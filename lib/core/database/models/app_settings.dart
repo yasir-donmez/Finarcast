@@ -27,6 +27,9 @@ class AppSettings {
   /// Varsayılan para birimi simgesi (varsayılan: ₺)
   String currencySymbol = '₺';
 
+  /// Kullanıcının bulunduğu ülke (AI analizi için - Örn: "Türkiye")
+  String? countryName;
+
   /// AI asistan bildirimleri açık mı?
   bool isAiNotificationsEnabled = true;
 

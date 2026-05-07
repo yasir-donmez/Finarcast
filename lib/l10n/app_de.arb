@@ -282,5 +282,6 @@
   "layout4": "4er-Layout",
   "moveForward": "Nach vorne",
   "moveBackward": "Nach hinten",
-  "selectCurrency": "Währung wählen"
+  "selectCurrency": "Währung wählen",
+  "aiMode": "AI Mode"
 }

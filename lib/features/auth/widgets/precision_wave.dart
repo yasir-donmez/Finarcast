@@ -64,7 +64,9 @@ class _WavePainter extends CustomPainter {
     }
 
     final paint = Paint()
-      ..color = color.withValues(alpha: 0.6 * (1 - progress))
+      ..color = color.withValues(
+        alpha: (math.sin(progress * math.pi) * 0.85).clamp(0.0, 0.85),
+      )
       ..style = PaintingStyle.fill;
 
     // Dalga Merkez Başlangıcı (Sol Üst)
@@ -73,15 +75,18 @@ class _WavePainter extends CustomPainter {
     final double maxRadius = math.sqrt(size.width * size.width + size.height * size.height);
     
     // Geçiş İlerlemesi (Surge Effect)
-    final double currentRadius = maxRadius * progress * 1.5;
+    // Progress 0.0 -> Radius 0
+    // Progress 1.0 -> Radius full + overshoot
+    final double currentRadius = maxRadius * progress * 2.0;
 
     final path = Path();
     
-    // Organik dalga formu (Daha az segment ile daha hızlı render)
-    for (double i = 0; i <= 90; i += 5) {
+    // Organik dalga formu (Zenginleştirilmiş fazlar)
+    for (double i = 0; i <= 90; i += 2) { // Daha sık örnekleme ile daha pürüzsüz
       final double radians = i * (math.pi / 180);
-      // Dalga etkisi eklemek için sinüs vari bozulma - daha yumuşak faz
-      final double waveDistortion = 25 * math.sin(progress * 4 * math.pi + radians * 6);
+      // Çok katmanlı dalga bozulması
+      final double waveDistortion = 35 * math.sin(progress * 3 * math.pi + radians * 8) +
+                                   15 * math.cos(progress * 5 * math.pi + radians * 4);
       
       final double x = center.dx + (currentRadius + waveDistortion) * math.cos(radians);
       final double y = center.dy + (currentRadius + waveDistortion) * math.sin(radians);

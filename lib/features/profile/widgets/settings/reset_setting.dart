@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/theme/app_constants.dart';
 import '../../../../shared/widgets/precision_dialog.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../profile_list_items.dart';
+import '../../../../core/providers/db_providers.dart';
+import '../../../../core/providers/settings_provider.dart';
+import '../../../../core/database/database_service.dart';
 
 class ResetSetting extends ConsumerWidget {
   const ResetSetting({super.key});
@@ -15,14 +19,14 @@ class ResetSetting extends ConsumerWidget {
     return ProfileListItems.buildSetting(
       icon: Icons.delete_forever_rounded,
       title: "Verileri Sıfırla",
-      onTap: () => _showResetDialog(context, l10n),
+      onTap: () => _showResetDialog(context, l10n, ref),
       activeColor: AppColors.getExpense(context),
       context: context,
       isAction: true,
     );
   }
 
-  void _showResetDialog(BuildContext context, AppLocalizations l10n) {
+  void _showResetDialog(BuildContext context, AppLocalizations l10n, WidgetRef ref) {
     showPrecisionDialog(
       context: context,
       title: "Verileri Sıfırla?",
@@ -36,11 +40,25 @@ class ResetSetting extends ConsumerWidget {
         PrecisionDialogAction(
           label: "Hepsini Sil",
           onTap: () async {
-            // Reset logic here
-            Navigator.pop(context);
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text("Tüm veriler temizlendi")),
-            );
+            HapticFeedback.vibrate();
+            
+            // 1. Veritabanını temizle
+            await DatabaseService.clearAllData();
+            
+            // 2. Provider'ları invalidate et (Arayüzün yenilenmesi için)
+            ref.invalidate(transactionsStreamProvider);
+            ref.invalidate(vaultsStreamProvider);
+            ref.invalidate(settingsProvider);
+            
+            if (context.mounted) {
+              Navigator.pop(context);
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text("Tüm veriler ve ayarlar başarıyla sıfırlandı."),
+                  backgroundColor: Colors.redAccent,
+                ),
+              );
+            }
           },
         ),
       ],

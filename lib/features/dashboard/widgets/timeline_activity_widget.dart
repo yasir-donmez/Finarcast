@@ -1,263 +1,248 @@
 import 'package:flutter/material.dart';
+import 'dart:math' as math;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'dashboard_widget.dart';
 import 'package:intl/intl.dart';
 import '../../../core/providers/db_providers.dart';
 import '../../../core/database/models/transaction_record.dart';
+import '../../../core/database/models/exchange_rate.dart';
 import '../../../core/utils/currency_utils.dart';
+import '../../../core/providers/settings_provider.dart';
+import '../../../core/theme/app_constants.dart';
+import '../../../core/utils/icon_utils.dart';
+import '../../../l10n/app_localizations.dart';
+import '../../transactions/widgets/transaction_category_data.dart';
 
-class TimelineActivityWidget extends ConsumerStatefulWidget {
+class TimelineActivityWidget extends ConsumerWidget {
   final DashboardWidgetSize size;
   const TimelineActivityWidget({super.key, this.size = DashboardWidgetSize.large});
 
   @override
-  ConsumerState<TimelineActivityWidget> createState() => _TimelineActivityWidgetState();
-}
-
-class _TimelineActivityWidgetState extends ConsumerState<TimelineActivityWidget> {
-  int _selectedTabIndex = 0; // 0: Gün, 1: Ay, 2: Yıl
-
-  @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final transactions = ref.watch(allTransactionsProvider);
-    final filteredTransactions = _filterTransactions(transactions);
+    final rates = ref.watch(exchangeRatesProvider).value ?? [];
+    final settings = ref.watch(settingsProvider);
+    final symbol = settings.currencySymbol;
+    
+    // EKLEME SIRASINA GÖRE SIRALA (En son eklenen en üstte)
+    final sortedTxs = transactions.toList()..sort((a, b) => b.id.compareTo(a.id));
+    
+    // Veri Saklama Süresine Göre Filtrele
+    final now = DateTime.now();
+    final retentionDays = settings.dataRetentionDays;
+    final filteredTxs = sortedTxs.where((tx) {
+      if (retentionDays <= 0 || retentionDays > 3650) return true; // 0 veya çok büyükse (Sonsuz) filtreleme yapma
+      final cutoffDate = now.subtract(Duration(days: retentionDays));
+      return tx.updatedAt.isAfter(cutoffDate);
+    }).toList();
+    
+    // Gelir ve Giderleri ayır (Kesinlikle max 7şer adet)
+    final incomeTxs = filteredTxs.where((tx) => tx.isIncome).take(7).toList();
+    final expenseTxs = filteredTxs.where((tx) => !tx.isIncome).take(7).toList();
 
-    switch (widget.size) {
-      case DashboardWidgetSize.small:
-        return _buildSmallView(filteredTransactions);
-      case DashboardWidgetSize.wide:
-        return _buildWideView(filteredTransactions);
-      case DashboardWidgetSize.large:
-        return _buildLargeView(filteredTransactions);
-    }
-  }
-
-  Widget _buildSmallView(List<TransactionRecord> txs) {
-    if (txs.isEmpty) return _buildEmptyState();
-    final latest = txs.first;
-    final theme = Theme.of(context);
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Icon(latest.isIncome ? Icons.south_west_rounded : Icons.north_east_rounded, 
-             color: latest.isIncome ? theme.colorScheme.primary : theme.colorScheme.error, size: 24),
-        const SizedBox(height: 8),
-        Text(
-          CurrencyUtils.formatAmount(latest.effectiveAmount),
-          style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w900),
-        ),
-        Text(
-          'SON İŞLEM',
-          style: theme.textTheme.labelLarge?.copyWith(fontSize: 8, color: theme.colorScheme.onSurface.withValues(alpha: 0.3)),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildWideView(List<TransactionRecord> txs) {
-    if (txs.isEmpty) return _buildEmptyState();
-    final theme = Theme.of(context);
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text('SON İŞLEMLER', style: theme.textTheme.labelLarge?.copyWith(fontSize: 9, color: theme.colorScheme.onSurface.withValues(alpha: 0.3))),
-            Icon(Icons.history_rounded, size: 12, color: theme.colorScheme.onSurface.withValues(alpha: 0.2)),
-          ],
-        ),
-        const SizedBox(height: 12),
-        ...txs.take(2).map((tx) => Padding(
-          padding: const EdgeInsets.only(bottom: 6.0),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(tx.title, style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700), maxLines: 1, overflow: TextOverflow.ellipsis),
-              Text(CurrencyUtils.formatAmount(tx.effectiveAmount), style: TextStyle(fontSize: 11, fontWeight: FontWeight.w900, color: tx.isIncome ? theme.colorScheme.primary : theme.colorScheme.error)),
-            ],
-          ),
-        )),
-      ],
-    );
-  }
-
-  Widget _buildLargeView(List<TransactionRecord> filteredTransactions) {
-    return Column(
-      children: [
-        // Periyot Tabları
-        _buildPeriodTabs(),
-        const SizedBox(height: 16),
-        
-        // İşlem Listesi
+        // SOL: Gelirler
         Expanded(
-          child: filteredTransactions.isEmpty
-              ? _buildEmptyState()
-              : ListView.separated(
-                  padding: EdgeInsets.zero,
-                  itemCount: filteredTransactions.length,
-                  separatorBuilder: (context, index) => const SizedBox(height: 8),
-                  itemBuilder: (context, index) => _buildTransactionItem(filteredTransactions[index]),
-                ),
+          child: _buildColumn(context, incomeTxs, symbol, rates, true),
+        ),
+        
+        const SizedBox(width: 8),
+        
+        // SAĞ: Giderler
+        Expanded(
+          child: _buildColumn(context, expenseTxs, symbol, rates, false),
         ),
       ],
     );
   }
 
-  Widget _buildPeriodTabs() {
-    final List<String> tabs = ['GÜN', 'AY', 'YIL'];
-    return Container(
-      height: 34,
-      padding: const EdgeInsets.all(3),
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
-        borderRadius: BorderRadius.circular(10),
-      ),
-      child: Row(
-        children: List.generate(tabs.length, (index) {
-          final isSelected = _selectedTabIndex == index;
-          return Expanded(
-            child: GestureDetector(
-              onTap: () => setState(() => _selectedTabIndex = index),
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 300),
-                curve: Curves.easeInOut,
-                decoration: BoxDecoration(
-                  color: isSelected 
-                      ? Theme.of(context).colorScheme.surface.withValues(alpha: 0.8)
-                      : Colors.transparent,
-                  borderRadius: BorderRadius.circular(8),
-                  boxShadow: isSelected ? [
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.1),
-                      blurRadius: 4,
-                      offset: const Offset(0, 2),
-                    ),
-                  ] : null,
-                ),
-                alignment: Alignment.center,
-                child: Text(
-                  tabs[index],
-                  style: TextStyle(
-                    fontSize: 10,
-                    fontWeight: isSelected ? FontWeight.w900 : FontWeight.w700,
-                    color: isSelected 
-                        ? Theme.of(context).colorScheme.primary 
-                        : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.3),
-                  ),
-                ),
-              ),
-            ),
-          );
-        }),
-      ),
-    );
-  }
-
-  Widget _buildTransactionItem(TransactionRecord tx) {
-    final theme = Theme.of(context);
-    final isIncome = tx.isIncome;
+  Widget _buildColumn(BuildContext context, List<TransactionRecord> txs, String symbol, List<ExchangeRate> rates, bool isIncome) {
+    final Color semanticColor = isIncome ? AppColors.getIncome(context) : AppColors.getExpense(context);
     
     return Container(
-      padding: const EdgeInsets.all(10),
+      clipBehavior: Clip.antiAlias,
       decoration: BoxDecoration(
-        color: theme.colorScheme.surface.withValues(alpha: 0.4),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: theme.colorScheme.onSurface.withValues(alpha: 0.05),
-        ),
+        color: semanticColor.withValues(alpha: 0.04), // Biraz daha belirgin zemin
+        borderRadius: BorderRadius.circular(16),
       ),
-      child: Row(
+      child: Stack(
         children: [
-          // Kategori İkonu
-          Container(
-            width: 36,
-            height: 36,
-            decoration: BoxDecoration(
-              color: (isIncome ? theme.colorScheme.primary : theme.colorScheme.error).withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(10),
-            ),
+          // Arka Plan Sembolik İkon (Düzeltilmiş Yönler)
+          Positioned(
+            right: isIncome ? null : -25,
+            left: isIncome ? -25 : null,
+            bottom: -25,
             child: Icon(
-              isIncome ? Icons.south_west_rounded : Icons.north_east_rounded,
-              size: 18,
-              color: isIncome ? theme.colorScheme.primary : theme.colorScheme.error,
+              isIncome ? Icons.north_east_rounded : Icons.south_west_rounded,
+              size: 110,
+              color: semanticColor.withValues(alpha: 0.06),
             ),
           ),
-          const SizedBox(width: 12),
+          Padding(
+            padding: const EdgeInsets.only(top: 10, bottom: 6, left: 4, right: 4),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.start, // Tepeden başla
+              children: txs.map((tx) => _buildMiniCard(context, tx, symbol, rates, isLeft: isIncome)).toList(),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildMiniCard(BuildContext context, TransactionRecord tx, String symbol, List<ExchangeRate> rates, {required bool isLeft}) {
+    final isIncome = tx.isIncome;
+    final Color semanticColor = isIncome ? AppColors.getIncome(context) : AppColors.getExpense(context);
+    final Color categoryColor = IconUtils.getColor(tx.iconCode ?? tx.categoryId);
+    final IconData categoryIcon = IconUtils.getIcon(tx.iconCode ?? tx.categoryId);
+    
+    final l10n = AppLocalizations.of(context)!;
+    final categoryInfo = _getCategoryInfo(context, l10n, tx.categoryId, isIncome);
+    final String subName = categoryInfo['sub'] ?? '';
+    final String parentName = categoryInfo['parent'] ?? '';
+    final String cleanTitle = tx.title.trim();
+    
+    String displayTitle;
+    if (cleanTitle.isNotEmpty && cleanTitle.toLowerCase() != subName.toLowerCase() && cleanTitle.toLowerCase() != parentName.toLowerCase()) {
+      displayTitle = cleanTitle;
+    } else if (subName.isNotEmpty) {
+      displayTitle = subName;
+    } else {
+      displayTitle = parentName;
+    }
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 3),
+      padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 4),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: isLeft ? Alignment.centerRight : Alignment.centerLeft,
+          end: isLeft ? Alignment.centerLeft : Alignment.centerRight,
+          colors: [categoryColor.withValues(alpha: 0.12), Colors.transparent], // Daha canlı gradyan
+        ),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: categoryColor.withValues(alpha: 0.05), width: 0.5),
+      ),
+      child: Row(
+        mainAxisAlignment: isLeft ? MainAxisAlignment.end : MainAxisAlignment.start,
+        children: [
+          if (!isLeft) _buildIcon(categoryIcon, categoryColor),
+          if (!isLeft) const SizedBox(width: 5),
           
-          // Başlık ve Tarih
+          if (isLeft) _buildDateText(tx, isLeft),
+          
           Expanded(
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+              crossAxisAlignment: isLeft ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
-                  tx.title,
+                  displayTitle,
+                  style: const TextStyle(
+                    fontSize: 8, 
+                    fontWeight: FontWeight.w800, 
+                    letterSpacing: -0.2,
+                    color: Colors.white, // Daha net başlık
+                  ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: theme.textTheme.labelLarge?.copyWith(
-                    fontSize: 13,
-                    letterSpacing: 0,
-                  ),
                 ),
                 Text(
-                  DateFormat('dd MMM').format(tx.date),
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: theme.colorScheme.onSurface.withValues(alpha: 0.4),
-                    fontSize: 10,
+                  '${CurrencyUtils.formatAmount(tx.effectiveAmount)}${tx.currency ?? '₺'}',
+                  style: TextStyle(
+                    fontSize: 8, 
+                    fontWeight: FontWeight.w900, 
+                    color: semanticColor.withValues(alpha: 0.95) // Tam doygunluğa yakın tutar
                   ),
                 ),
               ],
             ),
           ),
           
-          // Tutar
-          Text(
-            (isIncome ? '+' : '-') + CurrencyUtils.formatAmount(tx.effectiveAmount),
-            style: theme.textTheme.labelLarge?.copyWith(
-              fontSize: 14,
-              color: isIncome ? theme.colorScheme.primary : theme.colorScheme.error,
-              fontWeight: FontWeight.w900,
-            ),
-          ),
+          if (!isLeft) _buildDateText(tx, isLeft),
+          if (isLeft) const SizedBox(width: 5),
+          if (isLeft) _buildIcon(categoryIcon, categoryColor),
         ],
       ),
     );
   }
 
-  Widget _buildEmptyState() {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            Icons.inbox_rounded,
-            size: 32,
-            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.1),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            'İşlem bulunamadı',
-            style: TextStyle(
-              fontSize: 12,
-              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.3),
-            ),
-          ),
-        ],
+  Widget _buildDateText(TransactionRecord tx, bool isLeft) {
+    return Padding(
+      padding: EdgeInsets.only(left: isLeft ? 0 : 5, right: isLeft ? 5 : 0),
+      child: Text(
+        _formatSmartDate(tx.updatedAt), // EKlenme zamanını (updatedAt) kullan
+        style: TextStyle(
+          fontSize: 6, 
+          color: Colors.white.withValues(alpha: 0.25), 
+          fontWeight: FontWeight.w700
+        ),
       ),
     );
   }
 
-  List<TransactionRecord> _filterTransactions(List<TransactionRecord> all) {
-    final now = DateTime.now();
-    return all.where((tx) {
-      if (_selectedTabIndex == 0) { // Gün
-        return tx.date.year == now.year && tx.date.month == now.month && tx.date.day == now.day;
-      } else if (_selectedTabIndex == 1) { // Ay
-        return tx.date.year == now.year && tx.date.month == now.month;
-      } else { // Yıl
-        return tx.date.year == now.year;
+  Widget _buildIcon(IconData icon, Color color) {
+    return Container(
+      width: 17, height: 17,
+      decoration: BoxDecoration(color: color, borderRadius: BorderRadius.circular(5)),
+      child: Icon(icon, size: 9, color: Colors.white),
+    );
+  }
+
+  Map<String, String> _getCategoryInfo(BuildContext context, AppLocalizations l10n, String? categoryId, bool isIncome) {
+    if (categoryId == null) return {'parent': l10n.other, 'sub': l10n.other};
+    final String targetId = categoryId.toLowerCase();
+    
+    final categories = isIncome 
+        ? TransactionCategoryData.getIncomeCategories(context, l10n)
+        : TransactionCategoryData.getExpenseCategories(context, l10n);
+        
+    for (var cat in categories) {
+      final String parentName = cat['name'] as String;
+      if ((cat['id'] as String).toLowerCase() == targetId) return {'parent': parentName, 'sub': parentName};
+      
+      if (cat['subModels'] != null) {
+        for (var sub in (cat['subModels'] as List)) {
+          if ((sub['id'] as String).toLowerCase() == targetId) {
+            return {'parent': parentName, 'sub': sub['name'] as String};
+          }
+        }
       }
-    }).toList()
-      ..sort((a, b) => b.date.compareTo(a.date)); // En yeni en üstte
+    }
+    
+    return {'parent': categoryId, 'sub': categoryId};
+  }
+
+
+  String _formatSmartDate(DateTime date) {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final txDate = DateTime(date.year, date.month, date.day);
+    final diff = today.difference(txDate).inDays;
+    
+    final timeStr = DateFormat('HH:mm').format(date);
+    final dayName = DateFormat('EEEE', 'tr_TR').format(date);
+
+    if (diff == 0) {
+      return 'Bugün $timeStr';
+    } else if (diff == 1) {
+      return 'Dün $timeStr';
+    } else if (diff <= 7) {
+      return '$diff Gün Önce, $dayName $timeStr';
+    } else if (diff <= 30) {
+      final weeks = (diff / 7).floor();
+      return '$weeks Hafta Önce, $dayName $timeStr';
+    } else {
+      final months = (diff / 30).floor();
+      return '$months Ay Önce';
+    }
+  }
+
+  Widget _buildEmptyState(BuildContext context) {
+    return Center(
+      child: Icon(Icons.blur_on_rounded, color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.05), size: 14),
+    );
   }
 }

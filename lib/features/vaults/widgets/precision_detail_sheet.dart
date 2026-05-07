@@ -459,7 +459,13 @@ class _PrecisionDetailSheetState extends ConsumerState<PrecisionDetailSheet> {
           details.add(weekDays[tx.recurrenceDay! - 1]);
         }
       } else if (tx.recurrenceDate != null && [2, 3, 6, 7].contains(tx.periodType)) {
-        details.add("Ayın ${tx.recurrenceDate!.day}'i");
+        if (tx.periodType == 3) {
+          // Yıllık ise: 12 Mayıs
+          details.add(DateFormat('d MMMM', 'tr_TR').format(tx.recurrenceDate!));
+        } else {
+          // Aylık veya X ayda bir ise: Ayın 12'si
+          details.add("Ayın ${tx.recurrenceDate!.day}'i");
+        }
       }
       
       if (tx.recurrenceDuration != null && tx.recurrenceDuration! > 0) {

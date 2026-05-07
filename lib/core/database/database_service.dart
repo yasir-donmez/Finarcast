@@ -291,4 +291,19 @@ class DatabaseService {
   static Stream<List<ExchangeRate>> watchAllExchangeRates() {
     return isar.exchangeRates.where().watch(fireImmediately: true);
   }
+
+  /// =====================
+  /// GLOBAL RESET
+  /// =====================
+
+  /// Tüm veritabanını tamamen sıfırla
+  static Future<void> clearAllData() async {
+    await isar.writeTxn(() async {
+      await isar.transactionRecords.clear();
+      await isar.vaults.clear();
+      await isar.financialGoals.clear();
+      await isar.appSettings.clear();
+      await isar.exchangeRates.clear();
+    });
+  }
 }

@@ -1861,6 +1861,12 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'0'**
   String get zero;
+
+  /// No description provided for @aiMode.
+  ///
+  /// In tr, this message translates to:
+  /// **'AI Modu'**
+  String get aiMode;
 }
 
 class _AppLocalizationsDelegate

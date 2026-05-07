@@ -290,5 +290,6 @@
   "upgrade": "Upgrade",
   "auto": "AUTO",
   "max": "MAX",
-  "zero": "0"
+  "zero": "0",
+  "aiMode": "AI Mode"
 }

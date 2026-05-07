@@ -30,6 +30,7 @@ class SettingsNotifier extends StateNotifier<AppSettings> {
       ..isAiNotificationsEnabled = state.isAiNotificationsEnabled
       ..isSyncEnabled = state.isSyncEnabled
       ..isLocationEnabled = state.isLocationEnabled
+      ..countryName = state.countryName
       ..remoteId = state.remoteId
       ..syncStatus = state.syncStatus;
     await _save(newSettings);
@@ -48,6 +49,7 @@ class SettingsNotifier extends StateNotifier<AppSettings> {
       ..isAiNotificationsEnabled = state.isAiNotificationsEnabled
       ..isSyncEnabled = state.isSyncEnabled
       ..isLocationEnabled = state.isLocationEnabled
+      ..countryName = state.countryName
       ..remoteId = state.remoteId
       ..syncStatus = state.syncStatus;
     await _save(newSettings);
@@ -67,6 +69,7 @@ class SettingsNotifier extends StateNotifier<AppSettings> {
       ..isAiNotificationsEnabled = state.isAiNotificationsEnabled
       ..isSyncEnabled = state.isSyncEnabled
       ..isLocationEnabled = state.isLocationEnabled
+      ..countryName = state.countryName
       ..remoteId = state.remoteId
       ..syncStatus = state.syncStatus;
     await _save(newSettings);
@@ -101,6 +104,7 @@ class SettingsNotifier extends StateNotifier<AppSettings> {
       ..isAiNotificationsEnabled = state.isAiNotificationsEnabled
       ..isSyncEnabled = state.isSyncEnabled
       ..isLocationEnabled = state.isLocationEnabled
+      ..countryName = state.countryName
       ..remoteId = state.remoteId
       ..syncStatus = state.syncStatus;
     await _save(updated);
@@ -119,6 +123,7 @@ class SettingsNotifier extends StateNotifier<AppSettings> {
       ..isAiNotificationsEnabled = state.isAiNotificationsEnabled
       ..isSyncEnabled = state.isSyncEnabled
       ..isLocationEnabled = state.isLocationEnabled
+      ..countryName = state.countryName
       ..remoteId = state.remoteId
       ..syncStatus = state.syncStatus;
     await _save(updated);
@@ -137,6 +142,7 @@ class SettingsNotifier extends StateNotifier<AppSettings> {
       ..isAiNotificationsEnabled = value
       ..isSyncEnabled = state.isSyncEnabled
       ..isLocationEnabled = state.isLocationEnabled
+      ..countryName = state.countryName
       ..remoteId = state.remoteId
       ..syncStatus = state.syncStatus;
     await _save(updated);
@@ -155,6 +161,7 @@ class SettingsNotifier extends StateNotifier<AppSettings> {
       ..isAiNotificationsEnabled = state.isAiNotificationsEnabled
       ..isSyncEnabled = state.isSyncEnabled
       ..isLocationEnabled = value
+      ..countryName = state.countryName
       ..remoteId = state.remoteId
       ..syncStatus = state.syncStatus;
     await _save(updated);
@@ -173,6 +180,26 @@ class SettingsNotifier extends StateNotifier<AppSettings> {
       ..isAiNotificationsEnabled = state.isAiNotificationsEnabled
       ..isSyncEnabled = value
       ..isLocationEnabled = state.isLocationEnabled
+      ..countryName = state.countryName
+      ..remoteId = state.remoteId
+      ..syncStatus = state.syncStatus;
+    await _save(updated);
+  }
+
+  Future<void> setCountry(String? name) async {
+    if (state.countryName == name) return;
+
+    final updated = AppSettings()
+      ..id = state.id
+      ..themeModeIndex = state.themeModeIndex
+      ..languageCode = state.languageCode
+      ..currencySymbol = state.currencySymbol
+      ..dataRetentionDays = state.dataRetentionDays
+      ..permanentDeletionDays = state.permanentDeletionDays
+      ..isAiNotificationsEnabled = state.isAiNotificationsEnabled
+      ..isSyncEnabled = state.isSyncEnabled
+      ..isLocationEnabled = state.isLocationEnabled
+      ..countryName = name
       ..remoteId = state.remoteId
       ..syncStatus = state.syncStatus;
     await _save(updated);

@@ -188,13 +188,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen> with TickerProviderStat
       body: PrecisionBackground(
         child: Stack(
           children: [
-            RepaintBoundary(
-              child: PrecisionWave(
-                controller: _waveController,
-                color: _isLogin ? AppColors.secondary : AppColors.primary,
-                isTriggered: true,
-              ),
-            ),
+            // Arka plan dalgaları kaldırıldı, artık form içinde çalışıyor
             
             SafeArea(
               child: Center(
@@ -209,17 +203,17 @@ class _AuthScreenState extends ConsumerState<AuthScreen> with TickerProviderStat
   
                         PrecisionGlassCard(
                           padding: const EdgeInsets.all(24),
-                          isGlass: true, // Animasyon sırasında kapatmıyoruz ki widget ağacı sarsılmasın
-                          child: AnimatedSize(
-                            duration: const Duration(milliseconds: 1000),
-                            curve: Curves.easeInOutSine,
-                            clipBehavior: Clip.none, 
-                            alignment: Alignment.topCenter,
-                            child: PrecisionFlipCard(
-                              key: _flipKey,
-                              isFront: _isLogin,
-                              front: _buildLoginForm(context, screenHeight),
-                              back: _buildRegisterForm(context, screenHeight),
+                          isGlass: true,
+                          child: RepaintBoundary(
+                            child: AnimatedSize(
+                              duration: const Duration(milliseconds: 1000),
+                              curve: Curves.easeInOutSine,
+                              alignment: Alignment.topCenter,
+                              child: PrecisionFlipCard(
+                                isFront: _isLogin,
+                                front: _buildLoginForm(context, screenHeight),
+                                back: _buildRegisterForm(context, screenHeight),
+                              ),
                             ),
                           ),
                         ),
@@ -266,13 +260,10 @@ class _AuthScreenState extends ConsumerState<AuthScreen> with TickerProviderStat
   }
 
   Widget _buildLoginForm(BuildContext context, double screenHeight) {
-    return AnimatedOpacity(
-      duration: const Duration(milliseconds: 700),
-      opacity: _isLogin ? 1.0 : 0.0,
-      curve: Curves.easeInOutSine,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
+    return Column(
+      key: const ValueKey('login_form'),
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
         Text(
           'Hoş Geldiniz',
           style: Theme.of(context).textTheme.headlineSmall?.copyWith(
@@ -337,18 +328,14 @@ class _AuthScreenState extends ConsumerState<AuthScreen> with TickerProviderStat
         SizedBox(height: screenHeight * 0.035),
         _buildSocialLogin(context, screenHeight),
       ],
-    ),
-  );
-}
+    );
+  }
 
   Widget _buildRegisterForm(BuildContext context, double screenHeight) {
-    return AnimatedOpacity(
-      duration: const Duration(milliseconds: 700),
-      opacity: !_isLogin ? 1.0 : 0.0,
-      curve: Curves.easeInOutSine,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
+    return Column(
+      key: const ValueKey('register_form'),
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
         Text(
           'Yeni Hesap',
           style: Theme.of(context).textTheme.headlineSmall?.copyWith(
@@ -413,9 +400,8 @@ class _AuthScreenState extends ConsumerState<AuthScreen> with TickerProviderStat
                 activeColor: AppColors.secondary,
               ),
       ],
-    ),
-  );
-}
+    );
+  }
 
   Widget _buildSocialLogin(BuildContext context, double screenHeight) {
     return Column(

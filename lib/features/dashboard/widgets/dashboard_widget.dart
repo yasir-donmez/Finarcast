@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../../../shared/widgets/precision_glass_card.dart';
 import '../../../core/theme/app_constants.dart';
 
@@ -81,23 +82,46 @@ class _DashboardWidgetState extends State<DashboardWidget> with SingleTickerProv
       },
       child: GestureDetector(
         onTap: widget.isEditing ? null : widget.onTap,
-        onLongPress: widget.onLongPress,
+        onLongPress: () {
+          HapticFeedback.heavyImpact();
+          widget.onLongPress?.call();
+        },
         child: PrecisionGlassCard(
-          padding: const EdgeInsets.all(AppSizes.paddingMedium),
+          padding: const EdgeInsets.all(AppSizes.paddingSmall),
+          borderRadius: 24, // Daha yumuşak köşeler
+          blur: 20,
           child: Stack(
+            clipBehavior: Clip.none,
             children: [
               widget.child,
               if (widget.isEditing)
                 Positioned(
-                  top: -8,
-                  left: -8,
-                  child: Container(
-                    padding: const EdgeInsets.all(4),
-                    decoration: BoxDecoration(
-                      color: Theme.of(context).colorScheme.error,
-                      shape: BoxShape.circle,
+                  top: -12,
+                  left: -12,
+                  child: TweenAnimationBuilder<double>(
+                    duration: const Duration(milliseconds: 200),
+                    tween: Tween(begin: 0.0, end: 1.0),
+                    builder: (context, value, child) {
+                      return Transform.scale(
+                        scale: value,
+                        child: child,
+                      );
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.all(6),
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).colorScheme.error,
+                        shape: BoxShape.circle,
+                        boxShadow: [
+                          BoxShadow(
+                            color: Theme.of(context).colorScheme.error.withValues(alpha: 0.3),
+                            blurRadius: 8,
+                            offset: const Offset(0, 2),
+                          )
+                        ],
+                      ),
+                      child: const Icon(Icons.close_rounded, size: 14, color: Colors.white),
                     ),
-                    child: const Icon(Icons.remove, size: 12, color: Colors.white),
                   ),
                 ),
             ],

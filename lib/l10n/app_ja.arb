@@ -142,5 +142,6 @@
   "layout4": "4件表示",
   "moveForward": "前に移動",
   "moveBackward": "後ろに移動",
-  "selectCurrency": "通貨を選択"
+  "selectCurrency": "通貨を選択",
+  "aiMode": "AI Mode"
 }

@@ -34,9 +34,6 @@ class WidgetLayoutNotifier extends StateNotifier<List<List<WidgetConfig>>> {
     WidgetConfig(id: '1', type: 'timeline', size: DashboardWidgetSize.large, page: 0),
     WidgetConfig(id: '2', type: 'radar', size: DashboardWidgetSize.large, page: 1),
     WidgetConfig(id: '3', type: 'spending', size: DashboardWidgetSize.large, page: 2),
-    WidgetConfig(id: '4', type: 'quick_action', size: DashboardWidgetSize.small, page: 3),
-    WidgetConfig(id: '5', type: 'vault_status', size: DashboardWidgetSize.small, page: 3),
-    WidgetConfig(id: '6', type: 'daily_budget', size: DashboardWidgetSize.wide, page: 3),
   ];
 
   int _getWeight(DashboardWidgetSize size) {

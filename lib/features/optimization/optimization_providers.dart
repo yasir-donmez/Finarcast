@@ -1,9 +1,13 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/database/database_service.dart';
 import '../../core/database/models/transaction_record.dart';
 import '../../core/database/models/vault.dart';
 import '../../core/database/models/financial_goal.dart';
 import 'ai_service.dart';
+import '../../core/database/models/exchange_rate.dart';
+import '../../core/database/models/app_settings.dart';
+import '../../core/utils/currency_utils.dart';
 import 'dart:math';
 
 // =====================
@@ -65,6 +69,8 @@ class OptimizationEngine {
     required int? scopeVaultId,        // null = tüm kasalar
     required List<TransactionRecord> allTransactions,
     required List<Vault> allVaults,
+    required List<ExchangeRate> allRates,
+    required AppSettings settings,
     required Set<int> userLockedIds,   // Kullanıcının "Dokunulmasın" dediği ID'ler
     required Set<int> userFlexibleIds, // Kullanıcının "Değiştirilebilir" dediği ID'ler
     required List<String> vetoedCategories,
@@ -79,23 +85,28 @@ class OptimizationEngine {
         ? allVaults
         : allVaults.where((v) => v.id == scopeVaultId).toList();
 
-    // 2. Mevcut bakiyeyi hesapla — tek seferlik işlemlerden türet
-    // (Vault.balance alanı güncellenmediği için işlemlerden hesaplayalım)
+    final String baseCurrency = settings.currencySymbol;
+
+    // 2. Mevcut bakiyeyi hesapla — tüm işlemleri baz para birimine çevirerek topla
     final double txBalance = scopedTxs.fold(0.0, (sum, t) {
       if (t.periodType != 0) return sum; // Sadece tek seferlik işlemler bakiyeyi etkiler
-      return t.isIncome ? sum + t.effectiveAmount : sum - t.effectiveAmount;
+      final amount = t.getConvertedAmount(baseCurrency, allRates);
+      return t.isIncome ? sum + amount : sum - amount;
     });
-    // Vault bakiyesi varsa onu da ekle (elle set edilmiş başlangıç bakiyeleri için)
-    final double vaultBalance = scopedVaults.fold(0.0, (sum, v) => sum + v.balance);
+
+    // Vault bakiyesi varsa onu da ekle (DİKKAT: Vault'ların da para birimi çevrilmeli)
+    final double vaultBalance = scopedVaults.fold(0.0, (sum, v) {
+      return sum + CurrencyUtils.convert(v.balance, v.currency, baseCurrency, allRates);
+    });
     final double currentBalance = txBalance + vaultBalance;
 
     final double monthlyIncome = scopedTxs
         .where((t) => t.isIncome && t.periodType != 0)
-        .fold(0.0, (sum, t) => sum + t.monthlyEquivalent);
+        .fold(0.0, (sum, t) => sum + t.getConvertedMonthlyEquivalent(baseCurrency, allRates));
 
     final double monthlyExpense = scopedTxs
         .where((t) => !t.isIncome && t.periodType != 0)
-        .fold(0.0, (sum, t) => sum + t.monthlyEquivalent);
+        .fold(0.0, (sum, t) => sum + t.getConvertedMonthlyEquivalent(baseCurrency, allRates));
 
     final double monthlySurplus = monthlyIncome - monthlyExpense;
 
@@ -162,11 +173,12 @@ class OptimizationEngine {
 
       contextCategories.add(CategoryContext(
         name: tx.title,
-        currentAmount: tx.monthlyEquivalent,
-        minAmount: tx.minAmount,
-        maxAmount: tx.maxAmount,
+        currentAmount: tx.getConvertedMonthlyEquivalent(baseCurrency, allRates),
+        minAmount: tx.minAmount != null ? tx.getConvertedAmount(baseCurrency, allRates) : null,
+        maxAmount: tx.maxAmount != null ? tx.getConvertedAmount(baseCurrency, allRates) : null,
         coefficientOfVariation: cv,
         periodType: tx.periodType,
+        remainingInstallments: tx.remainingInstallments,
       ));
     }
 
@@ -183,10 +195,14 @@ class OptimizationEngine {
           rejectedCategories: vetoedCategories,
           targetAmount: targetAmount,
           monthsToGoal: months,
+          countryName: settings.countryName,
+          languageCode: settings.languageCode,
+          baseCurrency: baseCurrency,
         );
         usedAi = true;
       } catch (e) {
         // API başarısız → yerel fallback
+        debugPrint('❌ [OptimizationEngine] AI Analiz Hatası: $e');
         aiError = e.toString();
         optimizationResult = _localFallback(
           required: requiredMonthlySaving - monthlySurplus,

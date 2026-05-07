@@ -290,5 +290,6 @@
   "upgrade": "Yükselt",
   "auto": "OTOMATİK",
   "max": "MAX",
-  "zero": "0"
+  "zero": "0",
+  "aiMode": "AI Modu"
 }

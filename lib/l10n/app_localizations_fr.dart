@@ -911,4 +911,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get zero => '0';
+
+  @override
+  String get aiMode => 'AI Mode';
 }

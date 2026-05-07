@@ -8,6 +8,10 @@ import '../../core/database/database_service.dart';
 import '../../core/database/models/financial_goal.dart';
 import '../../core/database/models/transaction_record.dart';
 import '../../core/database/models/vault.dart';
+import '../../core/database/models/exchange_rate.dart';
+import '../../core/database/models/app_settings.dart';
+import '../../core/providers/db_providers.dart';
+import '../../core/providers/settings_provider.dart';
 
 import '../../shared/widgets/precision_sheet.dart';
 import 'optimization_providers.dart';
@@ -80,20 +84,23 @@ class _OptimizationScreenState extends ConsumerState<OptimizationScreen>
     List<TransactionRecord> txs,
     List<Vault> vaults,
     List<FinancialGoal> previousGoals,
+    List<ExchangeRate> allRates,
+    AppSettings settings,
   ) async {
     final subscription = ref.read(subscriptionServiceProvider);
+    // Test amaçlı PRO ve Limit kontrolleri devre dışı bırakıldı
+    /*
     if (!subscription.isPro) {
       if (mounted) ProUpgradeSheet.show(context);
       return;
     }
     if (subscription.usedAiCount >= subscription.dailyAiLimit) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Günlük AI analiz limitine ulaştınız.')),
-        );
+        _showChicError('Günlük AI analiz limitine ulaştınız.');
       }
       return;
     }
+    */
 
     setState(() => _isAnalyzing = true);
     await subscription.incrementAiUsage();
@@ -103,6 +110,8 @@ class _OptimizationScreenState extends ConsumerState<OptimizationScreen>
       final pText = await AiService.generatePersona(
         allTransactions: txs,
         vaults: vaults,
+        countryName: settings.countryName,
+        languageCode: settings.languageCode,
         previousGoals: previousGoals,
       );
       if (mounted) {
@@ -117,6 +126,8 @@ class _OptimizationScreenState extends ConsumerState<OptimizationScreen>
       scopeVaultId: _scopeVaultId,
       allTransactions: txs,
       allVaults: vaults,
+      allRates: allRates,
+      settings: settings,
       userLockedIds: _userLockedIds,
       userFlexibleIds: _userFlexibleIds,
       vetoedCategories: previousGoals
@@ -311,6 +322,8 @@ class _OptimizationScreenState extends ConsumerState<OptimizationScreen>
     final txsAsync = ref.watch(activeTransactionsProvider);
     final vaultsAsync = ref.watch(vaultsProvider);
     final goalsAsync = ref.watch(goalsProvider);
+    final ratesAsync = ref.watch(exchangeRatesProvider);
+    final settings = ref.watch(settingsProvider);
 
     return Stack(
       fit: StackFit.expand,
@@ -325,11 +338,17 @@ class _OptimizationScreenState extends ConsumerState<OptimizationScreen>
             data: (vaults) => goalsAsync.when(
               loading: () => const Center(child: CircularProgressIndicator()),
               error: (e, _) => const Center(child: Text('Hata')),
-              data: (goals) => _buildContent(
-                txs,
-                vaults,
-                goals,
-                AppLocalizations.of(context)!,
+              data: (goals) => ratesAsync.when(
+                loading: () => const Center(child: CircularProgressIndicator()),
+                error: (e, _) => const Center(child: Text('Kurlar yüklenemedi')),
+                data: (rates) => _buildContent(
+                  txs,
+                  vaults,
+                  goals,
+                  rates,
+                  settings,
+                  AppLocalizations.of(context)!,
+                ),
               ),
             ),
           ),
@@ -342,6 +361,8 @@ class _OptimizationScreenState extends ConsumerState<OptimizationScreen>
     List<TransactionRecord> txs,
     List<Vault> vaults,
     List<FinancialGoal> goals,
+    List<ExchangeRate> rates,
+    AppSettings settings,
     AppLocalizations l10n,
   ) {
     return SafeArea(
@@ -358,6 +379,7 @@ class _OptimizationScreenState extends ConsumerState<OptimizationScreen>
               OptimizationPersonaHeader(
                 goals: goals,
                 currentPersonaText: _personaText,
+                isAnalyzing: _isAnalyzing,
                 l10n: l10n,
               ),
               const SizedBox(height: 16),
@@ -414,7 +436,7 @@ class _OptimizationScreenState extends ConsumerState<OptimizationScreen>
             child: AnalysisCockpit(
               targetAmount: _targetAmount,
               isAnalyzing: _isAnalyzing,
-              onAnalyzeTap: () => _startAnalysis(txs, vaults, goals),
+              onAnalyzeTap: () => _startAnalysis(txs, vaults, goals, rates, settings),
               onAmountTap: _showManualAmountEntry,
               targetDate: _targetDate,
               vaultName: _scopeVaultId == null
@@ -434,6 +456,36 @@ class _OptimizationScreenState extends ConsumerState<OptimizationScreen>
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  void _showChicError(String message) {
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).clearSnackBars();
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        elevation: 0,
+        behavior: SnackBarBehavior.floating,
+        backgroundColor: Colors.transparent,
+        content: PrecisionGlassCard(
+          color: Theme.of(context).colorScheme.error.withValues(alpha: 0.9),
+          blur: 20,
+          borderRadius: 16,
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          child: Row(
+            children: [
+              const Icon(Icons.error_outline_rounded, color: Colors.white),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  message,
+                  style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

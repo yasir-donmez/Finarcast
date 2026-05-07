@@ -92,18 +92,30 @@ class _PrecisionFlipCardState extends State<PrecisionFlipCard> with SingleTicker
                 final double rotationValue = _animation.value * math.pi;
                 final bool isBackVisible = rotationValue > math.pi / 2;
 
+                // İçeriğin kaybolma ve belirme mantığı (90 dereceye yaklaştıkça yok olur)
+                // 0 -> 1.0, 90 -> 0.0, 180 -> 1.0
+                final double contentProgress = (rotationValue - (isBackVisible ? math.pi : 0)).abs();
+                final double opacity = (1.0 - (contentProgress / (math.pi / 2)) * 2).clamp(0.0, 1.0);
+                final double scale = 0.95 + (0.05 * opacity);
+
                 return Transform(
                   alignment: Alignment.center,
                   transform: Matrix4.identity()
                     ..setEntry(3, 2, 0.0007) // Yumuşak perspektif
                     ..rotateY(rotationValue),
-                  child: isBackVisible
-                      ? Transform(
-                          alignment: Alignment.center,
-                          transform: Matrix4.identity()..rotateY(math.pi),
-                          child: _buildCardSide(widget.back),
-                        )
-                      : _buildCardSide(widget.front),
+                  child: Opacity(
+                    opacity: opacity,
+                    child: Transform.scale(
+                      scale: scale,
+                      child: isBackVisible
+                          ? Transform(
+                              alignment: Alignment.center,
+                              transform: Matrix4.identity()..rotateY(math.pi),
+                              child: widget.back,
+                            )
+                          : widget.front,
+                    ),
+                  ),
                 );
               },
             ),
@@ -111,10 +123,6 @@ class _PrecisionFlipCardState extends State<PrecisionFlipCard> with SingleTicker
         ),
       ],
     );
-  }
-
-  Widget _buildCardSide(Widget child) {
-    return child;
   }
 }
 

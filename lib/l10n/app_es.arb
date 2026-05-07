@@ -145,5 +145,6 @@
   "layout4": "4 elementos",
   "moveForward": "Mover adelante",
   "moveBackward": "Mover atrás",
-  "selectCurrency": "Seleccionar moneda"
+  "selectCurrency": "Seleccionar moneda",
+  "aiMode": "AI Mode"
 }

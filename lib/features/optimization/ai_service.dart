@@ -1,4 +1,7 @@
+import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import 'package:google_generative_ai/google_generative_ai.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import '../../core/database/models/transaction_record.dart';
 import '../../core/database/models/vault.dart';
 import '../../core/database/models/financial_goal.dart';
@@ -11,28 +14,34 @@ class AiService {
     'GEMINI_API_KEY',
   );
 
-  static GenerativeModel? _model;
 
   static GenerativeModel _getModel() {
-    if (_apiKey.isEmpty) {
+    final key = _apiKey.isNotEmpty ? _apiKey : dotenv.get('GEMINI_API_KEY', fallback: '');
+    
+    debugPrint('🔑 [AiService] API Key Control: ${key.isNotEmpty ? "MEVCUT (Sonda: ${key.substring(key.length - 4)})" : "EKSIK"}');
+
+    if (key.isEmpty) {
       throw Exception(
         'Gemini API Key bulunamadı. '
+        '.env dosyasına GEMINI_API_KEY ekleyin veya '
         'flutter run --dart-define=GEMINI_API_KEY=your_key_here ile başlatın.',
       );
     }
-    _model ??= GenerativeModel(
+    
+    // Model adını 2026 güncel GA sürümü olan gemini-2.5-flash yapıyoruz.
+    return GenerativeModel(
       model: 'gemini-2.5-flash',
-      apiKey: _apiKey,
+      apiKey: key,
       generationConfig: GenerationConfig(
         responseMimeType: 'application/json',
         temperature: 0.7,
       ),
     );
-    return _model!;
   }
 
   /// API anahtarı var mı ve internet bağlantısı kurulabilir mi kontrol et
-  static bool get isAvailable => _apiKey.isNotEmpty;
+  static bool get isAvailable => 
+      _apiKey.isNotEmpty || dotenv.get('GEMINI_API_KEY', fallback: '').isNotEmpty;
 
   // =====================
   // PERSONA ÜRETME
@@ -43,6 +52,8 @@ class AiService {
   static Future<String> generatePersona({
     required List<TransactionRecord> allTransactions,
     required List<Vault> vaults,
+    String? countryName,
+    String? languageCode,
     List<FinancialGoal> previousGoals = const [],
   }) async {
     final model = _getModel();
@@ -76,39 +87,43 @@ class AiService {
     final prevRejections = previousGoals.where((g) => g.userApproved == false).length;
 
     final prompt = '''
-Sen bir finansal koç yapay zekasısın. Aşağıdaki kullanıcı verilerini analiz et ve
-kullanıcıyı yargılamayan, çok detaya inip onu tek bir harcamasından dolayı etiketlemeyen, 
-yapıcı, vizyoner ve motive edici, 2-3 cümlelik bir "Finansal Kimlik" (Persona) metni yaz.
+Sen bir finansal koçsun. Kullanıcının son harcama verilerine bakarak ona tek bir "Finansal Karakter/Persona" ata.
+Bu karakter hem akılda kalıcı, hem biraz eğlenceli hem de paylaşılabilir olmalı (Spotify Wrapped tarzında).
 
-Veriler (anonim):
+Veriler:
 - Toplam bakiye: ${totalBalance.toStringAsFixed(0)} TL
 - Aylık gelir: ${totalMonthlyIncome.toStringAsFixed(0)} TL
 - Aylık gider (esnek): ${totalMonthlyExpense.toStringAsFixed(0)} TL
 - Kilitli gider sayısı: $lockedCount, Esnek gider sayısı: $flexibleCount
 - En öne çıkan gider kategorileri: $topStr
+- Konum/Ülke: ${countryName ?? "Otomatik (Dil: $languageCode)"}
 - Geçmiş onaylanan analiz sayısı: $prevApprovals
 - Geçmiş reddedilen analiz sayısı: $prevRejections
 
 KURALLAR:
-1. Kullanıcının spesifik harcamalarıyla (örn: Fast Food, Oyun) ilgili kınayıcı, aşırı spesifik veya olumsuz çıkarımlar yapma.
-2. Olayın büyük finansal resmine profesyonel bir koç gibi yaklaşarak genel ve motive edici bir profil çıkar.
-3. Persona kısa olsun (~2-3 cümle), insansı, yapıcı ve umut verici olsun.
+1. YEREL VE KÜLTÜREL UYUM: Kullanıcının bulunduğu ülkeye (${countryName ?? languageCode ?? "Genel"}) ve kültürüne uygun, o coğrafyada karşılığı olan anlamlı ve ilgi çekici bir "finansal lakap" (persona) bul. 
+2. KISA VE ÖZ: Sadece TEK BİR CÜMLE yaz.
+3. FORMAT: [Kültürel Karakter Adı]: [Tek cümlelik, etkileyici ve durumu özetleyen açıklama].
+4. Sadece metni döndür.
+5. Sadece JSON formatında döndür: {"persona": "metin buraya"}
 
-JSON formatında döndür: {"persona": "metin buraya"}
+Örnek (Türkiye için):
+Tututumlu Sultan: Kaynaklarını bereketli kullanıyor, birikimlerini akıllıca yönetiyorsun.
 ''';
 
-    final response = await model.generateContent([Content.text(prompt)]).timeout(
-      const Duration(seconds: 30),
-      onTimeout: () => throw Exception('API isteği zaman aşımına uğradı (30s). Lütfen internet bağlantınızı kontrol edin.'),
-    );
-    final text = response.text ?? '{}';
-    // JSON parse
-    final jsonStr = text.contains('{') ? text : '{"persona": "$text"}';
-    final cleaned = jsonStr.replaceAll('```json', '').replaceAll('```', '').trim();
-
-    // Basit parse
-    final match = RegExp(r'"persona"\s*:\s*"([^"]+)"').firstMatch(cleaned);
-    return match?.group(1) ?? 'Finansal yolculuğun başlıyor. Hedeflerine adım adım yaklaşıyorsun.';
+    debugPrint('🤖 [AiService] Persona üretiliyor...');
+    try {
+      final response = await model.generateContent([Content.text(prompt)]).timeout(
+        const Duration(seconds: 30),
+      );
+      final text = response.text ?? '{}';
+      debugPrint('✅ [AiService] Persona yanıtı alındı.');
+      final data = jsonDecode(text.replaceAll('```json', '').replaceAll('```', '').trim());
+      return data['persona'] ?? 'Finansal yolculuğun başlıyor.';
+    } catch (e) {
+      debugPrint('❌ [AiService] Persona Hatası: $e');
+      return 'Finansal yolculuğun başlıyor. Hedeflerine adım adım yaklaşıyorsun.';
+    }
   }
 
   // =====================
@@ -123,6 +138,9 @@ JSON formatında döndür: {"persona": "metin buraya"}
     required List<String> rejectedCategories,
     required double targetAmount,
     required int monthsToGoal,
+    String? countryName,
+    String? languageCode,
+    String? baseCurrency,
   }) async {
     final model = _getModel();
 
@@ -132,6 +150,9 @@ JSON formatında döndür: {"persona": "metin buraya"}
       final varStr = c.coefficientOfVariation != null
           ? ', değişkenlik: %${(c.coefficientOfVariation! * 100).toStringAsFixed(0)}'
           : '';
+      final installmentStr = c.remainingInstallments != null
+          ? ', kalan taksit: ${c.remainingInstallments} ay'
+          : '';
       String periodStr = '';
       if (c.periodType == 1) periodStr = ' (Haftalık)';
       if (c.periodType == 4) periodStr = ' (2 Haftada Bir)';
@@ -140,7 +161,7 @@ JSON formatında döndür: {"persona": "metin buraya"}
       if (c.periodType == 6) periodStr = ' (3 Ayda Bir)';
       if (c.periodType == 7) periodStr = ' (6 Ayda Bir)';
       if (c.periodType == 3) periodStr = ' (Yıllık)';
-      return '- ${c.name}$periodStr: tutar ${c.currentAmount.toStringAsFixed(0)} TL$minStr$maxStr$varStr (KategID: ${c.name})';
+      return '- ${c.name}$periodStr: tutar ${c.currentAmount.toStringAsFixed(0)} $baseCurrency$minStr$maxStr$varStr$installmentStr (KategID: ${c.name})';
     }).join('\n');
 
     final rejectedStr = rejectedCategories.isEmpty
@@ -151,22 +172,24 @@ JSON formatında döndür: {"persona": "metin buraya"}
 Sen bir finansal optimizasyon yapay zekasısın. Kullanıcıya aylık tasarruf planı üret.
 
 Veriler:
-- Gereken aylık tasarruf: ${requiredMonthlySaving.toStringAsFixed(0)} TL
+- Gereken aylık tasarruf: ${requiredMonthlySaving.toStringAsFixed(0)} $baseCurrency
 - Hedefe kalan ay: $monthsToGoal ay
+- Kullanıcının dili/konumu: ${countryName ?? "Otomatik (Dil: $languageCode)"}
 - Kullanıcının daha önce reddettiği kategoriler: $rejectedStr
 
 Kısılabilir harcama kategorileri:
 $categoriesStr
 
 KURALLAR:
-1. Temel İhtiyaç Önceliği: Kira, Fatura, Market, Temizlik, Sağlık, Ulaşım gibi yaşamsal ve temel ihtiyaç kategorilerini en son kes. DİKKAT: Bu kalemleri asla tamamen sıfırlama veya 10, 50 gibi gerçek dışı, o ülkenin/para biriminin şartlarında yaşanılamaz tutarlara düşürme. Bir insanın aylık asgari hayatta kalma maliyetini düşün. Eğer bu kategoriler için "min" değeri verilmişse bu değer KESİN bir alt sınırdır (hard limit), altına kesinlikle inemezsin. Eğer "min" verilmemişse, verilen para birimi ve tutarlardaki genel yaşam standartlarına göre mantıklı ve gerçekçi bir alt sınır belirle ve o sınırda dur.
+1. Temel İhtiyaç Önceliği: Kira, Fatura, Market, Temizlik, Sağlık, Ulaşım gibi yaşamsal ve temel ihtiyaç kategorilerini en son kes. DİKKAT: Bu kalemleri asla tamamen sıfırlama veya gerçek dışı tutarlara düşürme. Kullanıcının bulunduğu bölgenin (${countryName ?? languageCode ?? "Genel"}) yaşam maliyetlerini ve asgari yaşam standartlarını göz önünde bulundur. Eğer bu kategoriler için "min" değeri verilmişse bu değer KESİN bir alt sınırdır (hard limit), altına kesinlikle inemezsin. Eğer "min" verilmemişse, verilen para birimi ve tutarlardaki genel yaşam standartlarına göre mantıklı ve gerçekçi bir alt sınır belirle ve o sınırda dur.
 2. Lüks ve İsteklerin Kesilmesi: Fast Food, Oyun, Eğlence, Yemek, Abonelikler gibi isteğe bağlı harcamaları ilk önce kes. Hedefe ulaşmak için gerekiyorsa bunları çekinmeden 0'a indirebilirsin.
 3. Gerçekçilik ve Yapıcılık: Gerekçe (reason) alanını doldururken aşırı spesifik veya yargılayıcı olma. Daha profesyonel, yapıcı ve stratejik ifadeler kullan. ("İsteğe bağlı bir harcama kalemi olduğu için öncelikli olarak kısıldı" vb.)
 4. Değişkenlik Faktörü: Kişiye özgü düşün; değişken harcamalar (yüksek değişkenlik yüzdesi) daha kolay kesilebilir, tutarlı/sabit tutarlara ise son çare olarak dokun.
 5. Periyot / Sıklık Değişimi Önerileri (ÖNEMLİ!): Eğer bir harcamanın periyodu düzenliyse, bunu sadece tutarı düşürerek değil, daha seyrek periyotlara taşıyarak da kısıtlama tavsiyesi verebilirsin. Yeni periyot sistemi: Haftada Bir(1), 2 Haftada Bir(4), 3 Haftada Bir(5), Ayda Bir(2), 3 Ayda Bir(6), 6 Ayda Bir(7), Yılda Bir(3), Günlük(8), 2 Günde Bir(9), 3 Günde Bir(10). Örneğin Haftalık 800 TL olan bir harcamayı "2 Haftada Bir 800 TL"ye veya "Aylık 1500 TL"ye uyarlayıp gerekçesine "Periyodu haftalıktan 2 haftada bire/aylığa çekerek tasarruf sağlandı" yazabilirsin. Değerleri hesaplarken yıllık tutarlar üzerinden matematiksel işlem yap.
 6. Hata Yanıtı: Eğer kategoriler hiç kısılamayacak durumdaysa JSON formatında boş "cuts" döndür ve "coachMessage" kısmında açıklama yap.
-7. Reddettiği kategoriler (kullanıcının kısmak istemediği) son çare olarak değerlendirilmelidir.
-8. Toplamda gereken tasarrufu tam olarak karşıla; eksik veya fazla kesinti yapma.
+7. Taksitli İşlemler: Eğer bir işlemin "kalan taksit" süresi varsa, bunu keserken taksit bitiminden sonraki tasarrufu da hesaba katabilirsin. Taksitli borçları keserken daha temkinli ol (banka borcu vs olabilir).
+8. Reddettiği kategoriler (kullanıcının kısmak istemediği) son çare olarak değerlendirilmelidir.
+9. Toplamda gereken tasarrufu tam olarak karşıla; eksik veya fazla kesinti yapma.
 
 JSON formatında döndür:
 {
@@ -188,14 +211,20 @@ JSON formatında döndür:
 Not: Eğer periyot değişimi önermiyorsan "newPeriod" alanını işlemin mevcut periyoduyla aynı bırak. "suggestedMin" ve "suggestedMax" alanlarını, önerdiğin yeni tutar etrafında mantıklı bir esneklik payı (range) olarak belirle. Eğer işlem sabitse ikisini de "suggestedAmount" ile aynı yapabilirsin.
 ''';
 
-    final response = await model.generateContent([Content.text(prompt)]).timeout(
-      const Duration(seconds: 30),
-      onTimeout: () => throw Exception('API isteği zaman aşımına uğradı (30s). Lütfen internet bağlantınızı kontrol edin.'),
-    );
-    final text = response.text ?? '{}';
-    final cleaned = text.replaceAll('```json', '').replaceAll('```', '').trim();
-
-    return OptimizationResult.fromJson(cleaned);
+    debugPrint('🤖 [AiService] Strateji üretiliyor...');
+    try {
+      final response = await model.generateContent([Content.text(prompt)]).timeout(
+        const Duration(seconds: 45),
+      );
+      
+      final text = response.text ?? '{}';
+      debugPrint('✅ [AiService] Strateji yanıtı alındı: $text');
+      final cleaned = text.replaceAll('```json', '').replaceAll('```', '').trim();
+      return OptimizationResult.fromJson(cleaned);
+    } catch (e) {
+      debugPrint('❌ [AiService] Strateji Hatası: $e');
+      rethrow;
+    }
   }
 }
 
@@ -209,6 +238,8 @@ class CategoryContext {
   final double? coefficientOfVariation;
   /// Periyot Tipi (0: Tek Seferlik, 1: Haftalık, 2: Aylık, 3: Yıllık)
   final int periodType;
+  /// Kalan taksit sayısı
+  final int? remainingInstallments;
 
   const CategoryContext({
     required this.name,
@@ -217,6 +248,7 @@ class CategoryContext {
     this.maxAmount,
     this.coefficientOfVariation,
     this.periodType = 0,
+    this.remainingInstallments,
   });
 }
 
@@ -234,42 +266,30 @@ class OptimizationResult {
 
   factory OptimizationResult.fromJson(String jsonStr) {
     try {
-      // Basit regex tabanlı parse (google_generative_ai JSON mode kullanıldığı için güvenli)
-      final cutsMatch = RegExp(r'"cuts"\s*:\s*\[([^\]]*)\]', dotAll: true).firstMatch(jsonStr);
-      final coachMatch = RegExp(r'"coachMessage"\s*:\s*"([^"]+)"').firstMatch(jsonStr);
-      final feasibleMatch = RegExp(r'"isFeasible"\s*:\s*(true|false)').firstMatch(jsonStr);
-
-      final cuts = <CutSuggestion>[];
-      if (cutsMatch != null) {
-        final cutsStr = cutsMatch.group(1) ?? '';
-        final categoryMatches = RegExp(
-          r'"category"\s*:\s*"([^"]+)".*?"currentAmount"\s*:\s*([\d.]+).*?"suggestedAmount"\s*:\s*([\d.]+).*?"suggestedMin"\s*:\s*([\d.]+).*?"suggestedMax"\s*:\s*([\d.]+).*?"newPeriod"\s*:\s*(\d+).*?"saving"\s*:\s*([\d.]+).*?"reason"\s*:\s*"([^"]+)"',
-          dotAll: true,
-        ).allMatches(cutsStr);
-
-        for (final m in categoryMatches) {
-          cuts.add(CutSuggestion(
-            category: m.group(1) ?? '',
-            currentAmount: double.tryParse(m.group(2) ?? '0') ?? 0,
-            suggestedAmount: double.tryParse(m.group(3) ?? '0') ?? 0,
-            suggestedMin: double.tryParse(m.group(4) ?? '0'),
-            suggestedMax: double.tryParse(m.group(5) ?? '0'),
-            newPeriod: int.tryParse(m.group(6) ?? ''),
-            saving: double.tryParse(m.group(7) ?? '0') ?? 0,
-            reason: m.group(8) ?? '',
-          ));
-        }
-      }
+      final Map<String, dynamic> data = jsonDecode(jsonStr);
+      
+      final List<dynamic> cutsData = data['cuts'] ?? [];
+      final cuts = cutsData.map((c) => CutSuggestion(
+        category: c['category'] ?? '',
+        currentAmount: (c['currentAmount'] ?? 0).toDouble(),
+        suggestedAmount: (c['suggestedAmount'] ?? 0).toDouble(),
+        suggestedMin: (c['suggestedMin'] ?? 0).toDouble(),
+        suggestedMax: (c['suggestedMax'] ?? 0).toDouble(),
+        newPeriod: c['newPeriod'] as int?,
+        saving: (c['saving'] ?? 0).toDouble(),
+        reason: c['reason'] ?? '',
+      )).toList();
 
       return OptimizationResult(
         cuts: cuts,
-        coachMessage: coachMatch?.group(1) ?? 'Hedefe adım adım yaklaşıyorsun!',
-        isFeasible: feasibleMatch?.group(1) == 'true',
+        coachMessage: data['coachMessage'] ?? 'Hedefe adım adım yaklaşıyorsun!',
+        isFeasible: data['isFeasible'] ?? true,
       );
-    } catch (_) {
+    } catch (e) {
+      debugPrint('❌ [OptimizationResult] JSON Parse Hatası: $e');
       return const OptimizationResult(
         cuts: [],
-        coachMessage: 'Analiz tamamlandı. Hedefine ulaşmak için bazı düzenlemeler gerekiyor.',
+        coachMessage: 'Analiz tamamlandı. Veriler işlenirken bir sorun oluştu.',
         isFeasible: true,
       );
     }
