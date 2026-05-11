@@ -49,9 +49,9 @@ class _PrecisionInlinePickerState extends State<PrecisionInlinePicker> {
   @override
   Widget build(BuildContext context) {
     final activeColor = Theme.of(context).colorScheme.primary;
-
+    
     final actualHeight = widget.height ?? (64 * widget.scalingFactor);
-    final itemExtent = actualHeight / 2;
+    final itemExtent = actualHeight / 2.2;
 
     return SizedBox(
       height: actualHeight,
@@ -59,15 +59,24 @@ class _PrecisionInlinePickerState extends State<PrecisionInlinePicker> {
       child: Stack(
         alignment: Alignment.center,
         children: [
-          // Vurgu Çizgileri
+          // Merkezi Vurgu Alanı (Mavi Cam Efekti)
           Container(
             width: widget.width * widget.scalingFactor,
-            height: (actualHeight * 0.55),
+            height: itemExtent * 1.1,
             decoration: BoxDecoration(
-              border: Border(
-                top: BorderSide(color: activeColor.withValues(alpha: 0.1), width: 0.8),
-                bottom: BorderSide(color: activeColor.withValues(alpha: 0.1), width: 0.8),
+              color: activeColor.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: activeColor.withValues(alpha: 0.15),
+                width: 1,
               ),
+              boxShadow: [
+                BoxShadow(
+                  color: activeColor.withValues(alpha: 0.05),
+                  blurRadius: 10,
+                  offset: const Offset(0, 2),
+                ),
+              ],
             ),
           ),
           
@@ -75,14 +84,15 @@ class _PrecisionInlinePickerState extends State<PrecisionInlinePicker> {
             controller: _controller,
             itemExtent: itemExtent,
             physics: const FixedExtentScrollPhysics(),
-            perspective: 0.006,
-            diameterRatio: 1.0,
-            overAndUnderCenterOpacity: 0.5,
+            perspective: 0.003,
+            diameterRatio: 1.8,
+            squeeze: 1.1,
+            overAndUnderCenterOpacity: 0.4,
             useMagnifier: true,
-            magnification: 1.15,
+            magnification: 1.1,
             onSelectedItemChanged: (index) {
               if (index != widget.selectedIndex) {
-                HapticFeedback.selectionClick();
+                HapticFeedback.lightImpact();
                 widget.onChanged(index);
               }
             },
@@ -93,15 +103,18 @@ class _PrecisionInlinePickerState extends State<PrecisionInlinePicker> {
                 final onSurface = Theme.of(context).colorScheme.onSurface;
                 
                 return Center(
-                  child: Text(
-                    widget.items[index],
+                  child: AnimatedDefaultTextStyle(
+                    duration: const Duration(milliseconds: 250),
+                    curve: Curves.easeOutCubic,
                     style: TextStyle(
-                      fontSize: 14 * widget.scalingFactor,
-                      fontWeight: isSelected ? FontWeight.w900 : FontWeight.w500,
+                      fontSize: (isSelected ? 15 : 13) * widget.scalingFactor,
+                      fontWeight: isSelected ? FontWeight.w900 : FontWeight.w600,
                       color: isSelected 
-                          ? onSurface 
-                          : onSurface.withValues(alpha: 0.6),
+                          ? activeColor 
+                          : onSurface.withValues(alpha: 0.3),
+                      letterSpacing: isSelected ? 0.2 : 0,
                     ),
+                    child: Text(widget.items[index]),
                   ),
                 );
               },

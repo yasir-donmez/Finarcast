@@ -55,6 +55,7 @@ class _AnalysisDetailScreenState extends State<AnalysisDetailScreen> {
         months: snapData['months'],
         requiredMonthlySaving: (snapData['requiredMonthlySaving'] as num).toDouble(),
         isAlreadyOnTrack: snapData['isAlreadyOnTrack'],
+        currencySymbol: snapData['currencySymbol'] ?? widget.goal.currencySymbol,
       );
 
       OptimizationResult? opt;
@@ -114,6 +115,7 @@ class _AnalysisDetailScreenState extends State<AnalysisDetailScreen> {
                   goal: widget.goal,
                   l10n: l10n,
                   currencyFormat: _currencyFormat,
+                  currencySymbol: _result.snapshot.currencySymbol,
                 ),
                 SliverPadding(
                   padding: const EdgeInsets.symmetric(
@@ -133,6 +135,7 @@ class _AnalysisDetailScreenState extends State<AnalysisDetailScreen> {
                           opt: _result.optimizationResult!,
                           l10n: l10n,
                           currencyFormat: _currencyFormat,
+                          currencySymbol: _result.snapshot.currencySymbol,
                         ),
                         const SizedBox(height: 24),
                       ],

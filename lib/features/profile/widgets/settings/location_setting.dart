@@ -60,12 +60,24 @@ class LocationSetting extends ConsumerWidget {
                           fontWeight: FontWeight.w700,
                         ),
                       ),
-                      Text(
-                        isExpanded ? "Harcama lokasyonlarını takip et." : (isLocationEnabled ? "Aktif" : "Kapalı"),
-                        style: TextStyle(
-                          color: AppColors.getTextSecondary(context).withValues(alpha: 0.5),
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600,
+                      AnimatedSwitcher(
+                        duration: const Duration(milliseconds: 300),
+                        layoutBuilder: (currentChild, previousChildren) => Stack(
+                          alignment: Alignment.centerLeft,
+                          children: [
+                            ...previousChildren,
+                            if (currentChild != null) currentChild,
+                          ],
+                        ),
+                        transitionBuilder: (child, animation) => FadeTransition(opacity: animation, child: child),
+                        child: Text(
+                          isLocationEnabled ? "Aktif" : "Kapalı",
+                          key: ValueKey(isLocationEnabled),
+                          style: TextStyle(
+                            color: AppColors.getTextSecondary(context).withValues(alpha: 0.5),
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                          ),
                         ),
                       ),
                     ],
@@ -80,16 +92,6 @@ class LocationSetting extends ConsumerWidget {
                   activeColor: activeColor,
                   activeIcon: Icons.location_on_rounded,
                   inactiveIcon: Icons.location_off_rounded,
-                ),
-                const SizedBox(width: 8),
-                AnimatedRotation(
-                  turns: isExpanded ? 0.25 : 0,
-                  duration: const Duration(milliseconds: 300),
-                  curve: Curves.easeOutBack,
-                  child: Icon(
-                    Icons.chevron_right_rounded,
-                    color: activeColor.withValues(alpha: isExpanded ? 1.0 : 0.3),
-                  ),
                 ),
               ],
             ),

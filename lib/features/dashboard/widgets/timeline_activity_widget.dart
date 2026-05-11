@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'dart:math' as math;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'dashboard_widget.dart';
 import 'package:intl/intl.dart';
@@ -39,6 +38,10 @@ class TimelineActivityWidget extends ConsumerWidget {
     // Gelir ve Giderleri ayır (Kesinlikle max 7şer adet)
     final incomeTxs = filteredTxs.where((tx) => tx.isIncome).take(7).toList();
     final expenseTxs = filteredTxs.where((tx) => !tx.isIncome).take(7).toList();
+
+    if (filteredTxs.isEmpty) {
+      return _buildEmptyState(context);
+    }
 
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -131,7 +134,7 @@ class TimelineActivityWidget extends ConsumerWidget {
           if (!isLeft) _buildIcon(categoryIcon, categoryColor),
           if (!isLeft) const SizedBox(width: 5),
           
-          if (isLeft) _buildDateText(tx, isLeft),
+          if (isLeft) _buildDateText(tx, isLeft, l10n),
           
           Expanded(
             child: Column(
@@ -150,7 +153,7 @@ class TimelineActivityWidget extends ConsumerWidget {
                   overflow: TextOverflow.ellipsis,
                 ),
                 Text(
-                  '${CurrencyUtils.formatAmount(tx.effectiveAmount)}${tx.currency ?? '₺'}',
+                  CurrencyUtils.formatAmount(tx.effectiveAmount, currencySymbol: tx.currency ?? '₺'),
                   style: TextStyle(
                     fontSize: 8, 
                     fontWeight: FontWeight.w900, 
@@ -161,7 +164,7 @@ class TimelineActivityWidget extends ConsumerWidget {
             ),
           ),
           
-          if (!isLeft) _buildDateText(tx, isLeft),
+          if (!isLeft) _buildDateText(tx, isLeft, l10n),
           if (isLeft) const SizedBox(width: 5),
           if (isLeft) _buildIcon(categoryIcon, categoryColor),
         ],
@@ -169,11 +172,11 @@ class TimelineActivityWidget extends ConsumerWidget {
     );
   }
 
-  Widget _buildDateText(TransactionRecord tx, bool isLeft) {
+  Widget _buildDateText(TransactionRecord tx, bool isLeft, AppLocalizations l10n) {
     return Padding(
       padding: EdgeInsets.only(left: isLeft ? 0 : 5, right: isLeft ? 5 : 0),
       child: Text(
-        _formatSmartDate(tx.updatedAt), // EKlenme zamanını (updatedAt) kullan
+        _formatSmartDate(tx.updatedAt, l10n), // EKlenme zamanını (updatedAt) kullan
         style: TextStyle(
           fontSize: 6, 
           color: Colors.white.withValues(alpha: 0.25), 
@@ -216,33 +219,48 @@ class TimelineActivityWidget extends ConsumerWidget {
   }
 
 
-  String _formatSmartDate(DateTime date) {
+  String _formatSmartDate(DateTime date, AppLocalizations l10n) {
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
     final txDate = DateTime(date.year, date.month, date.day);
     final diff = today.difference(txDate).inDays;
     
     final timeStr = DateFormat('HH:mm').format(date);
-    final dayName = DateFormat('EEEE', 'tr_TR').format(date);
 
     if (diff == 0) {
-      return 'Bugün $timeStr';
+      return '${l10n.today} $timeStr';
     } else if (diff == 1) {
-      return 'Dün $timeStr';
+      return '${l10n.yesterday} $timeStr';
     } else if (diff <= 7) {
-      return '$diff Gün Önce, $dayName $timeStr';
+      return '${l10n.daysAgo(diff)}, $timeStr';
     } else if (diff <= 30) {
       final weeks = (diff / 7).floor();
-      return '$weeks Hafta Önce, $dayName $timeStr';
+      return '${l10n.weeksAgo(weeks)}, $timeStr';
     } else {
       final months = (diff / 30).floor();
-      return '$months Ay Önce';
+      return l10n.monthsAgo(months);
     }
   }
 
   Widget _buildEmptyState(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Center(
-      child: Icon(Icons.blur_on_rounded, color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.05), size: 14),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(Icons.history_rounded, color: Colors.white.withValues(alpha: 0.05), size: 48),
+          const SizedBox(height: 12),
+          Text(
+            l10n.historyEmpty,
+            style: TextStyle(
+              color: Colors.white.withValues(alpha: 0.15),
+              fontSize: 10,
+              fontWeight: FontWeight.w600,
+              letterSpacing: 0.5,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

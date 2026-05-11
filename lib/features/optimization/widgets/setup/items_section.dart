@@ -169,7 +169,7 @@ class _OptimizationItemsSectionState extends State<OptimizationItemsSection> {
                   overflow: TextOverflow.ellipsis,
                 ),
                 Text(
-                  '${_currencyFormat.format(tx.amount.toInt())} ₺',
+                  '${_currencyFormat.format(tx.amount.toInt())} ${tx.currency}',
                   style: TextStyle(
                     color: AppColors.getTextSecondary(context).withValues(alpha: 0.6),
                     fontSize: 12,

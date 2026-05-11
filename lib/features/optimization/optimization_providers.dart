@@ -46,6 +46,7 @@ class AnalysisSnapshot {
   final int months;              // Hedefe kalan ay
   final double requiredMonthlySaving; // Kapatmak için gereken ayl. tasarruf
   final bool isAlreadyOnTrack;   // Mevcut hşz ile hedefe zaten ulaşılıyor mu
+  final String currencySymbol;   // Analiz anındaki para birimi
 
   const AnalysisSnapshot({
     required this.currentBalance,
@@ -57,6 +58,7 @@ class AnalysisSnapshot {
     required this.months,
     required this.requiredMonthlySaving,
     required this.isAlreadyOnTrack,
+    required this.currencySymbol,
   });
 }
 
@@ -128,6 +130,7 @@ class OptimizationEngine {
       months: months,
       requiredMonthlySaving: requiredMonthlySaving,
       isAlreadyOnTrack: isAlreadyOnTrack,
+      currencySymbol: baseCurrency,
     );
 
     // 5. Eğer zaten ulaşılıyorsa AI çağrılmaz

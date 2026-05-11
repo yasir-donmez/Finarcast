@@ -717,6 +717,117 @@ class AppLocalizationsEs extends AppLocalizations {
   String get vault => 'Bóveda';
 
   @override
+  String get vaultDetail => 'Kasa Detayı';
+
+  @override
+  String get managePanel => 'Paneli Yönet';
+
+  @override
+  String get vaultNameHint => 'Kasa Adı (örn. Birikim)';
+
+  @override
+  String get initialBalance => 'Başlangıç Bakiyesi';
+
+  @override
+  String get createVault => 'Kasa Oluştur';
+
+  @override
+  String get transactions => 'İşlemler';
+
+  @override
+  String get manage => 'Yönet';
+
+  @override
+  String get averageMonthlyLoad => 'AYLIK ORTALAMA YÜK';
+
+  @override
+  String get noTransactionsInVault => 'Bu kasada işlem bulunmuyor.';
+
+  @override
+  String get manageTransactionsInVault => 'Kasadaki İşlemleri Yönet';
+
+  @override
+  String get deleteVault => 'Kasayı Sil';
+
+  @override
+  String deleteVaultConfirm(String name) {
+    return '\"$name\" kasasını silmek istediğinize emin misiniz? Bu işlem geri alınamaz.';
+  }
+
+  @override
+  String get gold => 'ALTIN';
+
+  @override
+  String get amountNotEntered => 'TUTAR GİRİLMEDİ';
+
+  @override
+  String get addAmountByEditing => 'Düzenleyerek tutar ekleyin';
+
+  @override
+  String get added => 'Eklendi';
+
+  @override
+  String get endDate => 'Bitiş Tarihi';
+
+  @override
+  String get occurred => 'Gerçekleşen';
+
+  @override
+  String get remainingCount => 'Kalan Sayısı';
+
+  @override
+  String times(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count Kez',
+      one: '1 Kez',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get note => 'Not';
+
+  @override
+  String get indefinitely => 'Sürekli';
+
+  @override
+  String dayOfMonthOrdinal(Object day) {
+    return 'Ayın $day\'i';
+  }
+
+  @override
+  String get everyWeekDetailed => 'Her hafta';
+
+  @override
+  String get everyMonthDetailed => 'Her ay';
+
+  @override
+  String get everyYearDetailed => 'Her yıl';
+
+  @override
+  String get every2WeeksDetailed => '2 haftada bir';
+
+  @override
+  String get every3WeeksDetailed => '3 haftada bir';
+
+  @override
+  String get every3MonthsDetailed => '3 ayda bir';
+
+  @override
+  String get every6MonthsDetailed => '6 ayda bir';
+
+  @override
+  String get everyDayDetailed => 'Her gün';
+
+  @override
+  String get every2DaysDetailed => '2 günde bir';
+
+  @override
+  String get every3DaysDetailed => '3 günde bir';
+
+  @override
   String get allLabel => 'Todas';
 
   @override
@@ -761,8 +872,14 @@ class AppLocalizationsEs extends AppLocalizations {
   String get groupNameHint => 'Nombre del grupo...';
 
   @override
-  String transactionCount(Object count) {
-    return '$count transacciones';
+  String transactionCount(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count transacciones',
+      one: '1 transacción',
+    );
+    return '$_temp0';
   }
 
   @override
@@ -803,8 +920,16 @@ class AppLocalizationsEs extends AppLocalizations {
       'No se encontraron transacciones que surtan efecto para la fecha seleccionada.';
 
   @override
-  String itemsToAnalyze(Object count, Object months) {
-    return '$count elementos que surtirán efecto para la fecha objetivo ($months meses).';
+  String itemsToAnalyze(num count, Object months) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          '$count elementos que surtirán efecto para la fecha objetivo ($months meses).',
+      one:
+          '1 elemento que surtirá efecto para la fecha objetivo ($months meses).',
+    );
+    return '$_temp0';
   }
 
   @override
@@ -839,18 +964,36 @@ class AppLocalizationsEs extends AppLocalizations {
   }
 
   @override
-  String weeksToTargetLabel(Object count) {
-    return '$count Semanas';
+  String weeksToTargetLabel(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count semanas',
+      one: '1 semana',
+    );
+    return '$_temp0';
   }
 
   @override
-  String monthsToTargetLabel(Object count) {
-    return '$count Meses';
+  String monthsToTargetLabel(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count meses',
+      one: '1 mes',
+    );
+    return '$_temp0';
   }
 
   @override
-  String yearsToTargetLabel(Object count) {
-    return '$count Años';
+  String yearsToTargetLabel(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count años',
+      one: '1 año',
+    );
+    return '$_temp0';
   }
 
   @override
@@ -912,4 +1055,151 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get aiMode => 'AI Mode';
+
+  @override
+  String get addCustomCategory => 'Añadir nuevo';
+
+  @override
+  String get customCategoryHint => 'Ej: Especias, Mercado...';
+
+  @override
+  String get deleteCustomCategory => 'Eliminar categoría';
+
+  @override
+  String get deleteCustomCategoryConfirm =>
+      '¿Estás seguro de que quieres eliminar esta categoría personalizada?';
+
+  @override
+  String get dashboard => 'Dashboard';
+
+  @override
+  String get library => 'Kütüphane';
+
+  @override
+  String get dashboardEmpty => 'Dashboard şu an boş.';
+
+  @override
+  String get libraryEmpty => 'Kütüphane şu an boş.';
+
+  @override
+  String get pageLabel => 'Sayfa';
+
+  @override
+  String get sizeLabel => 'Boyut';
+
+  @override
+  String widgetAdded(String name) {
+    return '$name panoya eklendi!';
+  }
+
+  @override
+  String get historyTitle => 'İşlem Geçmişi';
+
+  @override
+  String get radarTitle => 'Harcama Radarı';
+
+  @override
+  String get giantsTitle => 'Harcama Devleri';
+
+  @override
+  String get quickActionTitle => 'Hızlı İşlem';
+
+  @override
+  String get vaultStatusTitle => 'Kasa Durumları';
+
+  @override
+  String get dailyBudgetTitle => 'Günlük Bütçe';
+
+  @override
+  String get dailyLimit => 'GÜNLÜK LİMİT';
+
+  @override
+  String get spendableRemaining => 'Harcanabilir Kalan';
+
+  @override
+  String get giantsWait => 'Harcama Dağılımı Bekleniyor';
+
+  @override
+  String get weeklyShort => 'H';
+
+  @override
+  String get monthlyShort => 'A';
+
+  @override
+  String get yearlyShort => 'Y';
+
+  @override
+  String get newLabel => 'YENİ';
+
+  @override
+  String get today => 'Bugün';
+
+  @override
+  String get yesterday => 'Dün';
+
+  @override
+  String daysAgo(int count) {
+    return '$count Gün Önce';
+  }
+
+  @override
+  String weeksAgo(int count) {
+    return '$count Hafta Önce';
+  }
+
+  @override
+  String monthsAgo(int count) {
+    return '$count Ay Önce';
+  }
+
+  @override
+  String get historyEmpty => 'İşlem Geçmişi Henüz Boş';
+
+  @override
+  String get upcomingPaymentsNotFound => 'Yaklaşan Ödeme Bulunmadı';
+
+  @override
+  String get transaction => 'İşlem';
+
+  @override
+  String get membership => 'ÜYELİK';
+
+  @override
+  String get currentPlan => 'Mevcut Plan';
+
+  @override
+  String get manageSubscription => 'Üyeliği Yönet';
+
+  @override
+  String get restorePurchases => 'Satın Almaları Geri Yükle';
+
+  @override
+  String get freePlan => 'Ücretsiz Plan';
+
+  @override
+  String get proPlan => 'FinCast PRO';
+
+  @override
+  String get upgradeToPro => 'PRO\'ya Yükselt';
+
+  @override
+  String get proFeatures => 'PRO Özellikleri';
+
+  @override
+  String get unlimitedVaults => 'Sınırsız Kasa';
+
+  @override
+  String get aiInsights => 'Gelişmiş AI Analizleri';
+
+  @override
+  String get prioritySupport => 'Öncelikli Destek';
+
+  @override
+  String get subscriptionStatus => 'Üyelik Durumu';
+
+  @override
+  String get active => 'Aktif';
+
+  @override
+  String get inactive => 'Aktif Değil';
 }

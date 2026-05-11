@@ -16,18 +16,17 @@ import '../../core/providers/settings_provider.dart';
 import '../../shared/widgets/precision_sheet.dart';
 import 'optimization_providers.dart';
 import 'ai_service.dart';
-import 'analysis_detail_screen.dart';
 import '../../l10n/app_localizations.dart';
 import '../../core/services/subscription_service.dart';
-import '../subscription/widgets/pro_upgrade_sheet.dart';
 import '../../shared/widgets/precision_glass_card.dart';
 import '../../shared/widgets/precision_button.dart';
 
 import '../../shared/widgets/precision_picker.dart';
+import '../../shared/widgets/precision_notification.dart';
 
 import 'widgets/common/fluid_background.dart';
-import 'widgets/setup/thinking_orb.dart';
 import 'widgets/setup/analysis_cockpit.dart';
+
 import 'widgets/common/thousands_separator_formatter.dart';
 import 'widgets/setup/history_section.dart';
 import 'widgets/setup/persona_header.dart';
@@ -53,20 +52,11 @@ class _OptimizationScreenState extends ConsumerState<OptimizationScreen>
   final Set<int> _userLockedIds = {};
   final Set<int> _userFlexibleIds = {};
 
-  late final AnimationController _breatheController;
-  late final Animation<double> _breatheAnim;
   late final AnimationController _bgAnimationController;
 
   @override
   void initState() {
     super.initState();
-    _breatheController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 2500),
-    )..repeat(reverse: true);
-    _breatheAnim = Tween<double>(begin: 0.95, end: 1.05).animate(
-      CurvedAnimation(parent: _breatheController, curve: Curves.easeInOutSine),
-    );
     _bgAnimationController = AnimationController(
       vsync: this,
       duration: const Duration(seconds: 10),
@@ -75,7 +65,6 @@ class _OptimizationScreenState extends ConsumerState<OptimizationScreen>
 
   @override
   void dispose() {
-    _breatheController.dispose();
     _bgAnimationController.dispose();
     super.dispose();
   }
@@ -139,18 +128,15 @@ class _OptimizationScreenState extends ConsumerState<OptimizationScreen>
     );
 
     // 3. Kaydet
-    final latestGoalId = await _saveGoalDraft(result);
-    final savedGoal = await DatabaseService.getGoal(latestGoalId);
+    await _saveGoalDraft(result);
 
     if (mounted) {
       setState(() => _isAnalyzing = false);
-      if (savedGoal != null) {
-        Navigator.of(context).push(
-          MaterialPageRoute(
-            builder: (context) => AnalysisDetailScreen(goal: savedGoal),
-          ),
-        );
-      }
+      // Başarı mesajı göster (İsteğe bağlı ama iyi bir UX için)
+      PrecisionNotification.success(
+        context,
+        AppLocalizations.of(context)!.financialIdentityUpdated,
+      );
     }
   }
 
@@ -166,6 +152,7 @@ class _OptimizationScreenState extends ConsumerState<OptimizationScreen>
         'months': result.snapshot.months,
         'requiredMonthlySaving': result.snapshot.requiredMonthlySaving,
         'isAlreadyOnTrack': result.snapshot.isAlreadyOnTrack,
+        'currencySymbol': result.snapshot.currencySymbol,
       },
       'optimization': result.optimizationResult == null
           ? null
@@ -190,6 +177,7 @@ class _OptimizationScreenState extends ConsumerState<OptimizationScreen>
 
     final goal = FinancialGoal()
       ..targetAmount = _targetAmount
+      ..currencySymbol = result.snapshot.currencySymbol
       ..targetDate = _targetDate
       ..vaultId = _scopeVaultId
       ..createdAt = DateTime.now()
@@ -209,6 +197,7 @@ class _OptimizationScreenState extends ConsumerState<OptimizationScreen>
     final controller = TextEditingController(
       text: formatter.format(_targetAmount.toInt()),
     );
+    final settings = ref.read(settingsProvider);
     
     PrecisionSheet.show(
       context: context,
@@ -223,7 +212,7 @@ class _OptimizationScreenState extends ConsumerState<OptimizationScreen>
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 Text(
-                  '₺',
+                  settings.currencySymbol,
                   style: TextStyle(
                     fontSize: 24,
                     fontWeight: FontWeight.w900,
@@ -405,28 +394,11 @@ class _OptimizationScreenState extends ConsumerState<OptimizationScreen>
                 },
               ),
               const SizedBox(height: 32),
-              if (_isAnalyzing)
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 40),
-                  child: Center(
-                    child: Column(
-                      children: [
-                        ThinkingOrb(breathe: _breatheAnim),
-                        const SizedBox(height: 20),
-                        Text(
-                          l10n.analyzingFinancialIdentity,
-                          style: TextStyle(
-                            color: AppColors.getPrimary(context),
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              if (goals.isNotEmpty && !_isAnalyzing) ...[
-                OptimizationHistorySection(goals: goals, l10n: l10n),
-              ],
+              OptimizationHistorySection(
+                goals: goals,
+                l10n: l10n,
+                isAnalyzing: _isAnalyzing,
+              ),
             ],
           ),
           Positioned(
@@ -452,40 +424,11 @@ class _OptimizationScreenState extends ConsumerState<OptimizationScreen>
                 if (picked != null) setState(() => _targetDate = picked);
               },
               onVaultTap: () => _showVaultPicker(vaults, l10n),
+              currencySymbol: settings.currencySymbol,
               l10n: l10n,
             ),
           ),
         ],
-      ),
-    );
-  }
-
-  void _showChicError(String message) {
-    if (!mounted) return;
-    ScaffoldMessenger.of(context).clearSnackBars();
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        elevation: 0,
-        behavior: SnackBarBehavior.floating,
-        backgroundColor: Colors.transparent,
-        content: PrecisionGlassCard(
-          color: Theme.of(context).colorScheme.error.withValues(alpha: 0.9),
-          blur: 20,
-          borderRadius: 16,
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-          child: Row(
-            children: [
-              const Icon(Icons.error_outline_rounded, color: Colors.white),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Text(
-                  message,
-                  style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
-                ),
-              ),
-            ],
-          ),
-        ),
       ),
     );
   }

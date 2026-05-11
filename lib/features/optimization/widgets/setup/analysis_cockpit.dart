@@ -15,6 +15,7 @@ class AnalysisCockpit extends StatelessWidget {
   final String vaultName;
   final VoidCallback onDateTap;
   final VoidCallback onVaultTap;
+  final String currencySymbol;
   final AppLocalizations l10n;
 
   const AnalysisCockpit({
@@ -27,6 +28,7 @@ class AnalysisCockpit extends StatelessWidget {
     required this.vaultName,
     required this.onDateTap,
     required this.onVaultTap,
+    required this.currencySymbol,
     required this.l10n,
   });
 
@@ -87,7 +89,7 @@ class AnalysisCockpit extends StatelessWidget {
                           ),
                           const SizedBox(height: 4),
                           Text(
-                            '₺${currencyFormat.format(targetAmount.toInt())}',
+                            '$currencySymbol${currencyFormat.format(targetAmount.toInt())}',
                             style: const TextStyle(
                               fontSize: 28,
                               fontWeight: FontWeight.w900,

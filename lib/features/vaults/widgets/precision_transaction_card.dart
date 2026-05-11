@@ -250,7 +250,7 @@ class PrecisionTransactionCard extends StatelessWidget {
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
                                   Text(
-                                    '${tx.currency ?? "₺"}${CurrencyUtils.formatAmount(tx.effectiveAmount)}',
+                                    CurrencyUtils.formatAmount(tx.effectiveAmount, currencySymbol: tx.currency ?? "₺"),
                                     style: TextStyle(
                                       fontSize: 36 * sf,
                                       fontWeight: FontWeight.w900,
@@ -263,32 +263,26 @@ class PrecisionTransactionCard extends StatelessWidget {
                                     mainAxisSize: MainAxisSize.min,
                                     children: [
                                       Text(
-                                        '${tx.currency ?? "₺"}${CurrencyUtils.formatAmount(tx.minAmount!)}',
+                                        CurrencyUtils.formatAmount(tx.minAmount!, currencySymbol: tx.currency ?? "₺"),
                                         style: TextStyle(
                                           fontSize: 10.5 * sf,
                                           fontWeight: FontWeight.w800,
-                                          color: isDark
-                                              ? Colors.white30
-                                              : Colors.black26,
+                                          color: AppColors.getTextPrimary(context).withValues(alpha: 0.3),
                                         ),
                                       ),
                                       Text(
                                         ' – ',
                                         style: TextStyle(
                                           fontSize: 10 * sf,
-                                          color: isDark
-                                              ? Colors.white24
-                                              : Colors.black12,
+                                          color: AppColors.getTextPrimary(context).withValues(alpha: 0.15),
                                         ),
                                       ),
                                       Text(
-                                        '${tx.currency ?? "₺"}${CurrencyUtils.formatAmount(tx.maxAmount!)}',
+                                        CurrencyUtils.formatAmount(tx.maxAmount!, currencySymbol: tx.currency ?? "₺"),
                                         style: TextStyle(
                                           fontSize: 10.5 * sf,
                                           fontWeight: FontWeight.w800,
-                                          color: isDark
-                                              ? Colors.white30
-                                              : Colors.black26,
+                                          color: AppColors.getTextPrimary(context).withValues(alpha: 0.3),
                                         ),
                                       ),
                                     ],
@@ -296,7 +290,7 @@ class PrecisionTransactionCard extends StatelessWidget {
                                 ],
                               )
                             : Text(
-                                '${tx.currency ?? "₺"}${CurrencyUtils.formatAmount(tx.effectiveAmount)}',
+                                CurrencyUtils.formatAmount(tx.effectiveAmount, currencySymbol: tx.currency ?? "₺"),
                                 style: TextStyle(
                                   fontSize: 44 * sf,
                                   fontWeight: FontWeight.w900,
@@ -328,7 +322,7 @@ class PrecisionTransactionCard extends StatelessWidget {
                                       : Icons.visibility_off_rounded,
                                   color: tx.showOnDashboard
                                       ? AppColors.getPrimary(context)
-                                      : Colors.grey.withValues(alpha: 0.3),
+                                      : AppColors.getTextPrimary(context).withValues(alpha: 0.2),
                                   size: 13 * sf,
                                 ),
                                 if (vaultCount > 0) ...[
@@ -338,14 +332,14 @@ class PrecisionTransactionCard extends StatelessWidget {
                                     style: TextStyle(
                                       fontSize: 10 * sf,
                                       fontWeight: FontWeight.w900,
-                                      color: Colors.grey.withValues(alpha: 0.6),
+                                      color: AppColors.getTextSecondary(context).withValues(alpha: 0.5),
                                     ),
                                   ),
                                   const SizedBox(width: 1),
                                   Icon(
                                     Icons.account_balance_wallet_rounded,
                                     size: 9 * sf,
-                                    color: Colors.grey.withValues(alpha: 0.4),
+                                    color: AppColors.getTextSecondary(context).withValues(alpha: 0.3),
                                   ),
                                 ],
                               ],

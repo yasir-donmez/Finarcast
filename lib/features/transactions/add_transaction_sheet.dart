@@ -7,6 +7,7 @@ import '../../core/theme/app_constants.dart';
 import '../../core/database/database_service.dart';
 import '../../core/database/models/transaction_record.dart';
 import '../../core/database/models/vault.dart';
+import '../../core/services/custom_category_service.dart';
 
 import 'widgets/transaction_vault_selector.dart';
 import 'widgets/transaction_currency_selector.dart';
@@ -38,6 +39,7 @@ class AddTransactionSheet extends ConsumerStatefulWidget {
   final int? initialRecurrenceDay;
   final DateTime? initialRecurrenceDate;
   final int? initialRecurrenceDuration;
+  final VoidCallback? onSuccess;
 
   const AddTransactionSheet({
     super.key,
@@ -55,6 +57,7 @@ class AddTransactionSheet extends ConsumerStatefulWidget {
     this.initialRecurrenceDay,
     this.initialRecurrenceDate,
     this.initialRecurrenceDuration,
+    this.onSuccess,
   });
 
   @override
@@ -66,6 +69,7 @@ class _AddTransactionSheetState extends ConsumerState<AddTransactionSheet> {
 
   List<Vault> _vaults = [];
   List<int> _selectedVaultIds = [];
+  List<Map<String, String>> _customSubs = [];
 
   final TextEditingController _amountController = TextEditingController();
   final TextEditingController _minController = TextEditingController();
@@ -97,6 +101,7 @@ class _AddTransactionSheetState extends ConsumerState<AddTransactionSheet> {
       duration: 0,
     );
     _loadVaults();
+    _loadCustomCategories();
     _selectedCurrency = ref.read(settingsProvider).currencySymbol;
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!_isFlexibleAmount && mounted) {
@@ -160,9 +165,7 @@ class _AddTransactionSheetState extends ConsumerState<AddTransactionSheet> {
       }
       
       if (widget.initialCategoryId != null) {
-        final categories = _tabIndex == 0 
-            ? TransactionCategoryData.getExpenseCategories(context, l10n)
-            : TransactionCategoryData.getIncomeCategories(context, l10n);
+        final categories = _getMergedCategories();
             
         for (int i = 0; i < categories.length; i++) {
           final cat = categories[i];
@@ -192,6 +195,236 @@ class _AddTransactionSheetState extends ConsumerState<AddTransactionSheet> {
       setState(() {
         _vaults = v;
       });
+    }
+  }
+
+  Future<void> _loadCustomCategories() async {
+    final customs = await CustomCategoryService.getAllCustomSubcategories();
+    if (mounted) {
+      setState(() {
+        _customSubs = customs;
+      });
+    }
+  }
+
+  List<Map<String, dynamic>> _getMergedCategories() {
+    final base = _tabIndex == 0 
+        ? TransactionCategoryData.getExpenseCategories(context, l10n)
+        : TransactionCategoryData.getIncomeCategories(context, l10n);
+    return TransactionCategoryData.mergeCustomSubcategories(base, _customSubs);
+  }
+
+  Future<void> _showAddCustomCategoryDialog(String parentCategoryId) async {
+    final controller = TextEditingController();
+    final parentCat = _getMergedCategories().firstWhere(
+      (c) => c['id'] == parentCategoryId,
+      orElse: () => <String, dynamic>{},
+    );
+    if (parentCat.isEmpty) return;
+
+    final parentColor = parentCat['color'] as Color;
+    final parentIcon = parentCat['icon'] as IconData;
+    final parentName = parentCat['name'] as String;
+
+    final result = await showDialog<String>(
+      context: context,
+      builder: (ctx) {
+        final isDark = Theme.of(ctx).brightness == Brightness.dark;
+        return AlertDialog(
+          backgroundColor: isDark ? const Color(0xFF1C1C1E) : Colors.white,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
+          title: Row(
+            children: [
+              Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: parentColor.withValues(alpha: 0.15),
+                ),
+                child: Icon(parentIcon, color: parentColor, size: 20),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      l10n.addCustomCategory,
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w800,
+                        color: AppColors.getTextPrimary(ctx),
+                      ),
+                    ),
+                    Text(
+                      parentName,
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w500,
+                        color: parentColor.withValues(alpha: 0.8),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          content: TextField(
+            controller: controller,
+            autofocus: true,
+            textCapitalization: TextCapitalization.sentences,
+            maxLength: 30,
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+              color: AppColors.getTextPrimary(ctx),
+            ),
+            decoration: InputDecoration(
+              hintText: l10n.customCategoryHint,
+              hintStyle: TextStyle(
+                color: AppColors.getTextSecondary(ctx).withValues(alpha: 0.5),
+                fontWeight: FontWeight.w400,
+              ),
+              prefixIcon: Icon(parentIcon, color: parentColor.withValues(alpha: 0.5), size: 20),
+              filled: true,
+              fillColor: (isDark ? Colors.white : Colors.black).withValues(alpha: 0.05),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(14),
+                borderSide: BorderSide.none,
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(14),
+                borderSide: BorderSide(color: parentColor.withValues(alpha: 0.4), width: 1.5),
+              ),
+              counterStyle: TextStyle(
+                color: AppColors.getTextSecondary(ctx).withValues(alpha: 0.4),
+                fontSize: 11,
+              ),
+            ),
+            onSubmitted: (val) {
+              if (val.trim().isNotEmpty) Navigator.pop(ctx, val.trim());
+            },
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx),
+              child: Text(
+                l10n.cancel,
+                style: TextStyle(
+                  color: AppColors.getTextSecondary(ctx),
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+            FilledButton(
+              onPressed: () {
+                final val = controller.text.trim();
+                if (val.isNotEmpty) Navigator.pop(ctx, val);
+              },
+              style: FilledButton.styleFrom(
+                backgroundColor: parentColor,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+              child: Text(
+                l10n.save,
+                style: const TextStyle(
+                  fontWeight: FontWeight.w700,
+                  color: Colors.white,
+                ),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (result != null && result.isNotEmpty) {
+      await CustomCategoryService.addCustomSubcategory(parentCategoryId, result);
+      await _loadCustomCategories();
+
+      // Yeni eklenen alt kategoriyi otomatik seç
+      final merged = _getMergedCategories();
+      final parentIndex = merged.indexWhere((c) => c['id'] == parentCategoryId);
+      if (parentIndex != -1) {
+        final subs = merged[parentIndex]['subModels'] as List;
+        setState(() {
+          _selectedCategoryIndex = parentIndex;
+          _selectedSubModelIndex = subs.length - 1; // Son eklenen
+          _expandedCategoryIndex = parentIndex;
+        });
+      }
+      HapticFeedback.mediumImpact();
+    }
+  }
+
+  Future<void> _handleRemoveCustomCategory(String subcategoryId) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) {
+        final isDark = Theme.of(ctx).brightness == Brightness.dark;
+        return AlertDialog(
+          backgroundColor: isDark ? const Color(0xFF1C1C1E) : Colors.white,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
+          title: Text(
+            l10n.deleteCustomCategory,
+            style: TextStyle(
+              fontWeight: FontWeight.w800,
+              color: AppColors.getTextPrimary(ctx),
+            ),
+          ),
+          content: Text(
+            l10n.deleteCustomCategoryConfirm,
+            style: TextStyle(
+              color: AppColors.getTextSecondary(ctx),
+              fontSize: 14,
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx, false),
+              child: Text(
+                l10n.cancel,
+                style: TextStyle(
+                  color: AppColors.getTextSecondary(ctx),
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.pop(ctx, true),
+              style: FilledButton.styleFrom(
+                backgroundColor: AppColors.getExpense(ctx),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+              child: Text(
+                l10n.yes,
+                style: const TextStyle(
+                  fontWeight: FontWeight.w700,
+                  color: Colors.white,
+                ),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (confirmed == true) {
+      await CustomCategoryService.removeCustomSubcategory(subcategoryId);
+      await _loadCustomCategories();
+      setState(() {
+        _selectedSubModelIndex = -1;
+      });
+      HapticFeedback.lightImpact();
     }
   }
 
@@ -238,9 +471,7 @@ class _AddTransactionSheetState extends ConsumerState<AddTransactionSheet> {
     final finalMin = _isFlexibleAmount ? minAmount : null;
     final finalMax = _isFlexibleAmount ? maxAmount : null;
     
-    final categories = _tabIndex == 0 
-        ? TransactionCategoryData.getExpenseCategories(context, l10n)
-        : TransactionCategoryData.getIncomeCategories(context, l10n);
+    final categories = _getMergedCategories();
         
     final cat = categories[_selectedCategoryIndex];
     final String categoryId = _selectedSubModelIndex != -1 
@@ -318,7 +549,11 @@ class _AddTransactionSheetState extends ConsumerState<AddTransactionSheet> {
     }
     
     if (mounted) {
-      Navigator.pop(context);
+      if (widget.onSuccess != null) {
+        widget.onSuccess!();
+      } else {
+        Navigator.pop(context);
+      }
     }
     HapticFeedback.heavyImpact();
   }
@@ -332,9 +567,7 @@ class _AddTransactionSheetState extends ConsumerState<AddTransactionSheet> {
   Widget build(BuildContext context) {
     final screenHeight = MediaQuery.of(context).size.height;
     final scalingFactor = (screenHeight / 812.0).clamp(0.85, 1.0);
-    final activeCategories = _tabIndex == 0 
-        ? TransactionCategoryData.getExpenseCategories(context, l10n)
-        : TransactionCategoryData.getIncomeCategories(context, l10n);
+    final activeCategories = _getMergedCategories();
 
     return RepaintBoundary(
       child: Column(
@@ -425,6 +658,8 @@ class _AddTransactionSheetState extends ConsumerState<AddTransactionSheet> {
                 _expandedCategoryIndex = expIndex;
               });
             },
+            onAddCustomSubcategory: _showAddCustomCategoryDialog,
+            onRemoveCustomSubcategory: _handleRemoveCustomCategory,
           ),
 
           const SizedBox(height: AppSizes.paddingLarge),

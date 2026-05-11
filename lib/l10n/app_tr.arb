@@ -234,6 +234,46 @@
   "no": "Hayır",
   "recentAnalyses": "Son Analizler",
   "vault": "Kasa",
+  "vaultDetail": "Kasa Detayı",
+  "managePanel": "Paneli Yönet",
+  "vaultNameHint": "Kasa Adı (örn. Birikim)",
+  "initialBalance": "Başlangıç Bakiyesi",
+  "createVault": "Kasa Oluştur",
+  "transactions": "İşlemler",
+  "manage": "Yönet",
+  "averageMonthlyLoad": "AYLIK ORTALAMA YÜK",
+  "noTransactionsInVault": "Bu kasada işlem bulunmuyor.",
+  "manageTransactionsInVault": "Kasadaki İşlemleri Yönet",
+  "deleteVault": "Kasayı Sil",
+  "deleteVaultConfirm": "\"{name}\" kasasını silmek istediğinize emin misiniz? Bu işlem geri alınamaz.",
+  "@deleteVaultConfirm": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "gold": "ALTIN",
+  "amountNotEntered": "TUTAR GİRİLMEDİ",
+  "addAmountByEditing": "Düzenleyerek tutar ekleyin",
+  "added": "Eklendi",
+  "endDate": "Bitiş Tarihi",
+  "occurred": "Gerçekleşen",
+  "remainingCount": "Kalan Sayısı",
+  "times": "{count, plural, =1{1 Kez} other{{count} Kez}}",
+  "note": "Not",
+  "indefinitely": "Sürekli",
+  "dayOfMonthOrdinal": "Ayın {day}'i",
+  "everyWeekDetailed": "Her hafta",
+  "everyMonthDetailed": "Her ay",
+  "everyYearDetailed": "Her yıl",
+  "every2WeeksDetailed": "2 haftada bir",
+  "every3WeeksDetailed": "3 haftada bir",
+  "every3MonthsDetailed": "3 ayda bir",
+  "every6MonthsDetailed": "6 ayda bir",
+  "everyDayDetailed": "Her gün",
+  "every2DaysDetailed": "2 günde bir",
+  "every3DaysDetailed": "3 günde bir",
   "allLabel": "Hepsi",
   "custom": "Özel",
   "status": "Durum",
@@ -248,7 +288,7 @@
   "permanentDeleteDesc": "Bu işlem kalıcı olarak silinecek",
   "yes": "Evet",
   "groupNameHint": "Grup adı...",
-  "transactionCount": "{count} işlem",
+  "transactionCount": "{count, plural, =1{1 işlem} other{{count} işlem}}",
   "noRemainingTransactions": "Eklenebilecek boş işlem kalmadı.",
   "editTransactionDesc": "İşlem bilgilerini güncelle",
   "visibilityDesc": "Ana sayfada hangi grup veya işlemlerin görüneceğini seçin.",
@@ -260,7 +300,7 @@
   "scopeLabel": "Kapsam:",
   "preselectHint": "Kalemler üzerinde ön seçim yap (isteğe bağlı)",
   "noItemsToAnalyze": "Seçilen tarihe kadar etki edecek işlem bulunamadı.",
-  "itemsToAnalyze": "Hedef tarihe ({months} ay) kadar etki edecek {count} kalem.",
+  "itemsToAnalyze": "{count, plural, =1{Hedef tarihe ({months} ay) kadar etki edecek 1 kalem.} other{Hedef tarihe ({months} ay) kadar etki edecek {count} kalem.}}",
   "budgetNotFeasible": "Bu hedef mevcut esnek bütçenle tam karşılanamıyor. Süreyi uzatmayı veya geliri artırmayı düşünebilirsin.",
   "financialIdentityUpdated": "Harika! Finansal kimliğin güncellendi ve analiz kaydedildi.",
   "feedbackMemoized": "Tamam, bu tercihler hafızaya alındı. Bir sonraki analizde farklı öneriler sunulacak.",
@@ -269,9 +309,9 @@
   "doYouLikeThisSuggestion": "Bu öneriyi beğendin mi?",
   "yesILikeIt": "Evet, Beğendim",
   "targetAmountLabel": "{amount} Hedef",
-  "weeksToTargetLabel": "{count} Hafta",
-  "monthsToTargetLabel": "{count} Ay",
-  "yearsToTargetLabel": "{count} Yıl",
+  "weeksToTargetLabel": "{count, plural, =1{1 Hafta} other{{count} Hafta}}",
+  "monthsToTargetLabel": "{count, plural, =1{1 Ay} other{{count} Ay}}",
+  "yearsToTargetLabel": "{count, plural, =1{1 Yıl} other{{count} Yıl}}",
   "minAmount": "Min.",
   "maxAmount": "Max.",
   "limitedTotal": "Toplam",
@@ -291,5 +331,79 @@
   "auto": "OTOMATİK",
   "max": "MAX",
   "zero": "0",
-  "aiMode": "AI Modu"
+  "aiMode": "AI Modu",
+  "addCustomCategory": "Yeni Ekle",
+  "customCategoryHint": "Örn: Baharat, Deterjan...",
+  "deleteCustomCategory": "Özel Kategoriyi Sil",
+  "deleteCustomCategoryConfirm": "Bu özel kategoriyi silmek istediğinize emin misiniz?",
+  "dashboard": "Dashboard",
+  "library": "Kütüphane",
+  "dashboardEmpty": "Dashboard şu an boş.",
+  "libraryEmpty": "Kütüphane şu an boş.",
+  "pageLabel": "Sayfa",
+  "sizeLabel": "Boyut",
+  "widgetAdded": "{name} panoya eklendi!",
+  "@widgetAdded": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "historyTitle": "İşlem Geçmişi",
+  "radarTitle": "Harcama Radarı",
+  "giantsTitle": "Harcama Devleri",
+  "quickActionTitle": "Hızlı İşlem",
+  "vaultStatusTitle": "Kasa Durumları",
+  "dailyBudgetTitle": "Günlük Bütçe",
+  "dailyLimit": "GÜNLÜK LİMİT",
+  "spendableRemaining": "Harcanabilir Kalan",
+  "giantsWait": "Harcama Dağılımı Bekleniyor",
+  "weeklyShort": "H",
+  "monthlyShort": "A",
+  "yearlyShort": "Y",
+  "newLabel": "YENİ",
+  "today": "Bugün",
+  "yesterday": "Dün",
+  "daysAgo": "{count} Gün Önce",
+  "@daysAgo": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "weeksAgo": "{count} Hafta Önce",
+  "@weeksAgo": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "monthsAgo": "{count} Ay Önce",
+  "@monthsAgo": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "historyEmpty": "İşlem Geçmişi Henüz Boş",
+  "upcomingPaymentsNotFound": "Yaklaşan Ödeme Bulunmadı",
+  "transaction": "İşlem",
+  "membership": "ÜYELİK",
+  "currentPlan": "Mevcut Plan",
+  "manageSubscription": "Üyeliği Yönet",
+  "restorePurchases": "Satın Almaları Geri Yükle",
+  "freePlan": "Ücretsiz Plan",
+  "proPlan": "FinCast PRO",
+  "upgradeToPro": "PRO'ya Yükselt",
+  "proFeatures": "PRO Özellikleri",
+  "unlimitedVaults": "Sınırsız Kasa",
+  "aiInsights": "Gelişmiş AI Analizleri",
+  "prioritySupport": "Öncelikli Destek",
+  "subscriptionStatus": "Üyelik Durumu",
+  "active": "Aktif",
+  "inactive": "Aktif Değil"
 }

@@ -88,7 +88,7 @@ class IntegratedVaultCard extends StatelessWidget {
             Positioned(
               left: hPad, right: hPad,
               top: 0, bottom: 0,
-              child: _buildMorphContent(context, isDark),
+              child: _buildMorphContent(context, isDark, cardHeight, effectiveWidth),
             ),
           ],
         ),
@@ -96,22 +96,17 @@ class IntegratedVaultCard extends StatelessWidget {
     );
   }
 
-  Widget _buildMorphContent(BuildContext context, bool isDark) {
+  Widget _buildMorphContent(BuildContext context, bool isDark, double h, double effectiveWidth) {
     final screenWidth = MediaQuery.of(context).size.width;
-    // contentT ve widthT tanımları burada da lazım (veya build'den geçmeli)
-    final double widthT = Curves.easeOutQuart.transform(morphProgress);
-    final double cardWidth = lerpDouble(screenWidth * 0.70, screenWidth, widthT)!;
-    final double effectiveWidth = isCurrent ? cardWidth : screenWidth * 0.70;
-    
     final hasFlexibleTx = txs.any((t) => t.minAmount != null || t.maxAmount != null);
     
     // Animasyon progressleri
     final double contentT = Curves.easeInOutCubic.transform(morphProgress);
-    final double magneticT = Curves.easeOutCubic.transform(morphProgress); // easeOutBack yerine daha yumuşak cubic
+    final double magneticT = Curves.easeOutCubic.transform(morphProgress); 
     
     // Smooth Size Logic
-    final double titleFontSize = lerpDouble(12, 17, contentT)!; // 11 yerine 12'den başlatıp daha yumuşak yaptık
-    final double balanceFontSize = lerpDouble(42, 18, contentT)!; // 16 yerine 18 (header'da daha okunaklı)
+    final double titleFontSize = lerpDouble(12, 17, contentT)!; 
+    final double balanceFontSize = lerpDouble(42, 18, contentT)!; 
     final double titleLetterSpacing = lerpDouble(1.2, -0.4, contentT)!;
     final double balanceLetterSpacing = lerpDouble(-2.0, 0.2, contentT)!;
     
@@ -129,216 +124,257 @@ class IntegratedVaultCard extends StatelessWidget {
 
     final Color balanceColor = Color.lerp(
       activeColor,
-      activeColor, // Tutar rengini koruyabiliriz veya isterseniz o da değişebilir. 
-      // Kullanıcı "dediklerim tutar içinde geçerli" dediği için tutar rengini de hafifçe lerp edelim.
+      activeColor, 
       contentT,
     )!;
     
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final h = constraints.maxHeight;
-        
-        // --- Geniş Mod (Expanded) Pozisyonları ---
-        final double titleExpandedTop = h * 0.12;
-        final double balanceExpandedTop = titleExpandedTop + 30; // 30px spacing
-        final double secondaryExpandedTop = balanceExpandedTop + 65; // Biraz daha boşluk
-        
-        // --- Dar Mod (Compact) Pozisyonları ---
-        final double titleCompactTop = (h - titleFontSize) / 2;
-        final double balanceCompactTop = (h - balanceFontSize) / 2;
+    // --- Geniş Mod (Expanded) Pozisyonları ---
+    final double titleExpandedTop = h * 0.12;
+    final double balanceExpandedTop = titleExpandedTop + 30; 
+    final double secondaryExpandedTop = balanceExpandedTop + 65; 
+    
+    // --- Dar Mod (Compact) Pozisyonları ---
+    final double titleCompactTop = (h - titleFontSize) / 2;
+    final double balanceCompactTop = (h - balanceFontSize) / 2;
 
-        final double titleTop = lerpDouble(titleExpandedTop, titleCompactTop, magneticT)!;
-        final double balanceTop = lerpDouble(balanceExpandedTop, balanceCompactTop, magneticT)!;
-        
-        final double statsOpacity = (1 - morphProgress * 5.0).clamp(0.0, 1.0); 
-        final double rangeOpacity = (1 - morphProgress * 8.0).clamp(0.0, 1.0); 
-        final double swapOpacity  = (1 - morphProgress * 12.0).clamp(0.0, 1.0); 
+    final double titleTop = lerpDouble(titleExpandedTop, titleCompactTop, magneticT)!;
+    final double balanceTop = lerpDouble(balanceExpandedTop, balanceCompactTop, magneticT)!;
+    
+    final double statsOpacity = (1 - morphProgress * 5.0).clamp(0.0, 1.0); 
+    final double rangeOpacity = (1 - morphProgress * 8.0).clamp(0.0, 1.0); 
+    final double swapOpacity  = (1 - morphProgress * 12.0).clamp(0.0, 1.0); 
 
-        // Yukarı kaçma efekti (Parallax)
-        final double parallaxOffset = morphProgress * -80.0; 
-        
-        return Stack(
-          clipBehavior: Clip.none,
-          children: [
-            // === TITLE ===
-            Positioned(
-              left: 4, right: 4, 
-              top: titleTop,
-              child: Align(
-                alignment: Alignment.lerp(Alignment.center, Alignment.centerLeft, magneticT)!,
-                child: Container(
-                  constraints: BoxConstraints(
-                    // Kasa modunda kartın %85'ini, Header modunda %55'ini kullanabilir
-                    maxWidth: lerpDouble(effectiveWidth * 0.85, screenWidth * 0.55, magneticT)!,
-                  ),
-                  child: Text(
-                    vaultName,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      fontSize: titleFontSize,
-                      fontWeight: FontWeight.w900,
-                      letterSpacing: titleLetterSpacing,
-                      color: nameColor,
-                    ),
-                  ),
+    // Yukarı kaçma efekti (Parallax)
+    final double parallaxOffset = morphProgress * -80.0; 
+    
+    return Stack(
+      clipBehavior: Clip.none,
+      children: [
+        // === TITLE ===
+        Positioned(
+          left: 4, right: 4, 
+          top: titleTop,
+          child: Align(
+            alignment: Alignment.lerp(Alignment.center, Alignment.centerLeft, magneticT)!,
+            child: Container(
+              constraints: BoxConstraints(
+                maxWidth: lerpDouble(effectiveWidth * 0.85, screenWidth * 0.55, magneticT)!,
+              ),
+              child: Text(
+                vaultName,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  fontSize: titleFontSize,
+                  fontWeight: FontWeight.w900,
+                  letterSpacing: titleLetterSpacing,
+                  color: nameColor,
                 ),
               ),
             ),
-            
-            // === BALANCE ===
-            Positioned(
-              left: 4, right: 4,
-              top: balanceTop,
-              child: Align(
+          ),
+        ),
+        
+        // === BALANCE ===
+        Positioned(
+          left: 4, right: 4,
+          top: balanceTop,
+          child: Align(
+            alignment: Alignment.lerp(Alignment.center, Alignment.centerRight, magneticT)!,
+            child: Container(
+              constraints: BoxConstraints(
+                maxWidth: lerpDouble(effectiveWidth - 24, screenWidth * 0.42, magneticT)!,
+              ),
+              padding: EdgeInsets.symmetric(horizontal: badgePadH, vertical: badgePadV),
+              decoration: BoxDecoration(
+                color: activeColor.withValues(alpha: badgeBgAlpha),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: FittedBox(
+                fit: BoxFit.scaleDown,
                 alignment: Alignment.lerp(Alignment.center, Alignment.centerRight, magneticT)!,
-                child: Container(
-                  constraints: BoxConstraints(
-                    // Kasa modunda kart genişliği kadar, Header modunda %42'si kadar yer kaplayabilir
-                    maxWidth: lerpDouble(effectiveWidth - 24, screenWidth * 0.42, magneticT)!,
-                  ),
-                  padding: EdgeInsets.symmetric(horizontal: badgePadH, vertical: badgePadV),
-                  decoration: BoxDecoration(
-                    color: activeColor.withValues(alpha: badgeBgAlpha),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: FittedBox(
-                    fit: BoxFit.scaleDown,
-                    alignment: Alignment.lerp(Alignment.center, Alignment.centerRight, magneticT)!,
-                    child: Text(
-                      '$currencySymbol${CurrencyUtils.formatFullAmount(balance)}',
-                      style: TextStyle(
-                        fontSize: balanceFontSize,
-                        fontWeight: FontWeight.w900,
-                        color: balanceColor,
-                        letterSpacing: balanceLetterSpacing,
-                      ),
-                    ),
+                child: Text(
+                  CurrencyUtils.formatFullAmount(balance, symbol: currencySymbol),
+                  style: TextStyle(
+                    fontSize: balanceFontSize,
+                    fontWeight: FontWeight.w900,
+                    color: balanceColor,
+                    letterSpacing: balanceLetterSpacing,
                   ),
                 ),
               ),
             ),
-            
-            // === DÖNÜŞTÜRÜLMÜŞ BAKİYE ===
-            if (convertedBalance != null && statsOpacity > 0.01)
-              Positioned(
-                left: 0, right: 0,
-                top: balanceTop + balanceFontSize + 4,
-                child: Opacity(
-                  opacity: statsOpacity,
-                  child: Center(
-                    child: Text(
-                      '≈ $convertedSymbol${CurrencyUtils.formatFullAmount(convertedBalance!)}',
-                      style: TextStyle(
-                        fontSize: 11,
-                        fontWeight: FontWeight.w700,
-                        color: AppColors.getTextPrimary(context).withValues(alpha: 0.4),
-                        letterSpacing: 0.3,
-                      ),
+          ),
+        ),
+        
+        // === DÖNÜŞTÜRÜLMÜŞ BAKİYE ===
+        if (convertedBalance != null && statsOpacity > 0.01)
+          Positioned(
+            left: 0, right: 0,
+            top: balanceTop + balanceFontSize + 4,
+            child: Opacity(
+              opacity: statsOpacity,
+              child: Center(
+                child: Text(
+                  '≈ ${CurrencyUtils.formatFullAmount(convertedBalance!, symbol: convertedSymbol)}',
+                  style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.getTextPrimary(context).withValues(alpha: 0.4),
+                    letterSpacing: 0.3,
+                  ),
+                ),
+              ),
+            ),
+          ),
+
+        // === SECONDARY STATS (STAGGERED FADE-OUT + PARALLAX) ===
+        if (statsOpacity > 0.01)
+          Positioned(
+            left: 0, right: 0,
+            top: secondaryExpandedTop,
+            child: Transform.translate(
+              offset: Offset(0, parallaxOffset),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Opacity(
+                    opacity: statsOpacity,
+                    child: Row(
+                      children: [
+                        Expanded(child: _buildMiniStat(l10n.income, income, AppColors.getIncome(context))),
+                        Container(width: 1, height: 30, color: activeColor.withValues(alpha: 0.15)),
+                        Expanded(child: _buildMiniStat(l10n.expense, expense, AppColors.getExpense(context))),
+                      ],
                     ),
                   ),
-                ),
-              ),
-
-            // === SECONDARY STATS (STAGGERED FADE-OUT + PARALLAX) ===
-            if (statsOpacity > 0.01)
-              Positioned(
-                left: 0, right: 0,
-                top: secondaryExpandedTop,
-                child: Transform.translate(
-                  offset: Offset(0, parallaxOffset),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Opacity(
-                        opacity: statsOpacity,
-                        child: Row(
-                          children: [
-                            Expanded(child: _buildMiniStat(l10n.income, income, AppColors.getIncome(context))),
-                            Container(width: 1, height: 30, color: activeColor.withValues(alpha: 0.15)),
-                            Expanded(child: _buildMiniStat(l10n.expense, expense, AppColors.getExpense(context))),
-                          ],
+                  
+                  if (rangeOpacity > 0.01)
+                    Opacity(
+                      opacity: rangeOpacity,
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        child: Divider(
+                          height: 1, 
+                          thickness: 0.5, 
+                          color: (isDark ? Colors.white : Colors.black).withValues(alpha: 0.1)
                         ),
                       ),
-                      
-                      if (rangeOpacity > 0.01)
-                        Opacity(
-                          opacity: rangeOpacity,
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 16),
-                            child: Divider(
-                              height: 1, 
-                              thickness: 0.5, 
-                              color: (isDark ? Colors.white : Colors.black).withValues(alpha: 0.1)
-                            ),
-                          ),
-                        ),
+                    ),
 
-                      if (hasFlexibleTx && rangeOpacity > 0.01)
-                        Opacity(
-                          opacity: rangeOpacity,
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              _buildRangeStats(txs, targetCurrency, exchangeRates),
-                              const SizedBox(height: 16),
-                            ],
-                          ),
-                        ),
+                  if (hasFlexibleTx && rangeOpacity > 0.01)
+                    Opacity(
+                      opacity: rangeOpacity,
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          _buildRangeStats(txs, targetCurrency, exchangeRates),
+                          const SizedBox(height: 16),
+                        ],
+                      ),
+                    ),
 
-                      if (swapOpacity > 0.01)
-                        Opacity(
-                          opacity: swapOpacity,
-                          child: Transform.translate(
-                            offset: Offset(0, parallaxOffset * 0.5), // Ok simgesi daha da hızlı kaçsın
-                            child: const Icon(Icons.swap_horiz_rounded, size: 20, color: Colors.grey),
-                          ),
-                        ),
-                    ],
-                  ),
-                ),
+                  if (swapOpacity > 0.01)
+                    Opacity(
+                      opacity: swapOpacity,
+                      child: Transform.translate(
+                        offset: Offset(0, parallaxOffset * 0.5), 
+                        child: const Icon(Icons.swap_horiz_rounded, size: 20, color: Colors.grey),
+                      ),
+                    ),
+                ],
               ),
-          ],
-        );
-      },
+            ),
+          ),
+      ],
     );
   }
 
   Widget _buildMiniStat(String label, double amount, Color color) {
     return Column(
       children: [
-        Text(label.toUpperCase(), style: TextStyle(fontSize: 9, fontWeight: FontWeight.w900, color: Colors.grey.withValues(alpha: 0.6), letterSpacing: 1)),
+        FittedBox(
+          fit: BoxFit.scaleDown,
+          child: Text(
+            label.toUpperCase(), 
+            style: TextStyle(
+              fontSize: 9, 
+              fontWeight: FontWeight.w900, 
+              color: Colors.grey.withValues(alpha: 0.6), 
+              letterSpacing: 1,
+            ),
+          ),
+        ),
         const SizedBox(height: 4),
-        Text('$currencySymbol${CurrencyUtils.formatAmount(amount)}', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w900, color: color)),
+        FittedBox(
+          fit: BoxFit.scaleDown,
+          child: Text(
+            CurrencyUtils.formatAmount(amount, currencySymbol: currencySymbol), 
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.w900, color: color),
+          ),
+        ),
       ],
     );
   }
 
   Widget _buildRangeStats(List<TransactionUI> txs, String targetCurrency, List<ExchangeRate> rates) {
-    final minNet = txs.where((t) => t.isIncome).fold<double>(0, (s, t) => s + CurrencyUtils.convert(t.minAmount ?? t.amount, t.currency ?? '₺', targetCurrency, rates)) 
-        - txs.where((t) => !t.isIncome).fold<double>(0, (s, t) => s + CurrencyUtils.convert(t.maxAmount ?? t.amount, t.currency ?? '₺', targetCurrency, rates));
-    final maxNet = txs.where((t) => t.isIncome).fold<double>(0, (s, t) => s + CurrencyUtils.convert(t.maxAmount ?? t.amount, t.currency ?? '₺', targetCurrency, rates)) 
-        - txs.where((t) => !t.isIncome).fold<double>(0, (s, t) => s + CurrencyUtils.convert(t.minAmount ?? t.amount, t.currency ?? '₺', targetCurrency, rates));
+    final activeTxs = txs.where((t) => !t.isArchived).toList();
+
+    final minNet = activeTxs.where((t) => t.isIncome).fold<double>(0, (s, t) {
+          final amt = t.minAmount ?? t.amount;
+          final eff = t.effectiveAmount;
+          final monthly = (t.periodType == 0 || eff == 0) ? amt : (amt * (t.monthlyEquivalent / eff));
+          return s + CurrencyUtils.convert(monthly, t.currency ?? '₺', targetCurrency, rates);
+        }) 
+        - activeTxs.where((t) => !t.isIncome).fold<double>(0, (s, t) {
+          final amt = t.maxAmount ?? t.amount;
+          final eff = t.effectiveAmount;
+          final monthly = (t.periodType == 0 || eff == 0) ? amt : (amt * (t.monthlyEquivalent / eff));
+          return s + CurrencyUtils.convert(monthly, t.currency ?? '₺', targetCurrency, rates);
+        });
+
+    final maxNet = activeTxs.where((t) => t.isIncome).fold<double>(0, (s, t) {
+          final amt = t.maxAmount ?? t.amount;
+          final eff = t.effectiveAmount;
+          final monthly = (t.periodType == 0 || eff == 0) ? amt : (amt * (t.monthlyEquivalent / eff));
+          return s + CurrencyUtils.convert(monthly, t.currency ?? '₺', targetCurrency, rates);
+        }) 
+        - activeTxs.where((t) => !t.isIncome).fold<double>(0, (s, t) {
+          final amt = t.minAmount ?? t.amount;
+          final eff = t.effectiveAmount;
+          final monthly = (t.periodType == 0 || eff == 0) ? amt : (amt * (t.monthlyEquivalent / eff));
+          return s + CurrencyUtils.convert(monthly, t.currency ?? '₺', targetCurrency, rates);
+        });
     
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceAround,
       children: [
-        _buildRangeStat("En Kötü", minNet, Colors.orange),
-        _buildRangeStat("En İyi", maxNet, Colors.blue),
+        _buildRangeStat(l10n.worstCase, minNet, Colors.orange),
+        _buildRangeStat(l10n.bestCase, maxNet, Colors.blue),
       ],
     );
   }
 
   Widget _buildRangeStat(String label, double amount, Color color) {
     return Row(
+      mainAxisSize: MainAxisSize.min,
       children: [
         Container(width: 5, height: 5, decoration: BoxDecoration(color: color, shape: BoxShape.circle)),
         const SizedBox(width: 8),
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(label, style: const TextStyle(fontSize: 8, fontWeight: FontWeight.bold, color: Colors.grey)),
-            Text('$currencySymbol${CurrencyUtils.formatAmount(amount)}', style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w900)),
+            Text(
+              label, 
+              style: const TextStyle(fontSize: 8, fontWeight: FontWeight.bold, color: Colors.grey),
+            ),
+            FittedBox(
+              fit: BoxFit.scaleDown,
+              child: Text(
+                CurrencyUtils.formatAmount(amount, currencySymbol: currencySymbol), 
+                style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w900),
+              ),
+            ),
           ],
         ),
       ],

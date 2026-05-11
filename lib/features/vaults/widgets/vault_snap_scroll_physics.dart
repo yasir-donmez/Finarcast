@@ -21,20 +21,20 @@ class VaultSnapScrollPhysics extends BouncingScrollPhysics {
     final tolerance = toleranceFor(position);
     final offset = position.pixels;
 
-    // Eğer Kasa başlığının küçüldüğü bölgedeysek (0 ile maxScrollExtent arası)
+    // Eğer Kasa başlığının küçüldüğü bölgedeysek
     if (offset > 0.0 && offset < maxScrollExtent) {
       final double target;
       
-      // Kullanıcı hızlı kaydırdıysa (flick), ivmeye göre yukarı veya aşağı yapıştır
+      // Flick (Hızlı kaydırma) veya Konum kontrolü
       if (velocity.abs() > tolerance.velocity) {
         target = velocity > 0 ? maxScrollExtent : 0.0;
       } else {
-        // Kullanıcı yavaş bıraktıysa, yarıyı geçtiği tarafa yapıştır
+        // Standart %50 sınırı (daha tahmin edilebilir)
         target = offset > maxScrollExtent / 2 ? maxScrollExtent : 0.0;
       }
       
       return ScrollSpringSimulation(
-        spring,
+        spring, // Varsayılan yay ayarı (BouncingScrollPhysics'ten gelir)
         offset,
         target,
         velocity,
@@ -42,7 +42,6 @@ class VaultSnapScrollPhysics extends BouncingScrollPhysics {
       );
     }
     
-    // Normal liste kaydırması için BouncingScrollPhysics'e bırak
     return super.createBallisticSimulation(position, velocity);
   }
 }

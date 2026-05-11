@@ -29,8 +29,8 @@ class LanguageSetting extends ConsumerWidget {
   }
 
   void _showLanguagePicker(BuildContext context, WidgetRef ref, String currentCode, AppLocalizations l10n) {
-    final List<String> languages = ["Türkçe", "English", "Deutsch", "Español", "Français", "Português", "Italiano", "日本語"];
-    final List<String> codes = ["tr", "en", "de", "es", "fr", "pt", "it", "ja"];
+    final List<String> languages = ["Türkçe", "English", "Deutsch", "Español", "Français", "Português", "Italiano", "日本語", "中文", "한국어"];
+    final List<String> codes = ["tr", "en", "de", "es", "fr", "pt", "it", "ja", "zh", "ko"];
     int initialIndex = codes.indexOf(currentCode);
     if (initialIndex == -1) initialIndex = 0;
 
@@ -71,6 +71,8 @@ class LanguageSetting extends ConsumerWidget {
       case 'pt': return 'Português';
       case 'it': return 'Italiano';
       case 'ja': return '日本語';
+      case 'zh': return '中文';
+      case 'ko': return '한국어';
       default: return 'Türkçe';
     }
   }

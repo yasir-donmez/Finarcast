@@ -37,12 +37,12 @@ class _VaultDetailSheetState extends ConsumerState<VaultDetailSheet> with Single
   Set<int>? _tempSelectedTxIds;
   bool _isInitialized = false;
 
-  final List<Map<String, String>> _currencies = [
-    {'symbol': 'AUTO', 'label': 'OTOMATİK'},
+  List<Map<String, String>> _getCurrencies(AppLocalizations l10n) => [
+    {'symbol': 'AUTO', 'label': l10n.auto},
     {'symbol': '₺', 'label': 'TL'},
     {'symbol': '\$', 'label': 'USD'},
     {'symbol': '€', 'label': 'EUR'},
-    {'symbol': 'G', 'label': 'ALTIN'},
+    {'symbol': 'G', 'label': l10n.gold},
   ];
 
   @override
@@ -113,6 +113,7 @@ class _VaultDetailSheetState extends ConsumerState<VaultDetailSheet> with Single
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final allVaults = ref.watch(allVaultsProvider);
     final allTransactions = ref.watch(vaultTransactionsProvider);
     final globalCurrency = ref.watch(settingsProvider).currencySymbol;
@@ -124,7 +125,7 @@ class _VaultDetailSheetState extends ConsumerState<VaultDetailSheet> with Single
 
     if (isMainVault) {
       vault = Vault()
-        ..name = AppLocalizations.of(context)!.mainVault
+        ..name = l10n.mainVault
         ..iconCode = 'account_balance_wallet_rounded'
         ..currency = 'AUTO';
       displayTxs = allTransactions;
@@ -173,7 +174,7 @@ class _VaultDetailSheetState extends ConsumerState<VaultDetailSheet> with Single
         children: [
           if (!isMainVault)
             PrecisionSegmentedControl(
-              tabs: const ['İşlemler', 'Yönet'],
+              tabs: [l10n.transactions, l10n.manage],
               selectedIndex: _activeTab == VaultDetailTab.transactions ? 0 : 1,
               onTabChanged: (index) => _switchTab(index == 0 ? VaultDetailTab.transactions : VaultDetailTab.manage),
               scalingFactor: sf,
@@ -187,8 +188,8 @@ class _VaultDetailSheetState extends ConsumerState<VaultDetailSheet> with Single
               switchInCurve: Curves.easeOutCubic,
               switchOutCurve: Curves.easeInCubic,
               child: _activeTab == VaultDetailTab.transactions
-                ? _buildMainView(context, vault, displayTxs, activeColor, isDark, isMainVault, displayCurrency, sf, rates)
-                : _buildManageView(context, vault, allTransactions, displayTxs, activeColor, isDark, sf),
+                ? _buildMainView(context, vault, displayTxs, activeColor, isDark, isMainVault, displayCurrency, sf, rates, l10n)
+                : _buildManageView(context, vault, allTransactions, displayTxs, activeColor, isDark, sf, l10n),
             ),
           ),
         ],
@@ -196,7 +197,7 @@ class _VaultDetailSheetState extends ConsumerState<VaultDetailSheet> with Single
     );
   }
 
-  Widget _buildMainView(BuildContext context, Vault vault, List<TransactionUI> vaultTransactions, Color activeColor, bool isDark, bool isMainVault, String currency, double sf, List<ExchangeRate> rates) {
+  Widget _buildMainView(BuildContext context, Vault vault, List<TransactionUI> vaultTransactions, Color activeColor, bool isDark, bool isMainVault, String currency, double sf, List<ExchangeRate> rates, AppLocalizations l10n) {
     final incomeLoad = vaultTransactions.where((t) => t.isIncome).fold<double>(0, (sum, t) => sum + t.getConvertedMonthlyEquivalent(currency, rates));
     final expenseLoad = vaultTransactions.where((t) => !t.isIncome).fold<double>(0, (sum, t) => sum + t.getConvertedMonthlyEquivalent(currency, rates));
     final netLoad = incomeLoad - expenseLoad;
@@ -238,9 +239,9 @@ class _VaultDetailSheetState extends ConsumerState<VaultDetailSheet> with Single
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('AYLIK ORTALAMA YÜK', style: TextStyle(fontSize: 9 * sf, fontWeight: FontWeight.w900, color: activeColor.withValues(alpha: 0.6), letterSpacing: 1)),
+                    Text(l10n.averageMonthlyLoad.toUpperCase(), style: TextStyle(fontSize: 9 * sf, fontWeight: FontWeight.w900, color: activeColor.withValues(alpha: 0.6), letterSpacing: 1)),
                     const SizedBox(height: 4),
-                    Text('$currency${CurrencyUtils.formatFullAmount(netLoad)}', style: TextStyle(fontSize: 20 * sf, fontWeight: FontWeight.w900, color: netLoad >= 0 ? AppColors.getIncome(context) : AppColors.getExpense(context))),
+                    Text(CurrencyUtils.formatFullAmount(netLoad, symbol: currency), style: TextStyle(fontSize: 20 * sf, fontWeight: FontWeight.w900, color: netLoad >= 0 ? AppColors.getIncome(context) : AppColors.getExpense(context))),
                   ],
                 ),
                 const Spacer(),
@@ -249,7 +250,7 @@ class _VaultDetailSheetState extends ConsumerState<VaultDetailSheet> with Single
             ),
           ),
           const SizedBox(height: 24),
-          Text('İşlemler', style: TextStyle(fontSize: 14 * sf, fontWeight: FontWeight.w900, color: Colors.grey.withValues(alpha: 0.6))),
+          Text(l10n.transactions, style: TextStyle(fontSize: 14 * sf, fontWeight: FontWeight.w900, color: Colors.grey.withValues(alpha: 0.6))),
           const SizedBox(height: 12),
           if (vaultTransactions.isNotEmpty)
             ConstrainedBox(
@@ -272,7 +273,7 @@ class _VaultDetailSheetState extends ConsumerState<VaultDetailSheet> with Single
                   children: [
                     Icon(Icons.receipt_long_rounded, size: 40 * sf),
                     SizedBox(height: 8 * sf),
-                    Text('Bu kasada işlem bulunmuyor.', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13 * sf)),
+                    Text(l10n.noTransactionsInVault, style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13 * sf)),
                   ],
                 ),
               ),
@@ -283,8 +284,9 @@ class _VaultDetailSheetState extends ConsumerState<VaultDetailSheet> with Single
     );
   }
 
-  Widget _buildManageView(BuildContext context, Vault vault, List<TransactionUI> allTransactions, List<TransactionUI> vaultTransactions, Color activeColor, bool isDark, double sf) {
+  Widget _buildManageView(BuildContext context, Vault vault, List<TransactionUI> allTransactions, List<TransactionUI> vaultTransactions, Color activeColor, bool isDark, double sf, AppLocalizations l10n) {
     final standaloneTransactions = allTransactions.where((t) => t.groupIds.isEmpty || (_tempSelectedTxIds?.contains(t.dbId) ?? false)).toList();
+    final currencies = _getCurrencies(l10n);
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -298,7 +300,7 @@ class _VaultDetailSheetState extends ConsumerState<VaultDetailSheet> with Single
               Expanded(
                 child: PrecisionInput(
                   controller: _nameController,
-                  hintText: 'Kasa Adı',
+                  hintText: l10n.vaultNameHint,
                   icon: Icons.edit_rounded,
                   scalingFactor: sf,
                 ),
@@ -315,12 +317,12 @@ class _VaultDetailSheetState extends ConsumerState<VaultDetailSheet> with Single
             ],
           ),
           const SizedBox(height: 20),
-          Text('PARA BİRİMİ', style: TextStyle(fontSize: 10, fontWeight: FontWeight.w900, color: Colors.grey.withValues(alpha: 0.5), letterSpacing: 1)),
+          Text(l10n.currency.toUpperCase(), style: TextStyle(fontSize: 10, fontWeight: FontWeight.w900, color: Colors.grey.withValues(alpha: 0.5), letterSpacing: 1)),
           const SizedBox(height: 12),
           SingleChildScrollView(
             scrollDirection: Axis.horizontal,
             child: Row(
-              children: _currencies.map((c) {
+              children: currencies.map((c) {
                 final isSelected = (_tempCurrency ?? vault.currency) == c['symbol'];
                 return Padding(
                   padding: const EdgeInsets.only(right: 8),
@@ -345,7 +347,7 @@ class _VaultDetailSheetState extends ConsumerState<VaultDetailSheet> with Single
             ),
           ),
           const SizedBox(height: 32),
-          Text('Kasadaki İşlemleri Yönet', style: TextStyle(fontSize: 16 * sf, fontWeight: FontWeight.w900, letterSpacing: -0.5)),
+          Text(l10n.manageTransactionsInVault, style: TextStyle(fontSize: 16 * sf, fontWeight: FontWeight.w900, letterSpacing: -0.5)),
           const SizedBox(height: 12),
           ConstrainedBox(
             constraints: BoxConstraints(maxHeight: MediaQuery.of(context).size.height * 0.35 * sf),
@@ -414,7 +416,7 @@ class _VaultDetailSheetState extends ConsumerState<VaultDetailSheet> with Single
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(tx.name, style: TextStyle(fontWeight: FontWeight.w800, fontSize: 14 * sf, letterSpacing: -0.5)),
-                Text('${tx.currency ?? "₺"}${CurrencyUtils.formatAmount(tx.effectiveAmount)}', style: TextStyle(fontSize: 12 * sf, fontWeight: FontWeight.w900, color: tx.isIncome ? AppColors.getIncome(context) : AppColors.getExpense(context))),
+                Text(CurrencyUtils.formatAmount(tx.effectiveAmount, currencySymbol: tx.currency ?? "₺"), style: TextStyle(fontSize: 12 * sf, fontWeight: FontWeight.w900, color: tx.isIncome ? AppColors.getIncome(context) : AppColors.getExpense(context))),
               ],
             ),
           ),
@@ -428,8 +430,8 @@ class _VaultDetailSheetState extends ConsumerState<VaultDetailSheet> with Single
     final confirm = await showPrecisionDialog<bool>(
       context: context,
       accentColor: AppColors.error,
-      title: 'Kasayı Sil',
-      content: '"${vault.name}" kasasını silmek istediğinize emin misiniz? Bu işlem geri alınamaz.',
+      title: l10n.deleteVault,
+      content: l10n.deleteVaultConfirm(vault.name),
       actions: [
         PrecisionDialogAction(label: l10n.cancel, onTap: () => Navigator.pop(context, false), isPrimary: false),
         PrecisionDialogAction(label: l10n.ok, onTap: () => Navigator.pop(context, true), isPrimary: true),

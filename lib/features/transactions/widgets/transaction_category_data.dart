@@ -3,6 +3,47 @@ import '../../../core/theme/app_constants.dart';
 import '../../../l10n/app_localizations.dart';
 
 class TransactionCategoryData {
+  /// Özel alt kategorileri built-in kategori listesine merge eder.
+  /// Her özel alt kategori, parent kategorisinin ikonunu kullanır.
+  /// [categories] — Built-in kategori listesi (deep copy yapılır, orijinal değişmez)
+  /// [customSubs] — CustomCategoryService'den gelen özel alt kategoriler
+  static List<Map<String, dynamic>> mergeCustomSubcategories(
+    List<Map<String, dynamic>> categories,
+    List<Map<String, String>> customSubs,
+  ) {
+    if (customSubs.isEmpty) return categories;
+
+    // Deep copy: orijinal listeyi bozmamak için
+    final merged = categories.map((cat) {
+      final copy = Map<String, dynamic>.from(cat);
+      copy['subModels'] = List<Map<String, dynamic>>.from(
+        (cat['subModels'] as List).map((s) => Map<String, dynamic>.from(s)),
+      );
+      return copy;
+    }).toList();
+
+    for (final custom in customSubs) {
+      final parentId = custom['parentId'] ?? '';
+      final parentIndex = merged.indexWhere((c) => c['id'] == parentId);
+      if (parentIndex == -1) continue;
+
+      final parent = merged[parentIndex];
+      final subs = parent['subModels'] as List<Map<String, dynamic>>;
+
+      // Zaten eklenmişse tekrar ekleme
+      if (subs.any((s) => s['id'] == custom['id'])) continue;
+
+      subs.add({
+        'id': custom['id'] ?? '',
+        'name': custom['name'] ?? '',
+        'icon': parent['icon'] as IconData, // Parent'ın ikonu
+        'isCustom': true, // Silme butonu göstermek için işaret
+      });
+    }
+
+    return merged;
+  }
+
   static List<Map<String, dynamic>> getExpenseCategories(BuildContext context, AppLocalizations l10n) => [
     {
       'id': 'exp_grocery',

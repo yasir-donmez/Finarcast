@@ -8,28 +8,15 @@ class ProfileListItems {
   static Widget buildSectionTitle(String title, Color activeColor, {Key? key}) {
     return Padding(
       key: key,
-      padding: const EdgeInsets.only(left: 8, bottom: 8),
-      child: Row(
-        children: [
-          Container(
-            width: 4,
-            height: 16,
-            decoration: BoxDecoration(
-              color: activeColor,
-              borderRadius: BorderRadius.circular(2),
-            ),
-          ),
-          const SizedBox(width: 10),
-          Text(
-            title.toUpperCase(),
-            style: TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.w900,
-              letterSpacing: 1.2,
-              color: activeColor.withValues(alpha: 0.8),
-            ),
-          ),
-        ],
+      padding: const EdgeInsets.only(left: 0, bottom: 8),
+      child: Text(
+        title.toUpperCase(),
+        style: TextStyle(
+          fontSize: 10,
+          fontWeight: FontWeight.w900,
+          color: Colors.grey.withValues(alpha: 0.5),
+          letterSpacing: 2,
+        ),
       ),
     );
   }
@@ -74,12 +61,24 @@ class ProfileListItems {
               ),
             ),
             if (trailing != null) ...[
-              Text(
-                trailing,
-                style: TextStyle(
-                  color: activeColor,
-                  fontSize: 14,
-                  fontWeight: FontWeight.w800,
+              AnimatedSwitcher(
+                duration: const Duration(milliseconds: 300),
+                layoutBuilder: (currentChild, previousChildren) => Stack(
+                  alignment: Alignment.centerRight,
+                  children: [
+                    ...previousChildren,
+                    if (currentChild != null) currentChild,
+                  ],
+                ),
+                transitionBuilder: (child, animation) => FadeTransition(opacity: animation, child: child),
+                child: Text(
+                  trailing,
+                  key: ValueKey(trailing),
+                  style: TextStyle(
+                    color: activeColor,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w800,
+                  ),
                 ),
               ),
               const SizedBox(width: 8),

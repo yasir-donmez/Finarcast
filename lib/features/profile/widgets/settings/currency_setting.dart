@@ -171,6 +171,12 @@ class CurrencySetting extends ConsumerWidget {
                 case r'$': name = "Amerikan Doları"; break;
                 case '€': name = "Euro"; break;
                 case '£': name = "İngiliz Sterlini"; break;
+                case '¥': name = "Japon Yeni"; break;
+                case '₩': name = "Kore Wonu"; break;
+                case '元': name = "Çin Yuanı"; break;
+                case r'R$': name = "Brezilya Reali"; break;
+                case 'Fr': name = "İsviçre Frangı"; break;
+                case 'G': name = "Gram Altın"; break;
               }
 
               return Center(

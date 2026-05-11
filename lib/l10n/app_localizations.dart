@@ -11,8 +11,10 @@ import 'app_localizations_es.dart';
 import 'app_localizations_fr.dart';
 import 'app_localizations_it.dart';
 import 'app_localizations_ja.dart';
+import 'app_localizations_ko.dart';
 import 'app_localizations_pt.dart';
 import 'app_localizations_tr.dart';
+import 'app_localizations_zh.dart';
 
 // ignore_for_file: type=lint
 
@@ -106,8 +108,10 @@ abstract class AppLocalizations {
     Locale('fr'),
     Locale('it'),
     Locale('ja'),
+    Locale('ko'),
     Locale('pt'),
     Locale('tr'),
+    Locale('zh'),
   ];
 
   /// No description provided for @appTitle.
@@ -1520,6 +1524,204 @@ abstract class AppLocalizations {
   /// **'Kasa'**
   String get vault;
 
+  /// No description provided for @vaultDetail.
+  ///
+  /// In tr, this message translates to:
+  /// **'Kasa Detayı'**
+  String get vaultDetail;
+
+  /// No description provided for @managePanel.
+  ///
+  /// In tr, this message translates to:
+  /// **'Paneli Yönet'**
+  String get managePanel;
+
+  /// No description provided for @vaultNameHint.
+  ///
+  /// In tr, this message translates to:
+  /// **'Kasa Adı (örn. Birikim)'**
+  String get vaultNameHint;
+
+  /// No description provided for @initialBalance.
+  ///
+  /// In tr, this message translates to:
+  /// **'Başlangıç Bakiyesi'**
+  String get initialBalance;
+
+  /// No description provided for @createVault.
+  ///
+  /// In tr, this message translates to:
+  /// **'Kasa Oluştur'**
+  String get createVault;
+
+  /// No description provided for @transactions.
+  ///
+  /// In tr, this message translates to:
+  /// **'İşlemler'**
+  String get transactions;
+
+  /// No description provided for @manage.
+  ///
+  /// In tr, this message translates to:
+  /// **'Yönet'**
+  String get manage;
+
+  /// No description provided for @averageMonthlyLoad.
+  ///
+  /// In tr, this message translates to:
+  /// **'AYLIK ORTALAMA YÜK'**
+  String get averageMonthlyLoad;
+
+  /// No description provided for @noTransactionsInVault.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu kasada işlem bulunmuyor.'**
+  String get noTransactionsInVault;
+
+  /// No description provided for @manageTransactionsInVault.
+  ///
+  /// In tr, this message translates to:
+  /// **'Kasadaki İşlemleri Yönet'**
+  String get manageTransactionsInVault;
+
+  /// No description provided for @deleteVault.
+  ///
+  /// In tr, this message translates to:
+  /// **'Kasayı Sil'**
+  String get deleteVault;
+
+  /// No description provided for @deleteVaultConfirm.
+  ///
+  /// In tr, this message translates to:
+  /// **'\"{name}\" kasasını silmek istediğinize emin misiniz? Bu işlem geri alınamaz.'**
+  String deleteVaultConfirm(String name);
+
+  /// No description provided for @gold.
+  ///
+  /// In tr, this message translates to:
+  /// **'ALTIN'**
+  String get gold;
+
+  /// No description provided for @amountNotEntered.
+  ///
+  /// In tr, this message translates to:
+  /// **'TUTAR GİRİLMEDİ'**
+  String get amountNotEntered;
+
+  /// No description provided for @addAmountByEditing.
+  ///
+  /// In tr, this message translates to:
+  /// **'Düzenleyerek tutar ekleyin'**
+  String get addAmountByEditing;
+
+  /// No description provided for @added.
+  ///
+  /// In tr, this message translates to:
+  /// **'Eklendi'**
+  String get added;
+
+  /// No description provided for @endDate.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bitiş Tarihi'**
+  String get endDate;
+
+  /// No description provided for @occurred.
+  ///
+  /// In tr, this message translates to:
+  /// **'Gerçekleşen'**
+  String get occurred;
+
+  /// No description provided for @remainingCount.
+  ///
+  /// In tr, this message translates to:
+  /// **'Kalan Sayısı'**
+  String get remainingCount;
+
+  /// No description provided for @times.
+  ///
+  /// In tr, this message translates to:
+  /// **'{count, plural, =1{1 Kez} other{{count} Kez}}'**
+  String times(num count);
+
+  /// No description provided for @note.
+  ///
+  /// In tr, this message translates to:
+  /// **'Not'**
+  String get note;
+
+  /// No description provided for @indefinitely.
+  ///
+  /// In tr, this message translates to:
+  /// **'Sürekli'**
+  String get indefinitely;
+
+  /// No description provided for @dayOfMonthOrdinal.
+  ///
+  /// In tr, this message translates to:
+  /// **'Ayın {day}\'i'**
+  String dayOfMonthOrdinal(Object day);
+
+  /// No description provided for @everyWeekDetailed.
+  ///
+  /// In tr, this message translates to:
+  /// **'Her hafta'**
+  String get everyWeekDetailed;
+
+  /// No description provided for @everyMonthDetailed.
+  ///
+  /// In tr, this message translates to:
+  /// **'Her ay'**
+  String get everyMonthDetailed;
+
+  /// No description provided for @everyYearDetailed.
+  ///
+  /// In tr, this message translates to:
+  /// **'Her yıl'**
+  String get everyYearDetailed;
+
+  /// No description provided for @every2WeeksDetailed.
+  ///
+  /// In tr, this message translates to:
+  /// **'2 haftada bir'**
+  String get every2WeeksDetailed;
+
+  /// No description provided for @every3WeeksDetailed.
+  ///
+  /// In tr, this message translates to:
+  /// **'3 haftada bir'**
+  String get every3WeeksDetailed;
+
+  /// No description provided for @every3MonthsDetailed.
+  ///
+  /// In tr, this message translates to:
+  /// **'3 ayda bir'**
+  String get every3MonthsDetailed;
+
+  /// No description provided for @every6MonthsDetailed.
+  ///
+  /// In tr, this message translates to:
+  /// **'6 ayda bir'**
+  String get every6MonthsDetailed;
+
+  /// No description provided for @everyDayDetailed.
+  ///
+  /// In tr, this message translates to:
+  /// **'Her gün'**
+  String get everyDayDetailed;
+
+  /// No description provided for @every2DaysDetailed.
+  ///
+  /// In tr, this message translates to:
+  /// **'2 günde bir'**
+  String get every2DaysDetailed;
+
+  /// No description provided for @every3DaysDetailed.
+  ///
+  /// In tr, this message translates to:
+  /// **'3 günde bir'**
+  String get every3DaysDetailed;
+
   /// No description provided for @allLabel.
   ///
   /// In tr, this message translates to:
@@ -1607,8 +1809,8 @@ abstract class AppLocalizations {
   /// No description provided for @transactionCount.
   ///
   /// In tr, this message translates to:
-  /// **'{count} işlem'**
-  String transactionCount(Object count);
+  /// **'{count, plural, =1{1 işlem} other{{count} işlem}}'**
+  String transactionCount(num count);
 
   /// No description provided for @noRemainingTransactions.
   ///
@@ -1679,8 +1881,8 @@ abstract class AppLocalizations {
   /// No description provided for @itemsToAnalyze.
   ///
   /// In tr, this message translates to:
-  /// **'Hedef tarihe ({months} ay) kadar etki edecek {count} kalem.'**
-  String itemsToAnalyze(Object count, Object months);
+  /// **'{count, plural, =1{Hedef tarihe ({months} ay) kadar etki edecek 1 kalem.} other{Hedef tarihe ({months} ay) kadar etki edecek {count} kalem.}}'**
+  String itemsToAnalyze(num count, Object months);
 
   /// No description provided for @budgetNotFeasible.
   ///
@@ -1733,20 +1935,20 @@ abstract class AppLocalizations {
   /// No description provided for @weeksToTargetLabel.
   ///
   /// In tr, this message translates to:
-  /// **'{count} Hafta'**
-  String weeksToTargetLabel(Object count);
+  /// **'{count, plural, =1{1 Hafta} other{{count} Hafta}}'**
+  String weeksToTargetLabel(num count);
 
   /// No description provided for @monthsToTargetLabel.
   ///
   /// In tr, this message translates to:
-  /// **'{count} Ay'**
-  String monthsToTargetLabel(Object count);
+  /// **'{count, plural, =1{1 Ay} other{{count} Ay}}'**
+  String monthsToTargetLabel(num count);
 
   /// No description provided for @yearsToTargetLabel.
   ///
   /// In tr, this message translates to:
-  /// **'{count} Yıl'**
-  String yearsToTargetLabel(Object count);
+  /// **'{count, plural, =1{1 Yıl} other{{count} Yıl}}'**
+  String yearsToTargetLabel(num count);
 
   /// No description provided for @minAmount.
   ///
@@ -1867,6 +2069,282 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'AI Modu'**
   String get aiMode;
+
+  /// No description provided for @addCustomCategory.
+  ///
+  /// In tr, this message translates to:
+  /// **'Yeni Ekle'**
+  String get addCustomCategory;
+
+  /// No description provided for @customCategoryHint.
+  ///
+  /// In tr, this message translates to:
+  /// **'Örn: Baharat, Deterjan...'**
+  String get customCategoryHint;
+
+  /// No description provided for @deleteCustomCategory.
+  ///
+  /// In tr, this message translates to:
+  /// **'Özel Kategoriyi Sil'**
+  String get deleteCustomCategory;
+
+  /// No description provided for @deleteCustomCategoryConfirm.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu özel kategoriyi silmek istediğinize emin misiniz?'**
+  String get deleteCustomCategoryConfirm;
+
+  /// No description provided for @dashboard.
+  ///
+  /// In tr, this message translates to:
+  /// **'Dashboard'**
+  String get dashboard;
+
+  /// No description provided for @library.
+  ///
+  /// In tr, this message translates to:
+  /// **'Kütüphane'**
+  String get library;
+
+  /// No description provided for @dashboardEmpty.
+  ///
+  /// In tr, this message translates to:
+  /// **'Dashboard şu an boş.'**
+  String get dashboardEmpty;
+
+  /// No description provided for @libraryEmpty.
+  ///
+  /// In tr, this message translates to:
+  /// **'Kütüphane şu an boş.'**
+  String get libraryEmpty;
+
+  /// No description provided for @pageLabel.
+  ///
+  /// In tr, this message translates to:
+  /// **'Sayfa'**
+  String get pageLabel;
+
+  /// No description provided for @sizeLabel.
+  ///
+  /// In tr, this message translates to:
+  /// **'Boyut'**
+  String get sizeLabel;
+
+  /// No description provided for @widgetAdded.
+  ///
+  /// In tr, this message translates to:
+  /// **'{name} panoya eklendi!'**
+  String widgetAdded(String name);
+
+  /// No description provided for @historyTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'İşlem Geçmişi'**
+  String get historyTitle;
+
+  /// No description provided for @radarTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Harcama Radarı'**
+  String get radarTitle;
+
+  /// No description provided for @giantsTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Harcama Devleri'**
+  String get giantsTitle;
+
+  /// No description provided for @quickActionTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Hızlı İşlem'**
+  String get quickActionTitle;
+
+  /// No description provided for @vaultStatusTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Kasa Durumları'**
+  String get vaultStatusTitle;
+
+  /// No description provided for @dailyBudgetTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Günlük Bütçe'**
+  String get dailyBudgetTitle;
+
+  /// No description provided for @dailyLimit.
+  ///
+  /// In tr, this message translates to:
+  /// **'GÜNLÜK LİMİT'**
+  String get dailyLimit;
+
+  /// No description provided for @spendableRemaining.
+  ///
+  /// In tr, this message translates to:
+  /// **'Harcanabilir Kalan'**
+  String get spendableRemaining;
+
+  /// No description provided for @giantsWait.
+  ///
+  /// In tr, this message translates to:
+  /// **'Harcama Dağılımı Bekleniyor'**
+  String get giantsWait;
+
+  /// No description provided for @weeklyShort.
+  ///
+  /// In tr, this message translates to:
+  /// **'H'**
+  String get weeklyShort;
+
+  /// No description provided for @monthlyShort.
+  ///
+  /// In tr, this message translates to:
+  /// **'A'**
+  String get monthlyShort;
+
+  /// No description provided for @yearlyShort.
+  ///
+  /// In tr, this message translates to:
+  /// **'Y'**
+  String get yearlyShort;
+
+  /// No description provided for @newLabel.
+  ///
+  /// In tr, this message translates to:
+  /// **'YENİ'**
+  String get newLabel;
+
+  /// No description provided for @today.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bugün'**
+  String get today;
+
+  /// No description provided for @yesterday.
+  ///
+  /// In tr, this message translates to:
+  /// **'Dün'**
+  String get yesterday;
+
+  /// No description provided for @daysAgo.
+  ///
+  /// In tr, this message translates to:
+  /// **'{count} Gün Önce'**
+  String daysAgo(int count);
+
+  /// No description provided for @weeksAgo.
+  ///
+  /// In tr, this message translates to:
+  /// **'{count} Hafta Önce'**
+  String weeksAgo(int count);
+
+  /// No description provided for @monthsAgo.
+  ///
+  /// In tr, this message translates to:
+  /// **'{count} Ay Önce'**
+  String monthsAgo(int count);
+
+  /// No description provided for @historyEmpty.
+  ///
+  /// In tr, this message translates to:
+  /// **'İşlem Geçmişi Henüz Boş'**
+  String get historyEmpty;
+
+  /// No description provided for @upcomingPaymentsNotFound.
+  ///
+  /// In tr, this message translates to:
+  /// **'Yaklaşan Ödeme Bulunmadı'**
+  String get upcomingPaymentsNotFound;
+
+  /// No description provided for @transaction.
+  ///
+  /// In tr, this message translates to:
+  /// **'İşlem'**
+  String get transaction;
+
+  /// No description provided for @membership.
+  ///
+  /// In tr, this message translates to:
+  /// **'ÜYELİK'**
+  String get membership;
+
+  /// No description provided for @currentPlan.
+  ///
+  /// In tr, this message translates to:
+  /// **'Mevcut Plan'**
+  String get currentPlan;
+
+  /// No description provided for @manageSubscription.
+  ///
+  /// In tr, this message translates to:
+  /// **'Üyeliği Yönet'**
+  String get manageSubscription;
+
+  /// No description provided for @restorePurchases.
+  ///
+  /// In tr, this message translates to:
+  /// **'Satın Almaları Geri Yükle'**
+  String get restorePurchases;
+
+  /// No description provided for @freePlan.
+  ///
+  /// In tr, this message translates to:
+  /// **'Ücretsiz Plan'**
+  String get freePlan;
+
+  /// No description provided for @proPlan.
+  ///
+  /// In tr, this message translates to:
+  /// **'FinCast PRO'**
+  String get proPlan;
+
+  /// No description provided for @upgradeToPro.
+  ///
+  /// In tr, this message translates to:
+  /// **'PRO\'ya Yükselt'**
+  String get upgradeToPro;
+
+  /// No description provided for @proFeatures.
+  ///
+  /// In tr, this message translates to:
+  /// **'PRO Özellikleri'**
+  String get proFeatures;
+
+  /// No description provided for @unlimitedVaults.
+  ///
+  /// In tr, this message translates to:
+  /// **'Sınırsız Kasa'**
+  String get unlimitedVaults;
+
+  /// No description provided for @aiInsights.
+  ///
+  /// In tr, this message translates to:
+  /// **'Gelişmiş AI Analizleri'**
+  String get aiInsights;
+
+  /// No description provided for @prioritySupport.
+  ///
+  /// In tr, this message translates to:
+  /// **'Öncelikli Destek'**
+  String get prioritySupport;
+
+  /// No description provided for @subscriptionStatus.
+  ///
+  /// In tr, this message translates to:
+  /// **'Üyelik Durumu'**
+  String get subscriptionStatus;
+
+  /// No description provided for @active.
+  ///
+  /// In tr, this message translates to:
+  /// **'Aktif'**
+  String get active;
+
+  /// No description provided for @inactive.
+  ///
+  /// In tr, this message translates to:
+  /// **'Aktif Değil'**
+  String get inactive;
 }
 
 class _AppLocalizationsDelegate
@@ -1886,8 +2364,10 @@ class _AppLocalizationsDelegate
     'fr',
     'it',
     'ja',
+    'ko',
     'pt',
     'tr',
+    'zh',
   ].contains(locale.languageCode);
 
   @override
@@ -1909,10 +2389,14 @@ AppLocalizations lookupAppLocalizations(Locale locale) {
       return AppLocalizationsIt();
     case 'ja':
       return AppLocalizationsJa();
+    case 'ko':
+      return AppLocalizationsKo();
     case 'pt':
       return AppLocalizationsPt();
     case 'tr':
       return AppLocalizationsTr();
+    case 'zh':
+      return AppLocalizationsZh();
   }
 
   throw FlutterError(

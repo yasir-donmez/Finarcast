@@ -11,7 +11,6 @@ class TrueMorphDeckHeaderDelegate extends SliverPersistentHeaderDelegate {
   final String? selectedVaultId;
   final Function(String?) onVaultSelect;
   final Color activeColor;
-  final VoidCallback onManageVaults;
   final VoidCallback onAddVault;
   final AppLocalizations l10n;
   final Function(String?) onVaultTap;
@@ -23,7 +22,6 @@ class TrueMorphDeckHeaderDelegate extends SliverPersistentHeaderDelegate {
     required this.selectedVaultId,
     required this.onVaultSelect,
     required this.activeColor,
-    required this.onManageVaults,
     required this.onAddVault,
     required this.l10n,
     required this.onVaultTap,
@@ -44,6 +42,7 @@ class TrueMorphDeckHeaderDelegate extends SliverPersistentHeaderDelegate {
     final currentIndex = deckItems.indexOf(selectedVaultId);
 
     final bgAlpha = Curves.easeOutQuad.transform((progress * 1.6).clamp(0.0, 1.0));
+    final iconOpacity = (1 - progress * 1.8).clamp(0.0, 1.0);
 
     // Kilitli haldeki içerik alanı (Status Bar hariç geri kalan alan)
     final double availableHeaderHeight = minExtent - topPadding;
@@ -55,21 +54,23 @@ class TrueMorphDeckHeaderDelegate extends SliverPersistentHeaderDelegate {
         clipBehavior: Clip.none,
         children: [
           // GPU-Friendly Blur Layer: Constant blur radius, dynamic opacity
-          Positioned.fill(
-            child: Opacity(
-              opacity: bgAlpha,
-              child: ClipRect(
-                child: BackdropFilter(
-                  filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: AppColors.getBackground(context).withValues(alpha: 0.15),
-                      border: Border(
-                        bottom: BorderSide(
-                          color: (isDark ? Colors.white : Colors.black).withValues(
-                            alpha: progress > 0.95 ? (progress - 0.95) * 2 : 0.0,
+          if (bgAlpha > 0.01)
+            Positioned.fill(
+              child: Opacity(
+                opacity: bgAlpha,
+                child: ClipRect(
+                  child: BackdropFilter(
+                    filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: AppColors.getBackground(context).withValues(alpha: 0.15),
+                        border: Border(
+                          bottom: BorderSide(
+                            color: (isDark ? Colors.white : Colors.black).withValues(
+                              alpha: progress > 0.95 ? (progress - 0.95) * 2 : 0.0,
+                            ),
+                            width: 0.5,
                           ),
-                          width: 0.5,
                         ),
                       ),
                     ),
@@ -77,7 +78,6 @@ class TrueMorphDeckHeaderDelegate extends SliverPersistentHeaderDelegate {
                 ),
               ),
             ),
-          ),
           // Content Layer
           Positioned.fill(
             child: Stack(
@@ -100,29 +100,29 @@ class TrueMorphDeckHeaderDelegate extends SliverPersistentHeaderDelegate {
                   ),
                 ),
 
-                Positioned(
-                  left: 20 - (progress * 150),
-                  top: topPadding + 10,
-                  child: Opacity(
-                    opacity: (1 - progress * 1.8).clamp(0.0, 1.0),
-                    child: Text(l10n.vaults, style: const TextStyle(fontSize: 32, fontWeight: FontWeight.w900, letterSpacing: -1.5)),
-                  ),
-                ),
-
-                Positioned(
-                  right: 20 - (progress * 150),
-                  top: topPadding + 10,
-                  child: Opacity(
-                    opacity: (1 - progress * 1.8).clamp(0.0, 1.0),
-                    child: Row(
-                      children: [
-                        HeaderIconButton(icon: Icons.dashboard_customize_rounded, onTap: onManageVaults),
-                        const SizedBox(width: 8),
-                        HeaderIconButton(icon: Icons.add_rounded, onTap: onAddVault),
-                      ],
+                if (iconOpacity > 0.01)
+                  Positioned(
+                    left: 20 - (progress * 150),
+                    top: topPadding + 10,
+                    child: Opacity(
+                      opacity: iconOpacity,
+                      child: Text(l10n.vaults, style: const TextStyle(fontSize: 32, fontWeight: FontWeight.w900, letterSpacing: -1.5)),
                     ),
                   ),
-                ),
+
+                if (iconOpacity > 0.01)
+                  Positioned(
+                    right: 20 - (progress * 150),
+                    top: topPadding + 10,
+                    child: Opacity(
+                      opacity: iconOpacity,
+                      child: Row(
+                        children: [
+                          HeaderIconButton(icon: Icons.add_rounded, onTap: onAddVault),
+                        ],
+                      ),
+                    ),
+                  ),
               ],
             ),
           ),

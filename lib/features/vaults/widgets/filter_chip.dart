@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../shared/widgets/precision_glass_card.dart';
+import '../../../core/theme/app_constants.dart';
 
 class VaultFilterChip extends StatelessWidget {
   final String label;
@@ -29,7 +30,7 @@ class VaultFilterChip extends StatelessWidget {
           style: TextStyle(
             fontSize: 12,
             fontWeight: isActive ? FontWeight.w800 : FontWeight.w500,
-            color: isActive ? activeColor : Colors.grey.shade500,
+            color: isActive ? activeColor : AppColors.getTextSecondary(context).withValues(alpha: 0.7),
           ),
         ),
       ),

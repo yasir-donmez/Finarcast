@@ -1,35 +1,43 @@
+import 'package:intl/intl.dart';
 import '../database/models/exchange_rate.dart';
 
 /// Para birimi ve tutar formatlama yardımları
 class CurrencyUtils {
   /// Tutar formatlama (Kısa gösterim)
-  static String formatAmount(double val) {
+  static String formatAmount(double val, {String? currencySymbol}) {
     if (val.abs() >= 1000000) {
-      return '${(val / 1000000).toStringAsFixed(1).replaceAll(RegExp(r'\.0$'), '')}M';
+      final formatted = (val / 1000000).toStringAsFixed(1).replaceAll(RegExp(r'\.0$'), '');
+      return currencySymbol != null ? '$currencySymbol${formatted}M' : '${formatted}M';
     }
-    return formatFullAmount(val, includeDecimals: false);
+    
+    // Eğer değer çok küçükse (özellikle altın gibi birimlerde 0 görünmemesi için) ondalıkları göster
+    final bool showDecimals = val.abs() > 0 && val.abs() < 1;
+    
+    return formatFullAmount(val, symbol: currencySymbol, includeDecimals: showDecimals);
   }
 
   /// Ondalık bakiye gösterimi (Dashboard ve Detaylar için)
-  static String formatFullAmount(double val, {bool includeDecimals = true}) {
-    if (val.abs() >= 10000000) {
-      return '${(val / 1000000).toStringAsFixed(1).replaceAll(RegExp(r'\.0$'), '')}M';
+  static String formatFullAmount(double val, {String? symbol, bool includeDecimals = true}) {
+    // Para birimi kodunu belirle
+    final code = _symbolToCode(symbol ?? 'TRY');
+    
+    // JPY ve KRW için ondalık basamak her zaman 0 olmalı
+    int decimalDigits = includeDecimals ? 2 : 0;
+    if (code == 'JPY' || code == 'KRW') {
+      decimalDigits = 0;
     }
 
-    String parts = (val.abs()).toStringAsFixed(includeDecimals ? 2 : 0);
-    List<String> split = parts.split('.');
-    String integerPart = split[0];
-    String decimalPart = split.length > 1 ? split[1] : '';
+    // Locale tespiti (Basit bir mantık: EUR ise de_DE, USD ise en_US, TRY ise tr_TR vb.)
+    // Aslında uygulama diline (Intl.defaultLocale) göre formatlamak daha doğru.
+    final locale = Intl.defaultLocale ?? 'en_US';
 
-    if (decimalPart == '00') decimalPart = '';
+    final formatter = NumberFormat.currency(
+      locale: locale,
+      symbol: symbol ?? '₺',
+      decimalDigits: decimalDigits,
+    );
 
-    final reg = RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))');
-    integerPart = integerPart.replaceAllMapped(reg, (Match m) => '${m[1]}.');
-
-    String result = integerPart;
-    if (decimalPart.isNotEmpty) result = '$integerPart,$decimalPart';
-    
-    return val < 0 ? '-$result' : result;
+    return formatter.format(val);
   }
 
   /// Tutarı kurlara göre baz birime (TRY) veya başka bir birime çevirir
@@ -39,7 +47,7 @@ class CurrencyUtils {
     // 1. Tutar'ı TRY'ye (Baz birim) getir
     double tryAmount = amount;
     if (from != 'TRY' && from != '₺' && from != 'AUTO') {
-      final fromCode = _normalizeCode(from);
+      final fromCode = _symbolToCode(from);
       final fromRate = rates.where((r) => r.currencyCode == fromCode).firstOrNull;
       if (fromRate != null) {
         tryAmount = amount * fromRate.rate;
@@ -49,7 +57,7 @@ class CurrencyUtils {
     // 2. TRY tutarını hedef birime çevir
     if (to == 'TRY' || to == '₺' || to == 'AUTO') return tryAmount;
     
-    final toCode = _normalizeCode(to);
+    final toCode = _symbolToCode(to);
     final toRate = rates.where((r) => r.currencyCode == toCode).firstOrNull;
     if (toRate != null) {
       return tryAmount / toRate.rate;
@@ -58,12 +66,24 @@ class CurrencyUtils {
     return tryAmount;
   }
 
-  /// Sembolleri API kodlarıyla eşleştirir ($, € -> USD, EUR)
-  static String _normalizeCode(String symbol) {
-    if (symbol == '\$') return 'USD';
-    if (symbol == '€') return 'EUR';
-    if (symbol == 'G') return 'GOLD';
-    if (symbol == 'ALTIN') return 'GOLD';
-    return symbol;
+  /// Sembolleri API kodlarıyla eşleştirir
+  static String _symbolToCode(String symbol) {
+    switch (symbol) {
+      case r'$': return 'USD';
+      case '€': return 'EUR';
+      case '£': return 'GBP';
+      case '¥': return 'JPY';
+      case '₩': return 'KRW';
+      case '元': return 'CNY';
+      case r'R$': return 'BRL';
+      case 'Fr': return 'CHF';
+      case '₺': return 'TRY';
+      case 'G':
+      case 'ALTIN': return 'GOLD';
+      default: return symbol;
+    }
   }
+
+  /// Mevcut tüm para birimi sembollerini getir (Seçim listesi için)
+  static List<String> get availableSymbols => ['₺', r'$', '€', '£', '¥', '₩', '元', r'R$', 'Fr', 'G'];
 }

@@ -116,7 +116,7 @@ class _PrecisionDetailSheetState extends ConsumerState<PrecisionDetailSheet> {
             ? Column(
                 children: [
                   Text(
-                    'TUTAR GİRİLMEDİ',
+                    l10n.amountNotEntered,
                     style: TextStyle(
                       fontSize: 24 * sf,
                       fontWeight: FontWeight.w900,
@@ -125,7 +125,7 @@ class _PrecisionDetailSheetState extends ConsumerState<PrecisionDetailSheet> {
                     ),
                   ),
                   Text(
-                    'Düzenleyerek tutar ekleyin',
+                    l10n.addAmountByEditing,
                     style: TextStyle(
                       fontSize: 12 * sf,
                       fontWeight: FontWeight.w600,
@@ -138,29 +138,35 @@ class _PrecisionDetailSheetState extends ConsumerState<PrecisionDetailSheet> {
               ? Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    _buildRangeValue('min', tx.minAmount!, tx.currency, sf, isDark),
+                    _buildRangeValue(l10n.minimum, tx.minAmount!, tx.currency, sf, isDark),
                     Padding(
                       padding: EdgeInsets.symmetric(horizontal: 16 * sf),
-                      child: Text(
-                        '${tx.currency ?? "₺"}${_formatFull(tx.effectiveAmount)}',
-                        style: TextStyle(
-                          fontSize: 40 * sf,
-                          fontWeight: FontWeight.w900,
-                          color: tx.isIncome ? AppColors.getIncome(context) : AppColors.getExpense(context),
-                          letterSpacing: -1.5,
+                      child: FittedBox(
+                        fit: BoxFit.scaleDown,
+                        child: Text(
+                          '${tx.currency ?? "₺"}${_formatFull(tx.effectiveAmount, context)}',
+                          style: TextStyle(
+                            fontSize: 40 * sf,
+                            fontWeight: FontWeight.w900,
+                            color: tx.isIncome ? AppColors.getIncome(context) : AppColors.getExpense(context),
+                            letterSpacing: -1.5,
+                          ),
                         ),
                       ),
                     ),
-                    _buildRangeValue('max', tx.maxAmount!, tx.currency, sf, isDark),
+                    _buildRangeValue(l10n.maximum, tx.maxAmount!, tx.currency, sf, isDark),
                   ],
                 )
-              : Text(
-                  '${tx.currency ?? "₺"}${_formatFull(tx.effectiveAmount)}',
-                  style: TextStyle(
-                    fontSize: 40 * sf,
-                    fontWeight: FontWeight.w900,
-                    color: tx.isIncome ? AppColors.getIncome(context) : AppColors.getExpense(context),
-                    letterSpacing: -2, height: 1,
+              : FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Text(
+                    '${tx.currency ?? "₺"}${_formatFull(tx.effectiveAmount, context)}',
+                    style: TextStyle(
+                      fontSize: 40 * sf,
+                      fontWeight: FontWeight.w900,
+                      color: tx.isIncome ? AppColors.getIncome(context) : AppColors.getExpense(context),
+                      letterSpacing: -2, height: 1,
+                    ),
                   ),
                 ),
         ),
@@ -173,9 +179,9 @@ class _PrecisionDetailSheetState extends ConsumerState<PrecisionDetailSheet> {
           padding: EdgeInsets.all(12 * sf),
           child: Column(
             children: [
-              _buildInfoRow(context, icon: Icons.calendar_today_rounded, label: 'Eklendi', value: _fullRecord != null ? DateFormat('dd MMM yyyy').format(_fullRecord!.date) : '-', color: Colors.blue),
+              _buildInfoRow(context, icon: Icons.calendar_today_rounded, label: l10n.added, value: _fullRecord != null ? DateFormat.yMMMd(Localizations.localeOf(context).toString()).format(_fullRecord!.date) : '-', color: Colors.blue),
               Divider(height: 16 * sf, thickness: 0.5),
-              _buildInfoRow(context, icon: Icons.replay_rounded, label: l10n.period, value: _getDetailedPeriodLabel(tx, l10n), color: Colors.purple),
+              _buildInfoRow(context, icon: Icons.replay_rounded, label: l10n.period, value: _getDetailedPeriodLabel(tx, l10n, context), color: Colors.purple),
               
               if (tx.periodType != 0) ...[
                 if (tx.recurrenceDuration != null && tx.recurrenceDuration! > 0) ...[
@@ -183,8 +189,8 @@ class _PrecisionDetailSheetState extends ConsumerState<PrecisionDetailSheet> {
                   _buildInfoRow(
                     context, 
                     icon: Icons.event_available_rounded, 
-                    label: 'Bitiş Tarihi', 
-                    value: _calculateEndDate(tx) != null ? DateFormat('dd MMM yyyy').format(_calculateEndDate(tx)!) : '-', 
+                    label: l10n.endDate, 
+                    value: _calculateEndDate(tx) != null ? DateFormat.yMMMd(Localizations.localeOf(context).toString()).format(_calculateEndDate(tx)!) : '-', 
                     color: Colors.redAccent
                   ),
                 ],
@@ -192,8 +198,8 @@ class _PrecisionDetailSheetState extends ConsumerState<PrecisionDetailSheet> {
                 _buildInfoRow(
                   context, 
                   icon: Icons.task_alt_rounded, 
-                  label: 'Gerçekleşen', 
-                  value: '${_calculatePassedOccurrences(tx)} Kez', 
+                  label: l10n.occurred, 
+                  value: l10n.times(_calculatePassedOccurrences(tx)), 
                   color: Colors.teal
                 ),
                 if (tx.recurrenceDuration != null && tx.recurrenceDuration! > 0) ...[
@@ -201,8 +207,8 @@ class _PrecisionDetailSheetState extends ConsumerState<PrecisionDetailSheet> {
                   _buildInfoRow(
                     context, 
                     icon: Icons.hourglass_bottom_rounded, 
-                    label: 'Kalan Sayısı', 
-                    value: '${(tx.recurrenceDuration! - _calculatePassedOccurrences(tx)).clamp(0, tx.recurrenceDuration!)} Kez', 
+                    label: l10n.remainingCount, 
+                    value: l10n.times((tx.recurrenceDuration! - _calculatePassedOccurrences(tx)).clamp(0, tx.recurrenceDuration!)), 
                     color: Colors.deepOrange
                   ),
                 ],
@@ -210,7 +216,7 @@ class _PrecisionDetailSheetState extends ConsumerState<PrecisionDetailSheet> {
 
               if (tx.note != null && tx.note!.isNotEmpty) ...[
                 Divider(height: 16 * sf, thickness: 0.5),
-                _buildInfoRow(context, icon: Icons.notes_rounded, label: 'Not', value: tx.note!, color: Colors.amber),
+                _buildInfoRow(context, icon: Icons.notes_rounded, label: l10n.note, value: tx.note!, color: Colors.amber),
               ]
             ],
           ),
@@ -242,8 +248,8 @@ class _PrecisionDetailSheetState extends ConsumerState<PrecisionDetailSheet> {
                       final confirm = await showPrecisionDialog<bool>(
                         context: context,
                         accentColor: AppColors.error,
-                        title: 'Kasadan Çıkar',
-                        content: 'Bu işlemi "${vault.name}" kasasından çıkarmak istediğinize emin misiniz?',
+                        title: l10n.removeFromVault,
+                        content: l10n.removeFromVaultDesc,
                         actions: [
                           PrecisionDialogAction(
                             label: l10n.cancel, 
@@ -314,9 +320,10 @@ class _PrecisionDetailSheetState extends ConsumerState<PrecisionDetailSheet> {
     );
   }
 
-  String _formatFull(double val) {
-    // Kısaltma yapmadan binlik ayırıcı ile göster (örn: 12.345)
-    final format = NumberFormat.decimalPattern('tr_TR');
+  String _formatFull(double val, BuildContext context) {
+    // Kısaltma yapmadan binlik ayırıcı ile göster
+    final locale = Localizations.localeOf(context).toString();
+    final format = NumberFormat.decimalPattern(locale);
     return format.format(val.toInt());
   }
 
@@ -333,12 +340,15 @@ class _PrecisionDetailSheetState extends ConsumerState<PrecisionDetailSheet> {
             letterSpacing: 1,
           ),
         ),
-        Text(
-          '${currency ?? "₺"}${_formatFull(value)}',
-          style: TextStyle(
-            fontSize: 14 * sf,
-            fontWeight: FontWeight.w700,
-            color: (isDark ? Colors.white : Colors.black).withValues(alpha: 0.3),
+        FittedBox(
+          fit: BoxFit.scaleDown,
+          child: Text(
+            '${currency ?? "₺"}${_formatFull(value, context)}',
+            style: TextStyle(
+              fontSize: 14 * sf,
+              fontWeight: FontWeight.w700,
+              color: (isDark ? Colors.white : Colors.black).withValues(alpha: 0.3),
+            ),
           ),
         ),
       ],
@@ -354,9 +364,21 @@ class _PrecisionDetailSheetState extends ConsumerState<PrecisionDetailSheet> {
           child: Icon(icon, size: 16, color: color),
         ),
         const SizedBox(width: 12),
-        Text(label, style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.getTextSecondary(context))),
-        const Spacer(),
-        Text(value, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w800)),
+        Expanded(
+          child: Text(
+            label, 
+            style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.getTextSecondary(context)),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          )
+        ),
+        const SizedBox(width: 8),
+        Text(
+          value, 
+          style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w800),
+          maxLines: 1,
+          overflow: TextOverflow.visible,
+        ),
       ],
     );
   }
@@ -434,20 +456,20 @@ class _PrecisionDetailSheetState extends ConsumerState<PrecisionDetailSheet> {
     }
   }
 
-  String _getDetailedPeriodLabel(TransactionUI tx, AppLocalizations l10n) {
+  String _getDetailedPeriodLabel(TransactionUI tx, AppLocalizations l10n, BuildContext context) {
     String base = '';
     switch (tx.periodType) {
       case 0: base = l10n.oneTime; break;
-      case 1: base = "Her hafta"; break;
-      case 2: base = "Her ay"; break;
-      case 3: base = "Her yıl"; break;
-      case 4: base = "2 haftada bir"; break;
-      case 5: base = "3 haftada bir"; break;
-      case 6: base = "3 ayda bir"; break;
-      case 7: base = "6 ayda bir"; break;
-      case 8: base = "Her gün"; break;
-      case 9: base = "2 günde bir"; break;
-      case 10: base = "3 günde bir"; break;
+      case 1: base = l10n.everyWeekDetailed; break;
+      case 2: base = l10n.everyMonthDetailed; break;
+      case 3: base = l10n.everyYearDetailed; break;
+      case 4: base = l10n.every2WeeksDetailed; break;
+      case 5: base = l10n.every3WeeksDetailed; break;
+      case 6: base = l10n.every3MonthsDetailed; break;
+      case 7: base = l10n.every6MonthsDetailed; break;
+      case 8: base = l10n.everyDayDetailed; break;
+      case 9: base = l10n.every2DaysDetailed; break;
+      case 10: base = l10n.every3DaysDetailed; break;
       default: base = l10n.oneTime;
     }
     if (tx.periodType != 0) {
@@ -461,17 +483,17 @@ class _PrecisionDetailSheetState extends ConsumerState<PrecisionDetailSheet> {
       } else if (tx.recurrenceDate != null && [2, 3, 6, 7].contains(tx.periodType)) {
         if (tx.periodType == 3) {
           // Yıllık ise: 12 Mayıs
-          details.add(DateFormat('d MMMM', 'tr_TR').format(tx.recurrenceDate!));
+          details.add(DateFormat.MMMMd(Localizations.localeOf(context).toString()).format(tx.recurrenceDate!));
         } else {
           // Aylık veya X ayda bir ise: Ayın 12'si
-          details.add("Ayın ${tx.recurrenceDate!.day}'i");
+          details.add(l10n.dayOfMonthOrdinal(tx.recurrenceDate!.day));
         }
       }
       
       if (tx.recurrenceDuration != null && tx.recurrenceDuration! > 0) {
-        details.add("${tx.recurrenceDuration} Kez");
+        details.add(l10n.times(tx.recurrenceDuration!));
       } else {
-        details.add("Sürekli");
+        details.add(l10n.indefinitely);
       }
       
       return details.join(' • ');

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/date_symbol_data_local.dart';
+import 'package:intl/intl.dart';
 import '../database/database_service.dart';
 import '../database/models/app_settings.dart';
 
@@ -86,9 +87,12 @@ class SettingsNotifier extends StateNotifier<AppSettings> {
       case 'pt': localeStr = 'pt_BR'; break;
       case 'it': localeStr = 'it_IT'; break;
       case 'ja': localeStr = 'ja_JP'; break;
+      case 'zh': localeStr = 'zh_CN'; break;
+      case 'ko': localeStr = 'ko_KR'; break;
       default: localeStr = 'en_US';
     }
     initializeDateFormatting(localeStr, null);
+    Intl.defaultLocale = localeStr;
   }
 
   Future<void> setDataRetention(int days) async {

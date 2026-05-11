@@ -80,14 +80,20 @@ class AppSizes {
   static const double paddingXLarge = 32.0;
 }
 class AppCurrency {
-  static const List<String> supportedSymbols = ['₺', '\$', '€', '£'];
+  static const List<String> supportedSymbols = ['₺', r'$', '€', '£', '¥', '₩', '元', r'R$', 'Fr', 'G'];
   static const Map<String, String> symbolToCode = {
-    '₺': 'TL',
-    '\$': 'USD',
+    '₺': 'TRY',
+    r'$': 'USD',
     '€': 'EUR',
     '£': 'GBP',
+    '¥': 'JPY',
+    '₩': 'KRW',
+    '元': 'CNY',
+    r'R$': 'BRL',
+    'Fr': 'CHF',
+    'G': 'GOLD',
   };
-  static String getCode(String symbol) => symbolToCode[symbol] ?? '';
+  static String getCode(String symbol) => symbolToCode[symbol] ?? symbol;
 }
 class AppAssets {
   static const String logoNormal = 'assets/images/app_logo_normal.png';

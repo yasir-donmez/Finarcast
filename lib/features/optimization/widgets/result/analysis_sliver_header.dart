@@ -9,12 +9,14 @@ class AnalysisSliverHeader extends StatelessWidget {
   final FinancialGoal goal;
   final AppLocalizations l10n;
   final NumberFormat currencyFormat;
+  final String currencySymbol;
 
   const AnalysisSliverHeader({
     super.key,
     required this.goal,
     required this.l10n,
     required this.currencyFormat,
+    required this.currencySymbol,
   });
 
   @override
@@ -123,7 +125,7 @@ class AnalysisSliverHeader extends StatelessWidget {
                               child: _headerInfoChip(
                                 context,
                                 icon: Icons.flag_circle_rounded,
-                                label: '₺${currencyFormat.format(goal.targetAmount.toInt())}',
+                                label: '$currencySymbol${currencyFormat.format(goal.targetAmount.toInt())}',
                               ),
                             ),
                           ),

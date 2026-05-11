@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../core/theme/app_constants.dart';
+import '../../../l10n/app_localizations.dart';
 
 class TransactionCategorySelector extends StatelessWidget {
   final List<Map<String, dynamic>> categories;
@@ -7,6 +8,8 @@ class TransactionCategorySelector extends StatelessWidget {
   final int selectedSubModelIndex;
   final int expandedCategoryIndex;
   final Function(int categoryIndex, int subIndex, int expandedIndex) onChanged;
+  final Function(String parentCategoryId)? onAddCustomSubcategory;
+  final Function(String subcategoryId)? onRemoveCustomSubcategory;
 
   const TransactionCategorySelector({
     super.key,
@@ -15,6 +18,8 @@ class TransactionCategorySelector extends StatelessWidget {
     required this.selectedSubModelIndex,
     required this.expandedCategoryIndex,
     required this.onChanged,
+    this.onAddCustomSubcategory,
+    this.onRemoveCustomSubcategory,
   });
 
   @override
@@ -22,6 +27,7 @@ class TransactionCategorySelector extends StatelessWidget {
     if (categories.isEmpty) return const SizedBox.shrink();
 
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final l10n = AppLocalizations.of(context)!;
     
     // Güvenlik kontrolü
     final safeSelectedIndex = selectedCategoryIndex >= 0 && selectedCategoryIndex < categories.length 
@@ -32,7 +38,8 @@ class TransactionCategorySelector extends StatelessWidget {
     final List<Map<String, dynamic>> subModels =
         (selectedCat['subModels'] as List<Map<String, dynamic>>?) ?? [];
     final bool isExpanded = expandedCategoryIndex == safeSelectedIndex;
-    final bool hasSubModels = subModels.isNotEmpty;
+    // Alt kategoriler varsa VEYA "+" butonu göstereceğiz (her zaman açılabilir)
+    final bool hasSubModels = subModels.isNotEmpty || onAddCustomSubcategory != null;
 
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -71,7 +78,9 @@ class TransactionCategorySelector extends StatelessWidget {
                   int newSel = safeSelectedIndex;
                   int newSub = selectedSubModelIndex;
 
-                  if (isSelected && (cat['subModels'] as List?)?.isNotEmpty == true) {
+                  if (isSelected) {
+                    // Seçili kategoriye tekrar tıklama → açma/kapama
+                    // Her kategoride "+" butonu olacağı için her zaman açılabilir
                     newExp = isExpanded ? -1 : safeSelectedIndex;
                   } else {
                     newSel = index;
@@ -149,20 +158,18 @@ class TransactionCategorySelector extends StatelessWidget {
                       // Hizalama için her zaman aynı yükseklikte bir alan bırakıyoruz
                       SizedBox(
                         height: 16,
-                        child: (cat['subModels'] as List?)?.isNotEmpty == true
-                            ? AnimatedRotation(
-                                turns: isExpanded ? 0.5 : 0.0,
-                                duration: const Duration(milliseconds: 300),
-                                curve: Curves.easeInOutCubic,
-                                child: Icon(
-                                  Icons.keyboard_arrow_down_rounded,
-                                  size: 14,
-                                  color: isSelected 
-                                      ? catColor 
-                                      : AppColors.getTextSecondary(context).withValues(alpha: 0.3),
-                                ),
-                              )
-                            : const SizedBox.shrink(),
+                        child: AnimatedRotation(
+                          turns: isExpanded ? 0.5 : 0.0,
+                          duration: const Duration(milliseconds: 300),
+                          curve: Curves.easeInOutCubic,
+                          child: Icon(
+                            Icons.keyboard_arrow_down_rounded,
+                            size: 14,
+                            color: isSelected 
+                                ? catColor 
+                                : AppColors.getTextSecondary(context).withValues(alpha: 0.3),
+                          ),
+                        ),
                       ),
                     ],
                   ),
@@ -187,11 +194,57 @@ class TransactionCategorySelector extends StatelessWidget {
                       scrollDirection: Axis.horizontal,
                       physics: const BouncingScrollPhysics(),
                       padding: const EdgeInsets.symmetric(horizontal: AppSizes.paddingMedium),
-                      itemCount: subModels.length,
+                      // +1 for the "Add New" button at the end
+                      itemCount: subModels.length + (onAddCustomSubcategory != null ? 1 : 0),
                       itemBuilder: (context, subIndex) {
+                        final Color parentColor = selectedCat['color'] as Color;
+
+                        // Son eleman = "＋ Yeni Ekle" butonu
+                        if (onAddCustomSubcategory != null && subIndex == subModels.length) {
+                          return Padding(
+                            padding: const EdgeInsets.only(right: 8),
+                            child: GestureDetector(
+                              onTap: () => onAddCustomSubcategory!(selectedCat['id'] as String),
+                              child: AnimatedContainer(
+                                duration: const Duration(milliseconds: 200),
+                                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                                decoration: BoxDecoration(
+                                  color: parentColor.withValues(alpha: 0.08),
+                                  borderRadius: BorderRadius.circular(AppSizes.radiusRound),
+                                  border: Border.all(
+                                    color: parentColor.withValues(alpha: 0.25),
+                                    width: 1,
+                                    style: BorderStyle.solid,
+                                  ),
+                                ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(
+                                      Icons.add_rounded,
+                                      size: 14,
+                                      color: parentColor,
+                                    ),
+                                    const SizedBox(width: 4),
+                                    Text(
+                                      l10n.addCustomCategory,
+                                      style: TextStyle(
+                                        fontSize: 11,
+                                        fontWeight: FontWeight.w700,
+                                        color: parentColor,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          );
+                        }
+
+                        // Normal alt kategori chip'i
                         final sub = subModels[subIndex];
                         final isSubSelected = subIndex == selectedSubModelIndex;
-                        final Color parentColor = selectedCat['color'] as Color;
+                        final bool isCustom = sub['isCustom'] == true;
 
                         return Padding(
                           padding: const EdgeInsets.only(right: 8),
@@ -200,6 +253,9 @@ class TransactionCategorySelector extends StatelessWidget {
                               final newSub = isSubSelected ? -1 : subIndex;
                               onChanged(safeSelectedIndex, newSub, expandedCategoryIndex);
                             },
+                            onLongPress: isCustom && onRemoveCustomSubcategory != null
+                                ? () => onRemoveCustomSubcategory!(sub['id'] as String)
+                                : null,
                             child: AnimatedContainer(
                               duration: const Duration(milliseconds: 200),
                               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
@@ -236,6 +292,18 @@ class TransactionCategorySelector extends StatelessWidget {
                                           : AppColors.getTextSecondary(context),
                                     ),
                                   ),
+                                  // Özel kategorilerde silme ikonu (sadece seçiliyken)
+                                  if (isCustom && isSubSelected && onRemoveCustomSubcategory != null) ...[
+                                    const SizedBox(width: 4),
+                                    GestureDetector(
+                                      onTap: () => onRemoveCustomSubcategory!(sub['id'] as String),
+                                      child: Icon(
+                                        Icons.close_rounded,
+                                        size: 12,
+                                        color: parentColor.withValues(alpha: 0.7),
+                                      ),
+                                    ),
+                                  ],
                                 ],
                               ),
                             ),

@@ -717,6 +717,117 @@ class AppLocalizationsEn extends AppLocalizations {
   String get vault => 'Vault';
 
   @override
+  String get vaultDetail => 'Vault Detail';
+
+  @override
+  String get managePanel => 'Manage Panel';
+
+  @override
+  String get vaultNameHint => 'Vault Name (e.g. Savings)';
+
+  @override
+  String get initialBalance => 'Initial Balance';
+
+  @override
+  String get createVault => 'Create Vault';
+
+  @override
+  String get transactions => 'Transactions';
+
+  @override
+  String get manage => 'Manage';
+
+  @override
+  String get averageMonthlyLoad => 'AVERAGE MONTHLY LOAD';
+
+  @override
+  String get noTransactionsInVault => 'No transactions in this vault.';
+
+  @override
+  String get manageTransactionsInVault => 'Manage Transactions in Vault';
+
+  @override
+  String get deleteVault => 'Delete Vault';
+
+  @override
+  String deleteVaultConfirm(String name) {
+    return 'Are you sure you want to delete the \"$name\" vault? This action cannot be undone.';
+  }
+
+  @override
+  String get gold => 'GOLD';
+
+  @override
+  String get amountNotEntered => 'AMOUNT NOT ENTERED';
+
+  @override
+  String get addAmountByEditing => 'Add amount by editing';
+
+  @override
+  String get added => 'Added';
+
+  @override
+  String get endDate => 'End Date';
+
+  @override
+  String get occurred => 'Occurred';
+
+  @override
+  String get remainingCount => 'Remaining Count';
+
+  @override
+  String times(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count Times',
+      one: '1 Time',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get note => 'Note';
+
+  @override
+  String get indefinitely => 'Indefinitely';
+
+  @override
+  String dayOfMonthOrdinal(Object day) {
+    return 'Day $day of month';
+  }
+
+  @override
+  String get everyWeekDetailed => 'Every week';
+
+  @override
+  String get everyMonthDetailed => 'Every month';
+
+  @override
+  String get everyYearDetailed => 'Every year';
+
+  @override
+  String get every2WeeksDetailed => 'Every 2 weeks';
+
+  @override
+  String get every3WeeksDetailed => 'Every 3 weeks';
+
+  @override
+  String get every3MonthsDetailed => 'Every 3 months';
+
+  @override
+  String get every6MonthsDetailed => 'Every 6 months';
+
+  @override
+  String get everyDayDetailed => 'Every day';
+
+  @override
+  String get every2DaysDetailed => 'Every 2 days';
+
+  @override
+  String get every3DaysDetailed => 'Every 3 days';
+
+  @override
   String get allLabel => 'All';
 
   @override
@@ -761,8 +872,14 @@ class AppLocalizationsEn extends AppLocalizations {
   String get groupNameHint => 'Group name...';
 
   @override
-  String transactionCount(Object count) {
-    return '$count transaction(s)';
+  String transactionCount(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count transactions',
+      one: '1 transaction',
+    );
+    return '$_temp0';
   }
 
   @override
@@ -803,8 +920,15 @@ class AppLocalizationsEn extends AppLocalizations {
       'No transactions found that would take effect by the selected date.';
 
   @override
-  String itemsToAnalyze(Object count, Object months) {
-    return '$count items that will take effect by the target date ($months months).';
+  String itemsToAnalyze(num count, Object months) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          '$count items that will take effect by the target date ($months months).',
+      one: '1 item that will take effect by the target date ($months months).',
+    );
+    return '$_temp0';
   }
 
   @override
@@ -839,18 +963,36 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String weeksToTargetLabel(Object count) {
-    return '$count Weeks';
+  String weeksToTargetLabel(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count Weeks',
+      one: '1 Week',
+    );
+    return '$_temp0';
   }
 
   @override
-  String monthsToTargetLabel(Object count) {
-    return '$count Months';
+  String monthsToTargetLabel(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count Months',
+      one: '1 Month',
+    );
+    return '$_temp0';
   }
 
   @override
-  String yearsToTargetLabel(Object count) {
-    return '$count Years';
+  String yearsToTargetLabel(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count Years',
+      one: '1 Year',
+    );
+    return '$_temp0';
   }
 
   @override
@@ -912,4 +1054,151 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get aiMode => 'AI Mode';
+
+  @override
+  String get addCustomCategory => 'Add New';
+
+  @override
+  String get customCategoryHint => 'e.g. Spices, Market...';
+
+  @override
+  String get deleteCustomCategory => 'Delete Custom Category';
+
+  @override
+  String get deleteCustomCategoryConfirm =>
+      'Are you sure you want to delete this custom category?';
+
+  @override
+  String get dashboard => 'Dashboard';
+
+  @override
+  String get library => 'Library';
+
+  @override
+  String get dashboardEmpty => 'Dashboard is currently empty.';
+
+  @override
+  String get libraryEmpty => 'Library is currently empty.';
+
+  @override
+  String get pageLabel => 'Page';
+
+  @override
+  String get sizeLabel => 'Size';
+
+  @override
+  String widgetAdded(String name) {
+    return '$name added to dashboard!';
+  }
+
+  @override
+  String get historyTitle => 'Transaction History';
+
+  @override
+  String get radarTitle => 'Spending Radar';
+
+  @override
+  String get giantsTitle => 'Spending Giants';
+
+  @override
+  String get quickActionTitle => 'Quick Action';
+
+  @override
+  String get vaultStatusTitle => 'Vault Statuses';
+
+  @override
+  String get dailyBudgetTitle => 'Daily Budget';
+
+  @override
+  String get dailyLimit => 'DAILY LIMIT';
+
+  @override
+  String get spendableRemaining => 'Spendable Remaining';
+
+  @override
+  String get giantsWait => 'Waiting for spending distribution';
+
+  @override
+  String get weeklyShort => 'W';
+
+  @override
+  String get monthlyShort => 'M';
+
+  @override
+  String get yearlyShort => 'Y';
+
+  @override
+  String get newLabel => 'NEW';
+
+  @override
+  String get today => 'Today';
+
+  @override
+  String get yesterday => 'Yesterday';
+
+  @override
+  String daysAgo(int count) {
+    return '$count Days Ago';
+  }
+
+  @override
+  String weeksAgo(int count) {
+    return '$count Weeks Ago';
+  }
+
+  @override
+  String monthsAgo(int count) {
+    return '$count Months Ago';
+  }
+
+  @override
+  String get historyEmpty => 'Transaction history is empty yet';
+
+  @override
+  String get upcomingPaymentsNotFound => 'No Upcoming Payments Found';
+
+  @override
+  String get transaction => 'Transaction';
+
+  @override
+  String get membership => 'MEMBERSHIP';
+
+  @override
+  String get currentPlan => 'Current Plan';
+
+  @override
+  String get manageSubscription => 'Manage Subscription';
+
+  @override
+  String get restorePurchases => 'Restore Purchases';
+
+  @override
+  String get freePlan => 'Free Plan';
+
+  @override
+  String get proPlan => 'FinCast PRO';
+
+  @override
+  String get upgradeToPro => 'Upgrade to PRO';
+
+  @override
+  String get proFeatures => 'PRO Features';
+
+  @override
+  String get unlimitedVaults => 'Unlimited Vaults';
+
+  @override
+  String get aiInsights => 'Advanced AI Insights';
+
+  @override
+  String get prioritySupport => 'Priority Support';
+
+  @override
+  String get subscriptionStatus => 'Subscription Status';
+
+  @override
+  String get active => 'Active';
+
+  @override
+  String get inactive => 'Inactive';
 }

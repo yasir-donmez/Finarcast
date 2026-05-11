@@ -63,7 +63,7 @@ class AnimatedCurrencySelector extends ConsumerWidget {
                     textBaseline: TextBaseline.alphabetic,
                     children: [
                       Text(
-                        CurrencyUtils.formatFullAmount(totalBalance),
+                        CurrencyUtils.formatFullAmount(totalBalance, symbol: currencySymbol),
                         style: TextStyle(
                           color: activeColor,
                           fontSize: 56,
@@ -100,6 +100,7 @@ class AnimatedCurrencySelector extends ConsumerWidget {
                             icon: Icons.south_east_rounded,
                             amount: minBalance!,
                             color: AppColors.getExpense(context),
+                            currencySymbol: currencySymbol,
                           ),
                           const SizedBox(width: 12),
                           Container(
@@ -116,6 +117,7 @@ class AnimatedCurrencySelector extends ConsumerWidget {
                             icon: Icons.north_east_rounded,
                             amount: maxBalance!,
                             color: AppColors.getIncome(context),
+                            currencySymbol: currencySymbol,
                           ),
                         ],
                       ),
@@ -129,14 +131,14 @@ class AnimatedCurrencySelector extends ConsumerWidget {
     );
   }
 
-  Widget _buildRangeIndicator({required BuildContext context, required IconData icon, required double amount, required Color color}) {
+  Widget _buildRangeIndicator({required BuildContext context, required IconData icon, required double amount, required Color color, required String currencySymbol}) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return Row(
       children: [
         Icon(icon, size: 14, color: color.withValues(alpha: 0.8)),
         const SizedBox(width: 4),
         Text(
-          CurrencyUtils.formatAmount(amount),
+          CurrencyUtils.formatAmount(amount, currencySymbol: currencySymbol),
           style: TextStyle(
             color: color.withValues(alpha: isDark ? 0.9 : 1.0), // Aydınlıkta tam opak
             fontSize: 14,

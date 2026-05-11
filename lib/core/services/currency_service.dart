@@ -22,7 +22,7 @@ class CurrencyService {
 
         // USD
         if (data['USD'] != null && data['USD']['Satış'] != null) {
-          final val = double.tryParse(data['USD']['Satış'].toString().replaceAll(',', '.'));
+          final val = double.tryParse(data['USD']['Satış'].toString().replaceAll('.', '').replaceAll(',', '.'));
           if (val != null) {
             exchangeRates.add(ExchangeRate()
               ..currencyCode = 'USD'
@@ -33,7 +33,7 @@ class CurrencyService {
 
         // EUR
         if (data['EUR'] != null && data['EUR']['Satış'] != null) {
-          final val = double.tryParse(data['EUR']['Satış'].toString().replaceAll(',', '.'));
+          final val = double.tryParse(data['EUR']['Satış'].toString().replaceAll('.', '').replaceAll(',', '.'));
           if (val != null) {
             exchangeRates.add(ExchangeRate()
               ..currencyCode = 'EUR'
@@ -44,7 +44,7 @@ class CurrencyService {
 
         // GBP
         if (data['GBP'] != null && data['GBP']['Satış'] != null) {
-          final val = double.tryParse(data['GBP']['Satış'].toString().replaceAll(',', '.'));
+          final val = double.tryParse(data['GBP']['Satış'].toString().replaceAll('.', '').replaceAll(',', '.'));
           if (val != null) {
             exchangeRates.add(ExchangeRate()
               ..currencyCode = 'GBP'
@@ -55,7 +55,7 @@ class CurrencyService {
 
         // CHF (İsviçre Frangı)
         if (data['CHF'] != null && data['CHF']['Satış'] != null) {
-          final val = double.tryParse(data['CHF']['Satış'].toString().replaceAll(',', '.'));
+          final val = double.tryParse(data['CHF']['Satış'].toString().replaceAll('.', '').replaceAll(',', '.'));
           if (val != null) {
             exchangeRates.add(ExchangeRate()
               ..currencyCode = 'CHF'
@@ -64,31 +64,42 @@ class CurrencyService {
           }
         }
 
-        // KWD (Kuveyt Dinarı)
-        if (data['KWD'] != null && data['KWD']['Satış'] != null) {
-          final val = double.tryParse(data['KWD']['Satış'].toString().replaceAll(',', '.'));
+        // CNY (Çin Yuanı)
+        if (data['CNY'] != null && data['CNY']['Satış'] != null) {
+          final val = double.tryParse(data['CNY']['Satış'].toString().replaceAll('.', '').replaceAll(',', '.'));
           if (val != null) {
             exchangeRates.add(ExchangeRate()
-              ..currencyCode = 'KWD'
+              ..currencyCode = 'CNY'
               ..rate = val
               ..lastUpdated = lastUpdated);
           }
         }
 
-        // SAR (Suudi Arabistan Riyali)
-        if (data['SAR'] != null && data['SAR']['Satış'] != null) {
-          final val = double.tryParse(data['SAR']['Satış'].toString().replaceAll(',', '.'));
+        // BRL (Brezilya Reali)
+        if (data['BRL'] != null && data['BRL']['Satış'] != null) {
+          final val = double.tryParse(data['BRL']['Satış'].toString().replaceAll('.', '').replaceAll(',', '.'));
           if (val != null) {
             exchangeRates.add(ExchangeRate()
-              ..currencyCode = 'SAR'
+              ..currencyCode = 'BRL'
               ..rate = val
               ..lastUpdated = lastUpdated);
           }
         }
 
-        // JPY (Japon Yeni - 100 JPY olarak gelebilir dikkat)
+        // KRW (Kore Wonu)
+        if (data['KRW'] != null && data['KRW']['Satış'] != null) {
+          final val = double.tryParse(data['KRW']['Satış'].toString().replaceAll('.', '').replaceAll(',', '.'));
+          if (val != null) {
+            exchangeRates.add(ExchangeRate()
+              ..currencyCode = 'KRW'
+              ..rate = val
+              ..lastUpdated = lastUpdated);
+          }
+        }
+
+        // JPY (Japon Yeni)
         if (data['JPY'] != null && data['JPY']['Satış'] != null) {
-          final val = double.tryParse(data['JPY']['Satış'].toString().replaceAll(',', '.'));
+          final val = double.tryParse(data['JPY']['Satış'].toString().replaceAll('.', '').replaceAll(',', '.'));
           if (val != null) {
             exchangeRates.add(ExchangeRate()
               ..currencyCode = 'JPY'
@@ -99,7 +110,7 @@ class CurrencyService {
 
         // GOLD (Gram Altın)
         if (data['gram-altin'] != null && data['gram-altin']['Satış'] != null) {
-          final val = double.tryParse(data['gram-altin']['Satış'].toString().replaceAll(',', '.'));
+          final val = double.tryParse(data['gram-altin']['Satış'].toString().replaceAll('.', '').replaceAll(',', '.'));
           if (val != null) {
             exchangeRates.add(ExchangeRate()
               ..currencyCode = 'GOLD'

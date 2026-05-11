@@ -3,11 +3,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 enum SubscriptionTier { free, pro }
+enum SubscriptionPeriod { monthly, yearly }
 
 /// FinCast Abonelik Servisi (Subscription Service).
 /// Kullanıcının abonelik durumunu yönetir ve özellik bazlı erişim yetkilerini kontrol eder.
 class SubscriptionService extends ChangeNotifier {
   static const String _isProKey = 'fincast_is_pro_user';
+  static const String _periodKey = 'fincast_subscription_period';
   
   final SharedPreferences _prefs;
   
@@ -19,12 +21,19 @@ class SubscriptionService extends ChangeNotifier {
     return isPro ? SubscriptionTier.pro : SubscriptionTier.free;
   }
 
+  /// Mevcut abonelik periyodunu döner.
+  SubscriptionPeriod get currentPeriod {
+    final periodIndex = _prefs.getInt(_periodKey) ?? 0;
+    return SubscriptionPeriod.values[periodIndex];
+  }
+
   /// Kullanıcının Pro olup olmadığını hızlıca kontrol eder.
   bool get isPro => currentTier == SubscriptionTier.pro;
 
   /// Deneme amaçlı veya satın alım sonrası Pro durumunu günceller.
-  Future<void> setProStatus(bool isPro) async {
+  Future<void> setProStatus(bool isPro, {SubscriptionPeriod period = SubscriptionPeriod.monthly}) async {
     await _prefs.setBool(_isProKey, isPro);
+    await _prefs.setInt(_periodKey, period.index);
     notifyListeners(); // UI'ı bilgilendir
   }
 

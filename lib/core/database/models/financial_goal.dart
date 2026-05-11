@@ -11,6 +11,9 @@ class FinancialGoal {
   /// Hedef tutar (örn: 10000.0)
   double targetAmount = 0.0;
 
+  /// Hedef para birimi simgesi (varsayılan: ₺)
+  String currencySymbol = '₺';
+
   /// Hedef tarih (opsiyonel — girilmezse sistem alternatif tarihler önerir)
   DateTime? targetDate;
 

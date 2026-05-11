@@ -51,22 +51,19 @@ class _VaultCardStackState extends ConsumerState<VaultCardStack> {
   void didUpdateWidget(covariant VaultCardStack oldWidget) {
     super.didUpdateWidget(oldWidget);
     
-    // YENİ: Manyetik Kilit Mantığı
-    // Eğer dikey kaydırma (morphing) başladıysa ve yatayda tam oturmamışsak, hemen en yakın sayfaya kilitlen.
-    if (widget.morphProgress > 0.01 && oldWidget.morphProgress <= 0.01) {
+    // YENİ: Daha hassas Manyetik Kilit
+    // Kaydırma başladığı an (0.005) hemen en yakın karta otur.
+    if (widget.morphProgress > 0.005 && oldWidget.morphProgress <= 0.005) {
       if (_pageController.hasClients) {
         final double? currentPage = _pageController.page;
         if (currentPage != null) {
           final int targetPage = currentPage.round();
-          // Eğer şu anki sayfa hedef sayfadan farklıysa veya tam integer değilse kilitlen
-          if ((currentPage - targetPage).abs() > 0.01) {
+          if ((currentPage - targetPage).abs() > 0.001) {
              _pageController.animateToPage(
               targetPage, 
-              duration: const Duration(milliseconds: 200), 
-              curve: Curves.easeOutCubic
+              duration: const Duration(milliseconds: 150), // Daha hızlı kilitlenme
+              curve: Curves.easeOutQuart
             );
-            // Seçimi de anında güncelle ki header verisi doğru gelsin
-            // HATA FİX: Build aşamasında provider değiştirmemek için mikro görev (microtask) içine alıyoruz.
             Future.microtask(() => widget.onVaultSelect(widget.deckItems[targetPage]));
           }
         }
@@ -119,9 +116,27 @@ class _VaultCardStackState extends ConsumerState<VaultCardStack> {
           final targetCurrency = vaultCurrency == 'AUTO' ? globalCurrency : vaultCurrency;
 
           final txs = vaultId == null ? widget.allTransactions : widget.allTransactions.where((t) => t.groupIds.contains(vaultId)).toList();
-          final income = txs.where((t) => t.isIncome).fold<double>(0, (sum, t) => sum + t.getConvertedMonthlyEquivalent(targetCurrency, rates));
-          final expense = txs.where((t) => !t.isIncome).fold<double>(0, (sum, t) => sum + t.getConvertedMonthlyEquivalent(targetCurrency, rates));
-          final balance = income - expense;
+          
+          // 1. Aylık Akış (Gelir/Gider İstatistikleri) - Sadece Arşivlenmemişler
+          final activeTxs = txs.where((t) => !t.isArchived).toList();
+          
+          final income = activeTxs.where((t) => t.isIncome).fold<double>(0, (sum, t) {
+            // Bir işlemin "aktif aylık akış" içinde olması için:
+            if (t.periodType == 0) return sum + t.getConvertedAmount(targetCurrency, rates);
+            return sum + t.getConvertedMonthlyEquivalent(targetCurrency, rates);
+          });
+          
+          final expense = activeTxs.where((t) => !t.isIncome).fold<double>(0, (sum, t) {
+            if (t.periodType == 0) return sum + t.getConvertedAmount(targetCurrency, rates);
+            return sum + t.getConvertedMonthlyEquivalent(targetCurrency, rates);
+          });
+
+          // 2. Toplam Bakiye (Geçmişten Bugüne Tüm Hareketler)
+          // Bu Dashboard ile tutarlı olmalı.
+          final balance = txs.fold<double>(0, (sum, t) {
+            final amt = t.getConvertedAmount(targetCurrency, rates);
+            return t.isIncome ? sum + amt : sum - amt;
+          });
 
           // Döviz çevrisi (Görünür sembol ve opsiyonel global bakiye)
           final currencySymbol = vaultCurrency == 'AUTO' ? globalCurrency : vaultCurrency;

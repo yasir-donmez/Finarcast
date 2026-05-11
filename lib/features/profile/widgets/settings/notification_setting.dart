@@ -61,12 +61,24 @@ class NotificationSetting extends ConsumerWidget {
                           fontWeight: FontWeight.w700,
                         ),
                       ),
-                      Text(
-                        isExpanded ? "Yapay zeka asistanı bilgilendirmeleri." : (isAiEnabled ? "Aktif" : "Kapalı"),
-                        style: TextStyle(
-                          color: AppColors.getTextSecondary(context).withValues(alpha: 0.5),
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600,
+                      AnimatedSwitcher(
+                        duration: const Duration(milliseconds: 300),
+                        layoutBuilder: (currentChild, previousChildren) => Stack(
+                          alignment: Alignment.centerLeft,
+                          children: [
+                            ...previousChildren,
+                            if (currentChild != null) currentChild,
+                          ],
+                        ),
+                        transitionBuilder: (child, animation) => FadeTransition(opacity: animation, child: child),
+                        child: Text(
+                          isAiEnabled ? "Aktif" : "Kapalı",
+                          key: ValueKey(isAiEnabled),
+                          style: TextStyle(
+                            color: AppColors.getTextSecondary(context).withValues(alpha: 0.5),
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                          ),
                         ),
                       ),
                     ],
@@ -81,16 +93,6 @@ class NotificationSetting extends ConsumerWidget {
                   activeColor: activeColor,
                   activeIcon: Icons.notifications_active_rounded,
                   inactiveIcon: Icons.notifications_off_rounded,
-                ),
-                const SizedBox(width: 8),
-                AnimatedRotation(
-                  turns: isExpanded ? 0.25 : 0,
-                  duration: const Duration(milliseconds: 300),
-                  curve: Curves.easeOutBack,
-                  child: Icon(
-                    Icons.chevron_right_rounded,
-                    color: activeColor.withValues(alpha: isExpanded ? 1.0 : 0.3),
-                  ),
                 ),
               ],
             ),

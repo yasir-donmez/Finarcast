@@ -9,12 +9,13 @@ import '../../shared/widgets/precision_dialog.dart';
 import '../../shared/widgets/precision_inset.dart';
 import 'vaults_providers.dart';
 import 'widgets/precision_transaction_card.dart';
-import '../transactions/add_transaction_sheet.dart';
-import '../dashboard/widgets/dashboard_widget_manager_sheet.dart';
+import '../transactions/add_transaction_screen.dart';
+
 import 'widgets/add_vault_sheet.dart';
 import 'widgets/vault_detail_sheet.dart';
 import 'widgets/precision_detail_sheet.dart';
 import '../dashboard/dashboard_providers.dart';
+import '../dashboard/dashboard_scroll_provider.dart';
 import 'widgets/precision_blob.dart';
 import 'widgets/header_delegate.dart';
 import 'widgets/filter_chip.dart';
@@ -29,17 +30,14 @@ class VaultsScreen extends ConsumerStatefulWidget {
 }
 
 class _VaultsScreenState extends ConsumerState<VaultsScreen> {
-  late ScrollController _scrollController;
 
   @override
   void initState() {
     super.initState();
-    _scrollController = ScrollController();
   }
 
   @override
   void dispose() {
-    _scrollController.dispose();
     super.dispose();
   }
 
@@ -58,9 +56,13 @@ class _VaultsScreenState extends ConsumerState<VaultsScreen> {
 
     final screenHeight = MediaQuery.of(context).size.height;
     final scalingFactor = (screenHeight / 812.0).clamp(0.85, 1.0);
+    final topPadding = MediaQuery.of(context).padding.top;
 
+    final scrollController = ref.watch(dashboardScrollProvider);
+
+    // YENİ: HeaderDelegate içindeki gerçek değerlerle eşitleme
     const maxHeaderHeight = 420.0;
-    const minHeaderHeight = 100.0;
+    final minHeaderHeight = topPadding + 56.0 + 20.0; // kCompactCardHeight + kHeaderBottomBuffer
 
     return Scaffold(
       backgroundColor: AppColors.getBackground(context),
@@ -69,9 +71,9 @@ class _VaultsScreenState extends ConsumerState<VaultsScreen> {
           if (isDark) ..._buildBackgroundBlobs(activeColor, context),
 
           CustomScrollView(
-            controller: _scrollController,
+            controller: scrollController,
             physics: VaultSnapScrollPhysics(
-              maxScrollExtent: maxHeaderHeight - (minHeaderHeight + MediaQuery.of(context).padding.top),
+              maxScrollExtent: maxHeaderHeight - minHeaderHeight,
             ),
             slivers: [
               _buildHeader(groups, allTransactions, selectedVaultId, activeColor, l10n, context),
@@ -127,7 +129,7 @@ class _VaultsScreenState extends ConsumerState<VaultsScreen> {
         selectedVaultId: selectedVaultId,
         onVaultSelect: (id) => ref.read(selectedVaultProvider.notifier).state = id,
         activeColor: activeColor,
-        onManageVaults: () => _showVaultManagementSheet(context),
+
         onAddVault: () => _showAddVaultSheet(context),
         l10n: l10n,
         onVaultTap: (id) => _showVaultDetail(context, id),
@@ -148,23 +150,14 @@ class _VaultsScreenState extends ConsumerState<VaultsScreen> {
       child: Padding(
         padding: const EdgeInsets.fromLTRB(
           AppSizes.paddingMedium,
-          24,
+          0, // Üst boşluk tamamen kaldırıldı
           AppSizes.paddingMedium,
           24,
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              "FİLTRELEME",
-              style: TextStyle(
-                fontSize: 10,
-                fontWeight: FontWeight.w900,
-                color: Colors.grey.withValues(alpha: 0.5),
-                letterSpacing: 2,
-              ),
-            ),
-            SizedBox(height: AppSizes.paddingLarge * scalingFactor),
+            const SizedBox(height: 8), // Filtre butonları ile üstteki kart arasında çok az bir nefes payı
             Row(
               children: [
                 VaultFilterChip(
@@ -257,7 +250,7 @@ class _VaultsScreenState extends ConsumerState<VaultsScreen> {
               ),
               const SizedBox(height: 24),
               Text(
-                l10n.noTransactions.toUpperCase(),
+                "Kasa İşlemi Bulunmadı".toUpperCase(),
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   color: isDark
@@ -368,26 +361,28 @@ class _VaultsScreenState extends ConsumerState<VaultsScreen> {
       child: PrecisionDetailSheet(
         transaction: tx,
         onEdit: () {
-          PrecisionSheet.show(
-            context: context,
-            title: AppLocalizations.of(context)!.edit,
-            child: AddTransactionSheet(
-              initialId: tx.dbId,
-              initialName: tx.name,
-              initialAmount: tx.amount,
-              initialMinAmount: tx.minAmount,
-              initialMaxAmount: tx.maxAmount,
-              initialIsIncome: tx.isIncome,
-              initialVaultIds: tx.groupIds
-                  .map((vId) => int.parse(vId.replaceFirst('v_', '')))
-                  .toList(),
-              initialCategoryId: tx.categoryId,
-              initialNote: tx.note,
-              initialCurrency: tx.currency,
-              initialPeriodType: tx.periodType,
-              initialRecurrenceDay: tx.recurrenceDay,
-              initialRecurrenceDate: tx.recurrenceDate,
-              initialRecurrenceDuration: tx.recurrenceDuration,
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => AddTransactionScreen(
+                initialId: tx.dbId,
+                initialName: tx.name,
+                initialAmount: tx.amount,
+                initialMinAmount: tx.minAmount,
+                initialMaxAmount: tx.maxAmount,
+                initialIsIncome: tx.isIncome,
+                initialVaultIds: tx.groupIds
+                    .map((vId) => int.parse(vId.replaceFirst('v_', '')))
+                    .toList(),
+                initialCategoryId: tx.categoryId,
+                initialNote: tx.note,
+                initialCurrency: tx.currency,
+                initialPeriodType: tx.periodType,
+                initialRecurrenceDay: tx.recurrenceDay,
+                initialRecurrenceDate: tx.recurrenceDate,
+                initialRecurrenceDuration: tx.recurrenceDuration,
+              ),
+              fullscreenDialog: true,
             ),
           );
         },
@@ -431,19 +426,13 @@ class _VaultsScreenState extends ConsumerState<VaultsScreen> {
     );
   }
 
-  void _showVaultManagementSheet(BuildContext context) {
-    PrecisionSheet.show(
-      context: context,
-      title: 'Panel Düzenle', 
-      child: const DashboardWidgetManagerSheet(),
-    );
-  }
+
 
   void _showAddVaultSheet(BuildContext context) {
     HapticFeedback.heavyImpact();
     PrecisionSheet.show(
       context: context,
-      title: 'Yeni Kasa',
+      title: AppLocalizations.of(context)!.addNewVault,
       child: const AddVaultSheet(),
     );
   }
@@ -452,7 +441,7 @@ class _VaultsScreenState extends ConsumerState<VaultsScreen> {
     HapticFeedback.mediumImpact();
     PrecisionSheet.show(
       context: context,
-      title: 'Kasa Detayı',
+      title: AppLocalizations.of(context)!.vaultDetail,
       child: VaultDetailSheet(vaultId: vaultId),
     );
   }

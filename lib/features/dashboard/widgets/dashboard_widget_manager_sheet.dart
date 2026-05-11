@@ -9,8 +9,10 @@ import '../../../shared/widgets/precision_selector_field.dart';
 import '../../../shared/widgets/precision_multi_toggle.dart';
 import '../../../shared/widgets/precision_button.dart';
 import '../../../shared/widgets/precision_icon_button.dart';
+import '../../../l10n/app_localizations.dart';
 import '../providers/widget_layout_provider.dart';
 import 'dashboard_widget.dart'; // for DashboardWidgetSize
+import '../../../shared/widgets/precision_notification.dart';
 
 enum WidgetManagerTab { active, library }
 
@@ -30,25 +32,26 @@ class _DashboardWidgetManagerSheetState extends ConsumerState<DashboardWidgetMan
     setState(() => _activeTab = tab);
   }
 
-  final List<Map<String, dynamic>> _library = [
-    {'type': 'timeline', 'name': 'İşlem Geçmişi', 'icon': Icons.history_rounded, 'defaultSize': DashboardWidgetSize.large},
-    {'type': 'radar', 'name': 'Harcama Radarı', 'icon': Icons.radar_rounded, 'defaultSize': DashboardWidgetSize.large},
-    {'type': 'spending', 'name': 'Harcama Devleri', 'icon': Icons.bar_chart_rounded, 'defaultSize': DashboardWidgetSize.large},
-    {'type': 'quick_action', 'name': 'Hızlı İşlem', 'icon': Icons.flash_on_rounded, 'defaultSize': DashboardWidgetSize.small},
-    {'type': 'vault_status', 'name': 'Kasa Durumları', 'icon': Icons.account_balance_wallet_rounded, 'defaultSize': DashboardWidgetSize.small},
-    {'type': 'daily_budget', 'name': 'Günlük Bütçe', 'icon': Icons.attach_money_rounded, 'defaultSize': DashboardWidgetSize.wide},
+  List<Map<String, dynamic>> _getLibrary(AppLocalizations l10n) => [
+    {'type': 'timeline', 'name': l10n.historyTitle, 'icon': Icons.history_rounded, 'defaultSize': DashboardWidgetSize.large},
+    {'type': 'radar', 'name': l10n.radarTitle, 'icon': Icons.radar_rounded, 'defaultSize': DashboardWidgetSize.large},
+    {'type': 'spending', 'name': l10n.giantsTitle, 'icon': Icons.bar_chart_rounded, 'defaultSize': DashboardWidgetSize.large},
+    {'type': 'quick_action', 'name': l10n.quickActionTitle, 'icon': Icons.flash_on_rounded, 'defaultSize': DashboardWidgetSize.small},
+    {'type': 'vault_status', 'name': l10n.vaultStatusTitle, 'icon': Icons.account_balance_wallet_rounded, 'defaultSize': DashboardWidgetSize.small},
+    {'type': 'daily_budget', 'name': l10n.dailyBudgetTitle, 'icon': Icons.attach_money_rounded, 'defaultSize': DashboardWidgetSize.wide},
   ];
 
-  String _getWidgetName(String type) {
-    return _library.firstWhere((w) => w['type'] == type, orElse: () => {'name': type})['name'] as String;
+  String _getWidgetName(String type, AppLocalizations l10n) {
+    return _getLibrary(l10n).firstWhere((w) => w['type'] == type, orElse: () => {'name': type})['name'] as String;
   }
 
-  IconData _getWidgetIcon(String type) {
-    return _library.firstWhere((w) => w['type'] == type, orElse: () => {'icon': Icons.widgets_rounded})['icon'] as IconData;
+  IconData _getWidgetIcon(String type, AppLocalizations l10n) {
+    return _getLibrary(l10n).firstWhere((w) => w['type'] == type, orElse: () => {'icon': Icons.widgets_rounded})['icon'] as IconData;
   }
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final pages = ref.watch(widgetLayoutProvider);
     final activeColor = AppColors.getPrimary(context);
     final scalingFactor = (MediaQuery.of(context).size.height / 812.0).clamp(0.85, 1.0);
@@ -62,7 +65,7 @@ class _DashboardWidgetManagerSheetState extends ConsumerState<DashboardWidgetMan
         children: [
           Center(
             child: PrecisionSegmentedControl(
-              tabs: const ['Dashboard', 'Library'],
+              tabs: [l10n.dashboard, l10n.library],
               selectedIndex: _activeTab == WidgetManagerTab.active ? 0 : 1,
               onTabChanged: (index) => _switchTab(index == 0 ? WidgetManagerTab.active : WidgetManagerTab.library),
               scalingFactor: scalingFactor,
@@ -73,8 +76,8 @@ class _DashboardWidgetManagerSheetState extends ConsumerState<DashboardWidgetMan
             child: AnimatedSwitcher(
               duration: const Duration(milliseconds: 300),
               child: _activeTab == WidgetManagerTab.active 
-                  ? _buildActiveWidgetsList(context, pages, activeColor, scalingFactor)
-                  : _buildLibraryList(context, pages, activeColor, scalingFactor),
+                  ? _buildActiveWidgetsList(context, pages, activeColor, scalingFactor, l10n)
+                  : _buildLibraryList(context, pages, activeColor, scalingFactor, l10n),
             ),
           ),
         ],
@@ -82,7 +85,7 @@ class _DashboardWidgetManagerSheetState extends ConsumerState<DashboardWidgetMan
     );
   }
 
-  Widget _buildActiveWidgetsList(BuildContext context, List<List<WidgetConfig>> pages, Color activeColor, double scalingFactor) {
+  Widget _buildActiveWidgetsList(BuildContext context, List<List<WidgetConfig>> pages, Color activeColor, double scalingFactor, AppLocalizations l10n) {
     final List<Map<String, dynamic>> flatList = [];
     for (int i = 0; i < pages.length; i++) {
       for (var widget in pages[i]) {
@@ -151,41 +154,42 @@ class _DashboardWidgetManagerSheetState extends ConsumerState<DashboardWidgetMan
                 return Container(
                   key: ValueKey('active_${widget.id}'), // Sabit anahtar animasyon için kritik
                   margin: EdgeInsets.only(bottom: 10 * scalingFactor),
-                  child: _buildActiveItem(context, widget, item['page'] as int, activeColor, scalingFactor, pages.length, index),
+                  child: _buildActiveItem(context, widget, item['page'] as int, activeColor, scalingFactor, pages.length, index, l10n),
                 );
               },
             ),
           )
         else
-          _buildEmptyState('Dashboard şu an boş.', Icons.dashboard_customize_rounded, activeColor, scalingFactor),
+          _buildEmptyState(l10n.dashboardEmpty, Icons.dashboard_customize_rounded, activeColor, scalingFactor),
         const SizedBox(height: 12),
       ],
     );
   }
 
-  Widget _buildLibraryList(BuildContext context, List<List<WidgetConfig>> pages, Color activeColor, double scalingFactor) {
+  Widget _buildLibraryList(BuildContext context, List<List<WidgetConfig>> pages, Color activeColor, double scalingFactor, AppLocalizations l10n) {
+    final library = _getLibrary(l10n);
     return Column(
       key: const ValueKey('library_widgets'),
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        if (_library.isNotEmpty)
+        if (library.isNotEmpty)
           ConstrainedBox(
             constraints: BoxConstraints(maxHeight: MediaQuery.of(context).size.height * 0.55 * scalingFactor),
             child: ListView.separated(
               shrinkWrap: true,
               padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8 * scalingFactor),
               physics: const BouncingScrollPhysics(),
-              itemCount: _library.length,
+              itemCount: library.length,
               separatorBuilder: (_, __) => SizedBox(height: 10 * scalingFactor),
               itemBuilder: (context, index) {
-                final libItem = _library[index];
-                return _buildLibraryItem(context, libItem, activeColor, scalingFactor, index);
+                final libItem = library[index];
+                return _buildLibraryItem(context, libItem, activeColor, scalingFactor, index, l10n);
               },
             ),
           )
         else
-          _buildEmptyState('Library şu an boş.', Icons.check_circle_outline_rounded, activeColor, scalingFactor),
+          _buildEmptyState(l10n.libraryEmpty, Icons.check_circle_outline_rounded, activeColor, scalingFactor),
         const SizedBox(height: 12),
       ],
     );
@@ -203,7 +207,7 @@ class _DashboardWidgetManagerSheetState extends ConsumerState<DashboardWidgetMan
     }
   }
 
-  Widget _buildActiveItem(BuildContext context, WidgetConfig widget, int pageIndex, Color activeColor, double scalingFactor, int totalPages, int index) {
+  Widget _buildActiveItem(BuildContext context, WidgetConfig widget, int pageIndex, Color activeColor, double scalingFactor, int totalPages, int index, AppLocalizations l10n) {
     final bool isDark = Theme.of(context).brightness == Brightness.dark;
     final allowedSizes = _getAllowedSizes(widget.type);
     
@@ -224,14 +228,14 @@ class _DashboardWidgetManagerSheetState extends ConsumerState<DashboardWidgetMan
             Row(
               children: [
                 Icon(
-                  _getWidgetIcon(widget.type),
+                  _getWidgetIcon(widget.type, l10n),
                   color: activeColor,
                   size: 20 * scalingFactor,
                 ),
                 SizedBox(width: 12 * scalingFactor),
                 Expanded(
                   child: Text(
-                    _getWidgetName(widget.type),
+                    _getWidgetName(widget.type, l10n),
                     style: TextStyle(
                       fontWeight: FontWeight.w900,
                       fontSize: 15 * scalingFactor,
@@ -260,7 +264,7 @@ class _DashboardWidgetManagerSheetState extends ConsumerState<DashboardWidgetMan
             ),
             PrecisionSelectorField(
               icon: Icons.dashboard_rounded,
-              label: 'Sayfa',
+              label: l10n.pageLabel,
               pickerWidth: 160,
               items: const ['1', '2', '3', '4'],
               selectedIndex: pageIndex.clamp(0, 3),
@@ -282,7 +286,7 @@ class _DashboardWidgetManagerSheetState extends ConsumerState<DashboardWidgetMan
                   SizedBox(width: 12 * scalingFactor),
                   Expanded(
                     child: Text(
-                      'Boyut',
+                      l10n.sizeLabel,
                       style: TextStyle(
                         fontSize: 11 * scalingFactor,
                         fontWeight: FontWeight.w900,
@@ -311,7 +315,7 @@ class _DashboardWidgetManagerSheetState extends ConsumerState<DashboardWidgetMan
     );
   }
 
-  Widget _buildLibraryItem(BuildContext context, Map<String, dynamic> libItem, Color activeColor, double scalingFactor, int index) {
+  Widget _buildLibraryItem(BuildContext context, Map<String, dynamic> libItem, Color activeColor, double scalingFactor, int index, AppLocalizations l10n) {
     return TweenAnimationBuilder<double>(
       duration: const Duration(milliseconds: 300),
       curve: Curves.easeOutSine,
@@ -343,7 +347,7 @@ class _DashboardWidgetManagerSheetState extends ConsumerState<DashboardWidgetMan
               ),
             ),
             PrecisionButton(
-              label: 'Ekle',
+              label: l10n.addNewVault.split(' ').last, // Use 'Add' or similar
               onTap: () {
                 HapticFeedback.heavyImpact();
                 ref.read(widgetLayoutProvider.notifier).addWidget(
@@ -351,15 +355,9 @@ class _DashboardWidgetManagerSheetState extends ConsumerState<DashboardWidgetMan
                   libItem['defaultSize'] as DashboardWidgetSize,
                 );
                 
-                ScaffoldMessenger.of(context).clearSnackBars();
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text('${libItem['name']} panoya eklendi!'),
-                    duration: const Duration(milliseconds: 800),
-                    behavior: SnackBarBehavior.floating,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                    margin: const EdgeInsets.all(16),
-                  ),
+                PrecisionNotification.success(
+                  context,
+                  l10n.widgetAdded(libItem['name'] as String),
                 );
               },
               activeColor: activeColor,

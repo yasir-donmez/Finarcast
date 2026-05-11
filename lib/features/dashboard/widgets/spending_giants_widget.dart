@@ -6,7 +6,7 @@ import '../../../core/database/models/transaction_record.dart';
 import '../../../core/database/models/exchange_rate.dart';
 import '../../../core/utils/currency_utils.dart';
 import '../../../core/providers/settings_provider.dart';
-import '../../../shared/widgets/precision_mini_segmented_control.dart';
+import '../../../shared/widgets/precision_multi_toggle.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../transactions/widgets/transaction_category_data.dart';
 import '../../../core/utils/icon_utils.dart';
@@ -40,6 +40,13 @@ class _SpendingGiantsWidgetState extends ConsumerState<SpendingGiantsWidget> wit
     super.dispose();
   }
 
+  void _handleFilterChange(int index) {
+    if (_selectedFilterIndex == index) return;
+    setState(() => _selectedFilterIndex = index);
+    _chartController.reset();
+    _chartController.forward();
+  }
+
   @override
   Widget build(BuildContext context) {
     final settings = ref.watch(settingsProvider);
@@ -56,17 +63,15 @@ class _SpendingGiantsWidgetState extends ConsumerState<SpendingGiantsWidget> wit
     return Column(
       children: [
         Center(
-          child: Transform.scale(
-            scale: 0.75,
-            child: PrecisionMiniSegmentedControl(
-              items: const ['H', 'A', 'Y'],
-              selectedIndex: _selectedFilterIndex,
-              onChanged: (index) {
-                setState(() => _selectedFilterIndex = index);
-                _chartController.reset();
-                _chartController.forward();
-              },
-            ),
+          child: PrecisionMultiToggle(
+            labels: const ['H', 'A', 'Y'],
+            selectedIndex: _selectedFilterIndex,
+            onChanged: _handleFilterChange,
+            activeColors: [
+              Theme.of(context).colorScheme.primary,
+              Theme.of(context).colorScheme.primary,
+              Theme.of(context).colorScheme.primary,
+            ],
           ),
         ),
         const SizedBox(height: 8),
@@ -158,7 +163,7 @@ class _SpendingGiantsWidgetState extends ConsumerState<SpendingGiantsWidget> wit
                   maxLines: 1, overflow: TextOverflow.ellipsis,
                 ),
                 Text(
-                  '${CurrencyUtils.formatAmount(g.amount)}$symbol',
+                  CurrencyUtils.formatAmount(g.amount, currencySymbol: symbol),
                   style: TextStyle(fontSize: 9, fontWeight: FontWeight.w900, color: catColor.withValues(alpha: 0.9)),
                 ),
               ],
@@ -230,7 +235,7 @@ class _SpendingGiantsWidgetState extends ConsumerState<SpendingGiantsWidget> wit
       final currentAmount = entry.value;
       final prevAmount = prevSums[catId] ?? 0;
       giants.add(_AnalyticGiant(
-        categoryId: catId, amount: currentAmount,
+        categoryId: catId == 'Diğer' ? null : catId, amount: currentAmount,
         percentage: currentTotal > 0 ? (currentAmount / currentTotal) * 100 : 0,
         prevPercentage: prevTotal > 0 ? (prevAmount / prevTotal) * 100 : 0,
         isNew: prevAmount == 0,
@@ -256,8 +261,24 @@ class _SpendingGiantsWidgetState extends ConsumerState<SpendingGiantsWidget> wit
   }
 
   Widget _buildEmptyState() {
+    final l10n = AppLocalizations.of(context)!;
     return Center(
-      child: Icon(Icons.blur_circular_rounded, color: Colors.white.withValues(alpha: 0.05), size: 40),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(Icons.auto_graph_rounded, color: Colors.white.withValues(alpha: 0.05), size: 48),
+          const SizedBox(height: 12),
+          Text(
+            l10n.giantsWait,
+            style: TextStyle(
+              color: Colors.white.withValues(alpha: 0.15),
+              fontSize: 10,
+              fontWeight: FontWeight.w600,
+              letterSpacing: 0.5,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -292,8 +313,6 @@ class _TripleOverlapPainter extends CustomPainter {
       // Dinamik daraltma (Merkeze gittikçe incelme)
       final double sWidth = (currentBaseStroke - (i * 1.2)).clamp(4.0, 12.0);
       final double cWidth = (currentBaseCore - (i * 0.4)).clamp(1.5, 4.0);
-      final double sSpacing = (currentBaseSpacing - (i * 0.4)).clamp(2.0, 6.0);
-      
       // Yarıçap hesaplama
       double currentRadius = maxRadius;
       for (int j = 0; j < i; j++) {

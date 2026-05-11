@@ -7,44 +7,58 @@ import '../../../../shared/widgets/precision_glass_card.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../analysis_detail_screen.dart';
 
+import 'optimization_loading_card.dart';
+
 class OptimizationHistorySection extends StatelessWidget {
   final List<FinancialGoal> goals;
   final AppLocalizations l10n;
+  final bool isAnalyzing;
 
   const OptimizationHistorySection({
     super.key,
     required this.goals,
     required this.l10n,
+    this.isAnalyzing = false,
   });
 
   @override
   Widget build(BuildContext context) {
-    if (goals.isEmpty) return const SizedBox.shrink();
+    if (goals.isEmpty && !isAnalyzing) return const SizedBox.shrink();
     
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          children: [
-            Icon(
-              Icons.history_rounded,
-              color: AppColors.getPrimary(context),
-              size: 20,
-            ),
-            const SizedBox(width: 10),
-            Text(
-              l10n.recentAnalyses.toUpperCase(),
-              style: const TextStyle(
-                fontSize: 13,
-                fontWeight: FontWeight.w900,
-                letterSpacing: 1.5,
+    return AnimatedSize(
+      duration: const Duration(milliseconds: 500),
+      curve: Curves.easeInOutQuart,
+      alignment: Alignment.topCenter,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(
+                Icons.history_rounded,
+                color: AppColors.getPrimary(context),
+                size: 20,
               ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 16),
-        ...goals.map((g) => _buildHistoryCardFluid(context, g, l10n)),
-      ],
+              const SizedBox(width: 10),
+              Text(
+                l10n.recentAnalyses.toUpperCase(),
+                style: const TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w900,
+                  letterSpacing: 1.5,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          // Analiz ediliyor kartı en üstte belirir
+          if (isAnalyzing) 
+            const OptimizationLoadingCard(key: ValueKey('loading_card')),
+          
+          // Geçmiş analizler her zaman görünür kalır
+          ...goals.map((g) => _buildHistoryCardFluid(context, g, l10n)),
+        ],
+      ),
     );
   }
 
@@ -89,7 +103,7 @@ class OptimizationHistorySection extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        '₺${currencyFormat.format(g.targetAmount.toInt())}',
+                        '${g.currencySymbol}${currencyFormat.format(g.targetAmount.toInt())}',
                         style: const TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w800,

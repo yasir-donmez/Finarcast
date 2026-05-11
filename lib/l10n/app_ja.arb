@@ -105,7 +105,7 @@
   "permanentDeleteDesc": "この取引は完全に削除されます",
   "yes": "はい",
   "groupNameHint": "グループ名...",
-  "transactionCount": "{count} 件の取引",
+  "transactionCount": "{count, plural, other{{count} 件の取引}}",
   "noRemainingTransactions": "追加できる取引はありません。",
   "editTransactionDesc": "取引の詳細を更新",
   "visibilityDesc": "ホーム画面に表示するグループまたは取引を選択します。",
@@ -117,7 +117,7 @@
   "scopeLabel": "対象:",
   "preselectHint": "項目を事前選択（任意）",
   "noItemsToAnalyze": "選択した日付までに有効な取引が見つかりませんでした。",
-  "itemsToAnalyze": "目標日（{months}ヶ月）までに有効な項目が {count} 件あります。",
+  "itemsToAnalyze": "{count, plural, other{目標日（{months}ヶ月）までに有効な項目が {count} 件あります。}}",
   "budgetNotFeasible": "現在の柔軟な予算では、この目標を完全に達成することは困難です。期間を延ばすか、収入を増やすことを検討してください。",
   "financialIdentityUpdated": "素晴らしい！金融アイデンティティが更新され、分析結果が保存されました。",
   "feedbackMemoized": "了解しました。これらの設定を記憶しました。次回の分析では異なる提案が行われます。",
@@ -126,9 +126,10 @@
   "doYouLikeThisSuggestion": "この提案はいかがですか？",
   "yesILikeIt": "はい、気に入りました",
   "targetAmountLabel": "{amount} 目標",
-  "weeksToTargetLabel": "{count} 週間",
-  "monthsToTargetLabel": "{count} ヶ月",
-  "yearsToTargetLabel": "{count} 年",
+  "weeksToTargetLabel": "{count, plural, other{{count} 週間}}",
+  "monthsToTargetLabel": "{count, plural, other{{count} ヶ月}}",
+  "yearsToTargetLabel": "{count, plural, other{{count} 年}}",
+
   "minAmount": "最小",
   "maxAmount": "最大",
   "limitedTotal": "合計",
@@ -143,5 +144,9 @@
   "moveForward": "前に移動",
   "moveBackward": "後ろに移動",
   "selectCurrency": "通貨を選択",
-  "aiMode": "AI Mode"
+  "aiMode": "AI Mode",
+  "addCustomCategory": "新規追加",
+  "customCategoryHint": "例: スパイス、マーケット...",
+  "deleteCustomCategory": "カテゴリを削除",
+  "deleteCustomCategoryConfirm": "このカスタムカテゴリを削除してもよろしいですか？"
 }

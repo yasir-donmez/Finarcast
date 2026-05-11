@@ -21,7 +21,7 @@ class FinancialReactorButton extends ConsumerStatefulWidget {
 }
 
 class _FinancialReactorButtonState extends ConsumerState<FinancialReactorButton> with TickerProviderStateMixin {
-  late final AnimationController _wobbleController, _pressController, _pulseController, _rotationController, _liquidController;
+  late final AnimationController _wobbleController, _pressController, _rotationController;
 
   @override
   void initState() {
@@ -34,24 +34,11 @@ class _FinancialReactorButtonState extends ConsumerState<FinancialReactorButton>
       vsync: this,
       duration: const Duration(milliseconds: 150),
     );
-    _pulseController = AnimationController(
-      vsync: this,
-      duration: const Duration(seconds: 2),
-    )..repeat(reverse: true);
     
     _rotationController = AnimationController(
       vsync: this,
-      duration: widget.isAnalyzing ? const Duration(milliseconds: 800) : const Duration(seconds: 2),
+      duration: widget.isAnalyzing ? const Duration(milliseconds: 500) : const Duration(seconds: 3),
     )..repeat();
-
-    _liquidController = AnimationController(
-      vsync: this,
-      duration: const Duration(seconds: 8),
-    );
-
-    if (widget.isAnalyzing) {
-      _liquidController.forward();
-    }
   }
 
   @override
@@ -59,15 +46,11 @@ class _FinancialReactorButtonState extends ConsumerState<FinancialReactorButton>
     super.didUpdateWidget(oldWidget);
     if (widget.isAnalyzing != oldWidget.isAnalyzing) {
       if (widget.isAnalyzing) {
-        _rotationController.duration = const Duration(milliseconds: 800);
+        _rotationController.duration = const Duration(milliseconds: 500);
         _rotationController.repeat();
-        // BASINCA İÇİ BOŞALACAK: Hemen sıfıra çekip sonra dolduruyoruz
-        _liquidController.value = 0;
-        _liquidController.forward();
       } else {
-        _rotationController.duration = const Duration(seconds: 2);
+        _rotationController.duration = const Duration(seconds: 3);
         _rotationController.repeat();
-        _liquidController.reverse(); // Durunca yavaşça boşalır
       }
     }
   }
@@ -76,9 +59,7 @@ class _FinancialReactorButtonState extends ConsumerState<FinancialReactorButton>
   void dispose() {
     _wobbleController.dispose();
     _pressController.dispose();
-    _pulseController.dispose();
     _rotationController.dispose();
-    _liquidController.dispose();
     super.dispose();
   }
 
@@ -104,14 +85,10 @@ class _FinancialReactorButtonState extends ConsumerState<FinancialReactorButton>
           animation: Listenable.merge([
             _wobbleController,
             _pressController,
-            _pulseController,
             _rotationController,
-            _liquidController,
           ]),
           builder: (context, child) {
-            final scale =
-                (1.0 - (_pressController.value * 0.08)) *
-                (1.0 + (_pulseController.value * 0.02));
+            final scale = 1.0 - (_pressController.value * 0.08);
                 
             return Transform.scale(
               scale: scale,
@@ -123,7 +100,6 @@ class _FinancialReactorButtonState extends ConsumerState<FinancialReactorButton>
                     reactorColor,
                     _wobbleController.value,
                     _rotationController.value * 2 * math.pi,
-                    _liquidController.value,
                   ),
                 ),
               ),
@@ -134,7 +110,7 @@ class _FinancialReactorButtonState extends ConsumerState<FinancialReactorButton>
     );
   }
 
-  Widget _buildOrganicCore(Color color, double t, double rotation, double progress) {
+  Widget _buildOrganicCore(Color color, double t, double rotation) {
     return IgnorePointer(
       child: Stack(
         alignment: Alignment.center,
@@ -145,24 +121,12 @@ class _FinancialReactorButtonState extends ConsumerState<FinancialReactorButton>
               color: color,
               wobbleValue: t,
               rotation: rotation,
-              liquidProgress: progress,
-              isAnalyzing: widget.isAnalyzing,
             ),
           ),
-          AnimatedSwitcher(
-            duration: const Duration(milliseconds: 400),
-            transitionBuilder: (child, anim) => ScaleTransition(
-              scale: CurvedAnimation(parent: anim, curve: Curves.elasticOut),
-              child: FadeTransition(opacity: anim, child: child),
-            ),
-            child: Icon(
-              widget.isAnalyzing
-                  ? Icons.auto_awesome_rounded
-                  : Icons.psychology_rounded,
-              key: ValueKey(widget.isAnalyzing),
-              color: Colors.white,
-              size: 28,
-            ),
+          const Icon(
+            Icons.psychology_rounded,
+            color: Colors.white,
+            size: 28,
           ),
         ],
       ),
@@ -172,15 +136,12 @@ class _FinancialReactorButtonState extends ConsumerState<FinancialReactorButton>
 
 class _WaterDropPainterForButton extends CustomPainter {
   final Color color;
-  final double wobbleValue, rotation, liquidProgress;
-  final bool isAnalyzing;
+  final double wobbleValue, rotation;
 
   _WaterDropPainterForButton({
     required this.color,
     required this.wobbleValue,
     required this.rotation,
-    required this.liquidProgress,
-    required this.isAnalyzing,
   });
 
   @override
@@ -196,53 +157,20 @@ class _WaterDropPainterForButton extends CustomPainter {
       double currentAngle = angle + rotation;
       double x = center.dx + r * math.cos(currentAngle);
       double y = center.dy + r * math.sin(currentAngle);
-      if (i == 0) path.moveTo(x, y); else path.lineTo(x, y);
+      if (i == 0) {
+        path.moveTo(x, y);
+      } else {
+        path.lineTo(x, y);
+      }
     }
     path.close();
     
     // Arka plan
     final bgPaint = Paint()
       ..shader = RadialGradient(
-        colors: [color.withValues(alpha: 0.3), color.withValues(alpha: 0.5)],
+        colors: [color.withValues(alpha: 0.6), color],
       ).createShader(Rect.fromCircle(center: center, radius: radius));
     canvas.drawPath(path, bgPaint);
-
-    if (liquidProgress > 0) {
-      canvas.save();
-      canvas.clipPath(path);
-      
-      final fillHeight = size.height * (1.1 - liquidProgress * 1.2); // Biraz daha aşağıdan başlar
-      final fillPath = Path();
-      
-      // SENİN DALGA MATEMATİĞİN (PrecisionWave.dart'tan uyarlandı)
-      fillPath.moveTo(-20, fillHeight);
-      for (double x = -20; x <= size.width + 20; x += 1) {
-        final double normalizedX = x / size.width;
-        // 35 ve 15'lik sert bozulmaları butona uygun ölçeklendirdim (7.0 ve 3.0)
-        double waveDistortion = 
-            7.0 * math.sin(wobbleValue * 6 * math.pi + normalizedX * 10) +
-            3.0 * math.cos(wobbleValue * 4 * math.pi + normalizedX * 6);
-            
-        fillPath.lineTo(x, fillHeight + waveDistortion);
-      }
-      fillPath.lineTo(size.width + 20, size.height + 40);
-      fillPath.lineTo(-20, size.height + 40);
-      fillPath.close();
-        
-      final fillPaint = Paint()
-        ..shader = LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [
-            Colors.white.withValues(alpha: 0.95), // Dalga tepesi daha parlak
-            color.withValues(alpha: 0.9),
-            color,
-          ],
-        ).createShader(Rect.fromLTWH(0, 0, size.width, size.height));
-        
-      canvas.drawPath(fillPath, fillPaint);
-      canvas.restore();
-    }
     
     final strokePaint = Paint()
       ..style = PaintingStyle.stroke

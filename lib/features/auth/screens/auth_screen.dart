@@ -8,7 +8,7 @@ import '../../../shared/widgets/precision_input.dart';
 import '../../../shared/widgets/precision_glass_card.dart';
 import '../widgets/precision_background.dart';
 import '../widgets/precision_flip_card.dart';
-import '../widgets/precision_wave.dart';
+import '../../../shared/widgets/precision_notification.dart';
 
 class AuthScreen extends ConsumerStatefulWidget {
   const AuthScreen({super.key});
@@ -32,7 +32,6 @@ class _AuthScreenState extends ConsumerState<AuthScreen> with TickerProviderStat
   String? _emailError;
   String? _passwordError;
   String? _confirmPasswordError;
-  final GlobalKey _flipKey = GlobalKey();
 
   @override
   void initState() {
@@ -160,17 +159,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen> with TickerProviderStat
   }
 
   void _showSnackBar(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          message,
-          style: TextStyle(color: AppColors.getTextPrimary(context)),
-        ),
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        backgroundColor: AppColors.getSurface(context),
-      ),
-    );
+    PrecisionNotification.info(context, message);
   }
 
   @override

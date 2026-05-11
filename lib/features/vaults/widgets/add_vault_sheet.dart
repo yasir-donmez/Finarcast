@@ -7,6 +7,7 @@ import '../../../core/database/models/vault.dart';
 import '../../../shared/widgets/precision_input.dart';
 import '../../../shared/widgets/precision_button.dart';
 import '../../auth/widgets/precision_wave.dart';
+import '../../../l10n/app_localizations.dart';
 
 class AddVaultSheet extends ConsumerStatefulWidget {
   const AddVaultSheet({super.key});
@@ -21,12 +22,12 @@ class _AddVaultSheetState extends ConsumerState<AddVaultSheet> with SingleTicker
   String _selectedCurrency = 'AUTO';
   late AnimationController _waveController;
 
-  final List<Map<String, String>> _currencies = [
-    {'symbol': 'AUTO', 'label': 'OTOMATİK'},
+  List<Map<String, String>> _getCurrencies(AppLocalizations l10n) => [
+    {'symbol': 'AUTO', 'label': l10n.auto},
     {'symbol': '₺', 'label': 'TL'},
     {'symbol': '\$', 'label': 'USD'},
     {'symbol': '€', 'label': 'EUR'},
-    {'symbol': 'G', 'label': 'ALTIN'},
+    {'symbol': 'G', 'label': l10n.gold},
   ];
 
   @override
@@ -48,10 +49,12 @@ class _AddVaultSheetState extends ConsumerState<AddVaultSheet> with SingleTicker
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final activeColor = AppColors.getPrimary(context);
     final secondaryColor = AppColors.getSecondary(context);
     final screenHeight = MediaQuery.of(context).size.height;
     final sf = (screenHeight / 812.0).clamp(0.85, 1.0);
+    final currencies = _getCurrencies(l10n);
 
     return Stack(
       children: [
@@ -74,7 +77,7 @@ class _AddVaultSheetState extends ConsumerState<AddVaultSheet> with SingleTicker
                 height: 50 * sf,
                 child: PrecisionInput(
                   controller: _nameController,
-                  hintText: 'Kasa Adı (örn. Birikim)',
+                  hintText: l10n.vaultNameHint,
                   icon: Icons.drive_file_rename_outline_rounded,
                   autofocus: true,
                   scalingFactor: sf,
@@ -85,7 +88,7 @@ class _AddVaultSheetState extends ConsumerState<AddVaultSheet> with SingleTicker
               Padding(
                 padding: const EdgeInsets.only(left: 4),
                 child: Text(
-                  'PARA BİRİMİ',
+                  l10n.currency.toUpperCase(),
                   style: TextStyle(
                     fontSize: 10,
                     fontWeight: FontWeight.w900,
@@ -98,7 +101,7 @@ class _AddVaultSheetState extends ConsumerState<AddVaultSheet> with SingleTicker
               SingleChildScrollView(
                 scrollDirection: Axis.horizontal,
                 child: Row(
-                  children: _currencies.map((c) {
+                  children: currencies.map((c) {
                     final isSelected = _selectedCurrency == c['symbol'];
                     return Padding(
                       padding: const EdgeInsets.only(right: 8),
@@ -139,7 +142,7 @@ class _AddVaultSheetState extends ConsumerState<AddVaultSheet> with SingleTicker
                 height: 50 * sf,
                 child: PrecisionInput(
                   controller: _balanceController,
-                  hintText: 'Başlangıç Bakiyesi',
+                  hintText: l10n.initialBalance,
                   icon: Icons.payments_rounded,
                   suffixText: _selectedCurrency == 'AUTO' ? '' : _selectedCurrency,
                   keyboardType: const TextInputType.numberWithOptions(decimal: true),
@@ -151,7 +154,7 @@ class _AddVaultSheetState extends ConsumerState<AddVaultSheet> with SingleTicker
               ),
               SizedBox(height: 24 * sf),
               PrecisionButton(
-                label: 'Kasa Oluştur',
+                label: l10n.createVault,
                 onTap: () async {
                   if (_nameController.text.isNotEmpty) {
                     final double? initialBalance = double.tryParse(_balanceController.text.replaceAll(',', '.'));

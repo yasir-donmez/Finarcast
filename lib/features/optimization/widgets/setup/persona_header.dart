@@ -47,78 +47,91 @@ class _OptimizationPersonaHeaderState extends State<OptimizationPersonaHeader> w
     final savedPersona = widget.goals.firstOrNull?.aiPersonaText;
     final displayText = widget.currentPersonaText ?? savedPersona;
     final screenWidth = MediaQuery.of(context).size.width;
-    final showGlow = widget.isAnalyzing;
-
-    return AnimatedBuilder(
-      animation: _glowController,
-      builder: (context, child) {
-        return Stack(
-          children: [
-            Container(
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(24),
-                boxShadow: showGlow ? [
-                  BoxShadow(
-                    color: AppColors.getPrimary(context).withValues(alpha: 0.1 * _glowController.value),
-                    blurRadius: 20,
-                    spreadRadius: 2,
+    return TweenAnimationBuilder<double>(
+      tween: Tween<double>(begin: 0, end: widget.isAnalyzing ? 1.0 : 0.0),
+      duration: const Duration(milliseconds: 800),
+      curve: Curves.easeInOut,
+      builder: (context, appearanceOpacity, child) {
+        return AnimatedBuilder(
+          animation: _glowController,
+          builder: (context, child) {
+            return Stack(
+              children: [
+                Container(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(24),
+                    boxShadow: appearanceOpacity > 0 ? [
+                      BoxShadow(
+                        color: AppColors.getPrimary(context).withValues(
+                          alpha: (0.1 * _glowController.value) * appearanceOpacity,
+                        ),
+                        blurRadius: 20,
+                        spreadRadius: 2,
+                      ),
+                    ] : null,
                   ),
-                ] : null,
-              ),
-              child: PrecisionGlassCard(
-                borderRadius: 24,
-                padding: EdgeInsets.symmetric(
-                  horizontal: screenWidth * 0.05,
-                  vertical: 20,
-                ),
-                child: Row(
-                  children: [
-                    PrecisionMembershipOrb(
-                      color: AppColors.getPrimary(context),
-                      size: 56,
+                  child: PrecisionGlassCard(
+                    borderRadius: 24,
+                    padding: EdgeInsets.symmetric(
+                      horizontal: screenWidth * 0.05,
+                      vertical: 20,
                     ),
-                    const SizedBox(width: 16),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            widget.l10n.financialIdentity.toUpperCase(),
-                            style: TextStyle(
-                              color: AppColors.getPrimary(context),
-                              fontSize: 10,
-                              fontWeight: FontWeight.w900,
-                              letterSpacing: 1.5,
+                    child: Row(
+                      children: [
+                        PrecisionMembershipOrb(
+                          color: AppColors.getPrimary(context),
+                          size: 56,
+                        ),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: AnimatedSize(
+                            duration: const Duration(milliseconds: 500),
+                            curve: Curves.easeInOutQuart,
+                            alignment: Alignment.centerLeft,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  widget.l10n.financialIdentity.toUpperCase(),
+                                  style: TextStyle(
+                                    color: AppColors.getPrimary(context),
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.w900,
+                                    letterSpacing: 1.5,
+                                  ),
+                                ),
+                                const SizedBox(height: 6),
+                                Text(
+                                  displayText ?? widget.l10n.financialIdentityHint,
+                                  style: TextStyle(
+                                    fontSize: 15,
+                                    height: 1.5,
+                                    fontWeight: FontWeight.w600,
+                                    color: AppColors.getTextPrimary(context),
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
-                          const SizedBox(height: 6),
-                          Text(
-                            displayText ?? widget.l10n.financialIdentityHint,
-                            style: TextStyle(
-                              fontSize: 15,
-                              height: 1.5,
-                              fontWeight: FontWeight.w600,
-                              color: AppColors.getTextPrimary(context),
-                            ),
-                          ),
-                        ],
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                if (appearanceOpacity > 0)
+                  Positioned.fill(
+                    child: IgnorePointer(
+                      child: CustomPaint(
+                        painter: _GradientBorderPainter(
+                          progress: _glowController.value,
+                          opacity: appearanceOpacity,
+                        ),
                       ),
                     ),
-                  ],
-                ),
-              ),
-            ),
-            if (showGlow)
-              Positioned.fill(
-                child: IgnorePointer(
-                  child: CustomPaint(
-                    painter: _GradientBorderPainter(
-                      progress: _glowController.value,
-                    ),
                   ),
-                ),
-              ),
-          ],
+              ],
+            );
+          },
         );
       },
     );
@@ -127,7 +140,8 @@ class _OptimizationPersonaHeaderState extends State<OptimizationPersonaHeader> w
 
 class _GradientBorderPainter extends CustomPainter {
   final double progress;
-  _GradientBorderPainter({required this.progress});
+  final double opacity;
+  _GradientBorderPainter({required this.progress, required this.opacity});
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -140,9 +154,9 @@ class _GradientBorderPainter extends CustomPainter {
       ..shader = SweepGradient(
         colors: [
           Colors.transparent,
-          const Color(0xFF4285F4).withValues(alpha: 0.8 * progress),
-          const Color(0xFF9B51E0).withValues(alpha: 0.8 * progress),
-          const Color(0xFFEA4335).withValues(alpha: 0.8 * progress),
+          const Color(0xFF4285F4).withValues(alpha: 0.8 * progress * opacity),
+          const Color(0xFF9B51E0).withValues(alpha: 0.8 * progress * opacity),
+          const Color(0xFFEA4335).withValues(alpha: 0.8 * progress * opacity),
           Colors.transparent,
         ],
         stops: const [0.0, 0.3, 0.5, 0.7, 1.0],
@@ -154,5 +168,5 @@ class _GradientBorderPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant _GradientBorderPainter oldDelegate) => 
-      oldDelegate.progress != progress;
+      oldDelegate.progress != progress || oldDelegate.opacity != opacity;
 }

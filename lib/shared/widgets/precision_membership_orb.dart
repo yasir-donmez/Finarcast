@@ -7,14 +7,16 @@ class PrecisionMembershipOrb extends StatefulWidget {
   final Color color;
   final double size;
   final double morphFactor;
-  final double wobbleValue; // External override if needed
+  final double wobbleValue;
+  final bool showParticles;
 
   const PrecisionMembershipOrb({
     super.key,
     required this.color,
     this.size = 50,
     this.morphFactor = 1.0,
-    this.wobbleValue = -1, // -1 means use internal animator
+    this.wobbleValue = -1,
+    this.showParticles = true,
   });
 
   @override
@@ -51,6 +53,7 @@ class _PrecisionMembershipOrbState extends State<PrecisionMembershipOrb> with Si
             color: widget.color,
             morphFactor: widget.morphFactor,
             wobbleValue: currentWobble,
+            showParticles: widget.showParticles,
           ),
         );
       },
@@ -62,11 +65,13 @@ class _WaterDropPainter extends CustomPainter {
   final Color color;
   final double morphFactor;
   final double wobbleValue;
+  final bool showParticles;
 
   _WaterDropPainter({
     required this.color, 
     required this.morphFactor,
     required this.wobbleValue,
+    required this.showParticles,
   });
 
   @override
@@ -106,46 +111,11 @@ class _WaterDropPainter extends CustomPainter {
     canvas.drawCircle(center, radius * morphFactor * 0.9, liquidPaint);
 
     // 4. İÇTEKİ NESNELER (Liquid Particles - 3D Layers)
-    if (morphFactor > 0.3) {
+    if (showParticles && morphFactor > 0.3) {
       _drawLiquidParticle(canvas, center, radius, morphFactor, t * 1.0, 0, 0.4, 3.5, 0.3); // 1.0 Tam tur
       _drawLiquidParticle(canvas, center, radius, morphFactor, t * 2.0, 2.5, 0.6, 5.5, 0.6); // 2.0 Tam tur
       _drawLiquidParticle(canvas, center, radius, morphFactor, t * 1.0, 4.5, 1.0, 8.0, 0.9); // 1.0 Tam tur
     }
- 
-    // 5. CAM YANSIMALARI (Refractive Highlights) - KALDIRILDI (USER İsteği)
-    /*
-    final mainHighlightPaint = Paint()
-      ..shader = LinearGradient(
-        colors: [
-          Colors.white.withValues(alpha: 0.4 * morphFactor),
-          Colors.white.withValues(alpha: 0.0),
-        ],
-        begin: Alignment.topLeft,
-        end: Alignment.bottomRight,
-      ).createShader(Rect.fromCircle(center: center, radius: radius * morphFactor));
-    
-    canvas.drawOval(
-      Rect.fromLTWH(
-        center.dx - radius * 0.6 * morphFactor,
-        center.dy - radius * 0.7 * morphFactor,
-        radius * 0.8 * morphFactor,
-        radius * 0.5 * morphFactor,
-      ),
-      mainHighlightPaint,
-    );
-
-    final glancePaint = Paint()
-      ..color = Colors.white.withValues(alpha: 0.6 * morphFactor)
-      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 1);
-    canvas.drawOval(
-      Rect.fromCenter(
-        center: center.translate(-radius * 0.45 * morphFactor, -radius * 0.45 * morphFactor),
-        width: radius * 0.25 * morphFactor,
-        height: radius * 0.15 * morphFactor,
-      ),
-      glancePaint,
-    );
-    */
  
     // 6. KENAR IŞIĞI (Rim Light - Glass Edge)
     final rimPaint = Paint()
@@ -201,5 +171,7 @@ class _WaterDropPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(_WaterDropPainter oldDelegate) => 
-    oldDelegate.morphFactor != morphFactor || oldDelegate.wobbleValue != wobbleValue;
+    oldDelegate.morphFactor != morphFactor || 
+    oldDelegate.wobbleValue != wobbleValue ||
+    oldDelegate.showParticles != showParticles;
 }

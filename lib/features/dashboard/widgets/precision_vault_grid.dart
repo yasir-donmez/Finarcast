@@ -419,7 +419,7 @@ class _PrecisionVaultGridState extends ConsumerState<PrecisionVaultGrid> {
                       blurRadius: 8,
                       spreadRadius: 0,
                     )
-                  ] : null,
+                  ] : [],
                 ),
               );
             }),
@@ -619,7 +619,7 @@ class _PrecisionVaultGridState extends ConsumerState<PrecisionVaultGrid> {
     double width,
     double height,
   ) {
-    String displayBalance = CurrencyUtils.formatAmount(item.balance.abs());
+    String displayBalance = CurrencyUtils.formatAmount(item.balance.abs(), currencySymbol: item.currency);
 
     return FittedBox(
       fit: BoxFit.scaleDown,
@@ -699,7 +699,7 @@ class _PrecisionVaultGridState extends ConsumerState<PrecisionVaultGrid> {
     double width,
     double height,
   ) {
-    String displayBalance = CurrencyUtils.formatAmount(item.balance.abs());
+    String displayBalance = CurrencyUtils.formatAmount(item.balance.abs(), currencySymbol: item.currency);
 
     final bool isFull = width > 300 && height > 200;
     final bool isWide = width > 300 && height < 150;
@@ -783,7 +783,7 @@ class _PrecisionVaultGridState extends ConsumerState<PrecisionVaultGrid> {
                   ),
                   const SizedBox(width: 2),
                   Text(
-                    CurrencyUtils.formatAmount(item.itemAmounts[idx].abs()),
+                    CurrencyUtils.formatAmount(item.itemAmounts[idx].abs(), currencySymbol: item.currency),
                     style: TextStyle(
                       fontSize: 8,
                       fontWeight: FontWeight.bold,

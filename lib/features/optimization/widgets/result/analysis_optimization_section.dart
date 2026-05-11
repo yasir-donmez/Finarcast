@@ -9,12 +9,14 @@ class AnalysisOptimizationSection extends StatefulWidget {
   final OptimizationResult opt;
   final AppLocalizations l10n;
   final NumberFormat currencyFormat;
+  final String currencySymbol;
 
   const AnalysisOptimizationSection({
     super.key,
     required this.opt,
     required this.l10n,
     required this.currencyFormat,
+    required this.currencySymbol,
   });
 
   @override
@@ -152,7 +154,7 @@ class _AnalysisOptimizationSectionState extends State<AnalysisOptimizationSectio
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
                 Text(
-                  '₺${widget.currencyFormat.format(cut.suggestedAmount.toInt())}',
+                  '${widget.currencySymbol}${widget.currencyFormat.format(cut.suggestedAmount.toInt())}',
                   style: TextStyle(
                     color: AppColors.getPrimary(context),
                     fontSize: 18,
@@ -161,7 +163,7 @@ class _AnalysisOptimizationSectionState extends State<AnalysisOptimizationSectio
                 ),
                 const SizedBox(height: 2),
                 Text(
-                  '← ₺${widget.currencyFormat.format(cut.currentAmount.toInt())}',
+                  '← ${widget.currencySymbol}${widget.currencyFormat.format(cut.currentAmount.toInt())}',
                   style: TextStyle(
                     color: AppColors.getTextSecondary(context).withValues(alpha: 0.5),
                     fontSize: 12,

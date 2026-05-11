@@ -11,6 +11,7 @@ import '../../../../shared/widgets/precision_card.dart';
 import '../../../../shared/widgets/precision_button.dart';
 import '../../../../shared/widgets/precision_action.dart';
 import '../../../../core/theme/app_constants.dart';
+import '../../../../shared/widgets/precision_notification.dart';
 
 class ExchangeRateSetting extends ConsumerStatefulWidget {
   const ExchangeRateSetting({super.key});
@@ -219,13 +220,11 @@ class _ExchangeRateSettingState extends ConsumerState<ExchangeRateSetting> with 
                           if (mounted) setState(() => _isUpdating = false);
 
                           if (!context.mounted) return;
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text(success ? "Kurlar başarıyla güncellendi." : "Güncelleme başarısız. İnternet bağlantınızı kontrol edin."),
-                              backgroundColor: success ? Colors.green : Colors.red,
-                              behavior: SnackBarBehavior.floating,
-                            ),
-                          );
+                          if (success) {
+                            PrecisionNotification.success(context, "Kurlar başarıyla güncellendi.");
+                          } else {
+                            PrecisionNotification.error(context, "Güncelleme başarısız. İnternet bağlantınızı kontrol edin.");
+                          }
                         },
                         activeColor: activeColor,
                       ),

@@ -33,6 +33,7 @@ class TransactionUI {
 
   final bool showOnDashboard;
   final int dashboardLayoutType;
+  final bool isArchived;
   List<String> groupIds = []; // Çoklu kasa desteği
 
   TransactionUI({
@@ -57,6 +58,7 @@ class TransactionUI {
     this.recurrenceDuration,
     required this.showOnDashboard,
     this.dashboardLayoutType = 4,
+    this.isArchived = false,
     List<String>? groupIds,
   }) : groupIds = groupIds ?? [];
 
@@ -145,6 +147,7 @@ class TransactionUI {
       recurrenceDuration: record.recurrenceDuration,
       showOnDashboard: record.showOnDashboard,
       dashboardLayoutType: record.dashboardLayoutType,
+      isArchived: record.isArchived,
       groupIds: record.vaultIds.map((vId) => 'v_$vId').toList(),
     );
   }

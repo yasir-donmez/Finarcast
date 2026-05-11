@@ -104,7 +104,7 @@ class _AnalysisStatusSectionState extends State<AnalysisStatusSection> with Tick
                     _vipMetricFluid(
                       context,
                       widget.l10n.targetGap,
-                      widget.currencyFormat.format(widget.snapshot.gap.toInt()),
+                      '${widget.snapshot.currencySymbol}${widget.currencyFormat.format(widget.snapshot.gap.toInt())}',
                       Icons.flag_circle_rounded,
                     ),
                     Container(
@@ -159,7 +159,7 @@ class _AnalysisStatusSectionState extends State<AnalysisStatusSection> with Tick
                     textBaseline: TextBaseline.alphabetic,
                     children: [
                       Text(
-                        '₺',
+                        widget.snapshot.currencySymbol,
                         style: TextStyle(
                           color: onTrack ? AppColors.getSuccess(context) : AppColors.getError(context),
                           fontSize: 24,

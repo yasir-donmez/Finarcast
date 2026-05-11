@@ -248,7 +248,7 @@ class _DueDateRadarWidgetState extends ConsumerState<DueDateRadarWidget> {
                   overflow: TextOverflow.ellipsis,
                 ),
                 Text(
-                  '${CurrencyUtils.formatAmount(tx.effectiveAmount)}${tx.currency ?? '₺'}',
+                  CurrencyUtils.formatAmount(tx.effectiveAmount, currencySymbol: tx.currency ?? '₺'),
                   style: TextStyle(
                     fontSize: 8.5, 
                     fontWeight: FontWeight.w900, 
@@ -300,11 +300,16 @@ class _DueDateRadarWidgetState extends ConsumerState<DueDateRadarWidget> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.event_note_rounded, color: Colors.white.withValues(alpha: 0.1), size: 24),
-          const SizedBox(height: 6),
+          Icon(Icons.event_available_rounded, color: Colors.white.withValues(alpha: 0.05), size: 48),
+          const SizedBox(height: 12),
           Text(
-            'Yakın zamanda planlı işlem yok',
-            style: TextStyle(fontSize: 9, fontWeight: FontWeight.w700, color: Colors.white.withValues(alpha: 0.2)),
+            'Yaklaşan Ödeme Bulunmadı',
+            style: TextStyle(
+              color: Colors.white.withValues(alpha: 0.15),
+              fontSize: 10, 
+              fontWeight: FontWeight.w600,
+              letterSpacing: 0.5,
+            ),
           ),
         ],
       ),
@@ -345,14 +350,28 @@ class _DueDateRadarWidgetState extends ConsumerState<DueDateRadarWidget> {
       }
 
       // 1 Yıllık pencere içindeki tüm tekrarları ekle
-      int count = 0;
-      while (currentOccurrence.isBefore(limit)) {
-        // Klon oluşturarak farklı tarihlerle listeye ekle
-        // Eğer bir "Kez" sınırı (recurrenceDuration) varsa ve dolmuşsa ekleme
-        if (tx.recurrenceDuration != null && tx.recurrenceDuration! > 0) {
-          // Burada basit bir "kaçıncı taksit" hesabı yapılabilir
-          // Şimdilik ana mantığa odaklanalım
+      int occurrencesProjected = 0;
+      
+      // Toplam limit hesabı:
+      // 1. Taksit varsa: Taksit sayısı kadar göster.
+      // 2. Taksit yoksa ama Duration (Tekrar Adedi) varsa: Başlangıçtan itibaren toplam adede bak.
+      int? maxOccurrences;
+      if (tx.remainingInstallments != null && tx.remainingInstallments! > 0) {
+        maxOccurrences = tx.remainingInstallments;
+      } else if (tx.recurrenceDuration != null && tx.recurrenceDuration! > 0) {
+        // Başlangıçtan bugüne kaç tane geçtiğini bulalım
+        DateTime pastOccurrence = DateTime(anchorDate.year, anchorDate.month, anchorDate.day, anchorDate.hour, anchorDate.minute);
+        int passedCount = 0;
+        while (pastOccurrence.isBefore(today)) {
+          pastOccurrence = _getNextOccurrence(pastOccurrence, tx.periodType);
+          passedCount++;
         }
+        maxOccurrences = math.max(0, tx.recurrenceDuration! - (passedCount - 1)); // -1 çünkü today'e kadar olanları saydık
+      }
+
+      while (currentOccurrence.isBefore(limit)) {
+        // Limit dolduysa dur
+        if (maxOccurrences != null && occurrencesProjected >= maxOccurrences) break;
 
         // Klon oluşturarak farklı tarihlerle listeye ekle
         final projectedTx = TransactionRecord()
@@ -371,8 +390,8 @@ class _DueDateRadarWidgetState extends ConsumerState<DueDateRadarWidget> {
         projectedItems.add(projectedTx);
         
         currentOccurrence = _getNextOccurrence(currentOccurrence, tx.periodType);
-        count++;
-        if (count > 100) break; // Sonsuz döngü koruması
+        occurrencesProjected++;
+        if (occurrencesProjected > 100) break; // Sonsuz döngü koruması
       }
     }
 

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
-import '../../core/services/subscription_service.dart';
 import '../../l10n/app_localizations.dart';
 import '../../core/theme/app_constants.dart';
 import '../../shared/widgets/precision_sheet.dart';
@@ -12,7 +11,7 @@ import '../../shared/widgets/precision_theme_toggle.dart';
 
 // Modular Widgets
 import 'widgets/etched_liquid_text.dart';
-import 'widgets/membership_card.dart';
+import 'widgets/settings/subscription_setting.dart';
 import 'widgets/profile_list_items.dart';
 
 // Modular Settings
@@ -63,7 +62,6 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final activeColor = ref.watch(rotaryColorProvider);
-    final subscription = ref.watch(subscriptionServiceProvider);
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return SafeArea(
@@ -98,15 +96,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             sliver: SliverList(
               delegate: SliverChildListDelegate([
                 const SizedBox(height: 10),
-                MembershipCard(
-                  l10n: l10n,
-                  isPro: subscription.isPro,
-                  activeColor: activeColor,
-                  onTap: () async {
-                    final currentPro = ref.read(subscriptionServiceProvider).isPro;
-                    await ref.read(subscriptionServiceProvider).setProStatus(!currentPro);
-                  },
-                ),
+                ProfileListItems.buildSectionTitle(l10n.membership, activeColor),
+                const SizedBox(height: 12),
+                const SubscriptionSetting(),
 
                 const SizedBox(height: 30),
                 ProfileListItems.buildSectionTitle(l10n.preferences, activeColor, key: _preferencesKey),

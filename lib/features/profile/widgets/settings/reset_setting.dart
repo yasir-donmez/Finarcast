@@ -8,6 +8,7 @@ import '../profile_list_items.dart';
 import '../../../../core/providers/db_providers.dart';
 import '../../../../core/providers/settings_provider.dart';
 import '../../../../core/database/database_service.dart';
+import '../../../../shared/widgets/precision_notification.dart';
 
 class ResetSetting extends ConsumerWidget {
   const ResetSetting({super.key});
@@ -52,12 +53,7 @@ class ResetSetting extends ConsumerWidget {
             
             if (context.mounted) {
               Navigator.pop(context);
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text("Tüm veriler ve ayarlar başarıyla sıfırlandı."),
-                  backgroundColor: Colors.redAccent,
-                ),
-              );
+              PrecisionNotification.success(context, "Tüm veriler ve ayarlar başarıyla sıfırlandı.");
             }
           },
         ),
