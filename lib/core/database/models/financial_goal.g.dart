@@ -37,43 +37,48 @@ const FinancialGoalSchema = CollectionSchema(
       name: r'createdAt',
       type: IsarType.dateTime,
     ),
-    r'rejectedCategories': PropertySchema(
+    r'currencySymbol': PropertySchema(
       id: 4,
+      name: r'currencySymbol',
+      type: IsarType.string,
+    ),
+    r'rejectedCategories': PropertySchema(
+      id: 5,
       name: r'rejectedCategories',
       type: IsarType.stringList,
     ),
     r'remoteId': PropertySchema(
-      id: 5,
+      id: 6,
       name: r'remoteId',
       type: IsarType.string,
     ),
     r'syncStatus': PropertySchema(
-      id: 6,
+      id: 7,
       name: r'syncStatus',
       type: IsarType.long,
     ),
     r'targetAmount': PropertySchema(
-      id: 7,
+      id: 8,
       name: r'targetAmount',
       type: IsarType.double,
     ),
     r'targetDate': PropertySchema(
-      id: 8,
+      id: 9,
       name: r'targetDate',
       type: IsarType.dateTime,
     ),
     r'updatedAt': PropertySchema(
-      id: 9,
+      id: 10,
       name: r'updatedAt',
       type: IsarType.dateTime,
     ),
     r'userApproved': PropertySchema(
-      id: 10,
+      id: 11,
       name: r'userApproved',
       type: IsarType.bool,
     ),
     r'vaultId': PropertySchema(
-      id: 11,
+      id: 12,
       name: r'vaultId',
       type: IsarType.long,
     )
@@ -156,6 +161,7 @@ int _financialGoalEstimateSize(
       bytesCount += 3 + value.length * 3;
     }
   }
+  bytesCount += 3 + object.currencySymbol.length * 3;
   bytesCount += 3 + object.rejectedCategories.length * 3;
   {
     for (var i = 0; i < object.rejectedCategories.length; i++) {
@@ -182,14 +188,15 @@ void _financialGoalSerialize(
   writer.writeString(offsets[1], object.aiStrategyText);
   writer.writeString(offsets[2], object.analysisRawData);
   writer.writeDateTime(offsets[3], object.createdAt);
-  writer.writeStringList(offsets[4], object.rejectedCategories);
-  writer.writeString(offsets[5], object.remoteId);
-  writer.writeLong(offsets[6], object.syncStatus);
-  writer.writeDouble(offsets[7], object.targetAmount);
-  writer.writeDateTime(offsets[8], object.targetDate);
-  writer.writeDateTime(offsets[9], object.updatedAt);
-  writer.writeBool(offsets[10], object.userApproved);
-  writer.writeLong(offsets[11], object.vaultId);
+  writer.writeString(offsets[4], object.currencySymbol);
+  writer.writeStringList(offsets[5], object.rejectedCategories);
+  writer.writeString(offsets[6], object.remoteId);
+  writer.writeLong(offsets[7], object.syncStatus);
+  writer.writeDouble(offsets[8], object.targetAmount);
+  writer.writeDateTime(offsets[9], object.targetDate);
+  writer.writeDateTime(offsets[10], object.updatedAt);
+  writer.writeBool(offsets[11], object.userApproved);
+  writer.writeLong(offsets[12], object.vaultId);
 }
 
 FinancialGoal _financialGoalDeserialize(
@@ -203,15 +210,16 @@ FinancialGoal _financialGoalDeserialize(
   object.aiStrategyText = reader.readStringOrNull(offsets[1]);
   object.analysisRawData = reader.readStringOrNull(offsets[2]);
   object.createdAt = reader.readDateTime(offsets[3]);
+  object.currencySymbol = reader.readString(offsets[4]);
   object.id = id;
-  object.rejectedCategories = reader.readStringList(offsets[4]) ?? [];
-  object.remoteId = reader.readStringOrNull(offsets[5]);
-  object.syncStatus = reader.readLong(offsets[6]);
-  object.targetAmount = reader.readDouble(offsets[7]);
-  object.targetDate = reader.readDateTimeOrNull(offsets[8]);
-  object.updatedAt = reader.readDateTime(offsets[9]);
-  object.userApproved = reader.readBoolOrNull(offsets[10]);
-  object.vaultId = reader.readLongOrNull(offsets[11]);
+  object.rejectedCategories = reader.readStringList(offsets[5]) ?? [];
+  object.remoteId = reader.readStringOrNull(offsets[6]);
+  object.syncStatus = reader.readLong(offsets[7]);
+  object.targetAmount = reader.readDouble(offsets[8]);
+  object.targetDate = reader.readDateTimeOrNull(offsets[9]);
+  object.updatedAt = reader.readDateTime(offsets[10]);
+  object.userApproved = reader.readBoolOrNull(offsets[11]);
+  object.vaultId = reader.readLongOrNull(offsets[12]);
   return object;
 }
 
@@ -231,20 +239,22 @@ P _financialGoalDeserializeProp<P>(
     case 3:
       return (reader.readDateTime(offset)) as P;
     case 4:
-      return (reader.readStringList(offset) ?? []) as P;
+      return (reader.readString(offset)) as P;
     case 5:
-      return (reader.readStringOrNull(offset)) as P;
+      return (reader.readStringList(offset) ?? []) as P;
     case 6:
-      return (reader.readLong(offset)) as P;
+      return (reader.readStringOrNull(offset)) as P;
     case 7:
-      return (reader.readDouble(offset)) as P;
+      return (reader.readLong(offset)) as P;
     case 8:
-      return (reader.readDateTimeOrNull(offset)) as P;
+      return (reader.readDouble(offset)) as P;
     case 9:
-      return (reader.readDateTime(offset)) as P;
+      return (reader.readDateTimeOrNull(offset)) as P;
     case 10:
-      return (reader.readBoolOrNull(offset)) as P;
+      return (reader.readDateTime(offset)) as P;
     case 11:
+      return (reader.readBoolOrNull(offset)) as P;
+    case 12:
       return (reader.readLongOrNull(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -1134,6 +1144,142 @@ extension FinancialGoalQueryFilter
     });
   }
 
+  QueryBuilder<FinancialGoal, FinancialGoal, QAfterFilterCondition>
+      currencySymbolEqualTo(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'currencySymbol',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<FinancialGoal, FinancialGoal, QAfterFilterCondition>
+      currencySymbolGreaterThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'currencySymbol',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<FinancialGoal, FinancialGoal, QAfterFilterCondition>
+      currencySymbolLessThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'currencySymbol',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<FinancialGoal, FinancialGoal, QAfterFilterCondition>
+      currencySymbolBetween(
+    String lower,
+    String upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'currencySymbol',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<FinancialGoal, FinancialGoal, QAfterFilterCondition>
+      currencySymbolStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.startsWith(
+        property: r'currencySymbol',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<FinancialGoal, FinancialGoal, QAfterFilterCondition>
+      currencySymbolEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.endsWith(
+        property: r'currencySymbol',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<FinancialGoal, FinancialGoal, QAfterFilterCondition>
+      currencySymbolContains(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.contains(
+        property: r'currencySymbol',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<FinancialGoal, FinancialGoal, QAfterFilterCondition>
+      currencySymbolMatches(String pattern, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.matches(
+        property: r'currencySymbol',
+        wildcard: pattern,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<FinancialGoal, FinancialGoal, QAfterFilterCondition>
+      currencySymbolIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'currencySymbol',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<FinancialGoal, FinancialGoal, QAfterFilterCondition>
+      currencySymbolIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        property: r'currencySymbol',
+        value: '',
+      ));
+    });
+  }
+
   QueryBuilder<FinancialGoal, FinancialGoal, QAfterFilterCondition> idEqualTo(
       Id value) {
     return QueryBuilder.apply(this, (query) {
@@ -1987,6 +2133,20 @@ extension FinancialGoalQuerySortBy
     });
   }
 
+  QueryBuilder<FinancialGoal, FinancialGoal, QAfterSortBy>
+      sortByCurrencySymbol() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'currencySymbol', Sort.asc);
+    });
+  }
+
+  QueryBuilder<FinancialGoal, FinancialGoal, QAfterSortBy>
+      sortByCurrencySymbolDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'currencySymbol', Sort.desc);
+    });
+  }
+
   QueryBuilder<FinancialGoal, FinancialGoal, QAfterSortBy> sortByRemoteId() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'remoteId', Sort.asc);
@@ -2137,6 +2297,20 @@ extension FinancialGoalQuerySortThenBy
     });
   }
 
+  QueryBuilder<FinancialGoal, FinancialGoal, QAfterSortBy>
+      thenByCurrencySymbol() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'currencySymbol', Sort.asc);
+    });
+  }
+
+  QueryBuilder<FinancialGoal, FinancialGoal, QAfterSortBy>
+      thenByCurrencySymbolDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'currencySymbol', Sort.desc);
+    });
+  }
+
   QueryBuilder<FinancialGoal, FinancialGoal, QAfterSortBy> thenById() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'id', Sort.asc);
@@ -2275,6 +2449,14 @@ extension FinancialGoalQueryWhereDistinct
   }
 
   QueryBuilder<FinancialGoal, FinancialGoal, QDistinct>
+      distinctByCurrencySymbol({bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'currencySymbol',
+          caseSensitive: caseSensitive);
+    });
+  }
+
+  QueryBuilder<FinancialGoal, FinancialGoal, QDistinct>
       distinctByRejectedCategories() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'rejectedCategories');
@@ -2359,6 +2541,13 @@ extension FinancialGoalQueryProperty
   QueryBuilder<FinancialGoal, DateTime, QQueryOperations> createdAtProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'createdAt');
+    });
+  }
+
+  QueryBuilder<FinancialGoal, String, QQueryOperations>
+      currencySymbolProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'currencySymbol');
     });
   }
 

@@ -29,9 +29,11 @@ class ProfileListItems {
     required Color activeColor,
     required BuildContext context,
     bool isAction = false,
+    BorderRadius? borderRadius,
   }) {
     return PrecisionAction(
       onTap: onTap,
+      borderRadius: borderRadius,
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Row(

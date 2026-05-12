@@ -62,28 +62,29 @@ class _PrecisionActionState extends State<PrecisionAction> {
             color: _isPressed && hasPressedColor 
                 ? widget.pressedColor 
                 : (widget.color ?? Colors.transparent),
-            borderRadius: widget.borderRadius ?? BorderRadius.circular(12),
+            borderRadius: widget.borderRadius ?? BorderRadius.circular(16),
           ),
-          child: Stack(
-            alignment: Alignment.center,
-            children: [
-              // Flash Overlay (Always present, but opacity animated to prevent layout jumps)
-              if (widget.showFlash && !hasPressedColor)
-                Positioned.fill(
-                  child: AnimatedOpacity(
-                    duration: const Duration(milliseconds: 100),
-                    opacity: _isPressed ? 1.0 : 0.0,
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: Colors.white.withValues(alpha: 0.15), // Reduced alpha for better blending
-                        borderRadius: widget.borderRadius ?? BorderRadius.circular(12),
+          child: widget.showFlash && !hasPressedColor
+              ? Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    // Flash Overlay
+                    Positioned.fill(
+                      child: AnimatedOpacity(
+                        duration: const Duration(milliseconds: 100),
+                        opacity: _isPressed ? 1.0 : 0.0,
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: Colors.white.withValues(alpha: 0.15),
+                            borderRadius: widget.borderRadius ?? BorderRadius.circular(16),
+                          ),
+                        ),
                       ),
                     ),
-                  ),
-                ),
-              widget.child,
-            ],
-          ),
+                    widget.child,
+                  ],
+                )
+              : widget.child,
         ),
       ),
     );

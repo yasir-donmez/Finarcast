@@ -35,6 +35,12 @@ class TransactionUI {
   final int dashboardLayoutType;
   final bool isArchived;
   List<String> groupIds = []; // Çoklu kasa desteği
+  
+  // --- Bildirim Ayarları ---
+  final bool isNotificationEnabled;
+  final int notificationReminderDays;
+  final int notificationHour;
+  final int notificationMinute;
 
   TransactionUI({
     required this.id,
@@ -60,6 +66,10 @@ class TransactionUI {
     this.dashboardLayoutType = 4,
     this.isArchived = false,
     List<String>? groupIds,
+    this.isNotificationEnabled = false,
+    this.notificationReminderDays = 0,
+    this.notificationHour = 9,
+    this.notificationMinute = 0,
   }) : groupIds = groupIds ?? [];
 
   /// Belirli bir tutarın aylık karşılığını hesaplar.
@@ -149,6 +159,10 @@ class TransactionUI {
       dashboardLayoutType: record.dashboardLayoutType,
       isArchived: record.isArchived,
       groupIds: record.vaultIds.map((vId) => 'v_$vId').toList(),
+      isNotificationEnabled: record.isNotificationEnabled,
+      notificationReminderDays: record.notificationReminderDays,
+      notificationHour: record.notificationHour,
+      notificationMinute: record.notificationMinute,
     );
   }
 }

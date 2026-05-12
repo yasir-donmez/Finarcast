@@ -7,6 +7,7 @@ import '../transactions/add_transaction_screen.dart';
 import 'dashboard_screen.dart';
 import 'dashboard_providers.dart';
 import '../vaults/vaults_screen.dart';
+import '../vaults/vaults_providers.dart';
 import '../optimization/optimization_screen.dart';
 import '../profile/profile_screen.dart';
 import '../../shared/widgets/precision_surface.dart';
@@ -67,10 +68,23 @@ class _MainScaffoldState extends ConsumerState<MainScaffold> {
   }
 
   void _openTransactionScreen() {
+    // YENİ: Kasalar sayfasındaysak ve bir kasa seçili ise onu varsayılan olarak gönder
+    final selectedVaultId = ref.read(selectedVaultProvider);
+    List<int>? vaultIds;
+    
+    if (_currentIndex == 1 && selectedVaultId != null) {
+      final vId = int.tryParse(selectedVaultId.replaceFirst('v_', ''));
+      if (vId != null) {
+        vaultIds = [vId];
+      }
+    }
+
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => const AddTransactionScreen(),
+        builder: (context) => AddTransactionScreen(
+          initialVaultIds: vaultIds,
+        ),
         fullscreenDialog: true,
       ),
     );

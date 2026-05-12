@@ -76,6 +76,12 @@ class TransactionRecord {
   /// İşlemin yapıldığı konumun koordinatları
   double? latitude;
   double? longitude;
+  
+  // --- Bildirim Ayarları ---
+  bool isNotificationEnabled = false;
+  int notificationReminderDays = 0; // 0: Aynı gün, 1: Bir gün önce...
+  int notificationHour = 9;
+  int notificationMinute = 0;
 
   /// --- Senkronizasyon Alanları ---
   /// Sunucu anahtarı (UUID)

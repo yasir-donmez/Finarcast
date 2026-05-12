@@ -72,7 +72,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
         slivers: [
           SliverToBoxAdapter(
             child: Padding(
-              padding: const EdgeInsets.only(top: 40, bottom: 20),
+              padding: const EdgeInsets.only(top: 120, bottom: 40),
               child: Center(
                 child: RepaintBoundary(
                   child: ValueListenableBuilder<double>(
@@ -95,12 +95,12 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             padding: const EdgeInsets.symmetric(horizontal: AppSizes.paddingLarge),
             sliver: SliverList(
               delegate: SliverChildListDelegate([
-                const SizedBox(height: 10),
+                const SizedBox(height: 20),
                 ProfileListItems.buildSectionTitle(l10n.membership, activeColor),
                 const SizedBox(height: 12),
                 const SubscriptionSetting(),
 
-                const SizedBox(height: 30),
+                const SizedBox(height: 50),
                 ProfileListItems.buildSectionTitle(l10n.preferences, activeColor, key: _preferencesKey),
                 const SizedBox(height: 12),
                 PrecisionCard(
@@ -124,7 +124,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   ),
                 ),
 
-                const SizedBox(height: 40),
+                const SizedBox(height: 60),
                 ProfileListItems.buildSectionTitle(l10n.dataAndAiSettings, activeColor, key: _dataAiKey),
                 const SizedBox(height: 16),
                 PrecisionCard(
@@ -138,7 +138,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   ),
                 ),
 
-                const SizedBox(height: 40),
+                const SizedBox(height: 60),
                 ProfileListItems.buildSectionTitle(
                   l10n.dataManagement, 
                   AppColors.getSecondary(context), 
@@ -174,7 +174,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   ),
                 ),
 
-                const SizedBox(height: 40),
+                const SizedBox(height: 60),
                 ProfileListItems.buildSectionTitle(
                   l10n.support, 
                   AppColors.getPrimary(context), 

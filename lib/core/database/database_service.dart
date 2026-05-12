@@ -6,6 +6,8 @@ import 'models/vault.dart';
 import 'models/financial_goal.dart';
 import 'models/app_settings.dart';
 import 'models/exchange_rate.dart';
+import 'models/custom_category.dart';
+import '../services/notification_service.dart';
 
 /// Isar Veritabanı Servisi — Singleton
 class DatabaseService {
@@ -33,6 +35,7 @@ class DatabaseService {
         FinancialGoalSchema,
         AppSettingsSchema,
         ExchangeRateSchema,
+        CustomCategorySchema,
       ], directory: dir.path);
       debugPrint('✅ [DatabaseService] Isar başarıyla açıldı.');
 
@@ -60,9 +63,12 @@ class DatabaseService {
   static Future<int> addTransaction(TransactionRecord tx) async {
     tx.updatedAt = DateTime.now();
     tx.syncStatus = 1; // Pending
-    return await isar.writeTxn(() async {
+    final id = await isar.writeTxn(() async {
       return await isar.transactionRecords.put(tx);
     });
+    // Bildirimi zamanla
+    await NotificationService().scheduleTransactionNotification(tx..id = id);
+    return id;
   }
 
   /// İşlemi güncelle
@@ -72,6 +78,8 @@ class DatabaseService {
     await isar.writeTxn(() async {
       await isar.transactionRecords.put(tx);
     });
+    // Bildirimi güncelle
+    await NotificationService().scheduleTransactionNotification(tx);
   }
 
   /// İşlemi sil
@@ -79,6 +87,8 @@ class DatabaseService {
     await isar.writeTxn(() async {
       await isar.transactionRecords.delete(id);
     });
+    // Bildirimi iptal et
+    await NotificationService().cancelNotification(id);
   }
 
   /// Birden fazla işlemi sil

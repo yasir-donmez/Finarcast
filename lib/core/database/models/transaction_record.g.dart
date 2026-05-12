@@ -67,83 +67,103 @@ const TransactionRecordSchema = CollectionSchema(
       name: r'isLocked',
       type: IsarType.bool,
     ),
-    r'latitude': PropertySchema(
+    r'isNotificationEnabled': PropertySchema(
       id: 10,
+      name: r'isNotificationEnabled',
+      type: IsarType.bool,
+    ),
+    r'latitude': PropertySchema(
+      id: 11,
       name: r'latitude',
       type: IsarType.double,
     ),
     r'longitude': PropertySchema(
-      id: 11,
+      id: 12,
       name: r'longitude',
       type: IsarType.double,
     ),
     r'maxAmount': PropertySchema(
-      id: 12,
+      id: 13,
       name: r'maxAmount',
       type: IsarType.double,
     ),
     r'minAmount': PropertySchema(
-      id: 13,
+      id: 14,
       name: r'minAmount',
       type: IsarType.double,
     ),
     r'note': PropertySchema(
-      id: 14,
+      id: 15,
       name: r'note',
       type: IsarType.string,
     ),
+    r'notificationHour': PropertySchema(
+      id: 16,
+      name: r'notificationHour',
+      type: IsarType.long,
+    ),
+    r'notificationMinute': PropertySchema(
+      id: 17,
+      name: r'notificationMinute',
+      type: IsarType.long,
+    ),
+    r'notificationReminderDays': PropertySchema(
+      id: 18,
+      name: r'notificationReminderDays',
+      type: IsarType.long,
+    ),
     r'periodType': PropertySchema(
-      id: 15,
+      id: 19,
       name: r'periodType',
       type: IsarType.long,
     ),
     r'recurrenceDate': PropertySchema(
-      id: 16,
+      id: 20,
       name: r'recurrenceDate',
       type: IsarType.dateTime,
     ),
     r'recurrenceDay': PropertySchema(
-      id: 17,
+      id: 21,
       name: r'recurrenceDay',
       type: IsarType.long,
     ),
     r'recurrenceDuration': PropertySchema(
-      id: 18,
+      id: 22,
       name: r'recurrenceDuration',
       type: IsarType.long,
     ),
     r'remainingInstallments': PropertySchema(
-      id: 19,
+      id: 23,
       name: r'remainingInstallments',
       type: IsarType.long,
     ),
     r'remoteId': PropertySchema(
-      id: 20,
+      id: 24,
       name: r'remoteId',
       type: IsarType.string,
     ),
     r'showOnDashboard': PropertySchema(
-      id: 21,
+      id: 25,
       name: r'showOnDashboard',
       type: IsarType.bool,
     ),
     r'syncStatus': PropertySchema(
-      id: 22,
+      id: 26,
       name: r'syncStatus',
       type: IsarType.long,
     ),
     r'title': PropertySchema(
-      id: 23,
+      id: 27,
       name: r'title',
       type: IsarType.string,
     ),
     r'updatedAt': PropertySchema(
-      id: 24,
+      id: 28,
       name: r'updatedAt',
       type: IsarType.dateTime,
     ),
     r'vaultIds': PropertySchema(
-      id: 25,
+      id: 29,
       name: r'vaultIds',
       type: IsarType.longList,
     )
@@ -259,22 +279,26 @@ void _transactionRecordSerialize(
   writer.writeBool(offsets[7], object.isArchived);
   writer.writeBool(offsets[8], object.isIncome);
   writer.writeBool(offsets[9], object.isLocked);
-  writer.writeDouble(offsets[10], object.latitude);
-  writer.writeDouble(offsets[11], object.longitude);
-  writer.writeDouble(offsets[12], object.maxAmount);
-  writer.writeDouble(offsets[13], object.minAmount);
-  writer.writeString(offsets[14], object.note);
-  writer.writeLong(offsets[15], object.periodType);
-  writer.writeDateTime(offsets[16], object.recurrenceDate);
-  writer.writeLong(offsets[17], object.recurrenceDay);
-  writer.writeLong(offsets[18], object.recurrenceDuration);
-  writer.writeLong(offsets[19], object.remainingInstallments);
-  writer.writeString(offsets[20], object.remoteId);
-  writer.writeBool(offsets[21], object.showOnDashboard);
-  writer.writeLong(offsets[22], object.syncStatus);
-  writer.writeString(offsets[23], object.title);
-  writer.writeDateTime(offsets[24], object.updatedAt);
-  writer.writeLongList(offsets[25], object.vaultIds);
+  writer.writeBool(offsets[10], object.isNotificationEnabled);
+  writer.writeDouble(offsets[11], object.latitude);
+  writer.writeDouble(offsets[12], object.longitude);
+  writer.writeDouble(offsets[13], object.maxAmount);
+  writer.writeDouble(offsets[14], object.minAmount);
+  writer.writeString(offsets[15], object.note);
+  writer.writeLong(offsets[16], object.notificationHour);
+  writer.writeLong(offsets[17], object.notificationMinute);
+  writer.writeLong(offsets[18], object.notificationReminderDays);
+  writer.writeLong(offsets[19], object.periodType);
+  writer.writeDateTime(offsets[20], object.recurrenceDate);
+  writer.writeLong(offsets[21], object.recurrenceDay);
+  writer.writeLong(offsets[22], object.recurrenceDuration);
+  writer.writeLong(offsets[23], object.remainingInstallments);
+  writer.writeString(offsets[24], object.remoteId);
+  writer.writeBool(offsets[25], object.showOnDashboard);
+  writer.writeLong(offsets[26], object.syncStatus);
+  writer.writeString(offsets[27], object.title);
+  writer.writeDateTime(offsets[28], object.updatedAt);
+  writer.writeLongList(offsets[29], object.vaultIds);
 }
 
 TransactionRecord _transactionRecordDeserialize(
@@ -295,22 +319,26 @@ TransactionRecord _transactionRecordDeserialize(
   object.isArchived = reader.readBool(offsets[7]);
   object.isIncome = reader.readBool(offsets[8]);
   object.isLocked = reader.readBool(offsets[9]);
-  object.latitude = reader.readDoubleOrNull(offsets[10]);
-  object.longitude = reader.readDoubleOrNull(offsets[11]);
-  object.maxAmount = reader.readDoubleOrNull(offsets[12]);
-  object.minAmount = reader.readDoubleOrNull(offsets[13]);
-  object.note = reader.readStringOrNull(offsets[14]);
-  object.periodType = reader.readLong(offsets[15]);
-  object.recurrenceDate = reader.readDateTimeOrNull(offsets[16]);
-  object.recurrenceDay = reader.readLongOrNull(offsets[17]);
-  object.recurrenceDuration = reader.readLongOrNull(offsets[18]);
-  object.remainingInstallments = reader.readLongOrNull(offsets[19]);
-  object.remoteId = reader.readStringOrNull(offsets[20]);
-  object.showOnDashboard = reader.readBool(offsets[21]);
-  object.syncStatus = reader.readLong(offsets[22]);
-  object.title = reader.readString(offsets[23]);
-  object.updatedAt = reader.readDateTime(offsets[24]);
-  object.vaultIds = reader.readLongList(offsets[25]) ?? [];
+  object.isNotificationEnabled = reader.readBool(offsets[10]);
+  object.latitude = reader.readDoubleOrNull(offsets[11]);
+  object.longitude = reader.readDoubleOrNull(offsets[12]);
+  object.maxAmount = reader.readDoubleOrNull(offsets[13]);
+  object.minAmount = reader.readDoubleOrNull(offsets[14]);
+  object.note = reader.readStringOrNull(offsets[15]);
+  object.notificationHour = reader.readLong(offsets[16]);
+  object.notificationMinute = reader.readLong(offsets[17]);
+  object.notificationReminderDays = reader.readLong(offsets[18]);
+  object.periodType = reader.readLong(offsets[19]);
+  object.recurrenceDate = reader.readDateTimeOrNull(offsets[20]);
+  object.recurrenceDay = reader.readLongOrNull(offsets[21]);
+  object.recurrenceDuration = reader.readLongOrNull(offsets[22]);
+  object.remainingInstallments = reader.readLongOrNull(offsets[23]);
+  object.remoteId = reader.readStringOrNull(offsets[24]);
+  object.showOnDashboard = reader.readBool(offsets[25]);
+  object.syncStatus = reader.readLong(offsets[26]);
+  object.title = reader.readString(offsets[27]);
+  object.updatedAt = reader.readDateTime(offsets[28]);
+  object.vaultIds = reader.readLongList(offsets[29]) ?? [];
   return object;
 }
 
@@ -342,7 +370,7 @@ P _transactionRecordDeserializeProp<P>(
     case 9:
       return (reader.readBool(offset)) as P;
     case 10:
-      return (reader.readDoubleOrNull(offset)) as P;
+      return (reader.readBool(offset)) as P;
     case 11:
       return (reader.readDoubleOrNull(offset)) as P;
     case 12:
@@ -350,28 +378,36 @@ P _transactionRecordDeserializeProp<P>(
     case 13:
       return (reader.readDoubleOrNull(offset)) as P;
     case 14:
-      return (reader.readStringOrNull(offset)) as P;
+      return (reader.readDoubleOrNull(offset)) as P;
     case 15:
-      return (reader.readLong(offset)) as P;
-    case 16:
-      return (reader.readDateTimeOrNull(offset)) as P;
-    case 17:
-      return (reader.readLongOrNull(offset)) as P;
-    case 18:
-      return (reader.readLongOrNull(offset)) as P;
-    case 19:
-      return (reader.readLongOrNull(offset)) as P;
-    case 20:
       return (reader.readStringOrNull(offset)) as P;
-    case 21:
-      return (reader.readBool(offset)) as P;
-    case 22:
+    case 16:
       return (reader.readLong(offset)) as P;
+    case 17:
+      return (reader.readLong(offset)) as P;
+    case 18:
+      return (reader.readLong(offset)) as P;
+    case 19:
+      return (reader.readLong(offset)) as P;
+    case 20:
+      return (reader.readDateTimeOrNull(offset)) as P;
+    case 21:
+      return (reader.readLongOrNull(offset)) as P;
+    case 22:
+      return (reader.readLongOrNull(offset)) as P;
     case 23:
-      return (reader.readString(offset)) as P;
+      return (reader.readLongOrNull(offset)) as P;
     case 24:
-      return (reader.readDateTime(offset)) as P;
+      return (reader.readStringOrNull(offset)) as P;
     case 25:
+      return (reader.readBool(offset)) as P;
+    case 26:
+      return (reader.readLong(offset)) as P;
+    case 27:
+      return (reader.readString(offset)) as P;
+    case 28:
+      return (reader.readDateTime(offset)) as P;
+    case 29:
       return (reader.readLongList(offset) ?? []) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -1528,6 +1564,16 @@ extension TransactionRecordQueryFilter
   }
 
   QueryBuilder<TransactionRecord, TransactionRecord, QAfterFilterCondition>
+      isNotificationEnabledEqualTo(bool value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'isNotificationEnabled',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<TransactionRecord, TransactionRecord, QAfterFilterCondition>
       latitudeIsNull() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(const FilterCondition.isNull(
@@ -2013,6 +2059,174 @@ extension TransactionRecordQueryFilter
       return query.addFilterCondition(FilterCondition.greaterThan(
         property: r'note',
         value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<TransactionRecord, TransactionRecord, QAfterFilterCondition>
+      notificationHourEqualTo(int value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'notificationHour',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<TransactionRecord, TransactionRecord, QAfterFilterCondition>
+      notificationHourGreaterThan(
+    int value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'notificationHour',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<TransactionRecord, TransactionRecord, QAfterFilterCondition>
+      notificationHourLessThan(
+    int value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'notificationHour',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<TransactionRecord, TransactionRecord, QAfterFilterCondition>
+      notificationHourBetween(
+    int lower,
+    int upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'notificationHour',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+      ));
+    });
+  }
+
+  QueryBuilder<TransactionRecord, TransactionRecord, QAfterFilterCondition>
+      notificationMinuteEqualTo(int value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'notificationMinute',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<TransactionRecord, TransactionRecord, QAfterFilterCondition>
+      notificationMinuteGreaterThan(
+    int value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'notificationMinute',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<TransactionRecord, TransactionRecord, QAfterFilterCondition>
+      notificationMinuteLessThan(
+    int value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'notificationMinute',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<TransactionRecord, TransactionRecord, QAfterFilterCondition>
+      notificationMinuteBetween(
+    int lower,
+    int upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'notificationMinute',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+      ));
+    });
+  }
+
+  QueryBuilder<TransactionRecord, TransactionRecord, QAfterFilterCondition>
+      notificationReminderDaysEqualTo(int value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'notificationReminderDays',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<TransactionRecord, TransactionRecord, QAfterFilterCondition>
+      notificationReminderDaysGreaterThan(
+    int value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'notificationReminderDays',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<TransactionRecord, TransactionRecord, QAfterFilterCondition>
+      notificationReminderDaysLessThan(
+    int value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'notificationReminderDays',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<TransactionRecord, TransactionRecord, QAfterFilterCondition>
+      notificationReminderDaysBetween(
+    int lower,
+    int upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'notificationReminderDays',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
       ));
     });
   }
@@ -3076,6 +3290,20 @@ extension TransactionRecordQuerySortBy
   }
 
   QueryBuilder<TransactionRecord, TransactionRecord, QAfterSortBy>
+      sortByIsNotificationEnabled() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'isNotificationEnabled', Sort.asc);
+    });
+  }
+
+  QueryBuilder<TransactionRecord, TransactionRecord, QAfterSortBy>
+      sortByIsNotificationEnabledDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'isNotificationEnabled', Sort.desc);
+    });
+  }
+
+  QueryBuilder<TransactionRecord, TransactionRecord, QAfterSortBy>
       sortByLatitude() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'latitude', Sort.asc);
@@ -3142,6 +3370,48 @@ extension TransactionRecordQuerySortBy
       sortByNoteDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'note', Sort.desc);
+    });
+  }
+
+  QueryBuilder<TransactionRecord, TransactionRecord, QAfterSortBy>
+      sortByNotificationHour() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'notificationHour', Sort.asc);
+    });
+  }
+
+  QueryBuilder<TransactionRecord, TransactionRecord, QAfterSortBy>
+      sortByNotificationHourDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'notificationHour', Sort.desc);
+    });
+  }
+
+  QueryBuilder<TransactionRecord, TransactionRecord, QAfterSortBy>
+      sortByNotificationMinute() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'notificationMinute', Sort.asc);
+    });
+  }
+
+  QueryBuilder<TransactionRecord, TransactionRecord, QAfterSortBy>
+      sortByNotificationMinuteDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'notificationMinute', Sort.desc);
+    });
+  }
+
+  QueryBuilder<TransactionRecord, TransactionRecord, QAfterSortBy>
+      sortByNotificationReminderDays() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'notificationReminderDays', Sort.asc);
+    });
+  }
+
+  QueryBuilder<TransactionRecord, TransactionRecord, QAfterSortBy>
+      sortByNotificationReminderDaysDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'notificationReminderDays', Sort.desc);
     });
   }
 
@@ -3442,6 +3712,20 @@ extension TransactionRecordQuerySortThenBy
   }
 
   QueryBuilder<TransactionRecord, TransactionRecord, QAfterSortBy>
+      thenByIsNotificationEnabled() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'isNotificationEnabled', Sort.asc);
+    });
+  }
+
+  QueryBuilder<TransactionRecord, TransactionRecord, QAfterSortBy>
+      thenByIsNotificationEnabledDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'isNotificationEnabled', Sort.desc);
+    });
+  }
+
+  QueryBuilder<TransactionRecord, TransactionRecord, QAfterSortBy>
       thenByLatitude() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'latitude', Sort.asc);
@@ -3508,6 +3792,48 @@ extension TransactionRecordQuerySortThenBy
       thenByNoteDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'note', Sort.desc);
+    });
+  }
+
+  QueryBuilder<TransactionRecord, TransactionRecord, QAfterSortBy>
+      thenByNotificationHour() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'notificationHour', Sort.asc);
+    });
+  }
+
+  QueryBuilder<TransactionRecord, TransactionRecord, QAfterSortBy>
+      thenByNotificationHourDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'notificationHour', Sort.desc);
+    });
+  }
+
+  QueryBuilder<TransactionRecord, TransactionRecord, QAfterSortBy>
+      thenByNotificationMinute() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'notificationMinute', Sort.asc);
+    });
+  }
+
+  QueryBuilder<TransactionRecord, TransactionRecord, QAfterSortBy>
+      thenByNotificationMinuteDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'notificationMinute', Sort.desc);
+    });
+  }
+
+  QueryBuilder<TransactionRecord, TransactionRecord, QAfterSortBy>
+      thenByNotificationReminderDays() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'notificationReminderDays', Sort.asc);
+    });
+  }
+
+  QueryBuilder<TransactionRecord, TransactionRecord, QAfterSortBy>
+      thenByNotificationReminderDaysDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'notificationReminderDays', Sort.desc);
     });
   }
 
@@ -3725,6 +4051,13 @@ extension TransactionRecordQueryWhereDistinct
   }
 
   QueryBuilder<TransactionRecord, TransactionRecord, QDistinct>
+      distinctByIsNotificationEnabled() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'isNotificationEnabled');
+    });
+  }
+
+  QueryBuilder<TransactionRecord, TransactionRecord, QDistinct>
       distinctByLatitude() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'latitude');
@@ -3756,6 +4089,27 @@ extension TransactionRecordQueryWhereDistinct
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'note', caseSensitive: caseSensitive);
+    });
+  }
+
+  QueryBuilder<TransactionRecord, TransactionRecord, QDistinct>
+      distinctByNotificationHour() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'notificationHour');
+    });
+  }
+
+  QueryBuilder<TransactionRecord, TransactionRecord, QDistinct>
+      distinctByNotificationMinute() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'notificationMinute');
+    });
+  }
+
+  QueryBuilder<TransactionRecord, TransactionRecord, QDistinct>
+      distinctByNotificationReminderDays() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'notificationReminderDays');
     });
   }
 
@@ -3910,6 +4264,13 @@ extension TransactionRecordQueryProperty
     });
   }
 
+  QueryBuilder<TransactionRecord, bool, QQueryOperations>
+      isNotificationEnabledProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'isNotificationEnabled');
+    });
+  }
+
   QueryBuilder<TransactionRecord, double?, QQueryOperations>
       latitudeProperty() {
     return QueryBuilder.apply(this, (query) {
@@ -3941,6 +4302,27 @@ extension TransactionRecordQueryProperty
   QueryBuilder<TransactionRecord, String?, QQueryOperations> noteProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'note');
+    });
+  }
+
+  QueryBuilder<TransactionRecord, int, QQueryOperations>
+      notificationHourProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'notificationHour');
+    });
+  }
+
+  QueryBuilder<TransactionRecord, int, QQueryOperations>
+      notificationMinuteProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'notificationMinute');
+    });
+  }
+
+  QueryBuilder<TransactionRecord, int, QQueryOperations>
+      notificationReminderDaysProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'notificationReminderDays');
     });
   }
 

@@ -56,6 +56,7 @@ class TransactionCategorySelector extends StatelessWidget {
             itemBuilder: (context, index) {
               final cat = categories[index];
               final isSelected = index == safeSelectedIndex;
+              final isExpandedLocal = index == expandedCategoryIndex;
               final catColor = cat['color'] as Color;
 
               // Seçili alt model varsa, onun bilgilerini göster
@@ -79,9 +80,7 @@ class TransactionCategorySelector extends StatelessWidget {
                   int newSub = selectedSubModelIndex;
 
                   if (isSelected) {
-                    // Seçili kategoriye tekrar tıklama → açma/kapama
-                    // Her kategoride "+" butonu olacağı için her zaman açılabilir
-                    newExp = isExpanded ? -1 : safeSelectedIndex;
+                    newExp = isExpandedLocal ? -1 : index;
                   } else {
                     newSel = index;
                     newSub = -1;
@@ -99,7 +98,7 @@ class TransactionCategorySelector extends StatelessWidget {
                         duration: const Duration(milliseconds: 400),
                         curve: Curves.easeOutBack,
                         child: AnimatedRotation(
-                          turns: isSelected ? 0.02 : 0.0, // Hafif bir eğim animasyonu
+                          turns: isSelected ? 0.02 : 0.0,
                           duration: const Duration(milliseconds: 500),
                           curve: Curves.elasticOut,
                           child: AnimatedContainer(
@@ -155,11 +154,10 @@ class TransactionCategorySelector extends StatelessWidget {
                           overflow: TextOverflow.ellipsis,
                         ),
                       ),
-                      // Hizalama için her zaman aynı yükseklikte bir alan bırakıyoruz
                       SizedBox(
                         height: 16,
                         child: AnimatedRotation(
-                          turns: isExpanded ? 0.5 : 0.0,
+                          turns: isExpandedLocal ? 0.5 : 0.0,
                           duration: const Duration(milliseconds: 300),
                           curve: Curves.easeInOutCubic,
                           child: Icon(

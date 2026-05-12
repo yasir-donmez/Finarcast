@@ -361,6 +361,19 @@ class _VaultsScreenState extends ConsumerState<VaultsScreen> {
       child: PrecisionDetailSheet(
         transaction: tx,
         onEdit: () {
+          final selectedVaultId = ref.read(selectedVaultProvider);
+          final currentVaultIds = tx.groupIds
+              .map((vId) => int.parse(vId.replaceFirst('v_', '')))
+              .toList();
+          
+          // Eğer bir kasa seçili ise ve işlem bu kasada değilse, düzenleme ekranına bu kasayı da seçili gönder
+          if (selectedVaultId != null) {
+            final vId = int.tryParse(selectedVaultId.replaceFirst('v_', ''));
+            if (vId != null && !currentVaultIds.contains(vId)) {
+              currentVaultIds.add(vId);
+            }
+          }
+
           Navigator.push(
             context,
             MaterialPageRoute(
@@ -371,9 +384,7 @@ class _VaultsScreenState extends ConsumerState<VaultsScreen> {
                 initialMinAmount: tx.minAmount,
                 initialMaxAmount: tx.maxAmount,
                 initialIsIncome: tx.isIncome,
-                initialVaultIds: tx.groupIds
-                    .map((vId) => int.parse(vId.replaceFirst('v_', '')))
-                    .toList(),
+                initialVaultIds: currentVaultIds,
                 initialCategoryId: tx.categoryId,
                 initialNote: tx.note,
                 initialCurrency: tx.currency,
@@ -381,6 +392,10 @@ class _VaultsScreenState extends ConsumerState<VaultsScreen> {
                 initialRecurrenceDay: tx.recurrenceDay,
                 initialRecurrenceDate: tx.recurrenceDate,
                 initialRecurrenceDuration: tx.recurrenceDuration,
+                initialIsNotificationEnabled: tx.isNotificationEnabled,
+                initialNotificationReminderDays: tx.notificationReminderDays,
+                initialNotificationHour: tx.notificationHour,
+                initialNotificationMinute: tx.notificationMinute,
               ),
               fullscreenDialog: true,
             ),

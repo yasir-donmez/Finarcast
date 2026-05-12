@@ -15,6 +15,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'core/services/subscription_service.dart';
+import 'core/services/notification_service.dart';
 
 void main() async {
   try {
@@ -39,6 +40,10 @@ void main() async {
     debugPrint('📦 [FinCast] Veritabanı başlatılıyor...');
     await DatabaseService.init();
     debugPrint('✅ [FinCast] Veritabanı başarıyla başlatıldı.');
+
+    // Bildirimleri başlat
+    debugPrint('🔔 [FinCast] Bildirim servisi başlatılıyor...');
+    await NotificationService().init();
 
     // Döviz kurlarını güncelle (Async - Fire & Forget)
     CurrencyService.updateRates();

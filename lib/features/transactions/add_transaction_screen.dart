@@ -1,3 +1,4 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -9,6 +10,7 @@ import '../../core/database/models/vault.dart';
 import '../../core/services/custom_category_service.dart';
 import '../../core/providers/settings_provider.dart';
 import '../dashboard/dashboard_providers.dart';
+import '../../core/services/notification_service.dart';
 
 import 'widgets/transaction_vault_selector.dart';
 import 'widgets/transaction_currency_selector.dart';
@@ -17,6 +19,8 @@ import 'widgets/transaction_amount_input.dart';
 import 'widgets/transaction_category_data.dart';
 import 'widgets/transaction_category_selector.dart';
 import 'widgets/transaction_period_selector.dart';
+import 'widgets/transaction_reminder_days_selector.dart';
+import 'widgets/transaction_reminder_time_selector.dart';
 import '../../shared/widgets/precision_toggle.dart';
 import '../../shared/widgets/precision_card.dart';
 import '../../shared/widgets/precision_input.dart';
@@ -38,6 +42,12 @@ class AddTransactionScreen extends ConsumerStatefulWidget {
   final int? initialRecurrenceDay;
   final DateTime? initialRecurrenceDate;
   final int? initialRecurrenceDuration;
+  
+  final bool? initialIsNotificationEnabled;
+  final int? initialNotificationReminderDays;
+  final int? initialNotificationHour;
+  final int? initialNotificationMinute;
+
   final VoidCallback? onSuccess;
 
   const AddTransactionScreen({
@@ -56,6 +66,10 @@ class AddTransactionScreen extends ConsumerStatefulWidget {
     this.initialRecurrenceDay,
     this.initialRecurrenceDate,
     this.initialRecurrenceDuration,
+    this.initialIsNotificationEnabled,
+    this.initialNotificationReminderDays,
+    this.initialNotificationHour,
+    this.initialNotificationMinute,
     this.onSuccess,
   });
 
@@ -81,6 +95,9 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
   int _selectedSubModelIndex = -1;
   String _selectedCurrency = '₺';
   late TransactionPeriodData _periodData;
+  bool _isNotificationEnabled = false;
+  int _notificationReminderDays = 0;
+  TimeOfDay _notificationTime = const TimeOfDay(hour: 9, minute: 0);
   bool _isPrefilled = false;
   String? _errorMessage;
 
@@ -125,6 +142,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
   }
 
   void _prefillIfEditing() {
+    // 1. DÜZENLEME MODU (Mevcut İşlem)
     if (widget.initialId != null) {
       _tabIndex = widget.initialIsIncome == true ? 1 : 0;
       if (widget.initialAmount != null) {
@@ -156,6 +174,15 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
         );
       }
       
+      _isNotificationEnabled = widget.initialIsNotificationEnabled ?? false;
+      _notificationReminderDays = widget.initialNotificationReminderDays ?? 0;
+      if (widget.initialNotificationHour != null && widget.initialNotificationMinute != null) {
+        _notificationTime = TimeOfDay(
+          hour: widget.initialNotificationHour!,
+          minute: widget.initialNotificationMinute!,
+        );
+      }
+      
       if (widget.initialCategoryId != null) {
         final categories = _getMergedCategories();
         for (int i = 0; i < categories.length; i++) {
@@ -176,6 +203,21 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
             }
           }
         }
+      }
+    } 
+    // 2. YENİ KAYIT MODU (Parametreler Varsa)
+    else {
+      if (widget.initialIsIncome != null) {
+        _tabIndex = widget.initialIsIncome! ? 1 : 0;
+      }
+      if (widget.initialVaultIds != null) {
+        _selectedVaultIds = List<int>.from(widget.initialVaultIds!);
+      }
+      if (widget.initialCurrency != null) {
+        _selectedCurrency = widget.initialCurrency!;
+      }
+      if (widget.initialIsNotificationEnabled != null) {
+        _isNotificationEnabled = widget.initialIsNotificationEnabled!;
       }
     }
   }
@@ -209,68 +251,130 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
     final parentIcon = parentCat['icon'] as IconData;
     final parentName = parentCat['name'] as String;
 
-    final result = await showDialog<String>(
+    IconData selectedIcon = parentIcon;
+
+    final result = await showDialog<Map<String, dynamic>>(
       context: context,
       builder: (ctx) {
         final isDark = Theme.of(ctx).brightness == Brightness.dark;
-        return AlertDialog(
-          backgroundColor: isDark ? const Color(0xFF1C1C1E) : Colors.white,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-          title: Row(
-            children: [
-              Container(
-                width: 40, height: 40,
-                decoration: BoxDecoration(shape: BoxShape.circle, color: parentColor.withValues(alpha: 0.15)),
-                child: Icon(parentIcon, color: parentColor, size: 20),
+        final List<IconData> iconOptions = [
+          parentIcon,
+          Icons.star_rounded,
+          Icons.favorite_rounded,
+          Icons.shopping_bag_rounded,
+          Icons.restaurant_rounded,
+          Icons.local_cafe_rounded,
+          Icons.directions_car_rounded,
+          Icons.home_rounded,
+          Icons.medical_services_rounded,
+          Icons.school_rounded,
+          Icons.fitness_center_rounded,
+          Icons.sports_esports_rounded,
+          Icons.camera_alt_rounded,
+          Icons.brush_rounded,
+          Icons.construction_rounded,
+          Icons.pets_rounded,
+        ];
+
+        return StatefulBuilder(
+          builder: (context, setDialogState) {
+            return AlertDialog(
+              backgroundColor: isDark ? const Color(0xFF1C1C1E) : Colors.white,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+              title: Row(
+                children: [
+                  Container(
+                    width: 40, height: 40,
+                    decoration: BoxDecoration(shape: BoxShape.circle, color: parentColor.withValues(alpha: 0.15)),
+                    child: Icon(selectedIcon, color: parentColor, size: 20),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(l10n.addCustomCategory, style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800, color: AppColors.getTextPrimary(ctx))),
+                        Text(parentName, style: TextStyle(fontSize: 12, fontWeight: FontWeight.w500, color: parentColor.withValues(alpha: 0.8))),
+                      ],
+                    ),
+                  ),
+                ],
               ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(l10n.addCustomCategory, style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800, color: AppColors.getTextPrimary(ctx))),
-                    Text(parentName, style: TextStyle(fontSize: 12, fontWeight: FontWeight.w500, color: parentColor.withValues(alpha: 0.8))),
-                  ],
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  TextField(
+                    controller: controller,
+                    autofocus: true,
+                    textCapitalization: TextCapitalization.sentences,
+                    maxLength: 30,
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: AppColors.getTextPrimary(ctx)),
+                    decoration: InputDecoration(
+                      hintText: l10n.customCategoryHint,
+                      hintStyle: TextStyle(color: AppColors.getTextSecondary(ctx).withValues(alpha: 0.5), fontWeight: FontWeight.w400),
+                      prefixIcon: Icon(selectedIcon, color: parentColor.withValues(alpha: 0.5), size: 20),
+                      filled: true,
+                      fillColor: (isDark ? Colors.white : Colors.black).withValues(alpha: 0.05),
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide.none),
+                      focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide(color: parentColor.withValues(alpha: 0.4), width: 1.5)),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  SizedBox(
+                    width: double.maxFinite,
+                    child: Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      alignment: WrapAlignment.center,
+                      children: iconOptions.map((icon) {
+                        final isSelected = selectedIcon == icon;
+                        return GestureDetector(
+                          onTap: () => setDialogState(() => selectedIcon = icon),
+                          child: AnimatedContainer(
+                            duration: const Duration(milliseconds: 200),
+                            width: 44,
+                            height: 44,
+                            decoration: BoxDecoration(
+                              color: isSelected ? parentColor.withValues(alpha: 0.2) : Colors.transparent,
+                              shape: BoxShape.circle,
+                              border: Border.all(
+                                color: isSelected ? parentColor : Colors.transparent,
+                                width: 1.5,
+                              ),
+                            ),
+                            child: Icon(icon, color: isSelected ? parentColor : AppColors.getTextSecondary(ctx).withValues(alpha: 0.4), size: 20),
+                          ),
+                        );
+                      }).toList(),
+                    ),
+                  ),
+                ],
+              ),
+              actions: [
+                TextButton(onPressed: () => Navigator.pop(ctx), child: Text(l10n.cancel)),
+                FilledButton(
+                  onPressed: () {
+                    final val = controller.text.trim();
+                    if (val.isNotEmpty) {
+                      Navigator.pop(ctx, {'name': val, 'iconCode': selectedIcon.codePoint});
+                    }
+                  },
+                  style: FilledButton.styleFrom(backgroundColor: parentColor),
+                  child: Text(l10n.save),
                 ),
-              ),
-            ],
-          ),
-          content: TextField(
-            controller: controller,
-            autofocus: true,
-            textCapitalization: TextCapitalization.sentences,
-            maxLength: 30,
-            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: AppColors.getTextPrimary(ctx)),
-            decoration: InputDecoration(
-              hintText: l10n.customCategoryHint,
-              hintStyle: TextStyle(color: AppColors.getTextSecondary(ctx).withValues(alpha: 0.5), fontWeight: FontWeight.w400),
-              prefixIcon: Icon(parentIcon, color: parentColor.withValues(alpha: 0.5), size: 20),
-              filled: true,
-              fillColor: (isDark ? Colors.white : Colors.black).withValues(alpha: 0.05),
-              border: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide.none),
-              focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide(color: parentColor.withValues(alpha: 0.4), width: 1.5)),
-            ),
-            onSubmitted: (val) {
-              if (val.trim().isNotEmpty) Navigator.pop(ctx, val.trim());
-            },
-          ),
-          actions: [
-            TextButton(onPressed: () => Navigator.pop(ctx), child: Text(l10n.cancel)),
-            FilledButton(
-              onPressed: () {
-                final val = controller.text.trim();
-                if (val.isNotEmpty) Navigator.pop(ctx, val);
-              },
-              style: FilledButton.styleFrom(backgroundColor: parentColor),
-              child: Text(l10n.save),
-            ),
-          ],
+              ],
+            );
+          }
         );
       },
     );
 
-    if (result != null && result.isNotEmpty) {
-      await CustomCategoryService.addCustomSubcategory(parentCategoryId, result);
+    if (result != null && result['name'] != null) {
+      await CustomCategoryService.addCustomSubcategory(
+        parentCategoryId, 
+        result['name'] as String, 
+        result['iconCode'] as int,
+      );
       await _loadCustomCategories();
       final merged = _getMergedCategories();
       final parentIndex = merged.indexWhere((c) => c['id'] == parentCategoryId);
@@ -382,6 +486,12 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
         old.recurrenceDuration = _periodData.duration;
         old.note = _noteController.text.isNotEmpty ? _noteController.text : null;
         old.currency = _selectedCurrency;
+        
+        old.isNotificationEnabled = _isNotificationEnabled;
+        old.notificationReminderDays = _notificationReminderDays;
+        old.notificationHour = _notificationTime.hour;
+        old.notificationMinute = _notificationTime.minute;
+        
         await DatabaseService.updateTransaction(old);
       }
     } else {
@@ -416,7 +526,11 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
         ..recurrenceDate = _periodData.selectedDateForRecurrence
         ..recurrenceDuration = _periodData.duration
         ..note = _noteController.text.isNotEmpty ? _noteController.text : null
-        ..currency = _selectedCurrency;
+        ..currency = _selectedCurrency
+        ..isNotificationEnabled = _isNotificationEnabled
+        ..notificationReminderDays = _notificationReminderDays
+        ..notificationHour = _notificationTime.hour
+        ..notificationMinute = _notificationTime.minute;
       
       await DatabaseService.addTransaction(tx);
     }
@@ -443,6 +557,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
     final activeCategories = _getMergedCategories();
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final activeColor = ref.watch(rotaryColorProvider);
+    final double safeTop = MediaQuery.of(context).padding.top;
 
     return Scaffold(
       backgroundColor: AppColors.getBackground(context),
@@ -450,29 +565,141 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
         physics: const BouncingScrollPhysics(),
         slivers: [
           SliverAppBar(
+            expandedHeight: 200,
             pinned: true,
-            expandedHeight: 120,
+            stretch: true,
             backgroundColor: Colors.transparent,
             elevation: 0,
-            flexibleSpace: FlexibleSpaceBar(
-              title: Text(
-                widget.initialId != null ? l10n.edit : l10n.addTransaction,
-                style: TextStyle(color: AppColors.getTextPrimary(context), fontWeight: FontWeight.w900, fontSize: 20, letterSpacing: -0.5),
-              ),
-              centerTitle: false,
-              titlePadding: const EdgeInsets.only(left: 56, bottom: 16),
-              background: Container(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topCenter, end: Alignment.bottomCenter,
-                    colors: [activeColor.withValues(alpha: 0.15), Colors.transparent],
-                  ),
-                ),
-              ),
-            ),
-            leading: IconButton(
-              icon: const Icon(Icons.arrow_back_ios_new_rounded),
-              onPressed: () => Navigator.pop(context),
+            automaticallyImplyLeading: false,
+            flexibleSpace: LayoutBuilder(
+              builder: (context, constraints) {
+                final double currentH = constraints.biggest.height;
+                final double minH = kToolbarHeight + safeTop;
+                final double totalRange = (200 + safeTop - minH);
+                
+                // Güvenlik: Payda 0 ise t=0 kabul et
+                double t = totalRange > 0 ? ((currentH - minH) / totalRange).clamp(0.0, 1.0) : 0.0;
+                
+                // NaN kontrolü
+                if (t.isNaN) t = 0.0;
+                
+                final double revT = 1.0 - t;
+
+                return Stack(
+                  fit: StackFit.expand,
+                  clipBehavior: Clip.none,
+                  children: [
+                    // GPU-Friendly Blur Layer
+                    Positioned.fill(
+                      child: Opacity(
+                        opacity: revT,
+                        child: ClipRect(
+                          child: BackdropFilter(
+                            filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
+                            child: Container(
+                              decoration: BoxDecoration(
+                                color: AppColors.getBackground(context).withValues(alpha: 0.15),
+                                border: Border(
+                                  bottom: BorderSide(
+                                    color: (isDark ? Colors.white : Colors.black).withValues(
+                                      alpha: revT > 0.95 ? (revT - 0.95) * 2 : 0.0,
+                                    ),
+                                    width: 0.5,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                    // Content Layer
+                    Positioned.fill(
+                      child: Stack(
+                        fit: StackFit.expand,
+                        clipBehavior: Clip.none,
+                        children: [
+                          // Gradient background
+                          Positioned.fill(
+                            child: Opacity(
+                              opacity: t,
+                              child: DecoratedBox(
+                                decoration: BoxDecoration(
+                                  gradient: LinearGradient(
+                                    begin: Alignment.topCenter,
+                                    end: Alignment.bottomCenter,
+                                    colors: [
+                                      activeColor.withValues(alpha: 0.15),
+                                      activeColor.withValues(alpha: 0.03),
+                                      Colors.transparent,
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+
+                          // Title Morphing
+                          Positioned(
+                            top: safeTop + (kToolbarHeight - 20) / 2 + (t * 70),
+                            left: 0,
+                            right: 0,
+                            child: IgnorePointer(
+                              child: Text(
+                                (widget.initialId != null ? l10n.edit : l10n.addTransaction).toUpperCase(),
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  color: AppColors.getTextPrimary(context),
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w900,
+                                  letterSpacing: 2.0 + (t * 2),
+                                ),
+                              ),
+                            ),
+                          ),
+
+                          // Back Button
+                          Positioned(
+                            top: safeTop + 4,
+                            left: 8,
+                            child: Material(
+                              color: Colors.transparent,
+                              child: InkWell(
+                                borderRadius: BorderRadius.circular(50),
+                                onTap: () => Navigator.pop(context),
+                                child: Container(
+                                  padding: const EdgeInsets.all(10),
+                                  decoration: BoxDecoration(
+                                    color: isDark
+                                        ? Colors.black.withValues(alpha: 0.4)
+                                        : Colors.white.withValues(alpha: 0.8),
+                                    shape: BoxShape.circle,
+                                    border: Border.all(
+                                      color: activeColor.withValues(alpha: 0.15),
+                                    ),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.black.withValues(alpha: 0.1),
+                                        blurRadius: 8,
+                                        offset: const Offset(0, 2),
+                                      ),
+                                    ],
+                                  ),
+                                  child: Icon(
+                                    Icons.arrow_back_ios_new_rounded,
+                                    size: 16,
+                                    color: AppColors.getTextPrimary(context),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                );
+              },
             ),
           ),
           SliverToBoxAdapter(
@@ -610,6 +837,81 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                             setState(() => _periodData = data);
                           },
                         ),
+                        
+                        // --- BİLDİRİM AYARLARI ---
+                        Divider(height: 24, thickness: 0.5, color: (isDark ? Colors.white : Colors.black).withValues(alpha: 0.08)),
+                        Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Row(
+                                children: [
+                                  Icon(Icons.notifications_active_rounded, size: 20, color: activeColor.withValues(alpha: 0.7)),
+                                  const SizedBox(width: 12),
+                                  Text('HATIRLATICI', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w900, color: AppColors.getTextPrimary(context).withValues(alpha: 0.8), letterSpacing: 0.5)),
+                                ],
+                              ),
+                              PrecisionToggle(
+                                value: _isNotificationEnabled,
+                                activeColor: activeColor,
+                                activeIcon: Icons.notifications_active_rounded,
+                                inactiveIcon: Icons.notifications_off_rounded,
+                                scalingFactor: scalingFactor * 0.9,
+                                onChanged: (val) async {
+                                  if (val) {
+                                    final granted = await NotificationService().requestPermissions();
+                                    if (!granted && context.mounted) {
+                                      ScaffoldMessenger.of(context).showSnackBar(
+                                        const SnackBar(content: Text('Bildirim izni verilmedi. Lütfen ayarlardan açın.'))
+                                      );
+                                      return;
+                                    }
+                                  }
+                                  HapticFeedback.mediumImpact();
+                                  setState(() => _isNotificationEnabled = val);
+                                },
+                              ),
+                            ],
+                          ),
+                          AnimatedSize(
+                            duration: const Duration(milliseconds: 400),
+                            curve: Curves.easeInOutQuart,
+                            alignment: Alignment.topCenter,
+                            child: AnimatedSwitcher(
+                              duration: const Duration(milliseconds: 350),
+                              transitionBuilder: (Widget child, Animation<double> animation) {
+                                return FadeTransition(
+                                  opacity: animation,
+                                  child: SlideTransition(
+                                    position: Tween<Offset>(
+                                      begin: const Offset(0.05, 0),
+                                      end: Offset.zero,
+                                    ).animate(CurvedAnimation(parent: animation, curve: Curves.easeOutQuart)),
+                                    child: child,
+                                  ),
+                                );
+                              },
+                              child: _isNotificationEnabled 
+                                ? Column(
+                                    key: const ValueKey('reminder_enabled'),
+                                    children: [
+                                      Divider(height: 1, thickness: 0.5, color: (isDark ? Colors.white : Colors.black).withValues(alpha: 0.08)),
+                                      const SizedBox(height: 8),
+                                      TransactionReminderDaysSelector(
+                                        selectedDays: _notificationReminderDays,
+                                        scalingFactor: scalingFactor,
+                                        onChanged: (val) => setState(() => _notificationReminderDays = val),
+                                      ),
+                                      Divider(height: 1, thickness: 0.5, indent: 16, endIndent: 16, color: (isDark ? Colors.white : Colors.black).withValues(alpha: 0.08)),
+                                      TransactionReminderTimeSelector(
+                                        selectedTime: _notificationTime,
+                                        scalingFactor: scalingFactor,
+                                        onChanged: (val) => setState(() => _notificationTime = val),
+                                      ),
+                                    ],
+                                  )
+                                : const SizedBox.shrink(key: ValueKey('reminder_disabled')),
+                            ),
+                          ),
                       ],
                     ),
                   ),

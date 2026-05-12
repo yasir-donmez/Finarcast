@@ -33,11 +33,14 @@ class TransactionCategoryData {
       // Zaten eklenmişse tekrar ekleme
       if (subs.any((s) => s['id'] == custom['id'])) continue;
 
+      final int? iconCode = int.tryParse(custom['iconCode'] ?? '');
       subs.add({
         'id': custom['id'] ?? '',
         'name': custom['name'] ?? '',
-        'icon': parent['icon'] as IconData, // Parent'ın ikonu
-        'isCustom': true, // Silme butonu göstermek için işaret
+        'icon': iconCode != null 
+            ? IconData(iconCode, fontFamily: 'MaterialIcons') 
+            : parent['icon'] as IconData, 
+        'isCustom': true,
       });
     }
 
@@ -343,7 +346,28 @@ class TransactionCategoryData {
       'name': l10n.other,
       'icon': Icons.more_horiz_rounded,
       'color': Colors.grey,
-      'subModels': <Map<String, dynamic>>[],
+      'subModels': [
+        {
+          'id': 'exp_other_general',
+          'name': l10n.other,
+          'icon': Icons.category_rounded,
+        },
+        {
+          'id': 'exp_other_donation',
+          'name': 'Bağış/Yardım',
+          'icon': Icons.volunteer_activism_rounded,
+        },
+        {
+          'id': 'exp_other_insurance',
+          'name': 'Sigorta',
+          'icon': Icons.security_rounded,
+        },
+        {
+          'id': 'exp_other_pocket_money',
+          'name': 'Harçlık',
+          'icon': Icons.savings_rounded,
+        },
+      ],
     },
   ];
 
@@ -476,14 +500,41 @@ class TransactionCategoryData {
       'name': l10n.gift,
       'icon': Icons.card_giftcard_rounded,
       'color': Colors.pinkAccent,
-      'subModels': <Map<String, dynamic>>[],
+      'subModels': [
+        {
+          'id': 'inc_gift_general',
+          'name': 'Hediye',
+          'icon': Icons.cake_rounded,
+        },
+        {
+          'id': 'inc_gift_award',
+          'name': 'Ödül/İkramiye',
+          'icon': Icons.emoji_events_rounded,
+        },
+      ],
     },
     {
       'id': 'inc_other',
       'name': l10n.other,
       'icon': Icons.more_horiz_rounded,
       'color': Colors.grey,
-      'subModels': <Map<String, dynamic>>[],
+      'subModels': [
+        {
+          'id': 'inc_other_general',
+          'name': l10n.other,
+          'icon': Icons.category_rounded,
+        },
+        {
+          'id': 'inc_other_refund',
+          'name': 'İade/Geri Ödeme',
+          'icon': Icons.assignment_return_rounded,
+        },
+        {
+          'id': 'inc_other_lottery',
+          'name': 'Şans Oyunları',
+          'icon': Icons.casino_rounded,
+        },
+      ],
     },
   ];
 }

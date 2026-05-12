@@ -35,7 +35,11 @@ class AnalysisSliverHeader extends StatelessWidget {
         builder: (context, constraints) {
           final double currentH = constraints.biggest.height;
           final double minH = kToolbarHeight + safeTop;
-          final double t = ((currentH - minH) / (200 + safeTop - minH)).clamp(0.0, 1.0);
+          final double totalRange = (200 + safeTop - minH);
+          
+          double t = totalRange > 0 ? ((currentH - minH) / totalRange).clamp(0.0, 1.0) : 0.0;
+          if (t.isNaN) t = 0.0;
+          
           final double revT = 1.0 - t;
 
           return Stack(

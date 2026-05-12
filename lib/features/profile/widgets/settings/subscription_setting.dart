@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:purchases_flutter/purchases_flutter.dart';
 import 'dart:ui';
 import 'dart:math' as math;
 import '../../../../core/services/subscription_service.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../../core/theme/app_constants.dart';
 import '../../../../shared/widgets/precision_button.dart';
-import '../../../../shared/widgets/precision_dialog.dart';
 import '../../../../shared/widgets/precision_card.dart';
 import '../../../../shared/widgets/precision_membership_orb.dart';
 import '../../../../shared/widgets/precision_action.dart';
@@ -69,10 +69,18 @@ class _SubscriptionSettingState extends ConsumerState<SubscriptionSetting> with 
               ProfileListItems.buildSetting(
                 icon: Icons.restore_rounded,
                 title: l10n.restorePurchases,
-                onTap: () => _showComingSoon(l10n.restorePurchases, l10n, context),
+                onTap: () async {
+                  await ref.read(subscriptionServiceProvider).restorePurchases();
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text(l10n.done)),
+                    );
+                  }
+                },
                 activeColor: activeColor,
                 context: context,
                 isAction: true,
+                borderRadius: BorderRadius.circular(16),
               ),
             ],
           ),
@@ -105,7 +113,7 @@ class _SubscriptionSettingState extends ConsumerState<SubscriptionSetting> with 
                   scalingFactor: 0.9,
                 ),
                 const SizedBox(height: 12),
-                _buildPremiumCheckoutCard(context, activeColor),
+                _buildPremiumCheckoutCard(context, activeColor, subscription),
                 const SizedBox(height: 24),
               ],
               
@@ -207,7 +215,7 @@ class _SubscriptionSettingState extends ConsumerState<SubscriptionSetting> with 
     );
   }
 
-  Widget _buildPremiumCheckoutCard(BuildContext context, Color activeColor) {
+  Widget _buildPremiumCheckoutCard(BuildContext context, Color activeColor, SubscriptionService subscription) {
     final isYearly = _selectedPeriod == SubscriptionPeriod.yearly;
     return Container(
       padding: const EdgeInsets.all(16),
@@ -238,8 +246,18 @@ class _SubscriptionSettingState extends ConsumerState<SubscriptionSetting> with 
                 crossAxisAlignment: CrossAxisAlignment.baseline,
                 textBaseline: TextBaseline.alphabetic,
                 children: [
-                  Text("₺", style: TextStyle(fontSize: 14, color: activeColor, fontWeight: FontWeight.w800)),
-                  Text(isYearly ? "1.190" : "149", style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w900)),
+                  if (subscription.offerings?.current != null) ...[
+                    Text(
+                      subscription.offerings!.current!.availablePackages.firstWhere(
+                        (p) => isYearly ? p.packageType == PackageType.annual : p.packageType == PackageType.monthly,
+                        orElse: () => subscription.offerings!.current!.availablePackages.first,
+                      ).storeProduct.priceString,
+                      style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w900),
+                    ),
+                  ] else ...[
+                    Text("₺", style: TextStyle(fontSize: 14, color: activeColor, fontWeight: FontWeight.w800)),
+                    Text(isYearly ? "1.190" : "149", style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w900)),
+                  ],
                 ],
               ),
             ],
@@ -247,7 +265,22 @@ class _SubscriptionSettingState extends ConsumerState<SubscriptionSetting> with 
           const SizedBox(height: 16),
           PrecisionButton(
             label: "PREMIUM'A YÜKSELT",
-            onTap: () async => await ref.read(subscriptionServiceProvider).setProStatus(true, period: _selectedPeriod),
+            onTap: () {
+              final subService = ref.read(subscriptionServiceProvider);
+              final offerings = subService.offerings;
+              
+              if (offerings?.current != null) {
+                // Eğer gerçek ürünler varsa en uygun paketi bul (Aylık/Yıllık seçimine göre)
+                final package = offerings!.current!.availablePackages.firstWhere(
+                  (p) => isYearly ? p.packageType == PackageType.annual : p.packageType == PackageType.monthly,
+                  orElse: () => offerings.current!.availablePackages.first,
+                );
+                subService.purchasePackage(package);
+              } else {
+                // Fallback: Mock status
+                subService.setProStatus(true);
+              }
+            },
             activeColor: activeColor,
             height: 48,
             fontSize: 13,
@@ -362,6 +395,7 @@ class _SubscriptionSettingState extends ConsumerState<SubscriptionSetting> with 
                   ),
                   PrecisionAction(
                     onTap: () => setState(() => _isExpanded = !_isExpanded),
+                    borderRadius: BorderRadius.circular(24),
                     child: const SizedBox(width: double.infinity, height: double.infinity),
                   ),
                 ],
@@ -376,7 +410,7 @@ class _SubscriptionSettingState extends ConsumerState<SubscriptionSetting> with 
   Widget _buildExpandableHeader(BuildContext context, Color activeColor, AppLocalizations l10n) {
     return PrecisionAction(
       onTap: () => setState(() => _isExpanded = !_isExpanded),
-      borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+      borderRadius: BorderRadius.circular(16),
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Row(
@@ -420,19 +454,6 @@ class _SubscriptionSettingState extends ConsumerState<SubscriptionSetting> with 
     );
   }
 
-  void _showComingSoon(String feature, AppLocalizations l10n, BuildContext context) {
-    showPrecisionDialog(
-      context: context,
-      title: l10n.comingSoon,
-      content: "$feature özelliği çok yakında sizlerle olacak.",
-      actions: [
-        PrecisionDialogAction(
-          label: l10n.ok,
-          onTap: () => Navigator.pop(context),
-        ),
-      ],
-    );
-  }
 }
 
 class _PremiumRimPainter extends CustomPainter {
