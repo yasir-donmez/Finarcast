@@ -7,7 +7,7 @@ import '../../../shared/widgets/precision_action.dart';
 import '../../../shared/widgets/precision_sheet.dart';
 import '../../../shared/widgets/precision_membership_orb.dart';
 
-/// FinCast "Pro Üyelik" (Paywall) Sayfası.
+/// Finarcast "Pro Üyelik" (Paywall) Sayfası.
 class ProUpgradeSheet extends ConsumerWidget {
   const ProUpgradeSheet({super.key});
 
@@ -51,7 +51,7 @@ class ProUpgradeSheet extends ConsumerWidget {
                   ),
                   SizedBox(height: headerSpacing),
                   Text(
-                    'FinCast Pro\'ya Geçin',
+                    'Finarcast Pro\'ya Geçin',
                     style: TextStyle(
                       fontSize: isSmallScreen ? 22 : 26, 
                       fontWeight: FontWeight.w900, 

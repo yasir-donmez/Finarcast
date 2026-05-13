@@ -1,4 +1,4 @@
-# FinCast Global Yerelleştirme ve Para Birimi Planı
+# Finarcast Global Yerelleştirme ve Para Birimi Planı
 
 Bu plan, uygulamanın global standartlara (EFIGS + CJK) tam olarak ulaşması ve para birimi formatlamasının farklı kültürlere göre mükemmelleştirilmesi için hazırlanmıştır.
 

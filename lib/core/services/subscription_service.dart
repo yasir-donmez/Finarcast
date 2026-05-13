@@ -8,10 +8,10 @@ enum SubscriptionTier { free, pro }
 
 enum SubscriptionPeriod { monthly, yearly }
 
-/// FinCast Abonelik Servisi (Subscription Service).
+/// Finarcast Abonelik Servisi (Subscription Service).
 /// RevenueCat entegrasyonu ile gerçek ödeme işlemlerini yönetir.
 class SubscriptionService extends ChangeNotifier {
-  static const String _isProKey = 'fincast_is_pro_user';
+  static const String _isProKey = 'Finarcast_is_pro_user';
 
   // RevenueCat API Anahtarları (Buraya kendi anahtarlarınızı girmelisiniz)
   static const String _appleApiKey = 'appl_YOUR_APPLE_API_KEY';
@@ -105,10 +105,10 @@ class SubscriptionService extends ChangeNotifier {
   // --- Özellik Bazlı Limitler ---
   int get maxVaults => _isPro ? 999 : 2;
   int get dailyAiLimit => 9999; 
-  int get usedAiCount => _prefs.getInt('fincast_ai_usage_$_today') ?? 0;
+  int get usedAiCount => _prefs.getInt('Finarcast_ai_usage_$_today') ?? 0;
 
   Future<void> incrementAiUsage() async {
-    await _prefs.setInt('fincast_ai_usage_$_today', usedAiCount + 1);
+    await _prefs.setInt('Finarcast_ai_usage_$_today', usedAiCount + 1);
     notifyListeners();
   }
 

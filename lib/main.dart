@@ -19,62 +19,62 @@ import 'core/services/notification_service.dart';
 
 void main() async {
   try {
-    debugPrint('🚀 [FinCast] Uygulama başlatılıyor...');
+    debugPrint('🚀 [Finarcast] Uygulama başlatılıyor...');
     WidgetsFlutterBinding.ensureInitialized();
-    debugPrint('✅ [FinCast] Flutter Binding hazır.');
+    debugPrint('✅ [Finarcast] Flutter Binding hazır.');
 
     // Çevresel değişkenleri yükle (.env)
-    debugPrint('🔑 [FinCast] .env ayarları yükleniyor...');
+    debugPrint('🔑 [Finarcast] .env ayarları yükleniyor...');
     await dotenv.load(fileName: ".env");
-    debugPrint('✅ [FinCast] .env yüklendi.');
+    debugPrint('✅ [Finarcast] .env yüklendi.');
 
     // Supabase başlat
-    debugPrint('☁️ [FinCast] Supabase başlatılıyor...');
+    debugPrint('☁️ [Finarcast] Supabase başlatılıyor...');
     await Supabase.initialize(
       url: dotenv.get('SUPABASE_URL', fallback: ''),
       anonKey: dotenv.get('SUPABASE_ANON_KEY', fallback: ''),
     );
-    debugPrint('✅ [FinCast] Supabase hazır.');
+    debugPrint('✅ [Finarcast] Supabase hazır.');
 
     // Isar veritabanını başlat
-    debugPrint('📦 [FinCast] Veritabanı başlatılıyor...');
+    debugPrint('📦 [Finarcast] Veritabanı başlatılıyor...');
     await DatabaseService.init();
-    debugPrint('✅ [FinCast] Veritabanı başarıyla başlatıldı.');
+    debugPrint('✅ [Finarcast] Veritabanı başarıyla başlatıldı.');
 
     // Bildirimleri başlat
-    debugPrint('🔔 [FinCast] Bildirim servisi başlatılıyor...');
+    debugPrint('🔔 [Finarcast] Bildirim servisi başlatılıyor...');
     await NotificationService().init();
 
     // Döviz kurlarını güncelle (Async - Fire & Forget)
     CurrencyService.updateRates();
 
     // Süresi dolan işlemleri arşivle
-    debugPrint('🧹 [FinCast] Arşivleme işlemi başlatılıyor...');
+    debugPrint('🧹 [Finarcast] Arşivleme işlemi başlatılıyor...');
     await DataRetentionService.archiveExpiredTransactions();
-    debugPrint('✅ [FinCast] Arşivleme tamamlandı.');
+    debugPrint('✅ [Finarcast] Arşivleme tamamlandı.');
 
     // Yerelleştirme (intl)
-    debugPrint('🌍 [FinCast] Yerelleştirme başlatılıyor...');
+    debugPrint('🌍 [Finarcast] Yerelleştirme başlatılıyor...');
     await initializeDateFormatting('tr_TR', null);
-    debugPrint('✅ [FinCast] Yerelleştirme hazır.');
+    debugPrint('✅ [Finarcast] Yerelleştirme hazır.');
 
     // SharedPreferences (Abonelik durumu için)
-    debugPrint('💾 [FinCast] SharedPreferences başlatılıyor...');
+    debugPrint('💾 [Finarcast] SharedPreferences başlatılıyor...');
     final prefs = await SharedPreferences.getInstance();
-    debugPrint('✅ [FinCast] SharedPreferences hazır.');
+    debugPrint('✅ [Finarcast] SharedPreferences hazır.');
 
-    debugPrint('🏁 [FinCast] runApp() çağrılıyor...');
+    debugPrint('🏁 [Finarcast] runApp() çağrılıyor...');
     runApp(
       ProviderScope(
         overrides: [
           subscriptionServiceProvider.overrideWith((ref) => SubscriptionService(prefs)),
         ],
-        child: const FinCastApp(),
+        child: const FinarcastApp(),
       ),
     );
   } catch (e, stack) {
-    debugPrint('❌ [FinCast FATAL] Başlangıç hatası: $e');
-    debugPrint('📜 [FinCast FATAL] Stack Trace:\n$stack');
+    debugPrint('❌ [Finarcast FATAL] Başlangıç hatası: $e');
+    debugPrint('📜 [Finarcast FATAL] Stack Trace:\n$stack');
     
     // Uygulama kritik bir hata aldığında en azından bir hata ekranı gösterelim
     runApp(
@@ -96,8 +96,8 @@ void main() async {
   }
 }
 
-class FinCastApp extends ConsumerWidget {
-  const FinCastApp({super.key});
+class FinarcastApp extends ConsumerWidget {
+  const FinarcastApp({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -119,7 +119,7 @@ class FinCastApp extends ConsumerWidget {
     return RepaintBoundary(
       key: rootRepaintBoundaryKey,
       child: MaterialApp(
-        title: 'FinCast',
+        title: 'Finarcast',
         debugShowCheckedModeBanner: false,
   
         // Tema Yapılandırması (Karanlık Neumorphism)

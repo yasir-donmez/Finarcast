@@ -2,7 +2,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import '../../../core/theme/app_constants.dart';
 
-/// FinCast "Sıvı Ruh" Arka Planı (Liquid Spirit Background).
+/// Finarcast "Sıvı Ruh" Arka Planı (Liquid Spirit Background).
 /// Arkada yavaşça süzülen, organik formda renkli blob'lar (leke) oluşturur.
 class PrecisionBackground extends StatefulWidget {
   final Widget? child;

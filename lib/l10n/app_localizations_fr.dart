@@ -9,13 +9,13 @@ class AppLocalizationsFr extends AppLocalizations {
   AppLocalizationsFr([String locale = 'fr']) : super(locale);
 
   @override
-  String get appTitle => 'FinCast';
+  String get appTitle => 'Finarcast';
 
   @override
   String get profile => 'Profil';
 
   @override
-  String get memberPremium => 'Membre Premium FinCast';
+  String get memberPremium => 'Membre Premium Finarcast';
 
   @override
   String get preferences => 'PRÉFÉRENCES & APPLICATION';
@@ -71,14 +71,14 @@ class AppLocalizationsFr extends AppLocalizations {
   String get support => 'SUPPORT';
 
   @override
-  String get contact => 'Contacter FinCast';
+  String get contact => 'Contacter Finarcast';
 
   @override
   String get about => 'À Propos';
 
   @override
-  String get aboutFinCast =>
-      'FinCast est votre assistant financier propulsé par l\'IA. Il analyse vos dépenses, vous aide à fixer des objectifs d\'épargne et optimise votre avenir financier.';
+  String get aboutFinarcast =>
+      'Finarcast est votre assistant financier propulsé par l\'IA. Il analyse vos dépenses, vous aide à fixer des objectifs d\'épargne et optimise votre avenir financier.';
 
   @override
   String get editProfile => 'Modifier le Profil';
@@ -1178,7 +1178,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get freePlan => 'Ücretsiz Plan';
 
   @override
-  String get proPlan => 'FinCast PRO';
+  String get proPlan => 'Finarcast PRO';
 
   @override
   String get upgradeToPro => 'PRO\'ya Yükselt';

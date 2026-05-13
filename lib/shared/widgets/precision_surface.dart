@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'dart:ui';
 import '../../core/theme/app_constants.dart';
 
-/// FinCast Yeni Nesil "Sıvı & Organik" Kapsayıcı (Fluid Container).
+/// Finarcast Yeni Nesil "Sıvı & Organik" Kapsayıcı (Fluid Container).
 /// Geleneksel Neumorphism'den uzaklaşıp, Squircle kavisler,
 /// Soft-Depth (Yumuşak Derinlik) ve Glassmorphism dokusunu birleştirir.
 class PrecisionSurface extends StatelessWidget {

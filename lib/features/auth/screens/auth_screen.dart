@@ -227,7 +227,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen> with TickerProviderStat
     return Column(
       children: [
         Text(
-          'FinCast',
+          'Finarcast',
           style: TextStyle(
             fontSize: fontSize,
             fontWeight: FontWeight.w900,
@@ -334,7 +334,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen> with TickerProviderStat
         ),
         const SizedBox(height: 8),
         Text(
-          'FinCast dünyasına katılarak limitlerinizi belirleyin.',
+          'Finarcast dünyasına katılarak limitlerinizi belirleyin.',
           style: TextStyle(
             color: AppColors.getTextSecondary(context).withValues(alpha: 0.7), 
             fontSize: (screenHeight * 0.016).clamp(11.0, 14.0),

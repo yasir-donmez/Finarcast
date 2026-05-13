@@ -1,7 +1,7 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
 
-/// FinCast "Akışkan Çift Yüzlü Kart" (Fluid 3D Flip Card).
+/// Finarcast "Akışkan Çift Yüzlü Kart" (Fluid 3D Flip Card).
 /// Giriş ve Kayıt formlarını kartın ön ve arka yüzünde taşıyan, 
 /// 3D döndürme animasyonuna sahip premium bileşen.
 class PrecisionFlipCard extends StatefulWidget {

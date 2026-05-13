@@ -1,6 +1,6 @@
-# 🗺️ FinCast Proje Yol Haritası & Mimari Dokümantasyonu
+# 🗺️ Finarcast Proje Yol Haritası & Mimari Dokümantasyonu
 
-Bu belge, FinCast uygulamasının teknik yapısını, dosya hiyerarşisini ve bileşenler arası ilişkileri detaylandırmak için oluşturulmuştur.
+Bu belge, Finarcast uygulamasının teknik yapısını, dosya hiyerarşisini ve bileşenler arası ilişkileri detaylandırmak için oluşturulmuştur.
 
 ---
 
@@ -41,9 +41,9 @@ graph TD
 | **Kasa Detay Sayfası** | `VaultDetailSheet` | Kasa içindeki işlemleri listeler ve düzenleme imkanı sunar. |
 
 ### 🛠️ Kullanılan Temel Bileşenler (Shared)
-*   [fluid_sheet.dart](file:///c:/Users/Yasir2.Prenses/FinCast/lib/shared/widgets/fluid_sheet.dart)
-*   [precision_picker.dart](file:///c:/Users/Yasir2.Prenses/FinCast/lib/shared/widgets/precision_picker.dart)
-*   [precision_button.dart](file:///c:/Users/Yasir2.Prenses/FinCast/lib/shared/widgets/precision_button.dart)
+*   [fluid_sheet.dart](file:///c:/Users/Yasir2.Prenses/Finarcast/lib/shared/widgets/fluid_sheet.dart)
+*   [precision_picker.dart](file:///c:/Users/Yasir2.Prenses/Finarcast/lib/shared/widgets/precision_picker.dart)
+*   [precision_button.dart](file:///c:/Users/Yasir2.Prenses/Finarcast/lib/shared/widgets/precision_button.dart)
 
 ---
 
@@ -85,9 +85,9 @@ graph TD
 | **Silme Onayı** | `PrecisionDialog` | Kasa veya işlem silerken onay alır. |
 
 ### 🛠️ Kullanılan Temel Bileşenler (Shared)
-*   [fluid_animated_icon.dart](file:///c:/Users/Yasir2.Prenses/FinCast/lib/shared/widgets/fluid_animated_icon.dart)
-*   [precision_dialog.dart](file:///c:/Users/Yasir2.Prenses/FinCast/lib/shared/widgets/precision_dialog.dart)
-*   [fluid_sheet.dart](file:///c:/Users/Yasir2.Prenses/FinCast/lib/shared/widgets/fluid_sheet.dart)
+*   [fluid_animated_icon.dart](file:///c:/Users/Yasir2.Prenses/Finarcast/lib/shared/widgets/fluid_animated_icon.dart)
+*   [precision_dialog.dart](file:///c:/Users/Yasir2.Prenses/Finarcast/lib/shared/widgets/precision_dialog.dart)
+*   [fluid_sheet.dart](file:///c:/Users/Yasir2.Prenses/Finarcast/lib/shared/widgets/fluid_sheet.dart)
 
 ---
 
@@ -123,9 +123,9 @@ graph TD
 | **Periyot Seçici (Sheet)** | `PrecisionPicker` | Özel gün/tarih seçimi için açılan panel. |
 
 ### 🛠️ Kullanılan Temel Bileşenler (Shared)
-*   [precision_picker.dart](file:///c:/Users/Yasir2.Prenses/FinCast/lib/shared/widgets/precision_picker.dart)
-*   [fluid_switch.dart](file:///c:/Users/Yasir2.Prenses/FinCast/lib/shared/widgets/fluid_switch.dart)
-*   [precision_button.dart](file:///c:/Users/Yasir2.Prenses/FinCast/lib/shared/widgets/precision_button.dart)
+*   [precision_picker.dart](file:///c:/Users/Yasir2.Prenses/Finarcast/lib/shared/widgets/precision_picker.dart)
+*   [fluid_switch.dart](file:///c:/Users/Yasir2.Prenses/Finarcast/lib/shared/widgets/fluid_switch.dart)
+*   [precision_button.dart](file:///c:/Users/Yasir2.Prenses/Finarcast/lib/shared/widgets/precision_button.dart)
 
 ---
 
@@ -162,9 +162,9 @@ graph TD
 | **Hesap İşlemleri** | `PrecisionDialog` | Çıkış yapma veya hesap silme onay diyalogları. |
 
 ### 🛠️ Kullanılan Temel Bileşenler (Shared)
-*   [theme_reveal_button.dart](file:///c:/Users/Yasir2.Prenses/FinCast/lib/shared/widgets/theme_reveal_button.dart)
-*   [precision_card.dart](file:///c:/Users/Yasir2.Prenses/FinCast/lib/shared/widgets/precision_card.dart)
-*   [precision_clickable.dart](file:///c:/Users/Yasir2.Prenses/FinCast/lib/shared/widgets/precision_clickable.dart)
+*   [theme_reveal_button.dart](file:///c:/Users/Yasir2.Prenses/Finarcast/lib/shared/widgets/theme_reveal_button.dart)
+*   [precision_card.dart](file:///c:/Users/Yasir2.Prenses/Finarcast/lib/shared/widgets/precision_card.dart)
+*   [precision_clickable.dart](file:///c:/Users/Yasir2.Prenses/Finarcast/lib/shared/widgets/precision_clickable.dart)
 
 ---
 
@@ -203,10 +203,10 @@ graph TD
 | **PRO Yükseltme** | `ProUpgradeSheet` | AI özelliklerine erişim için abonelik ekranı. |
 
 ### 🛠️ Kullanılan Temel Bileşenler (Shared)
-*   [premium_glass_card.dart](file:///c:/Users/Yasir2.Prenses/FinCast/lib/shared/widgets/premium_glass_card.dart)
-*   [membership_orb.dart](file:///c:/Users/Yasir2.Prenses/FinCast/lib/shared/widgets/membership_orb.dart)
-*   [fluid_button.dart](file:///c:/Users/Yasir2.Prenses/FinCast/lib/shared/widgets/fluid_button.dart)
+*   [premium_glass_card.dart](file:///c:/Users/Yasir2.Prenses/Finarcast/lib/shared/widgets/premium_glass_card.dart)
+*   [membership_orb.dart](file:///c:/Users/Yasir2.Prenses/Finarcast/lib/shared/widgets/membership_orb.dart)
+*   [fluid_button.dart](file:///c:/Users/Yasir2.Prenses/Finarcast/lib/shared/widgets/fluid_button.dart)
 
 ---
 
-**© 2026 FinCast Technical Documentation**
+**© 2026 Finarcast Technical Documentation**

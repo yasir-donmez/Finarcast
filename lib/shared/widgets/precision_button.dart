@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import '../../core/theme/app_constants.dart';
 import 'precision_action.dart';
 
-/// FinCast Standart "Ghost & Precision" Butonu.
+/// Finarcast Standart "Ghost & Precision" Butonu.
 /// Arka planı olmayan, sadece metin ve vurgulu parlamadan oluşan premium buton.
 class PrecisionButton extends StatelessWidget {
   final String label;

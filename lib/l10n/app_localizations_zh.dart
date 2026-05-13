@@ -9,13 +9,13 @@ class AppLocalizationsZh extends AppLocalizations {
   AppLocalizationsZh([String locale = 'zh']) : super(locale);
 
   @override
-  String get appTitle => 'FinCast';
+  String get appTitle => 'Finarcast';
 
   @override
   String get profile => '个人资料';
 
   @override
-  String get memberPremium => 'FinCast 高级会员';
+  String get memberPremium => 'Finarcast 高级会员';
 
   @override
   String get preferences => '偏好与应用';
@@ -69,14 +69,14 @@ class AppLocalizationsZh extends AppLocalizations {
   String get support => '支持';
 
   @override
-  String get contact => '联系 FinCast';
+  String get contact => '联系 Finarcast';
 
   @override
   String get about => '关于应用';
 
   @override
-  String get aboutFinCast =>
-      'FinCast 是您的 AI 驱动财务助手。它分析您的支出，帮助您设定储蓄目标，并优化您的财务未来。';
+  String get aboutFinarcast =>
+      'Finarcast 是您的 AI 驱动财务助手。它分析您的支出，帮助您设定储蓄目标，并优化您的财务未来。';
 
   @override
   String get editProfile => '编辑个人资料';
@@ -1158,7 +1158,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get freePlan => 'Ücretsiz Plan';
 
   @override
-  String get proPlan => 'FinCast PRO';
+  String get proPlan => 'Finarcast PRO';
 
   @override
   String get upgradeToPro => 'PRO\'ya Yükselt';

@@ -3,7 +3,7 @@ import 'package:flutter/services.dart';
 import '../../core/theme/app_constants.dart';
 import 'precision_card.dart';
 
-/// FinCast Standart "Animated Precision" Giriş Alanı.
+/// Finarcast Standart "Animated Precision" Giriş Alanı.
 /// Odaklandığında (focus) hafifçe büyüyen, kenarlıkları parlayan ve premium hissiyat veren input.
 class PrecisionInput extends StatefulWidget {
   final TextEditingController controller;

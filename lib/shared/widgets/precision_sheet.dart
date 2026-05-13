@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'dart:ui';
 import '../../core/theme/app_constants.dart';
 
-/// FinCast Standart Organik Açılır Ekran (Fluid Sheet).
+/// Finarcast Standart Organik Açılır Ekran (Fluid Sheet).
 /// Tüm popup ve modal ekranlar bu bileşeni kullanarak standartlaşır.
 class PrecisionSheet extends StatelessWidget {
   final Widget child;

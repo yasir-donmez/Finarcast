@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'dart:math' as math;
 
-/// FinCast Premium Üyelik Küresi (Premium Orb)
+/// Finarcast Premium Üyelik Küresi (Premium Orb)
 /// Animasyonlu, akışkan ve gerçekçi cam görünümlü bir küre sunar.
 class PrecisionMembershipOrb extends StatefulWidget {
   final Color color;

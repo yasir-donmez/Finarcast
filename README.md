@@ -1,5 +1,5 @@
 <div align="center">
-  <h1>🚀 FinCast</h1>
+  <h1>🚀 Finarcast</h1>
   <p><strong>Finansal Zaman Makinesi & Akıllı Servet Yönetimi</strong></p>
 
   <p>
@@ -15,7 +15,7 @@
 
 ## 🌟 Uygulama Vizyonu ve Farkımız
 
-**FinCast**, kullanıcıları her gün kuruş kuruş veri girmeye zorlayan, geçmiş odaklı ve geleneksel bütçe uygulamalarından tamamen farklıdır. 
+**Finarcast**, kullanıcıları her gün kuruş kuruş veri girmeye zorlayan, geçmiş odaklı ve geleneksel bütçe uygulamalarından tamamen farklıdır. 
 
 Uygulamamız bir **"Finansal Zaman Makinesi"** vizyonuyla çalışır. Geçmiş verileri listelemek yerine; **matematiksel modeller** ve **kısıtlı optimizasyon (Constrained Optimization)** algoritmaları kullanarak kullanıcının gelecekteki bakiyesini simüle eder, finansal hedeflerine ulaşması için stratejiler ve akıllı rotalar sunar.
 
@@ -33,7 +33,7 @@ Uygulamamız bir **"Finansal Zaman Makinesi"** vizyonuyla çalışır. Geçmiş 
 
 ## 🛠 Teknik Mimari (Tech Stack & Architecture)
 
-FinCast, modern, hızlı ve tamamen gizlilik odaklı bir mimariyle inşa edilmiştir:
+Finarcast, modern, hızlı ve tamamen gizlilik odaklı bir mimariyle inşa edilmiştir:
 
 - **Frontend (Flutter):** Saniyede 120 FPS akıcılığa sahip sıvı animasyonlar (fluid animations) ve pürüzsüz bir arayüz deneyimi sunar.
 - **Local Database (Isar):** Çevrimdışı öncelikli (offline-first) mimari üzerine kuruludur. İlişkisel NoSQL yapısıyla sıfır gecikme (zero-latency) sağlar. Uygulama internet olmadan %100 işlevsel çalışır.
@@ -44,7 +44,7 @@ FinCast, modern, hızlı ve tamamen gizlilik odaklı bir mimariyle inşa edilmi�
 
 ## 🎨 UI/UX Tasarım Dili
 
-FinCast, kullanıcıya premium ve dokunsal (tactile) bir his verir:
+Finarcast, kullanıcıya premium ve dokunsal (tactile) bir his verir:
 
 - **Tema (Dark Mode First):** Karanlık tema önceliklidir. Zemin rengi olarak obsidyen siyahı ve mat antrasit gri tercih edilmiştir.
 - **Stil (Dark Neumorphism):** Karanlık Kabartma (Dark Neumorphism) stili kullanılmıştır. Ekranda yer alan kartlar ve butonlar fiziksel olarak ekrana gömülü (debossed) veya dışarı kabartılmış (embossed) gibi durarak mat ve premium bir hissiyat sunar.
@@ -71,12 +71,12 @@ lib/
 
 ## 🚀 Kurulum (Getting Started)
 
-FinCast'i kendi ortamınızda derlemek ve deneyimlemek için aşağıdaki adımları takip edebilirsiniz:
+Finarcast'i kendi ortamınızda derlemek ve deneyimlemek için aşağıdaki adımları takip edebilirsiniz:
 
 1. **Repoyu Klonlayın:**
    ```bash
-   git clone https://github.com/yasir-donmez/FinCast.git
-   cd FinCast
+   git clone https://github.com/yasir-donmez/Finarcast.git
+   cd Finarcast
    ```
 
 2. **Bağımlılıkları Yükleyin:**
@@ -97,5 +97,5 @@ FinCast'i kendi ortamınızda derlemek ve deneyimlemek için aşağıdaki adıml
 ---
 
 <div align="center">
-  <p><i>FinCast — Gelecekteki Servetinizi Bugünden Optimizasyonla İnşa Edin.</i></p>
+  <p><i>Finarcast — Gelecekteki Servetinizi Bugünden Optimizasyonla İnşa Edin.</i></p>
 </div>

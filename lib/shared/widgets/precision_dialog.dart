@@ -3,7 +3,7 @@ import 'dart:ui';
 import '../../core/theme/app_constants.dart';
 import 'precision_button.dart';
 
-/// FinCast "Precision" Serisi Diyalog.
+/// Finarcast "Precision" Serisi Diyalog.
 /// PrecisionSheet tasarım diliyle uyumlu, temiz ve premium bir onay ekranı.
 class PrecisionDialog extends StatelessWidget {
   final String title;

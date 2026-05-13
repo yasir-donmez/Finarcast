@@ -218,13 +218,13 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   void _showAboutDialog(AppLocalizations l10n) {
     PrecisionSheet.show(
       context: context,
-      title: 'FinCast',
+      title: 'Finarcast',
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           const SizedBox(height: 24),
           Text(
-            l10n.aboutFinCast,
+            l10n.aboutFinarcast,
             textAlign: TextAlign.center,
             style: TextStyle(
               color: AppColors.getTextPrimary(context),
@@ -265,9 +265,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   Future<void> _launchEmail() async {
     final Uri emailLaunchUri = Uri(
       scheme: 'mailto',
-      path: 'support@fincast.app',
+      path: 'support@Finarcast.app',
       queryParameters: {
-        'subject': 'FinCast Feedback',
+        'subject': 'Finarcast Feedback',
       },
     );
     if (await canLaunchUrl(emailLaunchUri)) {

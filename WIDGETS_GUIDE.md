@@ -1,4 +1,4 @@
-# FinCast Tasarım Sistemi (Precision Design System)
+# Finarcast Tasarım Sistemi (Precision Design System)
 
 Bu dosya, `lib/shared/widgets` klasöründeki profesyonel bileşenlerin ne işe yaradığını ve projede nerelerde kullanıldığını açıklar. Tüm bileşenler **Precision** (Hassasiyet) teması altında standartlaştırılmıştır.
 

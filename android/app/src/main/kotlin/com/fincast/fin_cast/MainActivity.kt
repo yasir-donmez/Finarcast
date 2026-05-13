@@ -1,4 +1,4 @@
-package com.fincast.fin_cast
+package com.finarcast.finarcast
 
 import io.flutter.embedding.android.FlutterActivity
 

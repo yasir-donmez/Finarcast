@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'precision_action.dart';
 
-/// FinCast Standart Tasarımlı İkon Butonu.
+/// Finarcast Standart Tasarımlı İkon Butonu.
 /// PrecisionAction kullanarak premium tıklama hissiyatı ve standart görsel yapı sunar.
 class PrecisionIconButton extends StatelessWidget {
   final IconData? icon;

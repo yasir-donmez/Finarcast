@@ -5,7 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/app_constants.dart';
 import '../dashboard_providers.dart';
 
-/// FinCast'in "Zaman Makinesi" vizyonu olan Rotary Dial (Fiziksel Kadran)
+/// Finarcast'in "Zaman Makinesi" vizyonu olan Rotary Dial (Fiziksel Kadran)
 /// Progressive Time Scale (Giderek Hızlanan Zaman) mekanizması ile birleşti.
 class RotaryTimeDial extends ConsumerStatefulWidget {
   const RotaryTimeDial({super.key});

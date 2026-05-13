@@ -117,7 +117,7 @@ abstract class AppLocalizations {
   /// No description provided for @appTitle.
   ///
   /// In tr, this message translates to:
-  /// **'FinCast'**
+  /// **'Finarcast'**
   String get appTitle;
 
   /// No description provided for @profile.
@@ -129,7 +129,7 @@ abstract class AppLocalizations {
   /// No description provided for @memberPremium.
   ///
   /// In tr, this message translates to:
-  /// **'FinCast Premium Üyelik'**
+  /// **'Finarcast Premium Üyelik'**
   String get memberPremium;
 
   /// No description provided for @preferences.
@@ -237,7 +237,7 @@ abstract class AppLocalizations {
   /// No description provided for @contact.
   ///
   /// In tr, this message translates to:
-  /// **'FinCast ile İletişim'**
+  /// **'Finarcast ile İletişim'**
   String get contact;
 
   /// No description provided for @about.
@@ -246,11 +246,11 @@ abstract class AppLocalizations {
   /// **'Uygulama Hakkında'**
   String get about;
 
-  /// No description provided for @aboutFinCast.
+  /// No description provided for @aboutFinarcast.
   ///
   /// In tr, this message translates to:
-  /// **'FinCast, AI destekli finansal asistanınızdır. Harcamalarınızı analiz eder, tasarruf hedefleri belirlemenize yardımcı olur ve finansal geleceğinizi optimize eder.'**
-  String get aboutFinCast;
+  /// **'Finarcast, AI destekli finansal asistanınızdır. Harcamalarınızı analiz eder, tasarruf hedefleri belirlemenize yardımcı olur ve finansal geleceğinizi optimize eder.'**
+  String get aboutFinarcast;
 
   /// No description provided for @editProfile.
   ///
@@ -2295,7 +2295,7 @@ abstract class AppLocalizations {
   /// No description provided for @proPlan.
   ///
   /// In tr, this message translates to:
-  /// **'FinCast PRO'**
+  /// **'Finarcast PRO'**
   String get proPlan;
 
   /// No description provided for @upgradeToPro.

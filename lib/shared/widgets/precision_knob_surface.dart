@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../core/theme/app_constants.dart';
 
-/// FinCast Fiziksel "Buton/Kadran" Yüzeyi.
+/// Finarcast Fiziksel "Buton/Kadran" Yüzeyi.
 /// RotaryTimeDial'daki gerçekçi, dokunulabilir ve derinlikli tasarımı
 /// diğer bileşenlerde de kullanmak için modernize edilmiş hali.
 class PrecisionKnobSurface extends StatelessWidget {

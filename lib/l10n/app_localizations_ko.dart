@@ -9,13 +9,13 @@ class AppLocalizationsKo extends AppLocalizations {
   AppLocalizationsKo([String locale = 'ko']) : super(locale);
 
   @override
-  String get appTitle => 'FinCast';
+  String get appTitle => 'Finarcast';
 
   @override
   String get profile => '프로필';
 
   @override
-  String get memberPremium => 'FinCast 프리미엄 회원';
+  String get memberPremium => 'Finarcast 프리미엄 회원';
 
   @override
   String get preferences => '설정 및 앱';
@@ -71,14 +71,14 @@ class AppLocalizationsKo extends AppLocalizations {
   String get support => '지원';
 
   @override
-  String get contact => 'FinCast에 문의';
+  String get contact => 'Finarcast에 문의';
 
   @override
   String get about => '앱 정보';
 
   @override
-  String get aboutFinCast =>
-      'FinCast는 AI 기반 금융 비서입니다. 지출을 분석하고, 저축 목표 설정을 돕고, 금융 미래를 최적화합니다.';
+  String get aboutFinarcast =>
+      'Finarcast는 AI 기반 금융 비서입니다. 지출을 분석하고, 저축 목표 설정을 돕고, 금융 미래를 최적화합니다.';
 
   @override
   String get editProfile => '프로필 편집';
@@ -1162,7 +1162,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get freePlan => 'Ücretsiz Plan';
 
   @override
-  String get proPlan => 'FinCast PRO';
+  String get proPlan => 'Finarcast PRO';
 
   @override
   String get upgradeToPro => 'PRO\'ya Yükselt';

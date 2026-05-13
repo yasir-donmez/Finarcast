@@ -1,6 +1,6 @@
-# FinCast Dashboard Widget Board Planı 🚀💎
+# Finarcast Dashboard Widget Board Planı 🚀💎
 
-Bu belge, FinCast ana sayfasının iOS ve Android (Samsung) widget standartlarına uygun, modüler ve premium bir "Widget Panosu"na dönüştürülme stratejisini içerir.
+Bu belge, Finarcast ana sayfasının iOS ve Android (Samsung) widget standartlarına uygun, modüler ve premium bir "Widget Panosu"na dönüştürülme stratejisini içerir.
 
 ## 1. Temel Mimari (Grid System)
 Ana sayfa, esnek bir 2 sütunlu ızgara yapısına sahip olacaktır. Her widget aşağıdaki standart boyutlardan birine sahip olmalıdır:

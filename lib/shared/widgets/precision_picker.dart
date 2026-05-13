@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 
-/// FinCast "Precision" Serisi Döngüsel Seçici (Picker).
+/// Finarcast "Precision" Serisi Döngüsel Seçici (Picker).
 /// CupertinoPicker'ı premium bir cam efekti ve özel vurgu ile sarmalar.
 class PrecisionPicker extends StatelessWidget {
   final int itemCount;

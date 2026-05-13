@@ -95,7 +95,7 @@ class NotificationService {
 
     await _notifications.zonedSchedule(
       id: notificationId,
-      title: 'FinCast Hatırlatıcısı',
+      title: 'Finarcast Hatırlatıcısı',
       body: '${record.title} için ödeme/gelir zamanı geldi!',
       scheduledDate: tz.TZDateTime.from(targetDate, tz.local),
       notificationDetails: details,

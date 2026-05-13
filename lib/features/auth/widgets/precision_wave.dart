@@ -1,7 +1,7 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
 
-/// FinCast "Sıvı Geçiş Dalgası" (Liquid Transition Wave).
+/// Finarcast "Sıvı Geçiş Dalgası" (Liquid Transition Wave).
 /// Ekranın bir köşesinden başlayıp tüm ekranı kaplayan enerjik bir renk dalgası.
 class PrecisionWave extends StatefulWidget {
   final AnimationController controller;
