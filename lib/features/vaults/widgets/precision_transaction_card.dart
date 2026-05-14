@@ -164,12 +164,11 @@ class PrecisionTransactionCard extends StatelessWidget {
       onTap: onTap,
       onLongPress: onLongPress,
       child: PrecisionSurface(
-        padding: EdgeInsets.all(
-          10 * sf,
-        ), // Senin istediğin padding'e geri döndü
+        padding: EdgeInsets.all(10 * sf),
         borderRadius: 18 * sf,
-        isGlass: false,
-        color: tx.color.withValues(alpha: isDark ? 0.12 : 0.08),
+        isGlass: true, // Cam modu açık
+        blur: 12, // Buzlu cam derinliği
+        // color: tx.color override kaldırıldı, artık nötr cam kullanılacak
         child: Stack(
           children: [
             Positioned(
@@ -316,17 +315,15 @@ class PrecisionTransactionCard extends StatelessWidget {
                             Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
-                                Icon(
-                                  tx.showOnDashboard
-                                      ? Icons.visibility_rounded
-                                      : Icons.visibility_off_rounded,
-                                  color: tx.showOnDashboard
-                                      ? AppColors.getPrimary(context)
-                                      : AppColors.getTextPrimary(context).withValues(alpha: 0.2),
-                                  size: 13 * sf,
-                                ),
-                                if (vaultCount > 0) ...[
+                                if (tx.isNotificationEnabled)
+                                  Icon(
+                                    Icons.notifications_active_rounded,
+                                    color: AppColors.getPrimary(context),
+                                    size: 13 * sf,
+                                  ),
+                                if (tx.isNotificationEnabled && vaultCount > 0)
                                   SizedBox(width: 4 * sf),
+                                if (vaultCount > 0) ...[
                                   Text(
                                     '$vaultCount',
                                     style: TextStyle(

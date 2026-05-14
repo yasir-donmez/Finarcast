@@ -147,7 +147,7 @@ class SyncService {
       settings.languageCode = remoteSettings['language_code'];
       settings.themeModeIndex = remoteSettings['theme_mode_index'];
       settings.dataRetentionDays = remoteSettings['data_retention_days'];
-      settings.isAiNotificationsEnabled = remoteSettings['is_ai_notifications_enabled'];
+      settings.isNotificationsEnabled = remoteSettings['is_ai_notifications_enabled'];
       settings.isSyncEnabled = remoteSettings['is_sync_enabled'];
       settings.syncStatus = 0;
       

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 class AppColors {
   // --- Dark Colors ---
-  static const Color darkBackground = Color(0xFF292C31);
+  static const Color darkBackground = Color(0xFF000000);
   static const Color darkSurface = Color(0xFF2F3237);
   static const Color darkLightShadow = Color(0x1AFFFFFF);
   static const Color darkDarkShadow = Color(0x80000000);
@@ -21,29 +21,31 @@ class AppColors {
 
 
   // --- Dynamic Color Helpers ---
+  static Color getPrimary(BuildContext context) => Theme.of(context).colorScheme.primary;
+  static Color getSecondary(BuildContext context) => Theme.of(context).colorScheme.secondary;
+  static Color getError(BuildContext context) => Theme.of(context).colorScheme.error;
+  static Color getSurface(BuildContext context) => Theme.of(context).colorScheme.surface;
+  
+  static Color getSuccess(BuildContext context) => const Color(0xFF00E676);
+  static Color getWarning(BuildContext context) => const Color(0xFFFFAB40);
+  static Color getInfo(BuildContext context) => const Color(0xFF29B6F6);
+  static Color getIncome(BuildContext context) => const Color(0xFF00E676);
+  static Color getExpense(BuildContext context) => const Color(0xFFFF5252);
+
+  static Color getTextPrimary(BuildContext context) => Theme.of(context).colorScheme.onSurface;
+  static Color getTextSecondary(BuildContext context) => Theme.of(context).brightness == Brightness.dark ? darkTextSecondary : lightTextSecondary;
+
   static Color getBackground(BuildContext context) => Theme.of(context).brightness == Brightness.dark ? darkBackground : lightBackground;
-  static Color getSurface(BuildContext context) => Theme.of(context).brightness == Brightness.dark ? darkSurface : lightSurface;
   static Color getLightShadow(BuildContext context) => Theme.of(context).brightness == Brightness.dark ? darkLightShadow : lightLightShadow;
   static Color getDarkShadow(BuildContext context) => Theme.of(context).brightness == Brightness.dark ? darkDarkShadow : lightDarkShadow;
   static Color getInnerSurface(BuildContext context) => Theme.of(context).brightness == Brightness.dark ? darkInnerSurface : lightInnerSurface;
-  static Color getTextPrimary(BuildContext context) => Theme.of(context).brightness == Brightness.dark ? darkTextPrimary : lightTextPrimary;
-  static Color getTextSecondary(BuildContext context) => Theme.of(context).brightness == Brightness.dark ? darkTextSecondary : lightTextSecondary;
-  
+
   // Aydınlık modda okunabilirliği artıran derin renkler
   static Color getAccentDeep(BuildContext context, Color baseColor) {
     if (Theme.of(context).brightness == Brightness.dark) return baseColor;
-    // Aydınlık modda rengi daha koyu ve doygun yapıyoruz (Daha iyi kontrast için 0.35 -> 0.45)
+    // Aydınlık modda rengi daha koyu ve doygun yapıyoruz
     return Color.lerp(baseColor, Colors.black, 0.45) ?? baseColor;
   }
-
-  static Color getPrimary(BuildContext context) => getAccentDeep(context, primary); 
-  static Color getSecondary(BuildContext context) => getAccentDeep(context, secondary);
-  static Color getError(BuildContext context) => getAccentDeep(context, error);
-  static Color getSuccess(BuildContext context) => getAccentDeep(context, success);
-  static Color getWarning(BuildContext context) => getAccentDeep(context, warning);
-  static Color getInfo(BuildContext context) => getAccentDeep(context, info);
-  static Color getIncome(BuildContext context) => getAccentDeep(context, income);
-  static Color getExpense(BuildContext context) => getAccentDeep(context, expense);
 
   // --- Legacy Proxies (Deprecated: Use dynamic getters with context) ---
   // Renamed to prompt refactoring where context is available.
@@ -80,7 +82,7 @@ class AppSizes {
   static const double paddingXLarge = 32.0;
 }
 class AppCurrency {
-  static const List<String> supportedSymbols = ['₺', r'$', '€', '£', '¥', '₩', '元', r'R$', 'Fr', 'G'];
+  static const List<String> supportedSymbols = ['₺', r'$', '€', '£', '¥', '₩', '元', r'R$', 'Fr', 'G', 'Ag', 'SR', 'KD'];
   static const Map<String, String> symbolToCode = {
     '₺': 'TRY',
     r'$': 'USD',
@@ -92,15 +94,23 @@ class AppCurrency {
     r'R$': 'BRL',
     'Fr': 'CHF',
     'G': 'GOLD',
+    'Ag': 'SILVER',
+    'SR': 'SAR',
+    'KD': 'KWD',
   };
   static String getCode(String symbol) => symbolToCode[symbol] ?? symbol;
 }
 class AppAssets {
   static const String logoNormal = 'assets/images/app_logo_normal.png';
   static const String logoPremium = 'assets/images/app_logo_premium.png';
+  static const String bgPattern = 'assets/images/bg_pattern.png';
 
   static String getLogo(BuildContext context) {
     // Dark mode usually fits the "premium/transparent" look better
     return Theme.of(context).brightness == Brightness.dark ? logoPremium : logoNormal;
+  }
+
+  static String getBackgroundImg(BuildContext context) {
+    return bgPattern;
   }
 }

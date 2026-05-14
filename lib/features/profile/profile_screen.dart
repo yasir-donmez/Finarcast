@@ -2,12 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../l10n/app_localizations.dart';
+import '../../core/services/auth_service.dart';
 import '../../core/theme/app_constants.dart';
 import '../../shared/widgets/precision_sheet.dart';
 import '../../shared/widgets/precision_dialog.dart';
 import '../dashboard/dashboard_providers.dart';
 import '../../shared/widgets/precision_card.dart';
-import '../../shared/widgets/precision_theme_toggle.dart';
+import 'widgets/settings/theme_setting.dart';
+import 'widgets/settings/color_theme_setting.dart';
 
 // Modular Widgets
 import 'widgets/etched_liquid_text.dart';
@@ -61,8 +63,14 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final activeColor = ref.watch(rotaryColorProvider);
+    final activeColor = AppColors.getPrimary(context);
     final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    final authState = ref.watch(authStateProvider);
+    final String displayName = authState.maybeWhen(
+      data: (state) => state.session?.user.email ?? l10n.settings,
+      orElse: () => l10n.settings,
+    );
 
     return SafeArea(
       bottom: false,
@@ -81,8 +89,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                       return EtchedLiquidText(
                         progress: (offset / 120).clamp(0.0, 1.0),
                         activeColor: activeColor,
-                        text: "Yasir Dönmez",
-                        fontSize: 44,
+                        text: displayName,
+                        fontSize: displayName.length > 15 ? 32 : 44, // Uzun isimler için fontu küçültüyoruz
                       );
                     },
                   ),
@@ -107,7 +115,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   padding: EdgeInsets.zero,
                   child: Column(
                     children: [
-                      PrecisionThemeToggle(activeColor: activeColor),
+                      const ThemeSetting(),
+                      ProfileListItems.buildDivider(isDark),
+                      const ColorThemeSetting(),
                       ProfileListItems.buildDivider(isDark),
                       const LanguageSetting(),
                       ProfileListItems.buildDivider(isDark),

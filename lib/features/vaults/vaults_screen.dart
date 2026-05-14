@@ -16,7 +16,6 @@ import 'widgets/vault_detail_sheet.dart';
 import 'widgets/precision_detail_sheet.dart';
 import '../dashboard/dashboard_providers.dart';
 import '../dashboard/dashboard_scroll_provider.dart';
-import 'widgets/precision_blob.dart';
 import 'widgets/header_delegate.dart';
 import 'widgets/filter_chip.dart';
 import 'widgets/vault_snap_scroll_physics.dart';
@@ -65,10 +64,10 @@ class _VaultsScreenState extends ConsumerState<VaultsScreen> {
     final minHeaderHeight = topPadding + 56.0 + 20.0; // kCompactCardHeight + kHeaderBottomBuffer
 
     return Scaffold(
-      backgroundColor: AppColors.getBackground(context),
+      backgroundColor: Colors.transparent,
       body: Stack(
         children: [
-          if (isDark) ..._buildBackgroundBlobs(activeColor, context),
+          // Eski bloblar kaldırıldı, global pattern görünüyor
 
           CustomScrollView(
             controller: scrollController,
@@ -90,27 +89,6 @@ class _VaultsScreenState extends ConsumerState<VaultsScreen> {
         ],
       ),
     );
-  }
-
-  List<Widget> _buildBackgroundBlobs(Color activeColor, BuildContext context) {
-    return [
-      Positioned(
-        top: -50,
-        left: -50,
-        child: PrecisionBlob(
-          color: activeColor.withValues(alpha: 0.15),
-          size: 400,
-        ),
-      ),
-      Positioned(
-        bottom: 100,
-        right: -100,
-        child: PrecisionBlob(
-          color: AppColors.getSecondary(context).withValues(alpha: 0.1),
-          size: 500,
-        ),
-      ),
-    ];
   }
 
   Widget _buildHeader(
@@ -287,7 +265,7 @@ class _VaultsScreenState extends ConsumerState<VaultsScreen> {
           (context, index) {
             final tx = transactions[index];
             return StaggeredEntryAnim(
-              key: ValueKey(tx.dbId ?? index),
+              key: ValueKey(tx.id),
               index: index,
               child: PrecisionTransactionCard(
                 transaction: tx,

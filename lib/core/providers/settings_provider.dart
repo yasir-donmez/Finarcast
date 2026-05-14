@@ -4,6 +4,7 @@ import 'package:intl/date_symbol_data_local.dart';
 import 'package:intl/intl.dart';
 import '../database/database_service.dart';
 import '../database/models/app_settings.dart';
+import '../services/notification_service.dart';
 
 final rootRepaintBoundaryKey = GlobalKey();
 
@@ -24,11 +25,32 @@ class SettingsNotifier extends StateNotifier<AppSettings> {
     final newSettings = AppSettings()
       ..id = state.id
       ..themeModeIndex = index
+      ..accentColorValue = state.accentColorValue
       ..languageCode = state.languageCode
       ..currencySymbol = state.currencySymbol
       ..dataRetentionDays = state.dataRetentionDays
       ..permanentDeletionDays = state.permanentDeletionDays
-      ..isAiNotificationsEnabled = state.isAiNotificationsEnabled
+      ..isNotificationsEnabled = state.isNotificationsEnabled
+      ..isSyncEnabled = state.isSyncEnabled
+      ..isLocationEnabled = state.isLocationEnabled
+      ..countryName = state.countryName
+      ..remoteId = state.remoteId
+      ..syncStatus = state.syncStatus;
+    await _save(newSettings);
+  }
+
+  Future<void> setAccentColor(int colorValue) async {
+    if (state.accentColorValue == colorValue) return;
+
+    final newSettings = AppSettings()
+      ..id = state.id
+      ..themeModeIndex = state.themeModeIndex
+      ..accentColorValue = colorValue
+      ..languageCode = state.languageCode
+      ..currencySymbol = state.currencySymbol
+      ..dataRetentionDays = state.dataRetentionDays
+      ..permanentDeletionDays = state.permanentDeletionDays
+      ..isNotificationsEnabled = state.isNotificationsEnabled
       ..isSyncEnabled = state.isSyncEnabled
       ..isLocationEnabled = state.isLocationEnabled
       ..countryName = state.countryName
@@ -43,11 +65,12 @@ class SettingsNotifier extends StateNotifier<AppSettings> {
     final newSettings = AppSettings()
       ..id = state.id
       ..themeModeIndex = state.themeModeIndex
+      ..accentColorValue = state.accentColorValue
       ..languageCode = code
       ..currencySymbol = state.currencySymbol
       ..dataRetentionDays = state.dataRetentionDays
       ..permanentDeletionDays = state.permanentDeletionDays
-      ..isAiNotificationsEnabled = state.isAiNotificationsEnabled
+      ..isNotificationsEnabled = state.isNotificationsEnabled
       ..isSyncEnabled = state.isSyncEnabled
       ..isLocationEnabled = state.isLocationEnabled
       ..countryName = state.countryName
@@ -63,11 +86,12 @@ class SettingsNotifier extends StateNotifier<AppSettings> {
     final newSettings = AppSettings()
       ..id = state.id
       ..themeModeIndex = state.themeModeIndex
+      ..accentColorValue = state.accentColorValue
       ..languageCode = state.languageCode
       ..currencySymbol = symbol
       ..dataRetentionDays = state.dataRetentionDays
       ..permanentDeletionDays = state.permanentDeletionDays
-      ..isAiNotificationsEnabled = state.isAiNotificationsEnabled
+      ..isNotificationsEnabled = state.isNotificationsEnabled
       ..isSyncEnabled = state.isSyncEnabled
       ..isLocationEnabled = state.isLocationEnabled
       ..countryName = state.countryName
@@ -101,11 +125,12 @@ class SettingsNotifier extends StateNotifier<AppSettings> {
     final updated = AppSettings()
       ..id = state.id
       ..themeModeIndex = state.themeModeIndex
+      ..accentColorValue = state.accentColorValue
       ..languageCode = state.languageCode
       ..currencySymbol = state.currencySymbol
       ..dataRetentionDays = days
       ..permanentDeletionDays = state.permanentDeletionDays
-      ..isAiNotificationsEnabled = state.isAiNotificationsEnabled
+      ..isNotificationsEnabled = state.isNotificationsEnabled
       ..isSyncEnabled = state.isSyncEnabled
       ..isLocationEnabled = state.isLocationEnabled
       ..countryName = state.countryName
@@ -120,11 +145,12 @@ class SettingsNotifier extends StateNotifier<AppSettings> {
     final updated = AppSettings()
       ..id = state.id
       ..themeModeIndex = state.themeModeIndex
+      ..accentColorValue = state.accentColorValue
       ..languageCode = state.languageCode
       ..currencySymbol = state.currencySymbol
       ..dataRetentionDays = state.dataRetentionDays
       ..permanentDeletionDays = days
-      ..isAiNotificationsEnabled = state.isAiNotificationsEnabled
+      ..isNotificationsEnabled = state.isNotificationsEnabled
       ..isSyncEnabled = state.isSyncEnabled
       ..isLocationEnabled = state.isLocationEnabled
       ..countryName = state.countryName
@@ -133,23 +159,36 @@ class SettingsNotifier extends StateNotifier<AppSettings> {
     await _save(updated);
   }
 
-  Future<void> toggleAiNotifications(bool value) async {
-    if (state.isAiNotificationsEnabled == value) return;
-
+  Future<void> toggleNotifications(bool value) async {
+    if (state.isNotificationsEnabled == value) return;
+    
     final updated = AppSettings()
       ..id = state.id
       ..themeModeIndex = state.themeModeIndex
+      ..accentColorValue = state.accentColorValue
       ..languageCode = state.languageCode
       ..currencySymbol = state.currencySymbol
       ..dataRetentionDays = state.dataRetentionDays
       ..permanentDeletionDays = state.permanentDeletionDays
-      ..isAiNotificationsEnabled = value
+      ..isNotificationsEnabled = value
       ..isSyncEnabled = state.isSyncEnabled
       ..isLocationEnabled = state.isLocationEnabled
       ..countryName = state.countryName
       ..remoteId = state.remoteId
       ..syncStatus = state.syncStatus;
     await _save(updated);
+
+    // Master Switch Mantığı
+    if (!value) {
+      await NotificationService().cancelAll();
+    } else {
+      final transactions = await DatabaseService.getAllTransactions();
+      for (final tx in transactions) {
+        if (tx.isNotificationEnabled) {
+          await NotificationService().scheduleTransactionNotification(tx);
+        }
+      }
+    }
   }
 
   Future<void> toggleLocation(bool value) async {
@@ -158,11 +197,12 @@ class SettingsNotifier extends StateNotifier<AppSettings> {
     final updated = AppSettings()
       ..id = state.id
       ..themeModeIndex = state.themeModeIndex
+      ..accentColorValue = state.accentColorValue
       ..languageCode = state.languageCode
       ..currencySymbol = state.currencySymbol
       ..dataRetentionDays = state.dataRetentionDays
       ..permanentDeletionDays = state.permanentDeletionDays
-      ..isAiNotificationsEnabled = state.isAiNotificationsEnabled
+      ..isNotificationsEnabled = state.isNotificationsEnabled
       ..isSyncEnabled = state.isSyncEnabled
       ..isLocationEnabled = value
       ..countryName = state.countryName
@@ -177,11 +217,12 @@ class SettingsNotifier extends StateNotifier<AppSettings> {
     final updated = AppSettings()
       ..id = state.id
       ..themeModeIndex = state.themeModeIndex
+      ..accentColorValue = state.accentColorValue
       ..languageCode = state.languageCode
       ..currencySymbol = state.currencySymbol
       ..dataRetentionDays = state.dataRetentionDays
       ..permanentDeletionDays = state.permanentDeletionDays
-      ..isAiNotificationsEnabled = state.isAiNotificationsEnabled
+      ..isNotificationsEnabled = state.isNotificationsEnabled
       ..isSyncEnabled = value
       ..isLocationEnabled = state.isLocationEnabled
       ..countryName = state.countryName
@@ -196,11 +237,12 @@ class SettingsNotifier extends StateNotifier<AppSettings> {
     final updated = AppSettings()
       ..id = state.id
       ..themeModeIndex = state.themeModeIndex
+      ..accentColorValue = state.accentColorValue
       ..languageCode = state.languageCode
       ..currencySymbol = state.currencySymbol
       ..dataRetentionDays = state.dataRetentionDays
       ..permanentDeletionDays = state.permanentDeletionDays
-      ..isAiNotificationsEnabled = state.isAiNotificationsEnabled
+      ..isNotificationsEnabled = state.isNotificationsEnabled
       ..isSyncEnabled = state.isSyncEnabled
       ..isLocationEnabled = state.isLocationEnabled
       ..countryName = name
@@ -219,3 +261,5 @@ class SettingsNotifier extends StateNotifier<AppSettings> {
 final settingsProvider = StateNotifierProvider<SettingsNotifier, AppSettings>((ref) {
   return SettingsNotifier();
 });
+
+final dynamicColorProvider = StateProvider<Color>((ref) => const Color(0xFF00E5FF));

@@ -421,128 +421,176 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
   }
 
   Future<void> _saveTransaction() async {
-    final amountStr = _amountController.text.trim();
-    final minStr = _minController.text.trim();
-    final maxStr = _maxController.text.trim();
+    try {
+      final amountStr = _amountController.text.trim();
+      final minStr = _minController.text.trim();
+      final maxStr = _maxController.text.trim();
 
-    String sanitize(String input) {
-      if (input.isEmpty) return '0';
-      final clean = input.trim();
-      if (clean.contains(',')) {
-        return clean.replaceAll('.', '').replaceAll(',', '.');
-      } else {
-        if (RegExp(r'\.\d{3}$').hasMatch(clean)) return clean.replaceAll('.', '');
-        return clean;
-      }
-    }
-
-    final amount = double.tryParse(sanitize(amountStr)) ?? 0.0;
-    final minAmount = double.tryParse(sanitize(minStr)) ?? 0.0;
-    final maxAmount = double.tryParse(sanitize(maxStr)) ?? 0.0;
-
-    if (!_isFlexibleAmount && amount <= 0) {
-      _showValidationError('Lütfen geçerli bir tutar girin.');
-      return;
-    }
-
-    if (_isFlexibleAmount) {
-      if (maxAmount <= 0) {
-        _showValidationError('Maksimum tutar 0\'dan büyük olmalıdır.');
-        return;
-      }
-      if (minAmount >= maxAmount) {
-        _showValidationError('Minimum tutar maksimumdan küçük olmalıdır.');
-        return;
-      }
-    }
-
-    final finalAmount = _isFlexibleAmount ? 0.0 : amount;
-    final finalMin = _isFlexibleAmount ? minAmount : null;
-    final finalMax = _isFlexibleAmount ? maxAmount : null;
-    
-    final categories = _getMergedCategories();
-    final cat = categories[_selectedCategoryIndex];
-    final String categoryId = _selectedSubModelIndex != -1 
-        ? (cat['subModels'] as List)[_selectedSubModelIndex]['id'] as String
-        : cat['id'] as String;
-
-    if (widget.initialId != null) {
-      final old = await DatabaseService.getTransaction(widget.initialId!);
-      if (old != null) {
-        final catName = _selectedSubModelIndex != -1 
-            ? (cat['subModels'] as List)[_selectedSubModelIndex]['name'] as String
-            : cat['name'] as String;
-            
-        old.title = catName;
-        old.amount = finalAmount;
-        old.minAmount = finalMin;
-        old.maxAmount = finalMax;
-        old.isIncome = _tabIndex == 1;
-        old.vaultIds = _selectedVaultIds;
-        old.categoryId = categoryId;
-        old.periodType = _periodData.periodType;
-        old.recurrenceDay = _periodData.selectedDay;
-        old.recurrenceDate = _periodData.selectedDateForRecurrence;
-        old.recurrenceDuration = _periodData.duration;
-        old.note = _noteController.text.isNotEmpty ? _noteController.text : null;
-        old.currency = _selectedCurrency;
-        
-        old.isNotificationEnabled = _isNotificationEnabled;
-        old.notificationReminderDays = _notificationReminderDays;
-        old.notificationHour = _notificationTime.hour;
-        old.notificationMinute = _notificationTime.minute;
-        
-        await DatabaseService.updateTransaction(old);
-      }
-    } else {
-      final catName = _selectedSubModelIndex != -1 
-          ? (cat['subModels'] as List)[_selectedSubModelIndex]['name'] as String
-          : cat['name'] as String;
-
-      DateTime initialDate = DateTime.now();
-      if (_periodData.periodType != 0) {
-        final now = DateTime.now();
-        if ([2, 3, 6, 7].contains(_periodData.periodType)) {
-          final day = _periodData.selectedDay;
-          if (now.day <= day) {
-            initialDate = DateTime(now.year, now.month, day, now.hour, now.minute);
-          } else {
-            initialDate = DateTime(now.year, now.month + 1, day, now.hour, now.minute);
-          }
+      String sanitize(String input) {
+        if (input.isEmpty) return '0';
+        final clean = input.trim();
+        if (clean.contains(',')) {
+          return clean.replaceAll('.', '').replaceAll(',', '.');
+        } else {
+          if (RegExp(r'\.\d{3}$').hasMatch(clean)) return clean.replaceAll('.', '');
+          return clean;
         }
       }
 
-      final tx = TransactionRecord()
-        ..title = catName
-        ..amount = finalAmount
-        ..minAmount = finalMin
-        ..maxAmount = finalMax
-        ..isIncome = _tabIndex == 1
-        ..date = initialDate
-        ..vaultIds = _selectedVaultIds
-        ..categoryId = categoryId
-        ..periodType = _periodData.periodType
-        ..recurrenceDay = _periodData.selectedDay
-        ..recurrenceDate = _periodData.selectedDateForRecurrence
-        ..recurrenceDuration = _periodData.duration
-        ..note = _noteController.text.isNotEmpty ? _noteController.text : null
-        ..currency = _selectedCurrency
-        ..isNotificationEnabled = _isNotificationEnabled
-        ..notificationReminderDays = _notificationReminderDays
-        ..notificationHour = _notificationTime.hour
-        ..notificationMinute = _notificationTime.minute;
+      final amount = double.tryParse(sanitize(amountStr)) ?? 0.0;
+      final minAmount = double.tryParse(sanitize(minStr)) ?? 0.0;
+      final maxAmount = double.tryParse(sanitize(maxStr)) ?? 0.0;
+
+      if (!_isFlexibleAmount && amount <= 0) {
+        _showValidationError('Lütfen geçerli bir tutar girin.');
+        return;
+      }
+
+      if (_isFlexibleAmount) {
+        if (maxAmount <= 0) {
+          _showValidationError('Maksimum tutar 0\'dan büyük olmalıdır.');
+          return;
+        }
+        if (minAmount >= maxAmount) {
+          _showValidationError('Minimum tutar maksimumdan küçük olmalıdır.');
+          return;
+        }
+      }
+
+      final finalAmount = _isFlexibleAmount ? 0.0 : amount;
+      final finalMin = _isFlexibleAmount ? minAmount : null;
+      final finalMax = _isFlexibleAmount ? maxAmount : null;
       
-      await DatabaseService.addTransaction(tx);
-    }
-    
-    if (mounted) {
-      if (widget.onSuccess != null) {
-        widget.onSuccess!();
+      final categories = _getMergedCategories();
+      final cat = categories[_selectedCategoryIndex];
+      final String categoryId = _selectedSubModelIndex != -1 
+          ? (cat['subModels'] as List)[_selectedSubModelIndex]['id'] as String
+          : cat['id'] as String;
+
+      if (widget.initialId != null) {
+        final old = await DatabaseService.getTransaction(widget.initialId!);
+        if (old != null) {
+          final catName = _selectedSubModelIndex != -1 
+              ? (cat['subModels'] as List)[_selectedSubModelIndex]['name'] as String
+              : cat['name'] as String;
+              
+          old.title = catName;
+          old.amount = finalAmount;
+          old.minAmount = finalMin;
+          old.maxAmount = finalMax;
+          old.isIncome = _tabIndex == 1;
+          old.vaultIds = _selectedVaultIds;
+          old.categoryId = categoryId;
+          old.periodType = _periodData.periodType;
+          old.recurrenceDay = _periodData.selectedDay;
+          old.recurrenceDate = _periodData.selectedDateForRecurrence;
+          old.recurrenceDuration = _periodData.duration;
+          old.note = _noteController.text.isNotEmpty ? _noteController.text : null;
+          old.currency = _selectedCurrency;
+          
+          old.isNotificationEnabled = _isNotificationEnabled;
+          old.notificationReminderDays = _notificationReminderDays;
+          old.notificationHour = _notificationTime.hour;
+          old.notificationMinute = _notificationTime.minute;
+          
+          await DatabaseService.updateTransaction(old);
+        }
       } else {
-        Navigator.pop(context);
+        final catName = _selectedSubModelIndex != -1 
+            ? (cat['subModels'] as List)[_selectedSubModelIndex]['name'] as String
+            : cat['name'] as String;
+
+        DateTime initialDate = DateTime.now();
+        if (_periodData.periodType != 0) {
+          final now = DateTime.now();
+          if ([2, 3, 6, 7].contains(_periodData.periodType)) {
+            final day = _periodData.selectedDay;
+            if (now.day <= day) {
+              initialDate = DateTime(now.year, now.month, day, now.hour, now.minute);
+            } else {
+              initialDate = DateTime(now.year, now.month + 1, day, now.hour, now.minute);
+            }
+          }
+        }
+
+        final tx = TransactionRecord()
+          ..title = catName
+          ..amount = finalAmount
+          ..minAmount = finalMin
+          ..maxAmount = finalMax
+          ..isIncome = _tabIndex == 1
+          ..date = initialDate
+          ..vaultIds = _selectedVaultIds
+          ..categoryId = categoryId
+          ..periodType = _periodData.periodType
+          ..recurrenceDay = _periodData.selectedDay
+          ..recurrenceDate = _periodData.selectedDateForRecurrence
+          ..recurrenceDuration = _periodData.duration
+          ..note = _noteController.text.isNotEmpty ? _noteController.text : null
+          ..currency = _selectedCurrency
+          ..isNotificationEnabled = _isNotificationEnabled
+          ..notificationReminderDays = _notificationReminderDays
+          ..notificationHour = _notificationTime.hour
+          ..notificationMinute = _notificationTime.minute;
+        
+        await DatabaseService.addTransaction(tx);
+      }
+      
+      if (mounted) {
+        if (widget.onSuccess != null) {
+          widget.onSuccess!();
+        } else {
+          Navigator.pop(context);
+        }
+      }
+      HapticFeedback.heavyImpact();
+    } catch (e) {
+      debugPrint('❌ [AddTransactionScreen] Kaydetme hatası: $e');
+      _showValidationError('İşlem kaydedilirken bir hata oluştu: $e');
+    }
+  }
+
+  void _onCurrencyChanged(String newCurrency) {
+    if (newCurrency == _selectedCurrency) return;
+    
+    void formatFieldForNewCurrency(TextEditingController controller) {
+      final text = controller.text.trim();
+      if (text.isEmpty) return;
+      
+      // Sayıyı al (Formatı temizle)
+      final valStr = text.replaceAll('.', '').replaceAll(',', '.');
+      final val = double.tryParse(valStr);
+      
+      if (val != null) {
+        // Kullanıcı sayının DEĞİŞMEMESİNİ istediği için convert yapmıyoruz.
+        // Sadece yeni birimin format kurallarını uyguluyoruz (Örn: JPY için küsurat silme)
+        final code = AppCurrency.getCode(newCurrency);
+        final bool isZeroDecimal = (code == 'JPY' || code == 'KRW');
+        
+        int decimals = isZeroDecimal ? 0 : 2;
+        if (val == val.toInt()) decimals = 0;
+        
+        String formatted = val.toStringAsFixed(decimals).replaceAll('.', ',');
+        
+        // Binlik ayırıcıları tekrar ekle
+        if (formatted.contains(',')) {
+          List<String> parts = formatted.split(',');
+          parts[0] = parts[0].replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]}.');
+          formatted = parts.join(',');
+        } else {
+          formatted = formatted.replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]}.');
+        }
+        
+        controller.text = formatted;
       }
     }
-    HapticFeedback.heavyImpact();
+
+    setState(() {
+      formatFieldForNewCurrency(_amountController);
+      formatFieldForNewCurrency(_minController);
+      formatFieldForNewCurrency(_maxController);
+      _selectedCurrency = newCurrency;
+    });
   }
 
   void _showValidationError(String message) {
@@ -793,7 +841,9 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                               _selectedVaultIds = ids;
                               if (ids.isNotEmpty) {
                                 final sv = _vaults.firstWhere((v) => v.id == ids.first);
-                                if (sv.currency != 'AUTO') _selectedCurrency = sv.currency;
+                                if (sv.currency != 'AUTO') {
+                                  _onCurrencyChanged(sv.currency);
+                                }
                               }
                             });
                           },
@@ -802,7 +852,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                         TransactionCurrencySelector(
                           selectedCurrency: _selectedCurrency,
                           scalingFactor: scalingFactor,
-                          onChanged: (val) => setState(() => _selectedCurrency = val),
+                          onChanged: _onCurrencyChanged,
                         ),
                       ],
                     ),

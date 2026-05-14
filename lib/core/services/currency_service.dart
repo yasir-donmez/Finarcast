@@ -108,6 +108,39 @@ class CurrencyService {
           }
         }
 
+        // SAR (Suudi Arabistan Riyali)
+        if (data['SAR'] != null && data['SAR']['Satış'] != null) {
+          final val = double.tryParse(data['SAR']['Satış'].toString().replaceAll('.', '').replaceAll(',', '.'));
+          if (val != null) {
+            exchangeRates.add(ExchangeRate()
+              ..currencyCode = 'SAR'
+              ..rate = val
+              ..lastUpdated = lastUpdated);
+          }
+        }
+
+        // KWD (Kuveyt Dinarı)
+        if (data['KWD'] != null && data['KWD']['Satış'] != null) {
+          final val = double.tryParse(data['KWD']['Satış'].toString().replaceAll('.', '').replaceAll(',', '.'));
+          if (val != null) {
+            exchangeRates.add(ExchangeRate()
+              ..currencyCode = 'KWD'
+              ..rate = val
+              ..lastUpdated = lastUpdated);
+          }
+        }
+
+        // SILVER (Gümüş)
+        if (data['gumus'] != null && data['gumus']['Satış'] != null) {
+          final val = double.tryParse(data['gumus']['Satış'].toString().replaceAll('.', '').replaceAll(',', '.'));
+          if (val != null) {
+            exchangeRates.add(ExchangeRate()
+              ..currencyCode = 'SILVER'
+              ..rate = val
+              ..lastUpdated = lastUpdated);
+          }
+        }
+
         // GOLD (Gram Altın)
         if (data['gram-altin'] != null && data['gram-altin']['Satış'] != null) {
           final val = double.tryParse(data['gram-altin']['Satış'].toString().replaceAll('.', '').replaceAll(',', '.'));

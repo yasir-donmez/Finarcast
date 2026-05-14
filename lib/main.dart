@@ -16,6 +16,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'core/services/subscription_service.dart';
 import 'core/services/notification_service.dart';
+import 'package:dynamic_color/dynamic_color.dart';
 
 void main() async {
   try {
@@ -116,45 +117,76 @@ class FinarcastApp extends ConsumerWidget {
     } catch (_) {}
     appLocale ??= const Locale('tr');
 
-    return RepaintBoundary(
-      key: rootRepaintBoundaryKey,
-      child: MaterialApp(
-        title: 'Finarcast',
-        debugShowCheckedModeBanner: false,
-  
-        // Tema Yapılandırması (Karanlık Neumorphism)
-        theme: AppTheme.lightTheme,
-        darkTheme: AppTheme.darkTheme,
-        themeMode: themeMode,
-        
-        // Dil Yapılandırması
-        locale: appLocale,
-        localizationsDelegates: AppLocalizations.localizationsDelegates,
-        supportedLocales: AppLocalizations.supportedLocales,
-  
-        home: Consumer(
-          builder: (context, ref, child) {
-            final authState = ref.watch(authStateProvider);
+    return DynamicColorBuilder(
+      builder: (lightDynamic, darkDynamic) {
+        Color? accentColor;
+        if (settings.accentColorValue != 0) {
+          accentColor = Color(settings.accentColorValue);
+        }
+
+        final theme = AppTheme.buildLightTheme(accentColor ?? lightDynamic?.primary ?? const Color(0xFF00E5FF));
+        final darkTheme = AppTheme.buildDarkTheme(accentColor ?? darkDynamic?.primary ?? const Color(0xFF00E5FF));
+
+        // Dinamik rengi güncelle (Diğer bileşenlerin erişebilmesi için)
+        final dynamicColor = lightDynamic?.primary ?? const Color(0xFF00E5FF);
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (ref.read(dynamicColorProvider) != dynamicColor) {
+            ref.read(dynamicColorProvider.notifier).state = dynamicColor;
+          }
+        });
+
+        return RepaintBoundary(
+          key: rootRepaintBoundaryKey,
+          child: MaterialApp(
+            title: 'Finarcast',
+            debugShowCheckedModeBanner: false,
+      
+            // Tema Yapılandırması (Karanlık Neumorphism)
+            theme: theme,
+            darkTheme: darkTheme,
+            themeMode: themeMode,
             
-            return authState.when(
-              data: (state) {
-                if (state.session != null) {
-                  return const MainScaffold();
-                }
-                return const AuthScreen();
+            // Dil Yapılandırması
+            locale: appLocale,
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+      
+            builder: (context, child) {
+              final brightness = MediaQuery.platformBrightnessOf(context);
+              final isSystemDark = brightness == Brightness.dark;
+              final isDark = themeMode == ThemeMode.dark || (themeMode == ThemeMode.system && isSystemDark);
+              
+              return Material(
+                color: isDark ? AppColors.darkBackground : AppColors.lightBackground,
+                child: child,
+              );
+            },
+      
+            home: Consumer(
+              builder: (context, ref, child) {
+                final authState = ref.watch(authStateProvider);
+                
+                return authState.when(
+                  data: (state) {
+                    if (state.session != null) {
+                      return const MainScaffold();
+                    }
+                    return const AuthScreen();
+                  },
+                  loading: () => const Scaffold(
+                    backgroundColor: Colors.transparent, // Builder'daki renk görünecek
+                    body: Center(child: CircularProgressIndicator()),
+                  ),
+                  error: (e, st) => Scaffold(
+                    backgroundColor: Colors.transparent,
+                    body: Center(child: Text('Hata: $e')),
+                  ),
+                );
               },
-              loading: () => Scaffold(
-                backgroundColor: AppColors.getBackground(context),
-                body: const Center(child: CircularProgressIndicator()),
-              ),
-              error: (e, st) => Scaffold(
-                backgroundColor: AppColors.getBackground(context),
-                body: Center(child: Text('Hata: $e')),
-              ),
-            );
-          },
-        ),
-      ),
+            ),
+          ),
+        );
+      },
     );
   }
 

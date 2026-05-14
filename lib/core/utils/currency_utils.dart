@@ -80,10 +80,13 @@ class CurrencyUtils {
       case '₺': return 'TRY';
       case 'G':
       case 'ALTIN': return 'GOLD';
+      case 'Ag': return 'SILVER';
+      case 'SR': return 'SAR';
+      case 'KD': return 'KWD';
       default: return symbol;
     }
   }
 
   /// Mevcut tüm para birimi sembollerini getir (Seçim listesi için)
-  static List<String> get availableSymbols => ['₺', r'$', '€', '£', '¥', '₩', '元', r'R$', 'Fr', 'G'];
+  static List<String> get availableSymbols => ['₺', r'$', '€', '£', '¥', '₩', '元', r'R$', 'Fr', 'G', 'Ag', 'SR', 'KD'];
 }

@@ -12,6 +12,8 @@ import '../../../../shared/widgets/precision_button.dart';
 import '../../../../shared/widgets/precision_icon_button.dart';
 import '../../../../shared/widgets/precision_dialog.dart';
 import '../../../../l10n/app_localizations.dart';
+import '../../../../shared/widgets/precision_toggle.dart';
+import '../../../../shared/widgets/precision_animated_icon.dart';
 import '../vaults_providers.dart';
 
 class PrecisionDetailSheet extends ConsumerStatefulWidget {
@@ -37,10 +39,12 @@ class PrecisionDetailSheet extends ConsumerStatefulWidget {
 class _PrecisionDetailSheetState extends ConsumerState<PrecisionDetailSheet> {
   List<Vault> _attachedVaults = [];
   TransactionRecord? _fullRecord;
+  late bool _isNotificationEnabled;
 
   @override
   void initState() {
     super.initState();
+    _isNotificationEnabled = widget.transaction.isNotificationEnabled;
     _loadData();
   }
 
@@ -54,6 +58,21 @@ class _PrecisionDetailSheetState extends ConsumerState<PrecisionDetailSheet> {
       setState(() {
         _attachedVaults = allVaults.where((v) => ids.contains(v.id)).toList();
       });
+    }
+  }
+
+  Future<void> _toggleNotification(bool value) async {
+    setState(() {
+      _isNotificationEnabled = value;
+    });
+
+    if (widget.transaction.dbId != null) {
+      final record = await DatabaseService.getTransaction(widget.transaction.dbId!);
+      if (record != null) {
+        record.isNotificationEnabled = value;
+        await DatabaseService.updateTransaction(record);
+        HapticFeedback.mediumImpact();
+      }
     }
   }
 
@@ -285,6 +304,65 @@ class _PrecisionDetailSheetState extends ConsumerState<PrecisionDetailSheet> {
             ),
           )),
         ],
+
+        SizedBox(height: 12 * sf),
+
+        // 3.5 BİLDİRİM TOGGLE
+        PrecisionCard(
+          scalingFactor: sf,
+          padding: EdgeInsets.symmetric(horizontal: 16 * sf, vertical: 12 * sf),
+          child: Row(
+            children: [
+              Container(
+                width: 38 * sf,
+                height: 38 * sf,
+                decoration: BoxDecoration(
+                  color: tx.color.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(12 * sf),
+                ),
+                child: PrecisionAnimatedIcon(
+                  isActive: _isNotificationEnabled,
+                  activeIcon: Icons.notifications_active_rounded,
+                  inactiveIcon: Icons.notifications_off_rounded,
+                  color: tx.color,
+                  size: 18 * sf,
+                ),
+              ),
+              SizedBox(width: 12 * sf),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      l10n.notifications,
+                      style: TextStyle(
+                        fontSize: 14 * sf,
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.getTextPrimary(context),
+                      ),
+                    ),
+                    Text(
+                      _isNotificationEnabled ? l10n.active : l10n.disabled,
+                      style: TextStyle(
+                        fontSize: 11 * sf,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.getTextSecondary(context).withValues(alpha: 0.5),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              PrecisionToggle(
+                value: _isNotificationEnabled,
+                onChanged: _toggleNotification,
+                activeColor: tx.color,
+                scalingFactor: sf * 0.85,
+                activeIcon: Icons.notifications_active_rounded,
+                inactiveIcon: Icons.notifications_off_rounded,
+              ),
+            ],
+          ),
+        ),
 
         SizedBox(height: 16 * sf),
 

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'dart:ui';
 
+/// Finarcast "Hafif" Kapsayıcı (Light Card).
+/// Giriş alanları ve küçük öğeler için optimize edilmiş, çok hafif buzlu cam dokusu.
 class PrecisionCard extends StatelessWidget {
   final Widget child;
   final double scalingFactor;
@@ -8,6 +10,7 @@ class PrecisionCard extends StatelessWidget {
   final VoidCallback? onTap;
   final Color? backgroundColor;
   final Color? borderColor;
+  final double blur;
 
   const PrecisionCard({
     super.key,
@@ -17,6 +20,7 @@ class PrecisionCard extends StatelessWidget {
     this.onTap,
     this.backgroundColor,
     this.borderColor,
+    this.blur = 10.0,
   });
 
   @override
@@ -25,23 +29,25 @@ class PrecisionCard extends StatelessWidget {
     
     return GestureDetector(
       onTap: onTap,
-      child: Container(
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(16 * scalingFactor),
-          border: Border.all(
-            color: borderColor ?? (isDark ? Colors.white : Colors.black).withValues(alpha: 0.08),
-            width: 0.5,
-          ),
-        ),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(16 * scalingFactor),
-          child: BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-            child: Container(
-              padding: padding ?? EdgeInsets.all(10 * scalingFactor),
-              color: backgroundColor ?? (isDark ? Colors.white.withValues(alpha: 0.04) : Colors.black.withValues(alpha: 0.02)),
-              child: child,
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(16 * scalingFactor),
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: blur, sigmaY: blur),
+          child: Container(
+            padding: padding ?? EdgeInsets.all(12 * scalingFactor),
+            decoration: BoxDecoration(
+              color: backgroundColor ?? (isDark 
+                  ? Colors.white.withValues(alpha: 0.05) 
+                  : Colors.black.withValues(alpha: 0.02)),
+              borderRadius: BorderRadius.circular(16 * scalingFactor),
+              border: Border.all(
+                color: borderColor ?? (isDark 
+                    ? Colors.white.withValues(alpha: 0.08) 
+                    : Colors.black.withValues(alpha: 0.05)),
+                width: 0.5,
+              ),
             ),
+            child: child,
           ),
         ),
       ),

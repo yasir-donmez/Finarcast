@@ -1,5 +1,6 @@
 {
   "appTitle": "Finarcast",
+  "settings": "Settings",
   "profile": "Profile",
   "memberPremium": "Finarcast Premium Member",
   "preferences": "PREFERENCES & APP",
@@ -79,6 +80,8 @@
   "themeSystem": "System",
   "themeLight": "Light",
   "themeDark": "Dark",
+  "colorTheme": "Color Theme",
+  "colorSystem": "System",
   "market": "Market",
   "food": "Food",
   "cleaning": "Cleaning",
@@ -405,5 +408,7 @@
   "prioritySupport": "Priority Support",
   "subscriptionStatus": "Subscription Status",
   "active": "Active",
-  "inactive": "Inactive"
+  "inactive": "Inactive",
+  "notifications": "Notifications",
+  "disabled": "Disabled"
 }

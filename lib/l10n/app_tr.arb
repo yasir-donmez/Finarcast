@@ -1,5 +1,6 @@
 {
   "appTitle": "Finarcast",
+  "settings": "Ayarlar",
   "profile": "Profil",
   "memberPremium": "Finarcast Premium Üyelik",
   "preferences": "TERCİHLER & UYGULAMA",
@@ -79,6 +80,8 @@
   "themeSystem": "Sistem",
   "themeLight": "Aydınlık",
   "themeDark": "Karanlık",
+  "colorTheme": "Renk Teması",
+  "colorSystem": "Sistem",
   "market": "Market",
   "food": "Gıda",
   "cleaning": "Temizlik",
@@ -405,5 +408,7 @@
   "prioritySupport": "Öncelikli Destek",
   "subscriptionStatus": "Üyelik Durumu",
   "active": "Aktif",
-  "inactive": "Aktif Değil"
+  "inactive": "Aktif Değil",
+  "notifications": "Bildirimler",
+  "disabled": "Kapalı"
 }

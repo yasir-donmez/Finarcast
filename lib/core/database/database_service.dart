@@ -66,8 +66,11 @@ class DatabaseService {
     final id = await isar.writeTxn(() async {
       return await isar.transactionRecords.put(tx);
     });
-    // Bildirimi zamanla
-    await NotificationService().scheduleTransactionNotification(tx..id = id);
+    // Bildirimi zamanla (Master Switch kontrolü ile)
+    final settings = await getSettings();
+    if (settings.isNotificationsEnabled) {
+      await NotificationService().scheduleTransactionNotification(tx..id = id);
+    }
     return id;
   }
 
@@ -78,8 +81,13 @@ class DatabaseService {
     await isar.writeTxn(() async {
       await isar.transactionRecords.put(tx);
     });
-    // Bildirimi güncelle
-    await NotificationService().scheduleTransactionNotification(tx);
+    // Bildirimi güncelle (Master Switch kontrolü ile)
+    final settings = await getSettings();
+    if (settings.isNotificationsEnabled) {
+      await NotificationService().scheduleTransactionNotification(tx);
+    } else {
+      await NotificationService().cancelNotification(tx.id);
+    }
   }
 
   /// İşlemi sil

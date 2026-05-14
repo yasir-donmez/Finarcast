@@ -543,10 +543,12 @@ class _PrecisionVaultGridState extends ConsumerState<PrecisionVaultGrid> {
             switchOutCurve: Curves.easeInCubic,
             layoutBuilder:
                 (Widget? currentChild, List<Widget> previousChildren) {
+                  final Set<Key> seenKeys = {};
+                  if (currentChild?.key != null) seenKeys.add(currentChild!.key!);
                   return Stack(
                     alignment: Alignment.center,
                     children: <Widget>[
-                      ...previousChildren.where((child) => child.key != currentChild?.key),
+                      ...previousChildren.where((child) => child.key == null || seenKeys.add(child.key!)),
                       if (currentChild != null) currentChild,
                     ],
                   );
@@ -972,12 +974,12 @@ class _PrecisionVaultGridState extends ConsumerState<PrecisionVaultGrid> {
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
               color: isSelected
-                  ? AppColors.primary.withValues(alpha: 0.1)
+                  ? AppColors.getPrimary(context).withValues(alpha: 0.1)
                   : Colors.transparent,
               borderRadius: BorderRadius.circular(12),
               border: Border.all(
                 color: isSelected
-                    ? AppColors.primary
+                    ? AppColors.getPrimary(context)
                     : AppColors.getTextSecondary(context).withValues(alpha: 0.6), // Daha belirgin sınır (0.45 -> 0.6)
               ),
             ),

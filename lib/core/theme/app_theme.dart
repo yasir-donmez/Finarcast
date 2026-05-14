@@ -2,27 +2,14 @@ import 'package:flutter/material.dart';
 import 'app_constants.dart';
 
 class AppTheme {
-  static ThemeData? _darkTheme;
-  static ThemeData? _lightTheme;
-
-  static ThemeData get darkTheme {
-    _darkTheme ??= _buildDarkTheme();
-    return _darkTheme!;
-  }
-
-  static ThemeData get lightTheme {
-    _lightTheme ??= _buildLightTheme();
-    return _lightTheme!;
-  }
-
   /// Premium Glassmorphism - Karanlık Tema
-  static ThemeData _buildDarkTheme() {
+  static ThemeData buildDarkTheme(Color accentColor) {
     return ThemeData(
       useMaterial3: true,
       brightness: Brightness.dark,
-      scaffoldBackgroundColor: AppColors.darkBackground,
-      colorScheme: const ColorScheme.dark(
-        primary: AppColors.primary,
+      scaffoldBackgroundColor: Colors.transparent,
+      colorScheme: ColorScheme.dark(
+        primary: accentColor,
         onPrimary: Colors.white,
         secondary: AppColors.secondary,
         onSecondary: Colors.white,
@@ -40,14 +27,17 @@ class AppTheme {
   }
 
   /// Premium Glassmorphism - Aydınlık Tema
-  static ThemeData _buildLightTheme() {
+  static ThemeData buildLightTheme(Color accentColor) {
+    // Aydınlık modda okunabilirliği artırmak için rengi biraz koyulaştırıyoruz
+    final readableAccent = Color.lerp(accentColor, Colors.black, 0.45) ?? accentColor;
+
     return ThemeData(
       useMaterial3: true,
       brightness: Brightness.light,
-      primaryColor: AppColors.primary,
+      primaryColor: readableAccent,
       scaffoldBackgroundColor: AppColors.lightBackground,
-      colorScheme: const ColorScheme.light(
-        primary: AppColors.primary,
+      colorScheme: ColorScheme.light(
+        primary: readableAccent,
         secondary: AppColors.secondary,
         surface: AppColors.lightSurface,
         onSurface: AppColors.lightTextPrimary,

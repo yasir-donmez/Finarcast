@@ -15,7 +15,7 @@ import 'package:flutter/rendering.dart';
 import '../../core/services/subscription_service.dart';
 import '../subscription/widgets/pro_upgrade_sheet.dart';
 import '../../shared/widgets/precision_membership_orb.dart';
-
+import '../auth/widgets/precision_background.dart';
 import 'dashboard_scroll_provider.dart';
 
 class MainScaffold extends ConsumerStatefulWidget {
@@ -24,10 +24,13 @@ class MainScaffold extends ConsumerStatefulWidget {
   @override
   ConsumerState<MainScaffold> createState() => _MainScaffoldState();
 }
+
 class _MainScaffoldState extends ConsumerState<MainScaffold> {
   int _currentIndex = 0;
   int _previousIndex = 0;
   bool _isFloatingActionsVisible = true;
+  late final PageController _pageController = PageController(initialPage: _currentIndex);
+  ScrollController? _scrollController; 
 
   final List<Widget> _pages = [
     const DashboardScreen(),
@@ -39,19 +42,26 @@ class _MainScaffoldState extends ConsumerState<MainScaffold> {
   @override
   void initState() {
     super.initState();
-
+    // Build sonrası güvenli başlatma (LateInitializationError çözümüdür)
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.read(dashboardScrollProvider).addListener(_onScroll);
+      if (mounted) {
+        _scrollController = ref.read(dashboardScrollProvider);
+        _scrollController?.addListener(_onScroll);
+      }
     });
   }
 
   @override
   void dispose() {
+    // ref kullanmadan güvenli temizlik
+    _scrollController?.removeListener(_onScroll);
+    _pageController.dispose();
     super.dispose();
   }
 
   void _onScroll() {
-    final controller = ref.read(dashboardScrollProvider);
+    if (!mounted || _scrollController == null) return;
+    final controller = _scrollController!;
     if (!controller.hasClients) return;
 
     // Sayfanın en tepesindeyse her zaman göster
@@ -68,7 +78,6 @@ class _MainScaffoldState extends ConsumerState<MainScaffold> {
   }
 
   void _openTransactionScreen() {
-    // YENİ: Kasalar sayfasındaysak ve bir kasa seçili ise onu varsayılan olarak gönder
     final selectedVaultId = ref.read(selectedVaultProvider);
     List<int>? vaultIds;
     
@@ -92,61 +101,62 @@ class _MainScaffoldState extends ConsumerState<MainScaffold> {
 
   @override
   Widget build(BuildContext context) {
-    final backgroundColor = AppColors.getBackground(context);
     final subscription = ref.watch(subscriptionServiceProvider);
     final rotaryColor = ref.watch(rotaryColorProvider);
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final activeColor = isDark ? rotaryColor : AppColors.getAccentDeep(context, rotaryColor);
-
     
     final isKeyboardVisible = MediaQuery.of(context).viewInsets.bottom > 0;
     final bottomPadding = MediaQuery.of(context).padding.bottom;
-    final navbarHeight = 66.0;
-    final navbarBottomMargin = 12.0;
-    final gapAboveNavbar = 18.0;
+    const navbarHeight = 66.0;
+    const navbarBottomMargin = 12.0;
+    const gapAboveNavbar = 18.0;
     
-    // Toplam yükseklik: Güvenli alan + navbar boşluğu + navbar boyu + üstteki boşluk
     final floatingActionBottom = bottomPadding + navbarBottomMargin + navbarHeight + gapAboveNavbar;
-    // Sadece Dashboard sayfasında ve scroll/klavye durumuna göre göster
     final shouldShowProButton = _currentIndex == 0 && _isFloatingActionsVisible && !isKeyboardVisible;
-
 
     return Stack(
       children: [
-        Scaffold(
-          extendBody: true,
-          backgroundColor: backgroundColor,
-          body: AnimatedSwitcher(
+        Positioned.fill(
+          child: TweenAnimationBuilder<double>(
+            tween: Tween<double>(end: _currentIndex == 0 ? 100.0 : 0.0),
             duration: const Duration(milliseconds: 350),
-            switchInCurve: Curves.easeOutCubic,
-            switchOutCurve: Curves.easeInCubic,
-            transitionBuilder: (Widget child, Animation<double> animation) {
-              final isForward = _currentIndex >= _previousIndex;
-              final isIncoming = child.key == ValueKey<int>(_currentIndex);
-              
-              return FadeTransition(
-                opacity: animation,
-                child: SlideTransition(
-                  position: Tween<Offset>(
-                    begin: isIncoming 
-                        ? (isForward ? const Offset(0.12, 0) : const Offset(-0.12, 0))
-                        : Offset.zero,
-                    end: isIncoming
-                        ? Offset.zero
-                        : (isForward ? const Offset(-0.06, 0) : const Offset(0.06, 0)),
-                  ).animate(animation),
-                  child: child,
-                ),
+            curve: Curves.easeOutCubic,
+            builder: (context, radius, child) {
+              if (radius <= 0) return child!;
+              return ShaderMask(
+                blendMode: BlendMode.dstOut,
+                shaderCallback: (Rect bounds) {
+                  return RadialGradient(
+                    center: const Alignment(0.0, 0.40),
+                    radius: radius / (bounds.shortestSide / 2),
+                    colors: const [Colors.black, Colors.black, Colors.transparent],
+                    stops: const [0.0, 0.5, 1.0],
+                  ).createShader(bounds);
+                },
+                child: child,
               );
             },
-            child: Container(
-              key: ValueKey<int>(_currentIndex),
-              child: _pages[_currentIndex],
-            ),
+            child: const PrecisionBackground(useSystemBackground: false),
           ),
         ),
 
-        // 💎 PRO İKONU: Navbardan yükselen gerçekçi sıvı form (Z-Index: 1 - Navbar'ın arkasında)
+        Scaffold(
+          extendBody: true,
+          backgroundColor: Colors.transparent,
+          body: PageView(
+            controller: _pageController,
+            physics: const NeverScrollableScrollPhysics(),
+            onPageChanged: (index) {
+              setState(() {
+                _previousIndex = _currentIndex;
+                _currentIndex = index;
+              });
+            },
+            children: _pages,
+          ),
+        ),
+
         AnimatedPositioned(
           duration: const Duration(milliseconds: 600),
           curve: Curves.easeInOutQuart,
@@ -197,10 +207,8 @@ class _MainScaffoldState extends ConsumerState<MainScaffold> {
           ),
         ),
 
-        // ➕ AYRI FAB: Sadece Kasalar Sayfasında (Z-Index: 2)
         _buildFloatingActionButton(floatingActionBottom),
 
-        // 📱 MODERN NAVBAR (Z-Index: 3 - En üstte)
         Positioned(
           bottom: 0,
           left: 0,
@@ -226,7 +234,7 @@ class _MainScaffoldState extends ConsumerState<MainScaffold> {
     
     final screenWidth = MediaQuery.of(context).size.width;
     final navWidth = screenWidth - 32; 
-    final internalPadding = 20.0; 
+    const internalPadding = 20.0; 
     final availableWidth = navWidth - internalPadding;
     final itemWidth = availableWidth / 4;
 
@@ -239,45 +247,42 @@ class _MainScaffoldState extends ConsumerState<MainScaffold> {
         blur: 28,
         child: Stack(
           children: [
-            // 🚀 OPTİMİZE EDİLMİŞ GÖSTERGE (REPAINT BOUNDARY İLE)
             AnimatedPositioned(
               duration: const Duration(milliseconds: 600),
               curve: Curves.easeOutQuart,
               left: 10 + (_currentIndex * itemWidth),
               top: 6,
               bottom: 6,
-              child: RepaintBoundary(
-                child: AnimatedContainer(
-                  duration: const Duration(milliseconds: 350),
-                  curve: Curves.easeOutCubic,
-                  width: itemWidth,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(30),
-                    color: activeColor.withValues(alpha: isDark ? 0.25 : 0.15),
-                    boxShadow: [
-                      BoxShadow(
-                        color: activeColor.withValues(alpha: 0.15),
-                        blurRadius: 12,
-                        offset: const Offset(0, 4),
-                      ),
-                    ],
-                    border: Border.all(
-                      color: activeColor.withValues(alpha: isDark ? 0.3 : 0.2),
-                      width: 1.2,
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 350),
+                curve: Curves.easeOutCubic,
+                width: itemWidth,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(30),
+                  color: activeColor.withValues(alpha: isDark ? 0.25 : 0.15),
+                  boxShadow: [
+                    BoxShadow(
+                      color: activeColor.withValues(alpha: 0.15),
+                      blurRadius: 12,
+                      offset: const Offset(0, 4),
                     ),
+                  ],
+                  border: Border.all(
+                    color: activeColor.withValues(alpha: isDark ? 0.3 : 0.2),
+                    width: 1.2,
                   ),
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(30),
-                    child: Container(
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                          colors: [
-                            Colors.white.withValues(alpha: isDark ? 0.05 : 0.2),
-                            Colors.transparent,
-                          ],
-                        ),
+                ),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(30),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: [
+                          Colors.white.withValues(alpha: isDark ? 0.05 : 0.2),
+                          Colors.transparent,
+                        ],
                       ),
                     ),
                   ),
@@ -285,7 +290,6 @@ class _MainScaffoldState extends ConsumerState<MainScaffold> {
               ),
             ),
             
-            // ÖĞELER (STATİK KATMAN)
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 10),
               child: Row(
@@ -309,7 +313,6 @@ class _MainScaffoldState extends ConsumerState<MainScaffold> {
     final activeColor = isDark ? rotaryColor : AppColors.getAccentDeep(context, rotaryColor);
     final isKeyboardVisible = MediaQuery.of(context).viewInsets.bottom > 0;
     
-    // YENİ: Kaydırma durumuna göre (_isFloatingActionsVisible) görünürlüğü kontrol et
     final isVisible = _currentIndex == 1 && !isKeyboardVisible && _isFloatingActionsVisible;
 
     return AnimatedPositioned(
@@ -331,7 +334,6 @@ class _MainScaffoldState extends ConsumerState<MainScaffold> {
                 child: Stack(
                   alignment: Alignment.center,
                   children: [
-                    // Arka plandaki küre
                     Hero(
                       tag: 'fab_bubble',
                       child: PrecisionMembershipOrb(
@@ -341,29 +343,16 @@ class _MainScaffoldState extends ConsumerState<MainScaffold> {
                         showParticles: false,
                       ),
                     ),
-                    // İkon
                     if (scaleFactor > 0.6)
                       AnimatedOpacity(
                         duration: const Duration(milliseconds: 200),
                         opacity: (scaleFactor - 0.6) / 0.4,
-                        child: Container(
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.white.withValues(alpha: 0.25),
-                                blurRadius: 10,
-                              ),
-                            ],
-                          ),
-                          child: const Icon(
-                            Icons.add_rounded,
-                            color: Colors.white,
-                            size: 36,
-                          ),
+                        child: const Icon(
+                          Icons.add_rounded,
+                          color: Colors.white,
+                          size: 36,
                         ),
                       ),
-                    // Tıklama Efekti (Pro Orb ile aynı)
                     Material(
                       color: Colors.transparent,
                       child: InkWell(
@@ -391,7 +380,6 @@ class _MainScaffoldState extends ConsumerState<MainScaffold> {
     final secondaryTextColor = AppColors.getTextSecondary(context);
     final activeColor = ref.watch(rotaryColorProvider);
     
-    // YENİ: İçerik rengi seçili olduğunda aktif renge (ama daha okunaklı tonuna) bürünür
     final contentColor = isSelected 
         ? (isDark ? activeColor : AppColors.getAccentDeep(context, activeColor)) 
         : secondaryTextColor.withValues(alpha: 0.8);
@@ -399,11 +387,22 @@ class _MainScaffoldState extends ConsumerState<MainScaffold> {
     return Expanded(
       child: GestureDetector(
         onTap: () {
+          if (_currentIndex == index) return;
+          
           HapticFeedback.selectionClick();
-          setState(() {
-            _previousIndex = _currentIndex;
-            _currentIndex = index;
-          });
+          
+          // Akıllı Kayma: Eğer hedef çok uzaktaysa, önce hedefin yanına ışınlan
+          final distance = (index - _currentIndex).abs();
+          if (distance > 1) {
+            final jumpTo = index > _currentIndex ? index - 1 : index + 1;
+            _pageController.jumpToPage(jumpTo);
+          }
+          
+          _pageController.animateToPage(
+            index,
+            duration: const Duration(milliseconds: 450),
+            curve: Curves.easeOutQuart,
+          );
         },
         behavior: HitTestBehavior.opaque,
         child: Column(

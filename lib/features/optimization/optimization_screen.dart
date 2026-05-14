@@ -24,7 +24,6 @@ import '../../shared/widgets/precision_button.dart';
 import '../../shared/widgets/precision_picker.dart';
 import '../../shared/widgets/precision_notification.dart';
 
-import 'widgets/common/fluid_background.dart';
 import 'widgets/setup/analysis_cockpit.dart';
 
 import 'widgets/common/thousands_separator_formatter.dart';
@@ -40,8 +39,7 @@ class OptimizationScreen extends ConsumerStatefulWidget {
   ConsumerState<OptimizationScreen> createState() => _OptimizationScreenState();
 }
 
-class _OptimizationScreenState extends ConsumerState<OptimizationScreen>
-    with TickerProviderStateMixin {
+class _OptimizationScreenState extends ConsumerState<OptimizationScreen> {
   double _targetAmount = 50000;
   DateTime _targetDate = DateTime.now().add(const Duration(days: 365));
   int? _scopeVaultId;
@@ -52,20 +50,15 @@ class _OptimizationScreenState extends ConsumerState<OptimizationScreen>
   final Set<int> _userLockedIds = {};
   final Set<int> _userFlexibleIds = {};
 
-  late final AnimationController _bgAnimationController;
+
 
   @override
   void initState() {
     super.initState();
-    _bgAnimationController = AnimationController(
-      vsync: this,
-      duration: const Duration(seconds: 10),
-    )..repeat();
   }
 
   @override
   void dispose() {
-    _bgAnimationController.dispose();
     super.dispose();
   }
 
@@ -317,7 +310,7 @@ class _OptimizationScreenState extends ConsumerState<OptimizationScreen>
     return Stack(
       fit: StackFit.expand,
       children: [
-        FluidBackground(animation: _bgAnimationController),
+
         txsAsync.when(
           loading: () => const Center(child: CircularProgressIndicator()),
           error: (e, _) => Center(child: Text('Hata: $e')),

@@ -165,10 +165,14 @@ final displayBalanceProvider = Provider<double>((ref) {
   return realBalance + bonus;
 });
 
-/// Renklerin zaman içinde iPhone vari bir spektrumla (Gökkuşağı/Progressive) değişmesini sağlayan Provider
-final rotaryColorProvider = StateProvider<Color>(
-  (ref) => const Color(0xFF00E5FF),
-);
+/// Renklerin artık sadece Ayarlar'dan gelmesini sağlayan Provider (Zaman çarkından bağımsızlaştırıldı)
+final rotaryColorProvider = Provider<Color>((ref) {
+  final accentColor = ref.watch(settingsProvider.select((s) => s.accentColorValue));
+  if (accentColor == 0) {
+    return ref.watch(dynamicColorProvider);
+  }
+  return Color(accentColor);
+});
 
 /// Zaman makinesinin şu an hangi "Ay/Yıl" ofsetinde olduğunu tutar (0 = Bugün)
 final timeOffsetProvider = StateProvider<int>((ref) => 0);

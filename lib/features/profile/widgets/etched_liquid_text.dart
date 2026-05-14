@@ -59,7 +59,7 @@ class _EtchedLiquidTextState extends State<EtchedLiquidText>
       builder: (context, child) {
         // progress 0 ise animasyonlu seviyeyi kullan (0.45 - 0.65 arası)
         // Start from the bottom (base level) when at the top
-        final double idleLevel = 0.05 + (_levelController.value * 0.05);
+        const double idleLevel = 0.0;
         final double effectiveLevel = (widget.progress * (1.0 - idleLevel)) + idleLevel;
 
         return CustomPaint(
@@ -186,11 +186,10 @@ class _EtchedLiquidPainter extends CustomPainter {
       submergedPath.lineTo(textRect.left - 50, textRect.bottom + 50);
       submergedPath.close();
 
-      // Liquid Fill - Use background color to "erase" the text as it rises
-      final Paint liquidPaint = Paint()
-        ..color = AppColors.getBackground(context)
-        ..blendMode = BlendMode.srcATop;
-      canvas.drawPath(submergedPath, liquidPaint);
+      // Liquid Fill - Dalganın altında kalan yazıyı TAMAMEN temizle
+      final Paint erasePaint = Paint()
+        ..blendMode = BlendMode.clear;
+      canvas.drawPath(submergedPath, erasePaint);
 
       // Liquid Surface Effects - Only show the active color on the surface edge
       final Paint surfacePaint = Paint()

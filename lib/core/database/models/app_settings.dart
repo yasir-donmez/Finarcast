@@ -21,6 +21,9 @@ class AppSettings {
   /// 2 = Karanlık (Dark)
   int themeModeIndex = 0;
 
+  /// Ana Tema Rengi (Accent Color) — Örn: 0xFF00E5FF
+  int accentColorValue = 0xFF00E5FF;
+
   /// Uygulama dili (varsayılan: tr)
   String languageCode = 'tr';
 
@@ -30,8 +33,8 @@ class AppSettings {
   /// Kullanıcının bulunduğu ülke (AI analizi için - Örn: "Türkiye")
   String? countryName;
 
-  /// AI asistan bildirimleri açık mı?
-  bool isAiNotificationsEnabled = true;
+  /// Tüm uygulama bildirimleri açık mı? (Master Switch)
+  bool isNotificationsEnabled = true;
 
   /// Konum servisleri açık mı?
   bool isLocationEnabled = false;

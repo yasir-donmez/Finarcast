@@ -44,17 +44,6 @@ class AnalysisCockpit extends StatelessWidget {
         left: 20,
         right: 20,
       ),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [
-            AppColors.getBackground(context).withValues(alpha: 0.0),
-            AppColors.getBackground(context).withValues(alpha: 0.7),
-          ],
-          stops: const [0.0, 1.0],
-        ),
-      ),
       child: PrecisionSurface(
         padding: const EdgeInsets.all(20),
         isGlass: true,

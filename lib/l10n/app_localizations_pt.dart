@@ -12,6 +12,9 @@ class AppLocalizationsPt extends AppLocalizations {
   String get appTitle => 'Finarcast';
 
   @override
+  String get settings => 'Ayarlar';
+
+  @override
   String get profile => 'Perfil';
 
   @override
@@ -250,6 +253,12 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get themeDark => 'Escuro';
+
+  @override
+  String get colorTheme => 'Renk Teması';
+
+  @override
+  String get colorSystem => 'Sistem';
 
   @override
   String get market => 'Mercado';
@@ -1199,4 +1208,10 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get inactive => 'Aktif Değil';
+
+  @override
+  String get notifications => 'Bildirimler';
+
+  @override
+  String get disabled => 'Kapalı';
 }

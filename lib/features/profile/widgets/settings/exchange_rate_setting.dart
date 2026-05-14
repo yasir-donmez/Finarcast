@@ -169,9 +169,9 @@ class _ExchangeRateSettingState extends ConsumerState<ExchangeRateSetting> with 
                       // 2. Diğer kurları göster (Kendi birimi hariç)
                       ...rates.where((r) {
                         final code = r.currencyCode;
-                        final isSupported = ['USD', 'EUR', 'GBP', 'GOLD'].contains(code);
+                        final isSupported = ['USD', 'EUR', 'GBP', 'GOLD', 'SILVER', 'CHF', 'JPY', 'SAR', 'KWD'].contains(code);
                         return isSupported && code != _normalizeSymbol(userCurrency);
-                      }).map((rate) {
+                      }).toList().reversed.map((rate) {
                         // Kuru kullanıcının birimine çevir
                         final displayRate = CurrencyUtils.convert(1.0, rate.currencyCode, userCurrency, rates);
                         
@@ -256,6 +256,7 @@ class _ExchangeRateSettingState extends ConsumerState<ExchangeRateSetting> with 
       case 'KWD': return '🇰🇼';
       case 'SAR': return '🇸🇦';
       case 'JPY': return '🇯🇵';
+      case 'SILVER': return '🥈';
       case 'GOLD': 
       case 'G': return '🟡';
       default: return '💰';
@@ -269,8 +270,9 @@ class _ExchangeRateSettingState extends ConsumerState<ExchangeRateSetting> with 
       case 'GBP': return 'İngiliz Sterlini';
       case 'CHF': return 'İsviçre Frangı';
       case 'KWD': return 'Kuveyt Dinarı';
-      case 'SAR': return 'Suudi Riyali';
+      case 'SAR': return 'Suudi Arabistan Riyali';
       case 'JPY': return 'Japon Yeni';
+      case 'SILVER': return 'Gümüş (Gram)';
       case 'GOLD': 
       case 'G': return 'Gram Altın';
       default: return code;

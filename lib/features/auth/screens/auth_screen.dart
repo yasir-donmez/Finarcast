@@ -173,15 +173,12 @@ class _AuthScreenState extends ConsumerState<AuthScreen> with TickerProviderStat
     final double heroToCardSpacer = screenHeight * 0.05;
     final double cardToBottomSpacer = screenHeight * 0.04;
 
-    return Scaffold(
-      body: PrecisionBackground(
-        child: Stack(
-          children: [
-            // Arka plan dalgaları kaldırıldı, artık form içinde çalışıyor
-            
-            SafeArea(
-              child: Center(
-                child: SingleChildScrollView(
+    return PrecisionBackground(
+      child: Scaffold(
+        backgroundColor: Colors.transparent,
+        body: SafeArea(
+          child: Center(
+            child: SingleChildScrollView(
                   padding: const EdgeInsets.symmetric(horizontal: AppSizes.paddingLarge),
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -213,12 +210,10 @@ class _AuthScreenState extends ConsumerState<AuthScreen> with TickerProviderStat
                     ],
                   ),
                 ),
-              ),
             ),
-          ],
+          ),
         ),
-      ),
-    );
+      );
   }
 
   Widget _buildHero(BuildContext context, Color primaryColor, double screenHeight) {

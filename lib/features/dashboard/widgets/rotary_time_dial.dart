@@ -67,14 +67,6 @@ class _RotaryTimeDialState extends ConsumerState<RotaryTimeDial> with SingleTick
       _currentAngle += delta;
       if (_currentAngle < 0) _currentAngle = 0;
 
-      final activeColor = _getFixedColor();
-      
-      if (ref.read(rotaryColorProvider) != activeColor) {
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          ref.read(rotaryColorProvider.notifier).state = activeColor;
-        });
-      }
-
       // Haptics synchronized with 84 visual ticks
       int currentTick = (_currentAngle / (2 * pi / 84)).floor();
       if (currentTick != _lastHapticLevel) {
@@ -131,7 +123,7 @@ class _RotaryTimeDialState extends ConsumerState<RotaryTimeDial> with SingleTick
   }
 
   Color _getFixedColor() {
-    return AppColors.primary;
+    return AppColors.getPrimary(context);
   }
 
   String _getTimeLabel(double currentAngle) {
@@ -163,10 +155,12 @@ class _RotaryTimeDialState extends ConsumerState<RotaryTimeDial> with SingleTick
         AnimatedSwitcher(
           duration: const Duration(milliseconds: 300),
           layoutBuilder: (Widget? currentChild, List<Widget> previousChildren) {
+            final Set<Key> seenKeys = {};
+            if (currentChild?.key != null) seenKeys.add(currentChild!.key!);
             return Stack(
               alignment: Alignment.center,
               children: <Widget>[
-                ...previousChildren.where((child) => child.key != currentChild?.key),
+                ...previousChildren.where((child) => child.key == null || seenKeys.add(child.key!)),
                 if (currentChild != null) currentChild,
               ],
             );
@@ -209,11 +203,6 @@ class _RotaryTimeDialState extends ConsumerState<RotaryTimeDial> with SingleTick
                       final double simulatedDays = _calculateSimulatedDays(_currentAngle);
                       final double dailyVelocity = ref.read(dailyVelocityProvider);
                       ref.read(simulationBonusProvider.notifier).state = simulatedDays * dailyVelocity;
-                      
-                      final activeColor = _getFixedColor();
-                      if (ref.read(rotaryColorProvider) != activeColor) {
-                        ref.read(rotaryColorProvider.notifier).state = activeColor;
-                      }
                     });
                   });
                 

@@ -106,7 +106,7 @@ class _AnalysisOptimizationSectionState extends State<AnalysisOptimizationSectio
             animation: animation,
             builder: (context, child) {
               return Opacity(
-                opacity: animation.value,
+                opacity: animation.value.clamp(0.0, 1.0),
                 child: Transform.translate(
                   offset: Offset(0, 30 * (1 - animation.value)),
                   child: _buildCutRowFluid(context, cut),

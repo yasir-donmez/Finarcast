@@ -12,6 +12,9 @@ class AppLocalizationsKo extends AppLocalizations {
   String get appTitle => 'Finarcast';
 
   @override
+  String get settings => 'Ayarlar';
+
+  @override
   String get profile => '프로필';
 
   @override
@@ -250,6 +253,12 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get themeDark => '다크 모드';
+
+  @override
+  String get colorTheme => 'Renk Teması';
+
+  @override
+  String get colorSystem => 'Sistem';
 
   @override
   String get market => '마켓';
@@ -1187,4 +1196,10 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get inactive => 'Aktif Değil';
+
+  @override
+  String get notifications => 'Bildirimler';
+
+  @override
+  String get disabled => 'Kapalı';
 }

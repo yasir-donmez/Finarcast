@@ -16,7 +16,7 @@ class NotificationSetting extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final isAiEnabled = ref.watch(settingsProvider.select((s) => s.isAiNotificationsEnabled));
+    final isEnabled = ref.watch(settingsProvider.select((s) => s.isNotificationsEnabled));
     final activeColor = ref.watch(rotaryColorProvider);
     final l10n = AppLocalizations.of(context)!;
     final isExpanded = ref.watch(_notifExpandedProvider);
@@ -41,7 +41,7 @@ class NotificationSetting extends ConsumerWidget {
                     borderRadius: BorderRadius.circular(14),
                   ),
                   child: PrecisionAnimatedIcon(
-                    isActive: isAiEnabled,
+                    isActive: isEnabled,
                     activeIcon: Icons.notifications_active_rounded,
                     inactiveIcon: Icons.notifications_off_rounded,
                     color: activeColor,
@@ -54,7 +54,7 @@ class NotificationSetting extends ConsumerWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        l10n.aiNotifications,
+                        "Cihaz Bildirimleri",
                         style: TextStyle(
                           color: AppColors.getTextPrimary(context),
                           fontSize: 16,
@@ -72,8 +72,8 @@ class NotificationSetting extends ConsumerWidget {
                         ),
                         transitionBuilder: (child, animation) => FadeTransition(opacity: animation, child: child),
                         child: Text(
-                          isAiEnabled ? "Aktif" : "Kapalı",
-                          key: ValueKey(isAiEnabled),
+                          isEnabled ? "Telefonda Göster" : "Sadece Uygulama İçi",
+                          key: ValueKey(isEnabled),
                           style: TextStyle(
                             color: AppColors.getTextSecondary(context).withValues(alpha: 0.5),
                             fontSize: 12,
@@ -85,14 +85,14 @@ class NotificationSetting extends ConsumerWidget {
                   ),
                 ),
                 PrecisionToggle(
-                  value: isAiEnabled,
+                  value: isEnabled,
                   onChanged: (val) {
                     HapticFeedback.mediumImpact();
-                    ref.read(settingsProvider.notifier).toggleAiNotifications(val);
+                    ref.read(settingsProvider.notifier).toggleNotifications(val);
                   },
                   activeColor: activeColor,
-                  activeIcon: Icons.notifications_active_rounded,
-                  inactiveIcon: Icons.notifications_off_rounded,
+                  activeIcon: Icons.phonelink_ring_rounded,
+                  inactiveIcon: Icons.phonelink_erase_rounded,
                 ),
               ],
             ),
@@ -113,8 +113,9 @@ class NotificationSetting extends ConsumerWidget {
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Text(
-                      "Finansal durumunuzdaki kritik değişimler, bütçe aşımları ve yapay zeka optimizasyon "
-                      "önerileri hakkında anlık bildirimler almanızı sağlar.",
+                      "Hatırlatıcıların sadece uygulama içinde mi saklanacağını yoksa telefonunuzun bildirim "
+                      "panelinde de gösterilip gösterilmeyeceğini belirler. Kapalıyken hatırlatıcılar sessizce "
+                      "uygulama içinde kalır.",
                       style: TextStyle(
                         color: AppColors.getTextSecondary(context),
                         fontSize: 13,

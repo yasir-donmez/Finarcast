@@ -12,6 +12,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get appTitle => 'Finarcast';
 
   @override
+  String get settings => 'Ayarlar';
+
+  @override
   String get profile => '个人资料';
 
   @override
@@ -248,6 +251,12 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get themeDark => '深色模式';
+
+  @override
+  String get colorTheme => 'Renk Teması';
+
+  @override
+  String get colorSystem => 'Sistem';
 
   @override
   String get market => '市场';
@@ -1183,4 +1192,10 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get inactive => 'Aktif Değil';
+
+  @override
+  String get notifications => 'Bildirimler';
+
+  @override
+  String get disabled => 'Kapalı';
 }

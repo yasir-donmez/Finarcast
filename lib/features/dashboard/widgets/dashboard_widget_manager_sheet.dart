@@ -87,9 +87,12 @@ class _DashboardWidgetManagerSheetState extends ConsumerState<DashboardWidgetMan
 
   Widget _buildActiveWidgetsList(BuildContext context, List<List<WidgetConfig>> pages, Color activeColor, double scalingFactor, AppLocalizations l10n) {
     final List<Map<String, dynamic>> flatList = [];
+    final Set<String> seenIds = {};
     for (int i = 0; i < pages.length; i++) {
-      for (var widget in pages[i]) {
-        flatList.add({'page': i, 'widget': widget});
+      for (var config in pages[i]) {
+        if (seenIds.add(config.id)) {
+          flatList.add({'page': i, 'widget': config});
+        }
       }
     }
 

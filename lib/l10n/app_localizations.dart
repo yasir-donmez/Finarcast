@@ -120,6 +120,12 @@ abstract class AppLocalizations {
   /// **'Finarcast'**
   String get appTitle;
 
+  /// No description provided for @settings.
+  ///
+  /// In tr, this message translates to:
+  /// **'Ayarlar'**
+  String get settings;
+
   /// No description provided for @profile.
   ///
   /// In tr, this message translates to:
@@ -593,6 +599,18 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'Karanlık'**
   String get themeDark;
+
+  /// No description provided for @colorTheme.
+  ///
+  /// In tr, this message translates to:
+  /// **'Renk Teması'**
+  String get colorTheme;
+
+  /// No description provided for @colorSystem.
+  ///
+  /// In tr, this message translates to:
+  /// **'Sistem'**
+  String get colorSystem;
 
   /// No description provided for @market.
   ///
@@ -2345,6 +2363,18 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'Aktif Değil'**
   String get inactive;
+
+  /// No description provided for @notifications.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bildirimler'**
+  String get notifications;
+
+  /// No description provided for @disabled.
+  ///
+  /// In tr, this message translates to:
+  /// **'Kapalı'**
+  String get disabled;
 }
 
 class _AppLocalizationsDelegate

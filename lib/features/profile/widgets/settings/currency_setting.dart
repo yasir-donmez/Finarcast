@@ -177,6 +177,9 @@ class CurrencySetting extends ConsumerWidget {
                 case r'R$': name = "Brezilya Reali"; break;
                 case 'Fr': name = "İsviçre Frangı"; break;
                 case 'G': name = "Gram Altın"; break;
+                case 'Ag': name = "Gümüş (Gram)"; break;
+                case 'SR': name = "Suudi Riyali"; break;
+                case 'KD': name = "Kuveyt Dinarı"; break;
               }
 
               return Center(
