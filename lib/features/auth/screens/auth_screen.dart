@@ -179,6 +179,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen> with TickerProviderStat
         body: SafeArea(
           child: Center(
             child: SingleChildScrollView(
+                  physics: const BouncingScrollPhysics(), // Stretch efektini engeller, BackdropFilter'ın bozulmasını önler
                   padding: const EdgeInsets.symmetric(horizontal: AppSizes.paddingLarge),
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,

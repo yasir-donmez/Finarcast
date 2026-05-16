@@ -25,6 +25,7 @@ import '../../shared/widgets/precision_toggle.dart';
 import '../../shared/widgets/precision_card.dart';
 import '../../shared/widgets/precision_input.dart';
 import '../../shared/widgets/precision_button.dart';
+import '../../shared/widgets/precision_sheet.dart';
 
 class AddTransactionScreen extends ConsumerStatefulWidget {
   final int? initialId;
@@ -37,12 +38,12 @@ class AddTransactionScreen extends ConsumerStatefulWidget {
   final String? initialCategoryId;
   final String? initialNote;
   final String? initialCurrency;
-  
+
   final int? initialPeriodType;
   final int? initialRecurrenceDay;
   final DateTime? initialRecurrenceDate;
   final int? initialRecurrenceDuration;
-  
+
   final bool? initialIsNotificationEnabled;
   final int? initialNotificationReminderDays;
   final int? initialNotificationHour;
@@ -74,7 +75,8 @@ class AddTransactionScreen extends ConsumerStatefulWidget {
   });
 
   @override
-  ConsumerState<AddTransactionScreen> createState() => _AddTransactionScreenState();
+  ConsumerState<AddTransactionScreen> createState() =>
+      _AddTransactionScreenState();
 }
 
 class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
@@ -169,20 +171,22 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
         _periodData = TransactionPeriodData(
           periodType: widget.initialPeriodType!,
           selectedDay: widget.initialRecurrenceDay ?? 1,
-          selectedDateForRecurrence: widget.initialRecurrenceDate ?? DateTime.now(),
+          selectedDateForRecurrence:
+              widget.initialRecurrenceDate ?? DateTime.now(),
           duration: widget.initialRecurrenceDuration ?? 0,
         );
       }
-      
+
       _isNotificationEnabled = widget.initialIsNotificationEnabled ?? false;
       _notificationReminderDays = widget.initialNotificationReminderDays ?? 0;
-      if (widget.initialNotificationHour != null && widget.initialNotificationMinute != null) {
+      if (widget.initialNotificationHour != null &&
+          widget.initialNotificationMinute != null) {
         _notificationTime = TimeOfDay(
           hour: widget.initialNotificationHour!,
           minute: widget.initialNotificationMinute!,
         );
       }
-      
+
       if (widget.initialCategoryId != null) {
         final categories = _getMergedCategories();
         for (int i = 0; i < categories.length; i++) {
@@ -204,7 +208,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
           }
         }
       }
-    } 
+    }
     // 2. YENİ KAYIT MODU (Parametreler Varsa)
     else {
       if (widget.initialIsIncome != null) {
@@ -233,7 +237,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
   }
 
   List<Map<String, dynamic>> _getMergedCategories() {
-    final base = _tabIndex == 0 
+    final base = _tabIndex == 0
         ? TransactionCategoryData.getExpenseCategories(context, l10n)
         : TransactionCategoryData.getIncomeCategories(context, l10n);
     return TransactionCategoryData.mergeCustomSubcategories(base, _customSubs);
@@ -250,144 +254,233 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
     final parentColor = parentCat['color'] as Color;
     final parentIcon = parentCat['icon'] as IconData;
     final parentName = parentCat['name'] as String;
+    final bool showIconPicker =
+        parentCategoryId == 'exp_other' || parentCategoryId == 'inc_other';
 
     IconData selectedIcon = parentIcon;
 
-    final result = await showDialog<Map<String, dynamic>>(
+    final result = await PrecisionSheet.show<Map<String, dynamic>>(
       context: context,
-      builder: (ctx) {
-        final isDark = Theme.of(ctx).brightness == Brightness.dark;
-        final List<IconData> iconOptions = [
-          parentIcon,
-          Icons.star_rounded,
-          Icons.favorite_rounded,
-          Icons.shopping_bag_rounded,
-          Icons.restaurant_rounded,
-          Icons.local_cafe_rounded,
-          Icons.directions_car_rounded,
-          Icons.home_rounded,
-          Icons.medical_services_rounded,
-          Icons.school_rounded,
-          Icons.fitness_center_rounded,
-          Icons.sports_esports_rounded,
-          Icons.camera_alt_rounded,
-          Icons.brush_rounded,
-          Icons.construction_rounded,
-          Icons.pets_rounded,
-        ];
+      title: l10n.addCustomCategory,
+      child: StatefulBuilder(
+        builder: (context, setDialogState) {
+          final isDark = Theme.of(context).brightness == Brightness.dark;
+          final List<IconData> iconOptions = [
+            parentIcon,
+            Icons.star_rounded,
+            Icons.favorite_rounded,
+            Icons.shopping_bag_rounded,
+            Icons.restaurant_rounded,
+            Icons.local_cafe_rounded,
+            Icons.directions_car_rounded,
+            Icons.home_rounded,
+            Icons.medical_services_rounded,
+            Icons.school_rounded,
+            Icons.fitness_center_rounded,
+            Icons.sports_esports_rounded,
+            Icons.camera_alt_rounded,
+            Icons.brush_rounded,
+            Icons.construction_rounded,
+            Icons.pets_rounded,
+            Icons.savings_rounded,
+            Icons.receipt_long_rounded,
+            Icons.card_giftcard_rounded,
+            Icons.build_rounded,
+            Icons.memory_rounded,
+            Icons.landscape_rounded,
+          ];
 
-        return StatefulBuilder(
-          builder: (context, setDialogState) {
-            return AlertDialog(
-              backgroundColor: isDark ? const Color(0xFF1C1C1E) : Colors.white,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-              title: Row(
-                children: [
-                  Container(
-                    width: 40, height: 40,
-                    decoration: BoxDecoration(shape: BoxShape.circle, color: parentColor.withValues(alpha: 0.15)),
-                    child: Icon(selectedIcon, color: parentColor, size: 20),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(l10n.addCustomCategory, style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800, color: AppColors.getTextPrimary(ctx))),
-                        Text(parentName, style: TextStyle(fontSize: 12, fontWeight: FontWeight.w500, color: parentColor.withValues(alpha: 0.8))),
-                      ],
+          return Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Üst Bilgi (Kategori İsmi)
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 8,
+                ),
+                decoration: BoxDecoration(
+                  color: parentColor.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(selectedIcon, color: parentColor, size: 16),
+                    const SizedBox(width: 8),
+                    Text(
+                      parentName.toUpperCase(),
+                      style: TextStyle(
+                        fontSize: 10,
+                        fontWeight: FontWeight.w900,
+                        color: parentColor,
+                        letterSpacing: 1.0,
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-              content: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  TextField(
-                    controller: controller,
-                    autofocus: true,
-                    textCapitalization: TextCapitalization.sentences,
-                    maxLength: 30,
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: AppColors.getTextPrimary(ctx)),
-                    decoration: InputDecoration(
-                      hintText: l10n.customCategoryHint,
-                      hintStyle: TextStyle(color: AppColors.getTextSecondary(ctx).withValues(alpha: 0.5), fontWeight: FontWeight.w400),
-                      prefixIcon: Icon(selectedIcon, color: parentColor.withValues(alpha: 0.5), size: 20),
-                      filled: true,
-                      fillColor: (isDark ? Colors.white : Colors.black).withValues(alpha: 0.05),
-                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide.none),
-                      focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide(color: parentColor.withValues(alpha: 0.4), width: 1.5)),
+              const SizedBox(height: 20),
+
+              // Giriş Alanı
+              TextField(
+                controller: controller,
+                autofocus: true,
+                textCapitalization: TextCapitalization.sentences,
+                maxLength: 30,
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w700,
+                ),
+                decoration: InputDecoration(
+                  hintText: l10n.customCategoryHint,
+                  hintStyle: TextStyle(
+                    color: AppColors.getTextFaint(context),
+                    fontWeight: FontWeight.w600,
+                  ),
+                  counterText: '',
+                  filled: true,
+                  fillColor: (isDark ? Colors.white : Colors.black).withValues(
+                    alpha: 0.03,
+                  ),
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 20,
+                    vertical: 18,
+                  ),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(20),
+                    borderSide: BorderSide.none,
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(20),
+                    borderSide: BorderSide(
+                      color: parentColor.withValues(alpha: 0.3),
+                      width: 2,
                     ),
                   ),
-                  const SizedBox(height: 12),
-                  SizedBox(
-                    width: double.maxFinite,
-                    child: Wrap(
-                      spacing: 8,
-                      runSpacing: 8,
-                      alignment: WrapAlignment.center,
-                      children: iconOptions.map((icon) {
-                        final isSelected = selectedIcon == icon;
-                        return GestureDetector(
-                          onTap: () => setDialogState(() => selectedIcon = icon),
-                          child: AnimatedContainer(
-                            duration: const Duration(milliseconds: 200),
-                            width: 44,
-                            height: 44,
-                            decoration: BoxDecoration(
-                              color: isSelected ? parentColor.withValues(alpha: 0.2) : Colors.transparent,
-                              shape: BoxShape.circle,
-                              border: Border.all(
-                                color: isSelected ? parentColor : Colors.transparent,
-                                width: 1.5,
-                              ),
+                ),
+              ),
+
+              if (showIconPicker) ...[
+                const SizedBox(height: 32),
+                Row(
+                  children: [
+                    Text(
+                      'İKON SEÇİN'.toUpperCase(),
+                      style: TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w900,
+                        color: AppColors.getTextFaint(context),
+                        letterSpacing: 1.2,
+                      ),
+                    ),
+                    const Spacer(),
+                    Text(
+                      '${iconOptions.length} SEÇENEK',
+                      style: TextStyle(
+                        fontSize: 10,
+                        fontWeight: FontWeight.w900,
+                        color: parentColor.withValues(alpha: 0.5),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                SizedBox(
+                  height: 160,
+                  child: GridView.builder(
+                    padding: EdgeInsets.zero,
+                    physics: const BouncingScrollPhysics(),
+                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 6,
+                      mainAxisSpacing: 12,
+                      crossAxisSpacing: 12,
+                    ),
+                    itemCount: iconOptions.length,
+                    itemBuilder: (context, index) {
+                      final icon = iconOptions[index];
+                      final isSelected = selectedIcon == icon;
+                      return GestureDetector(
+                        onTap: () {
+                          HapticFeedback.selectionClick();
+                          setDialogState(() => selectedIcon = icon);
+                        },
+                        child: AnimatedContainer(
+                          duration: const Duration(milliseconds: 200),
+                          decoration: BoxDecoration(
+                            color: isSelected
+                                ? parentColor.withValues(alpha: 0.2)
+                                : (isDark ? Colors.white : Colors.black)
+                                    .withValues(alpha: 0.04),
+                            borderRadius: BorderRadius.circular(16),
+                            border: Border.all(
+                              color: isSelected
+                                  ? parentColor
+                                  : Colors.transparent,
+                              width: 2,
                             ),
-                            child: Icon(icon, color: isSelected ? parentColor : AppColors.getTextSecondary(ctx).withValues(alpha: 0.4), size: 20),
                           ),
-                        );
-                      }).toList(),
-                    ),
+                          child: Icon(
+                            icon,
+                            color: isSelected
+                                ? parentColor
+                                : parentColor.withValues(alpha: 0.25),
+                            size: 22,
+                          ),
+                        ),
+                      );
+                    },
                   ),
-                ],
-              ),
-              actions: [
-                TextButton(onPressed: () => Navigator.pop(ctx), child: Text(l10n.cancel)),
-                FilledButton(
-                  onPressed: () {
-                    final val = controller.text.trim();
-                    if (val.isNotEmpty) {
-                      Navigator.pop(ctx, {'name': val, 'iconCode': selectedIcon.codePoint});
-                    }
-                  },
-                  style: FilledButton.styleFrom(backgroundColor: parentColor),
-                  child: Text(l10n.save),
                 ),
               ],
-            );
-          }
-        );
-      },
+
+              const SizedBox(height: 32),
+
+              // Onay Butonu
+              PrecisionButton(
+                label: l10n.ok,
+                onTap: () {
+                  if (controller.text.trim().isNotEmpty) {
+                    Navigator.pop(context, {
+                      'name': controller.text.trim(),
+                      'iconCode': selectedIcon.codePoint.toString(),
+                    });
+                  }
+                },
+                isPrimary: true,
+                activeColor: parentColor,
+                height: 56,
+              ),
+              const SizedBox(height: 12),
+            ],
+          );
+        },
+      ),
     );
 
     if (result != null && result['name'] != null) {
-      await CustomCategoryService.addCustomSubcategory(
-        parentCategoryId, 
-        result['name'] as String, 
-        result['iconCode'] as int,
-      );
-      await _loadCustomCategories();
-      final merged = _getMergedCategories();
-      final parentIndex = merged.indexWhere((c) => c['id'] == parentCategoryId);
-      if (parentIndex != -1) {
-        final subs = merged[parentIndex]['subModels'] as List;
-        setState(() {
-          _selectedCategoryIndex = parentIndex;
-          _selectedSubModelIndex = subs.length - 1;
-          _expandedCategoryIndex = parentIndex;
-        });
+      final int? code = int.tryParse(result['iconCode'] as String);
+      if (code != null) {
+        await CustomCategoryService.addCustomSubcategory(
+          parentCategoryId,
+          result['name'] as String,
+          code,
+        );
+        await _loadCustomCategories();
       }
-      HapticFeedback.mediumImpact();
     }
+    final merged = _getMergedCategories();
+    final parentIndex = merged.indexWhere((c) => c['id'] == parentCategoryId);
+    if (parentIndex != -1) {
+      final subs = merged[parentIndex]['subModels'] as List;
+      setState(() {
+        _selectedCategoryIndex = parentIndex;
+        _selectedSubModelIndex = subs.length - 1;
+        _expandedCategoryIndex = parentIndex;
+      });
+    }
+    HapticFeedback.mediumImpact();
   }
 
   Future<void> _handleRemoveCustomCategory(String subcategoryId) async {
@@ -397,14 +490,21 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
         final isDark = Theme.of(ctx).brightness == Brightness.dark;
         return AlertDialog(
           backgroundColor: isDark ? const Color(0xFF1C1C1E) : Colors.white,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
           title: Text(l10n.deleteCustomCategory),
           content: Text(l10n.deleteCustomCategoryConfirm),
           actions: [
-            TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text(l10n.cancel)),
+            TextButton(
+              onPressed: () => Navigator.pop(ctx, false),
+              child: Text(l10n.cancel),
+            ),
             FilledButton(
               onPressed: () => Navigator.pop(ctx, true),
-              style: FilledButton.styleFrom(backgroundColor: AppColors.getExpense(ctx)),
+              style: FilledButton.styleFrom(
+                backgroundColor: AppColors.getExpense(ctx),
+              ),
               child: Text(l10n.yes),
             ),
           ],
@@ -432,7 +532,8 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
         if (clean.contains(',')) {
           return clean.replaceAll('.', '').replaceAll(',', '.');
         } else {
-          if (RegExp(r'\.\d{3}$').hasMatch(clean)) return clean.replaceAll('.', '');
+          if (RegExp(r'\.\d{3}$').hasMatch(clean))
+            return clean.replaceAll('.', '');
           return clean;
         }
       }
@@ -460,20 +561,21 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
       final finalAmount = _isFlexibleAmount ? 0.0 : amount;
       final finalMin = _isFlexibleAmount ? minAmount : null;
       final finalMax = _isFlexibleAmount ? maxAmount : null;
-      
+
       final categories = _getMergedCategories();
       final cat = categories[_selectedCategoryIndex];
-      final String categoryId = _selectedSubModelIndex != -1 
+      final String categoryId = _selectedSubModelIndex != -1
           ? (cat['subModels'] as List)[_selectedSubModelIndex]['id'] as String
           : cat['id'] as String;
 
       if (widget.initialId != null) {
         final old = await DatabaseService.getTransaction(widget.initialId!);
         if (old != null) {
-          final catName = _selectedSubModelIndex != -1 
-              ? (cat['subModels'] as List)[_selectedSubModelIndex]['name'] as String
+          final catName = _selectedSubModelIndex != -1
+              ? (cat['subModels'] as List)[_selectedSubModelIndex]['name']
+                    as String
               : cat['name'] as String;
-              
+
           old.title = catName;
           old.amount = finalAmount;
           old.minAmount = finalMin;
@@ -485,30 +587,49 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
           old.recurrenceDay = _periodData.selectedDay;
           old.recurrenceDate = _periodData.selectedDateForRecurrence;
           old.recurrenceDuration = _periodData.duration;
-          old.note = _noteController.text.isNotEmpty ? _noteController.text : null;
+          old.note = _noteController.text.isNotEmpty
+              ? _noteController.text
+              : null;
           old.currency = _selectedCurrency;
-          
+
+          if (_periodData.periodType == 0) {
+            old.date = _periodData.selectedDateForRecurrence;
+          }
+
           old.isNotificationEnabled = _isNotificationEnabled;
           old.notificationReminderDays = _notificationReminderDays;
           old.notificationHour = _notificationTime.hour;
           old.notificationMinute = _notificationTime.minute;
-          
+
           await DatabaseService.updateTransaction(old);
         }
       } else {
-        final catName = _selectedSubModelIndex != -1 
-            ? (cat['subModels'] as List)[_selectedSubModelIndex]['name'] as String
+        final catName = _selectedSubModelIndex != -1
+            ? (cat['subModels'] as List)[_selectedSubModelIndex]['name']
+                  as String
             : cat['name'] as String;
 
-        DateTime initialDate = DateTime.now();
+        DateTime initialDate = _periodData.selectedDateForRecurrence;
         if (_periodData.periodType != 0) {
           final now = DateTime.now();
           if ([2, 3, 6, 7].contains(_periodData.periodType)) {
             final day = _periodData.selectedDay;
             if (now.day <= day) {
-              initialDate = DateTime(now.year, now.month, day, now.hour, now.minute);
+              initialDate = DateTime(
+                now.year,
+                now.month,
+                day,
+                now.hour,
+                now.minute,
+              );
             } else {
-              initialDate = DateTime(now.year, now.month + 1, day, now.hour, now.minute);
+              initialDate = DateTime(
+                now.year,
+                now.month + 1,
+                day,
+                now.hour,
+                now.minute,
+              );
             }
           }
         }
@@ -532,10 +653,10 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
           ..notificationReminderDays = _notificationReminderDays
           ..notificationHour = _notificationTime.hour
           ..notificationMinute = _notificationTime.minute;
-        
+
         await DatabaseService.addTransaction(tx);
       }
-      
+
       if (mounted) {
         if (widget.onSuccess != null) {
           widget.onSuccess!();
@@ -552,35 +673,41 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
 
   void _onCurrencyChanged(String newCurrency) {
     if (newCurrency == _selectedCurrency) return;
-    
+
     void formatFieldForNewCurrency(TextEditingController controller) {
       final text = controller.text.trim();
       if (text.isEmpty) return;
-      
+
       // Sayıyı al (Formatı temizle)
       final valStr = text.replaceAll('.', '').replaceAll(',', '.');
       final val = double.tryParse(valStr);
-      
+
       if (val != null) {
         // Kullanıcı sayının DEĞİŞMEMESİNİ istediği için convert yapmıyoruz.
         // Sadece yeni birimin format kurallarını uyguluyoruz (Örn: JPY için küsurat silme)
         final code = AppCurrency.getCode(newCurrency);
         final bool isZeroDecimal = (code == 'JPY' || code == 'KRW');
-        
+
         int decimals = isZeroDecimal ? 0 : 2;
         if (val == val.toInt()) decimals = 0;
-        
+
         String formatted = val.toStringAsFixed(decimals).replaceAll('.', ',');
-        
+
         // Binlik ayırıcıları tekrar ekle
         if (formatted.contains(',')) {
           List<String> parts = formatted.split(',');
-          parts[0] = parts[0].replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]}.');
+          parts[0] = parts[0].replaceAllMapped(
+            RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
+            (Match m) => '${m[1]}.',
+          );
           formatted = parts.join(',');
         } else {
-          formatted = formatted.replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]}.');
+          formatted = formatted.replaceAllMapped(
+            RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
+            (Match m) => '${m[1]}.',
+          );
         }
-        
+
         controller.text = formatted;
       }
     }
@@ -624,13 +751,15 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                 final double currentH = constraints.biggest.height;
                 final double minH = kToolbarHeight + safeTop;
                 final double totalRange = (200 + safeTop - minH);
-                
+
                 // Güvenlik: Payda 0 ise t=0 kabul et
-                double t = totalRange > 0 ? ((currentH - minH) / totalRange).clamp(0.0, 1.0) : 0.0;
-                
+                double t = totalRange > 0
+                    ? ((currentH - minH) / totalRange).clamp(0.0, 1.0)
+                    : 0.0;
+
                 // NaN kontrolü
                 if (t.isNaN) t = 0.0;
-                
+
                 final double revT = 1.0 - t;
 
                 return Stack(
@@ -646,12 +775,18 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                             filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
                             child: Container(
                               decoration: BoxDecoration(
-                                color: AppColors.getBackground(context).withValues(alpha: 0.15),
+                                color: AppColors.getBackground(
+                                  context,
+                                ).withValues(alpha: 0.15),
                                 border: Border(
                                   bottom: BorderSide(
-                                    color: (isDark ? Colors.white : Colors.black).withValues(
-                                      alpha: revT > 0.95 ? (revT - 0.95) * 2 : 0.0,
-                                    ),
+                                    color:
+                                        (isDark ? Colors.white : Colors.black)
+                                            .withValues(
+                                              alpha: revT > 0.95
+                                                  ? (revT - 0.95) * 2
+                                                  : 0.0,
+                                            ),
                                     width: 0.5,
                                   ),
                                 ),
@@ -694,7 +829,10 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                             right: 0,
                             child: IgnorePointer(
                               child: Text(
-                                (widget.initialId != null ? l10n.edit : l10n.addTransaction).toUpperCase(),
+                                (widget.initialId != null
+                                        ? l10n.edit
+                                        : l10n.addTransaction)
+                                    .toUpperCase(),
                                 textAlign: TextAlign.center,
                                 style: TextStyle(
                                   color: AppColors.getTextPrimary(context),
@@ -723,11 +861,15 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                                         : Colors.white.withValues(alpha: 0.8),
                                     shape: BoxShape.circle,
                                     border: Border.all(
-                                      color: activeColor.withValues(alpha: 0.15),
+                                      color: activeColor.withValues(
+                                        alpha: 0.15,
+                                      ),
                                     ),
                                     boxShadow: [
                                       BoxShadow(
-                                        color: Colors.black.withValues(alpha: 0.1),
+                                        color: Colors.black.withValues(
+                                          alpha: 0.1,
+                                        ),
                                         blurRadius: 8,
                                         offset: const Offset(0, 2),
                                       ),
@@ -776,18 +918,34 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                   amountFocusNode: _amountFocusNode,
                 ),
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: AppSizes.paddingMedium),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AppSizes.paddingMedium,
+                  ),
                   child: PrecisionCard(
                     scalingFactor: scalingFactor,
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 12,
+                    ),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Row(
                           children: [
-                            Icon(Icons.linear_scale_rounded, size: 20, color: activeColor.withValues(alpha: 0.7)),
+                            Icon(
+                              Icons.linear_scale_rounded,
+                              size: 20,
+                              color: activeColor.withValues(alpha: 0.7),
+                            ),
                             const SizedBox(width: 12),
-                            Text(l10n.flexibleAmount, style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: AppColors.getTextPrimary(context))),
+                            Text(
+                              l10n.flexibleAmount,
+                              style: TextStyle(
+                                fontSize: 15,
+                                fontWeight: FontWeight.w600,
+                                color: AppColors.getTextPrimary(context),
+                              ),
+                            ),
                           ],
                         ),
                         PrecisionToggle(
@@ -826,10 +984,12 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                   onRemoveCustomSubcategory: _handleRemoveCustomCategory,
                 ),
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: AppSizes.paddingMedium),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AppSizes.paddingMedium,
+                  ),
                   child: PrecisionCard(
                     scalingFactor: scalingFactor,
-                    padding: EdgeInsets.zero,
+                    padding: const EdgeInsets.all(12),
                     child: Column(
                       children: [
                         TransactionVaultSelector(
@@ -840,7 +1000,9 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                             setState(() {
                               _selectedVaultIds = ids;
                               if (ids.isNotEmpty) {
-                                final sv = _vaults.firstWhere((v) => v.id == ids.first);
+                                final sv = _vaults.firstWhere(
+                                  (v) => v.id == ids.first,
+                                );
                                 if (sv.currency != 'AUTO') {
                                   _onCurrencyChanged(sv.currency);
                                 }
@@ -848,7 +1010,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                             });
                           },
                         ),
-                        Divider(height: 1, thickness: 0.5, indent: 16, endIndent: 16, color: (isDark ? Colors.white : Colors.black).withValues(alpha: 0.08)),
+                        const SizedBox(height: 8),
                         TransactionCurrencySelector(
                           selectedCurrency: _selectedCurrency,
                           scalingFactor: scalingFactor,
@@ -858,9 +1020,29 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                     ),
                   ),
                 ),
-                const SizedBox(height: AppSizes.paddingMedium),
+                const SizedBox(height: 12),
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: AppSizes.paddingMedium),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AppSizes.paddingMedium,
+                  ),
+                  child: PrecisionCard(
+                    scalingFactor: scalingFactor,
+                    padding: const EdgeInsets.all(16),
+                    child: TransactionPeriodSelector(
+                      initialData: _periodData,
+                      scalingFactor: scalingFactor,
+                      onChanged: (data) {
+                        HapticFeedback.mediumImpact();
+                        setState(() => _periodData = data);
+                      },
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AppSizes.paddingMedium,
+                  ),
                   child: PrecisionCard(
                     scalingFactor: scalingFactor,
                     padding: const EdgeInsets.all(16),
@@ -869,99 +1051,159 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                       children: [
                         Row(
                           children: [
-                            Icon(Icons.notes_rounded, size: 20, color: activeColor.withValues(alpha: 0.7)),
+                            Icon(
+                              Icons.notes_rounded,
+                              size: 20,
+                              color: activeColor.withValues(alpha: 0.7),
+                            ),
                             const SizedBox(width: 12),
-                            Text(l10n.description.toUpperCase(), style: TextStyle(fontSize: 13, fontWeight: FontWeight.w900, color: AppColors.getTextPrimary(context).withValues(alpha: 0.8), letterSpacing: 0.5)),
+                            Text(
+                              l10n.description.toUpperCase(),
+                              style: TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w900,
+                                color: AppColors.getTextPrimary(
+                                  context,
+                                ).withValues(alpha: 0.8),
+                                letterSpacing: 0.5,
+                              ),
+                            ),
                           ],
                         ),
                         const SizedBox(height: 12),
-                        PrecisionInput(controller: _noteController, hintText: 'İşleme dair not bırakın...', icon: Icons.edit_note_rounded),
-                        const SizedBox(height: 12),
-                        Divider(height: 24, thickness: 0.5, color: (isDark ? Colors.white : Colors.black).withValues(alpha: 0.08)),
-                        const SizedBox(height: 12),
-                        TransactionPeriodSelector(
-                          initialData: _periodData,
-                          scalingFactor: scalingFactor,
-                          onChanged: (data) {
-                            HapticFeedback.mediumImpact();
-                            setState(() => _periodData = data);
-                          },
+                        PrecisionInput(
+                          controller: _noteController,
+                          hintText: 'İşleme dair not bırakın...',
+                          icon: Icons.edit_note_rounded,
                         ),
-                        
-                        // --- BİLDİRİM AYARLARI ---
-                        Divider(height: 24, thickness: 0.5, color: (isDark ? Colors.white : Colors.black).withValues(alpha: 0.08)),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AppSizes.paddingMedium,
+                  ),
+                  child: PrecisionCard(
+                    scalingFactor: scalingFactor,
+                    padding: const EdgeInsets.all(16),
+                    child: Column(
+                      children: [
                         Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Row(
-                                children: [
-                                  Icon(Icons.notifications_active_rounded, size: 20, color: activeColor.withValues(alpha: 0.7)),
-                                  const SizedBox(width: 12),
-                                  Text('HATIRLATICI', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w900, color: AppColors.getTextPrimary(context).withValues(alpha: 0.8), letterSpacing: 0.5)),
-                                ],
-                              ),
-                              PrecisionToggle(
-                                value: _isNotificationEnabled,
-                                activeColor: activeColor,
-                                activeIcon: Icons.notifications_active_rounded,
-                                inactiveIcon: Icons.notifications_off_rounded,
-                                scalingFactor: scalingFactor * 0.9,
-                                onChanged: (val) async {
-                                  if (val) {
-                                    final granted = await NotificationService().requestPermissions();
-                                    if (!granted && context.mounted) {
-                                      ScaffoldMessenger.of(context).showSnackBar(
-                                        const SnackBar(content: Text('Bildirim izni verilmedi. Lütfen ayarlardan açın.'))
-                                      );
-                                      return;
-                                    }
-                                  }
-                                  HapticFeedback.mediumImpact();
-                                  setState(() => _isNotificationEnabled = val);
-                                },
-                              ),
-                            ],
-                          ),
-                          AnimatedSize(
-                            duration: const Duration(milliseconds: 400),
-                            curve: Curves.easeInOutQuart,
-                            alignment: Alignment.topCenter,
-                            child: AnimatedSwitcher(
-                              duration: const Duration(milliseconds: 350),
-                              transitionBuilder: (Widget child, Animation<double> animation) {
-                                return FadeTransition(
-                                  opacity: animation,
-                                  child: SlideTransition(
-                                    position: Tween<Offset>(
-                                      begin: const Offset(0.05, 0),
-                                      end: Offset.zero,
-                                    ).animate(CurvedAnimation(parent: animation, curve: Curves.easeOutQuart)),
-                                    child: child,
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Row(
+                              children: [
+                                Icon(
+                                  Icons.notifications_active_rounded,
+                                  size: 20,
+                                  color: activeColor.withValues(alpha: 0.7),
+                                ),
+                                const SizedBox(width: 12),
+                                Text(
+                                  'HATIRLATICI',
+                                  style: TextStyle(
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w900,
+                                    color: AppColors.getTextPrimary(
+                                      context,
+                                    ).withValues(alpha: 0.8),
+                                    letterSpacing: 0.5,
                                   ),
-                                );
+                                ),
+                              ],
+                            ),
+                            PrecisionToggle(
+                              value: _isNotificationEnabled,
+                              activeColor: activeColor,
+                              activeIcon: Icons.notifications_active_rounded,
+                              inactiveIcon: Icons.notifications_off_rounded,
+                              scalingFactor: scalingFactor * 0.9,
+                              onChanged: (val) async {
+                                if (val) {
+                                  final granted = await NotificationService()
+                                      .requestPermissions();
+                                  if (!granted && context.mounted) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(
+                                        content: Text(
+                                          'Bildirim izni verilmedi. Lütfen ayarlardan açın.',
+                                        ),
+                                      ),
+                                    );
+                                    return;
+                                  }
+                                }
+                                HapticFeedback.mediumImpact();
+                                setState(() => _isNotificationEnabled = val);
                               },
-                              child: _isNotificationEnabled 
+                            ),
+                          ],
+                        ),
+                        AnimatedSize(
+                          duration: const Duration(milliseconds: 400),
+                          curve: Curves.easeInOutQuart,
+                          alignment: Alignment.topCenter,
+                          child: AnimatedSwitcher(
+                            duration: const Duration(milliseconds: 350),
+                            transitionBuilder:
+                                (Widget child, Animation<double> animation) {
+                                  return FadeTransition(
+                                    opacity: animation,
+                                    child: SlideTransition(
+                                      position:
+                                          Tween<Offset>(
+                                            begin: const Offset(0, 0.05),
+                                            end: Offset.zero,
+                                          ).animate(
+                                            CurvedAnimation(
+                                              parent: animation,
+                                              curve: Curves.easeOutQuart,
+                                            ),
+                                          ),
+                                      child: child,
+                                    ),
+                                  );
+                                },
+                            child: _isNotificationEnabled
                                 ? Column(
                                     key: const ValueKey('reminder_enabled'),
                                     children: [
-                                      Divider(height: 1, thickness: 0.5, color: (isDark ? Colors.white : Colors.black).withValues(alpha: 0.08)),
-                                      const SizedBox(height: 8),
+                                      const SizedBox(height: 16),
+                                      Divider(
+                                        height: 1,
+                                        thickness: 0.5,
+                                        color:
+                                            (isDark
+                                                    ? Colors.white
+                                                    : Colors.black)
+                                                .withValues(alpha: 0.08),
+                                      ),
+                                      const SizedBox(height: 16),
                                       TransactionReminderDaysSelector(
                                         selectedDays: _notificationReminderDays,
                                         scalingFactor: scalingFactor,
-                                        onChanged: (val) => setState(() => _notificationReminderDays = val),
+                                        onChanged: (days) => setState(
+                                          () =>
+                                              _notificationReminderDays = days,
+                                        ),
                                       ),
-                                      Divider(height: 1, thickness: 0.5, indent: 16, endIndent: 16, color: (isDark ? Colors.white : Colors.black).withValues(alpha: 0.08)),
+                                      const SizedBox(height: 16),
                                       TransactionReminderTimeSelector(
                                         selectedTime: _notificationTime,
                                         scalingFactor: scalingFactor,
-                                        onChanged: (val) => setState(() => _notificationTime = val),
+                                        onChanged: (time) => setState(
+                                          () => _notificationTime = time,
+                                        ),
                                       ),
                                     ],
                                   )
-                                : const SizedBox.shrink(key: ValueKey('reminder_disabled')),
-                            ),
+                                : const SizedBox.shrink(
+                                    key: ValueKey('reminder_disabled'),
+                                  ),
                           ),
+                        ),
                       ],
                     ),
                   ),
@@ -970,13 +1212,27 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                   Padding(
                     padding: const EdgeInsets.symmetric(vertical: 16),
                     child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                      decoration: BoxDecoration(color: AppColors.error.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(12)),
-                      child: Text(_errorMessage!, style: const TextStyle(color: AppColors.error, fontWeight: FontWeight.bold)),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 8,
+                      ),
+                      decoration: BoxDecoration(
+                        color: AppColors.error.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Text(
+                        _errorMessage!,
+                        style: const TextStyle(
+                          color: AppColors.error,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
                     ),
                   ),
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: AppSizes.paddingMedium),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AppSizes.paddingMedium,
+                  ),
                   child: PrecisionButton(
                     onTap: _saveTransaction,
                     label: l10n.save,

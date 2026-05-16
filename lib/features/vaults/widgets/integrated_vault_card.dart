@@ -74,13 +74,12 @@ class IntegratedVaultCard extends StatelessWidget {
             // === ARKA PLAN: Premium Glass (morph sırasında kaybolur) ===
             if (decorationOpacity > 0.01)
               Positioned.fill(
-                child: Opacity(
-                  opacity: decorationOpacity,
-                  child: PrecisionGlassCard(
-                    borderRadius: cardRadius,
-                    isGlass: true,
-                    child: const SizedBox.expand(),
-                  ),
+                child: PrecisionGlassCard(
+                  borderRadius: cardRadius,
+                  isGlass: true,
+                  blur: 10.0 * decorationOpacity, // Blur değerini sıfıra kadar yumuşatarak çekiyoruz
+                  opacityMultiplier: decorationOpacity, // Renkleri, gölgeleri ve sınırları yumuşakça siliyoruz
+                  child: const SizedBox.expand(),
                 ),
               ),
 

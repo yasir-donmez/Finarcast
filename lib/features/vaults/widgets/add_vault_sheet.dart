@@ -22,13 +22,27 @@ class _AddVaultSheetState extends ConsumerState<AddVaultSheet> with SingleTicker
   String _selectedCurrency = 'AUTO';
   late AnimationController _waveController;
 
-  List<Map<String, String>> _getCurrencies(AppLocalizations l10n) => [
-    {'symbol': 'AUTO', 'label': l10n.auto},
-    {'symbol': '₺', 'label': 'TL'},
-    {'symbol': '\$', 'label': 'USD'},
-    {'symbol': '€', 'label': 'EUR'},
-    {'symbol': 'G', 'label': l10n.gold},
-  ];
+  List<Map<String, String>> _getCurrencies(AppLocalizations l10n) {
+    final List<Map<String, String>> items = [
+      {'symbol': 'AUTO', 'label': l10n.auto},
+    ];
+    
+    for (var symbol in AppCurrency.supportedSymbols) {
+      String label = symbol;
+      if (symbol == '₺') {
+        label = 'TL';
+      } else if (symbol == r'$') {
+        label = 'USD';
+      } else if (symbol == '€') {
+        label = 'EUR';
+      } else if (symbol == 'G') {
+        label = l10n.gold;
+      }
+      
+      items.add({'symbol': symbol, 'label': label});
+    }
+    return items;
+  }
 
   @override
   void initState() {

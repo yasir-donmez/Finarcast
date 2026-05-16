@@ -34,6 +34,12 @@ class AppColors {
 
   static Color getTextPrimary(BuildContext context) => Theme.of(context).colorScheme.onSurface;
   static Color getTextSecondary(BuildContext context) => Theme.of(context).brightness == Brightness.dark ? darkTextSecondary : lightTextSecondary;
+  
+  // En sönük metinler (başlıklar vb.) için standart bir renk
+  static Color getTextFaint(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return (isDark ? Colors.white : Colors.black).withValues(alpha: 0.35);
+  }
 
   static Color getBackground(BuildContext context) => Theme.of(context).brightness == Brightness.dark ? darkBackground : lightBackground;
   static Color getLightShadow(BuildContext context) => Theme.of(context).brightness == Brightness.dark ? darkLightShadow : lightLightShadow;
@@ -44,7 +50,15 @@ class AppColors {
   static Color getAccentDeep(BuildContext context, Color baseColor) {
     if (Theme.of(context).brightness == Brightness.dark) return baseColor;
     // Aydınlık modda rengi daha koyu ve doygun yapıyoruz
-    return Color.lerp(baseColor, Colors.black, 0.45) ?? baseColor;
+    // Luma kontrolü ile çok açık renkleri daha da koyulaştırıyoruz
+    final luma = baseColor.computeLuminance();
+    final lerpAmount = luma > 0.6 ? 0.65 : 0.45;
+    return Color.lerp(baseColor, Colors.black, lerpAmount) ?? baseColor;
+  }
+
+  /// Verilen arka plan rengi üzerinde en iyi okunan metin rengini döner (Siyah veya Beyaz)
+  static Color getContrastColor(Color backgroundColor) {
+    return backgroundColor.computeLuminance() > 0.5 ? Colors.black : Colors.white;
   }
 
   // --- Legacy Proxies (Deprecated: Use dynamic getters with context) ---

@@ -91,7 +91,7 @@ class PrecisionSheet extends StatelessWidget {
                   Colors.transparent,
                 ],
               ),
-              color: surfaceColor.withValues(alpha: isDark ? 0.94 : 1.0), // Opaklığı artırdık (0.85 -> 0.94)
+              color: surfaceColor.withValues(alpha: isDark ? 0.65 : 0.82), // Daha premium cam hissi (0.94 -> 0.65/0.82)
               borderRadius: const BorderRadius.vertical(top: Radius.circular(AppSizes.radiusLarge * 2.5)),
               border: Border.all(
                 color: Colors.white.withValues(alpha: isDark ? 0.15 : 0.4),
@@ -109,7 +109,7 @@ class PrecisionSheet extends StatelessWidget {
             child: ClipRRect(
               borderRadius: const BorderRadius.vertical(top: Radius.circular(AppSizes.radiusLarge * 2.5)),
               child: BackdropFilter(
-                filter: ImageFilter.blur(sigmaX: 20.0, sigmaY: 20.0), // Blur azaltıldı (30 -> 20)
+                filter: ImageFilter.blur(sigmaX: 15.0, sigmaY: 15.0), // Blur azaltıldı (30 -> 15)
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [

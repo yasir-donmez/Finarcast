@@ -37,13 +37,13 @@ class PrecisionCard extends StatelessWidget {
             padding: padding ?? EdgeInsets.all(12 * scalingFactor),
             decoration: BoxDecoration(
               color: backgroundColor ?? (isDark 
-                  ? Colors.white.withValues(alpha: 0.05) 
-                  : Colors.black.withValues(alpha: 0.02)),
+                  ? Colors.white.withValues(alpha: 0.08) 
+                  : Colors.black.withValues(alpha: 0.04)),
               borderRadius: BorderRadius.circular(16 * scalingFactor),
               border: Border.all(
                 color: borderColor ?? (isDark 
-                    ? Colors.white.withValues(alpha: 0.08) 
-                    : Colors.black.withValues(alpha: 0.05)),
+                    ? Colors.white.withValues(alpha: 0.12) 
+                    : Colors.black.withValues(alpha: 0.08)),
                 width: 0.5,
               ),
             ),

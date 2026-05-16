@@ -10,6 +10,7 @@ import '../dashboard/dashboard_providers.dart';
 import '../../shared/widgets/precision_card.dart';
 import 'widgets/settings/theme_setting.dart';
 import 'widgets/settings/color_theme_setting.dart';
+import 'widgets/settings/background_setting.dart';
 
 // Modular Widgets
 import 'widgets/etched_liquid_text.dart';
@@ -115,9 +116,34 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   padding: EdgeInsets.zero,
                   child: Column(
                     children: [
-                      const ThemeSetting(),
-                      ProfileListItems.buildDivider(isDark),
-                      const ColorThemeSetting(),
+                      Theme(
+                        data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
+                        child: ExpansionTile(
+                          iconColor: activeColor,
+                          collapsedIconColor: AppColors.getTextSecondary(context),
+                          title: Row(
+                            children: [
+                              Icon(Icons.palette_rounded, color: AppColors.getTextSecondary(context), size: 22),
+                              const SizedBox(width: 16),
+                              Text(
+                                "Görünüm ve Arka Plan",
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w600,
+                                  color: AppColors.getTextPrimary(context),
+                                ),
+                              ),
+                            ],
+                          ),
+                          children: [
+                            const ThemeSetting(),
+                            ProfileListItems.buildDivider(isDark),
+                            const ColorThemeSetting(),
+                            ProfileListItems.buildDivider(isDark),
+                            const BackgroundSetting(),
+                          ],
+                        ),
+                      ),
                       ProfileListItems.buildDivider(isDark),
                       const LanguageSetting(),
                       ProfileListItems.buildDivider(isDark),

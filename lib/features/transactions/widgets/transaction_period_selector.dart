@@ -220,7 +220,18 @@ class _TransactionPeriodSelectorState extends State<TransactionPeriodSelector> {
               );
             },
             child: _periodType == 0 
-              ? const SizedBox.shrink(key: ValueKey('period_empty'))
+              ? Column(
+                  key: const ValueKey('period_date_selection'),
+                  children: [
+                    Divider(height: 1, thickness: 0.5, color: (isDark ? Colors.white : Colors.black).withValues(alpha: 0.08)),
+                    _buildStandardRow(
+                      l10n.selectDate,
+                      "${_selectedDateForRecurrence.day} ${_getMonths(l10n)[_selectedDateForRecurrence.month - 1]} ${_selectedDateForRecurrence.year}",
+                      Icons.calendar_today_rounded,
+                      () => _showFullDatePicker(l10n),
+                    ),
+                  ],
+                )
               : Column(
                   key: ValueKey('period_content_$_periodType'),
                   children: [
@@ -658,4 +669,69 @@ class _TransactionPeriodSelectorState extends State<TransactionPeriodSelector> {
     );
   }
 
+  void _showFullDatePicker(AppLocalizations l10n) {
+    int tempDay = _selectedDateForRecurrence.day;
+    int tempMonth = _selectedDateForRecurrence.month;
+    int tempYear = _selectedDateForRecurrence.year;
+    
+    PrecisionSheet.show(
+      context: context,
+      title: l10n.selectDate,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          SizedBox(
+            height: 240,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                // Day
+                SizedBox(
+                  width: 70,
+                  child: PrecisionPicker.strings(
+                    items: List.generate(31, (i) => (i + 1).toString()),
+                    initialItem: tempDay - 1,
+                    onSelectedItemChanged: (idx) => tempDay = idx + 1,
+                  ),
+                ),
+                const SizedBox(width: 10),
+                // Month
+                SizedBox(
+                  width: 130,
+                  child: PrecisionPicker.strings(
+                    items: List.generate(12, (i) => _getMonths(l10n)[i]),
+                    initialItem: tempMonth - 1,
+                    onSelectedItemChanged: (idx) => tempMonth = idx + 1,
+                  ),
+                ),
+                const SizedBox(width: 10),
+                // Year
+                SizedBox(
+                  width: 90,
+                  child: PrecisionPicker.strings(
+                    items: List.generate(11, (i) => (DateTime.now().year - 5 + i).toString()),
+                    initialItem: tempYear - (DateTime.now().year - 5),
+                    onSelectedItemChanged: (idx) => tempYear = DateTime.now().year - 5 + idx,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 32),
+          PrecisionButton(
+            label: l10n.ok,
+            onTap: () {
+              setState(() {
+                _selectedDateForRecurrence = DateTime(tempYear, tempMonth, tempDay);
+                _selectedDay = tempDay;
+              });
+              _notifyChanges();
+              Navigator.pop(context);
+              HapticFeedback.mediumImpact();
+            },
+          ),
+        ],
+      ),
+    );
+  }
 }

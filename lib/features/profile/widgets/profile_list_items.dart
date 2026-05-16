@@ -6,18 +6,22 @@ import '../../../shared/widgets/precision_animated_icon.dart';
 
 class ProfileListItems {
   static Widget buildSectionTitle(String title, Color activeColor, {Key? key}) {
-    return Padding(
-      key: key,
-      padding: const EdgeInsets.only(left: 0, bottom: 8),
-      child: Text(
-        title.toUpperCase(),
-        style: TextStyle(
-          fontSize: 10,
-          fontWeight: FontWeight.w900,
-          color: Colors.grey.withValues(alpha: 0.5),
-          letterSpacing: 2,
-        ),
-      ),
+    return Builder(
+      builder: (context) {
+        return Padding(
+          key: key,
+          padding: const EdgeInsets.only(left: 0, bottom: 8),
+          child: Text(
+            title.toUpperCase(),
+            style: TextStyle(
+              fontSize: 10,
+              fontWeight: FontWeight.w900,
+              color: AppColors.getTextFaint(context),
+              letterSpacing: 2,
+            ),
+          ),
+        );
+      }
     );
   }
 

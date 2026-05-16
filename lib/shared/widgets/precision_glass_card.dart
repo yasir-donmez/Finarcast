@@ -13,6 +13,7 @@ class PrecisionGlassCard extends StatelessWidget {
   final Color? borderColor;
   final double? borderWidth;
   final bool showShadow;
+  final double opacityMultiplier;
 
   const PrecisionGlassCard({
     super.key,
@@ -20,10 +21,11 @@ class PrecisionGlassCard extends StatelessWidget {
     this.padding,
     this.borderRadius,
     this.color,
-    this.blur = 15.0,
+    this.blur = 10.0,
     this.borderColor,
     this.borderWidth,
     this.showShadow = true,
+    this.opacityMultiplier = 1.0,
     // isGlass parametresi artık varsayılan olarak true ve tasarımın parçası
     bool isGlass = true, 
   });
@@ -39,6 +41,7 @@ class PrecisionGlassCard extends StatelessWidget {
       borderColor: borderColor,
       borderWidth: borderWidth,
       showShadow: showShadow,
+      opacityMultiplier: opacityMultiplier,
       child: child,
     );
   }

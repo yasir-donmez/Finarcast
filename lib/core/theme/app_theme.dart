@@ -28,8 +28,11 @@ class AppTheme {
 
   /// Premium Glassmorphism - Aydınlık Tema
   static ThemeData buildLightTheme(Color accentColor) {
-    // Aydınlık modda okunabilirliği artırmak için rengi biraz koyulaştırıyoruz
-    final readableAccent = Color.lerp(accentColor, Colors.black, 0.45) ?? accentColor;
+    // Aydınlık modda okunabilirliği artırmak için rengi koyulaştırıyoruz.
+    // Çok açık renkler (sarı, açık yeşil vb.) için daha agresif bir koyulaştırma uyguluyoruz.
+    final luma = accentColor.computeLuminance();
+    final lerpAmount = luma > 0.6 ? 0.65 : 0.45;
+    final readableAccent = Color.lerp(accentColor, Colors.black, lerpAmount) ?? accentColor;
 
     return ThemeData(
       useMaterial3: true,

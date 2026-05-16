@@ -118,26 +118,12 @@ class _MainScaffoldState extends ConsumerState<MainScaffold> {
     return Stack(
       children: [
         Positioned.fill(
-          child: TweenAnimationBuilder<double>(
-            tween: Tween<double>(end: _currentIndex == 0 ? 100.0 : 0.0),
-            duration: const Duration(milliseconds: 350),
-            curve: Curves.easeOutCubic,
-            builder: (context, radius, child) {
-              if (radius <= 0) return child!;
-              return ShaderMask(
-                blendMode: BlendMode.dstOut,
-                shaderCallback: (Rect bounds) {
-                  return RadialGradient(
-                    center: const Alignment(0.0, 0.40),
-                    radius: radius / (bounds.shortestSide / 2),
-                    colors: const [Colors.black, Colors.black, Colors.transparent],
-                    stops: const [0.0, 0.5, 1.0],
-                  ).createShader(bounds);
-                },
-                child: child,
-              );
-            },
-            child: const PrecisionBackground(useSystemBackground: false),
+          child: Stack(
+            children: [
+              const PrecisionBackground(useSystemBackground: false),
+              // RadialGradient animasyonu tamamen kaldırıldı, çünkü geçiş sırasında BackdropFilter'ı bozuyor
+              // ve kartların bir anda opak/şeffaf olmasına (pıt efekti) neden oluyordu.
+            ],
           ),
         ),
 

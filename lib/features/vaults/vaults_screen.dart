@@ -401,6 +401,7 @@ class _VaultsScreenState extends ConsumerState<VaultsScreen> {
           if (confirm == true) {
             await DatabaseService.deleteTransaction(tx.dbId!);
             HapticFeedback.mediumImpact();
+            if (context.mounted) Navigator.pop(context); // Close the detail sheet
           }
         },
         onRemoveFromVault: selectedVaultId != null ? () async {

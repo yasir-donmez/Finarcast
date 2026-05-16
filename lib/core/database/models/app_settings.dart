@@ -21,6 +21,14 @@ class AppSettings {
   /// 2 = Karanlık (Dark)
   int themeModeIndex = 0;
 
+  /// Arka Plan Deseni Yoğunluğu
+  /// 0 = Kapalı, 1 = Hafif, 2 = Orta, 3 = Yoğun
+  int bgPatternDensity = 1;
+
+  /// Arka Plan Renklendirme Stili
+  /// 0 = İkonları Boya, 1 = Zemini Boya, 2 = Sade
+  int bgColorStyle = 1;
+
   /// Ana Tema Rengi (Accent Color) — Örn: 0xFF00E5FF
   int accentColorValue = 0xFF00E5FF;
 
