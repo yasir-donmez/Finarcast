@@ -60,9 +60,29 @@ class _VaultsScreenState extends ConsumerState<VaultsScreen> {
     final topPadding = MediaQuery.of(context).padding.top;
 
     final scrollController = ref.watch(dashboardScrollProvider);
+    final bottomPadding = MediaQuery.of(context).padding.bottom;
+    final screenWidth = MediaQuery.of(context).size.width;
+
+    // Sabit boşluklar (Gap A = Gap B = 32px, Gap C = Gap D = 16px)
+    const double gapAB = 32.0;  // Başlık↔Kasa ve Kasa↔Filtre arası
+    const double gapCD = 16.0;  // Filtre↔Kartlar ve Kartlar↔Navbar arası
+    const double titleBarH = 42.0;
+    const double cardH = 270.0;
+    const double filtersH = 72.0;
+    const double navbarH = 80.0;
+
+    // Üst alan: statusBar + başlık + gapA + kasa + gapB + filtreler + gapC
+    final topArea = topPadding + titleBarH + gapAB + cardH + gapAB + filtersH + gapCD;
+    // Alt alan: navbar + safeArea + gapD
+    final bottomArea = navbarH + bottomPadding + gapCD;
+    // Kalan alan 2 satır kart + 12px arası boşluk için
+    final availableForGrid = screenHeight - topArea - bottomArea;
+    final cardHeight = ((availableForGrid - 12.0) / 2.0).clamp(80.0, 200.0);
+    final cardWidth = (screenWidth - 32.0 - 12.0) / 2.0;
+    final dynamicAspectRatio = cardWidth / cardHeight;
 
     // YENİ: HeaderDelegate içindeki gerçek değerlerle eşitleme
-    const maxHeaderHeight = 420.0;
+    final maxHeaderHeight = topPadding + titleBarH + gapAB + cardH;
     final minHeaderHeight = topPadding + 56.0 + 20.0; // kCompactCardHeight + kHeaderBottomBuffer
 
     return Scaffold(
@@ -77,13 +97,13 @@ class _VaultsScreenState extends ConsumerState<VaultsScreen> {
               maxScrollExtent: maxHeaderHeight - minHeaderHeight,
             ),
             slivers: [
-              _buildHeader(groups, allTransactions, selectedVaultId, activeColor, unseenNotificationsCount, l10n, context),
-              _buildFilters(filter, selectedPeriod, activeColor, scalingFactor, l10n, context),
+              _buildHeader(groups, allTransactions, selectedVaultId, activeColor, unseenNotificationsCount, gapAB, l10n, context),
+              _buildFilters(filter, selectedPeriod, activeColor, scalingFactor, gapAB, l10n, context),
               
               if (filteredTransactions.isEmpty)
                 _buildEmptyState(activeColor, isDark, l10n)
               else
-                _buildTransactionGrid(filteredTransactions, context),
+                _buildTransactionGrid(filteredTransactions, dynamicAspectRatio, context),
 
               _buildSmartSpacing(maxHeaderHeight, minHeaderHeight),
             ],
@@ -99,6 +119,7 @@ class _VaultsScreenState extends ConsumerState<VaultsScreen> {
     String? selectedVaultId, 
     Color activeColor, 
     int unseenNotificationsCount,
+    double dynamicGap,
     AppLocalizations l10n, 
     BuildContext context
   ) {
@@ -117,6 +138,7 @@ class _VaultsScreenState extends ConsumerState<VaultsScreen> {
         topPadding: MediaQuery.of(context).padding.top,
         onShowNotifications: () => _showNotificationsSheet(context),
         unseenNotificationsCount: unseenNotificationsCount,
+        dynamicGap: dynamicGap,
       ),
     );
   }
@@ -126,6 +148,7 @@ class _VaultsScreenState extends ConsumerState<VaultsScreen> {
     int? selectedPeriod, 
     Color activeColor, 
     double scalingFactor, 
+    double dynamicGap,
     AppLocalizations l10n, 
     BuildContext context
   ) {
@@ -135,12 +158,12 @@ class _VaultsScreenState extends ConsumerState<VaultsScreen> {
           AppSizes.paddingMedium,
           0, // Üst boşluk tamamen kaldırıldı
           AppSizes.paddingMedium,
-          24,
+          16,
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const SizedBox(height: 8), // Filtre butonları ile üstteki kart arasında çok az bir nefes payı
+            SizedBox(height: dynamicGap), // Filtre butonları ile üstteki kart arasında tam simetrik boşluk (Gap B)
             Row(
               children: [
                 VaultFilterChip(
@@ -165,7 +188,7 @@ class _VaultsScreenState extends ConsumerState<VaultsScreen> {
                 ),
               ],
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 8),
             SingleChildScrollView(
               scrollDirection: Axis.horizontal,
               physics: const BouncingScrollPhysics(),
@@ -249,20 +272,21 @@ class _VaultsScreenState extends ConsumerState<VaultsScreen> {
     );
   }
 
-  Widget _buildTransactionGrid(List<TransactionUI> transactions, BuildContext context) {
+  Widget _buildTransactionGrid(List<TransactionUI> transactions, double childAspectRatio, BuildContext context) {
+    final bottomPadding = MediaQuery.of(context).padding.bottom;
     return SliverPadding(
-      padding: const EdgeInsets.fromLTRB(
+      padding: EdgeInsets.fromLTRB(
         AppSizes.paddingMedium,
         0,
         AppSizes.paddingMedium,
-        20,
+        80.0 + bottomPadding + 16.0, // Alt navbar ve safeArea çentiği kadar boşluk bırakarak kartların navbar altında kalmasını önlüyoruz.
       ),
       sliver: SliverGrid(
-        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: 2,
           mainAxisSpacing: 12,
           crossAxisSpacing: 12,
-          childAspectRatio: 1.35,
+          childAspectRatio: childAspectRatio,
         ),
         delegate: SliverChildBuilderDelegate(
           (context, index) {
@@ -289,7 +313,8 @@ class _VaultsScreenState extends ConsumerState<VaultsScreen> {
   Widget _buildSmartSpacing(double maxHeaderHeight, double minHeaderHeight) {
     return SliverLayoutBuilder(
       builder: (context, constraints) {
-        final totalHeightAtStart = constraints.precedingScrollExtent + constraints.scrollOffset;
+        // scrollOffset'i kaldırarak kaydırma esnasında sınırların mutasyona uğramasını ve "yaya benzer sallanmayı" tamamen engelliyoruz.
+        final totalHeightAtStart = constraints.precedingScrollExtent;
         final targetHeight = constraints.viewportMainAxisExtent + (maxHeaderHeight - minHeaderHeight);
         final gap = targetHeight - totalHeightAtStart;
 

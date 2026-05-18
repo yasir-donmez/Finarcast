@@ -17,6 +17,7 @@ class TrueMorphDeckHeaderDelegate extends SliverPersistentHeaderDelegate {
   final double topPadding;
   final VoidCallback onShowNotifications;
   final int unseenNotificationsCount;
+  final double dynamicGap;
 
   TrueMorphDeckHeaderDelegate({
     required this.groups,
@@ -30,11 +31,12 @@ class TrueMorphDeckHeaderDelegate extends SliverPersistentHeaderDelegate {
     required this.topPadding,
     required this.onShowNotifications,
     required this.unseenNotificationsCount,
+    required this.dynamicGap,
   });
 
   // --- Tasarım Sistemi Sabitleri ---
   static const double kCompactCardHeight = 56.0;
-  static const double kExpandedCardHeight = 300.0;
+  static const double kExpandedCardHeight = 270.0;
   static const double kHeaderBottomBuffer = 20.0; // Pinned haldeyken alttaki nefes payı
   
   @override
@@ -88,7 +90,7 @@ class TrueMorphDeckHeaderDelegate extends SliverPersistentHeaderDelegate {
               clipBehavior: Clip.none,
               children: [
                 Positioned(
-                  top: lerpDouble(topPadding + 80, compactTopOffset, progress)!,
+                  top: lerpDouble(topPadding + 42.0 + dynamicGap, compactTopOffset, progress)!,
                   left: 0, right: 0,
                   height: lerpDouble(kExpandedCardHeight, kCompactCardHeight, progress)!,
                   child: VaultCardStack(
@@ -166,7 +168,7 @@ class TrueMorphDeckHeaderDelegate extends SliverPersistentHeaderDelegate {
   }
 
   @override
-  double get maxExtent => 420;
+  double get maxExtent => topPadding + 42.0 + dynamicGap + kExpandedCardHeight;
   @override
   double get minExtent => topPadding + kCompactCardHeight + kHeaderBottomBuffer;
   @override

@@ -201,113 +201,162 @@ class _TransactionPeriodSelectorState extends State<TransactionPeriodSelector> {
             ],
           ),
         ),
-        Divider(height: 1, thickness: 0.5, color: (isDark ? Colors.white : Colors.black).withValues(alpha: 0.08)),
+        SizedBox(height: 16 * scalingFactor),
+        Divider(
+          height: 1, 
+          thickness: 0.5, 
+          color: (isDark ? Colors.white : Colors.black).withValues(alpha: 0.08),
+        ),
+        SizedBox(height: 16 * scalingFactor),
+        
+        // === BAŞLANGIÇ TARİHİ (TÜM PERİYOTLAR İÇİN - SABİT VE HİÇBİR ZAMAN ANİME EDİLMEZ) ===
+        _buildStandardRow(
+          _periodType == 0 ? l10n.selectDate : "Başlangıç Tarihi",
+          "${_selectedDateForRecurrence.day} ${_getMonths(l10n)[_selectedDateForRecurrence.month - 1]} ${_selectedDateForRecurrence.year}",
+          Icons.calendar_today_rounded,
+          () => _showFullDatePicker(l10n),
+        ),
+        
+        // === BİTİŞ SÜRESİ (Sadece periyodik durumlarda açılır, pürüzsüz animasyonlu) ===
         AnimatedSize(
-          duration: const Duration(milliseconds: 400),
+          duration: const Duration(milliseconds: 300),
           curve: Curves.easeInOutQuart,
           alignment: Alignment.topCenter,
           child: AnimatedSwitcher(
-            duration: const Duration(milliseconds: 350),
-            layoutBuilder: (Widget? currentChild, List<Widget> previousChildren) {
-              return Stack(
-                alignment: Alignment.topCenter,
-                children: <Widget>[
-                  ...previousChildren,
-                  if (currentChild != null) currentChild,
-                ],
-              );
-            },
+            duration: const Duration(milliseconds: 250),
             transitionBuilder: (Widget child, Animation<double> animation) {
               return FadeTransition(
                 opacity: animation,
                 child: SlideTransition(
                   position: Tween<Offset>(
-                    begin: const Offset(0, 0.05),
+                    begin: const Offset(0.0, 0.05),
                     end: Offset.zero,
-                  ).animate(CurvedAnimation(parent: animation, curve: Curves.easeOutQuart)),
+                  ).animate(CurvedAnimation(
+                    parent: animation, 
+                    curve: Curves.easeOutQuart,
+                  )),
                   child: child,
                 ),
               );
             },
-                              l10n.duration,
-                              style: TextStyle(
-                                fontSize: 15 * scalingFactor,
-                                fontWeight: FontWeight.w600,
-                                color: AppColors.getTextPrimary(context),
+            child: _periodType != 0
+                ? Column(
+                    key: const ValueKey('duration_panel_enabled'),
+                    children: [
+                      SizedBox(height: 16 * scalingFactor),
+                      Padding(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: 16 * scalingFactor, 
+                          vertical: 8 * scalingFactor,
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Icon(
+                              Icons.timer_rounded,
+                              size: 18 * scalingFactor,
+                              color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.8),
+                            ),
+                            SizedBox(width: 12 * scalingFactor),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    l10n.duration.toUpperCase(),
+                                    style: TextStyle(
+                                      fontSize: 11 * scalingFactor,
+                                      fontWeight: FontWeight.w900,
+                                      color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
+                                      letterSpacing: 1.0,
+                                    ),
+                                  ),
+                                  Text(
+                                    _duration == 0 
+                                        ? l10n.repeatsIndefinitely 
+                                        : '$_duration ${l10n.endsAfter}',
+                                    style: TextStyle(
+                                      fontSize: 11 * scalingFactor,
+                                      color: AppColors.getTextSecondary(context).withValues(alpha: 0.5),
+                                    ),
+                                  ),
+                                ],
                               ),
                             ),
-                          ),
-                          Row(
-                            children: [
-                              _buildDurationBtn(Icons.remove_rounded, () {
-                                if (_duration > 0) {
-                                  setState(() { 
-                                    _prevDuration = _duration;
-                                    _duration--; 
-                                  });
-                                  _notifyChanges();
-                                }
-                              }, scalingFactor),
-                              SizedBox(width: 8 * scalingFactor),
-                              SizedBox(
-                                width: 32 * scalingFactor,
-                                child: Center(
-                                  child: AnimatedSwitcher(
-                                    duration: const Duration(milliseconds: 300),
-                                    transitionBuilder: (Widget child, Animation<double> animation) {
-                                      final isEntering = child.key == ValueKey<int>(_duration);
-                                      final isIncreasing = _duration >= _prevDuration;
-                                      double beginOffset = isIncreasing ? -1.0 : 1.0;
-                                      if (!isEntering) beginOffset = -beginOffset;
+                            Row(
+                              children: [
+                                _buildDurationBtn(Icons.remove_rounded, () {
+                                  if (_duration > 0) {
+                                    setState(() { 
+                                      _prevDuration = _duration;
+                                      _duration--; 
+                                    });
+                                    _notifyChanges();
+                                  }
+                                }, scalingFactor),
+                                SizedBox(width: 8 * scalingFactor),
+                                SizedBox(
+                                  width: 32 * scalingFactor,
+                                  child: Center(
+                                    child: AnimatedSwitcher(
+                                      duration: const Duration(milliseconds: 200),
+                                      transitionBuilder: (Widget child, Animation<double> animation) {
+                                        final isEntering = child.key == ValueKey<int>(_duration);
+                                        final isIncreasing = _duration >= _prevDuration;
+                                        double beginOffset = isIncreasing ? -1.0 : 1.0;
+                                        if (!isEntering) beginOffset = -beginOffset;
 
-                                      return ClipRect(
-                                        child: SlideTransition(
-                                          position: Tween<Offset>(
-                                            begin: Offset(0.0, beginOffset),
-                                            end: Offset.zero,
-                                          ).animate(CurvedAnimation(
-                                            parent: animation,
-                                            curve: Curves.easeInOutQuart,
-                                          )),
-                                          child: FadeTransition(
-                                            opacity: animation,
-                                            child: ScaleTransition(
-                                              scale: Tween<double>(begin: 0.9, end: 1.0).animate(animation),
-                                              child: child,
+                                        return ClipRect(
+                                          child: SlideTransition(
+                                            position: Tween<Offset>(
+                                              begin: Offset(0.0, beginOffset),
+                                              end: Offset.zero,
+                                            ).animate(CurvedAnimation(
+                                              parent: animation,
+                                              curve: Curves.easeInOutQuart,
+                                            )),
+                                            child: FadeTransition(
+                                              opacity: animation,
+                                              child: ScaleTransition(
+                                                scale: Tween<double>(begin: 0.9, end: 1.0).animate(animation),
+                                                child: child,
+                                              ),
                                             ),
                                           ),
+                                        );
+                                      },
+                                      child: Text(
+                                        _duration == 0 ? "\u221E" : _duration.toString(),
+                                        key: ValueKey<int>(_duration),
+                                        style: TextStyle(
+                                          fontSize: 16 * scalingFactor,
+                                          fontWeight: FontWeight.w900,
+                                          color: AppColors.getPrimary(context),
                                         ),
-                                      );
-                                    },
-                                    child: Text(
-                                      _duration == 0 ? "∞" : _duration.toString(),
-                                      key: ValueKey<int>(_duration),
-                                      style: TextStyle(
-                                        fontSize: 16 * scalingFactor,
-                                        fontWeight: FontWeight.w900,
-                                        color: AppColors.getPrimary(context),
                                       ),
                                     ),
                                   ),
                                 ),
-                              ),
-                              SizedBox(width: 8 * scalingFactor),
-                              _buildDurationBtn(Icons.add_rounded, () {
-                                if (_duration < 120) {
-                                  setState(() { 
-                                    _prevDuration = _duration;
-                                    _duration++; 
-                                  });
-                                  _notifyChanges();
-                                }
-                              }, scalingFactor),
-                            ],
-                          ),
-                        ],
+                                SizedBox(width: 8 * scalingFactor),
+                                _buildDurationBtn(Icons.add_rounded, () {
+                                  if (_duration < 120) {
+                                    setState(() { 
+                                      _prevDuration = _duration;
+                                      _duration++; 
+                                    });
+                                    _notifyChanges();
+                                  }
+                                }, scalingFactor),
+                              ],
+                            ),
+                          ],
+                        ),
                       ),
-                    ),
-                  ],
-                ),
+                    ],
+                  )
+                : const SizedBox.shrink(
+                    key: ValueKey('duration_panel_disabled'),
+                  ),
           ),
         ),
       ],
@@ -320,8 +369,7 @@ class _TransactionPeriodSelectorState extends State<TransactionPeriodSelector> {
       onTap: onTap,
       color: Colors.transparent,
       showFlash: false,
-      height: 56 * scalingFactor,
-      padding: EdgeInsets.symmetric(horizontal: 16 * scalingFactor),
+      padding: EdgeInsets.symmetric(horizontal: 16 * scalingFactor, vertical: 12 * scalingFactor),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
@@ -330,16 +378,17 @@ class _TransactionPeriodSelectorState extends State<TransactionPeriodSelector> {
             children: [
               Icon(
                 icon,
-                size: 20 * scalingFactor,
-                color: AppColors.getPrimary(context).withValues(alpha: 0.7),
+                size: 18 * scalingFactor,
+                color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.8),
               ),
               SizedBox(width: 12 * scalingFactor),
               Text(
-                label,
+                label.toUpperCase(),
                 style: TextStyle(
-                  fontSize: 15 * scalingFactor,
-                  fontWeight: FontWeight.w600,
-                  color: AppColors.getTextPrimary(context),
+                  fontSize: 11 * scalingFactor,
+                  fontWeight: FontWeight.w900,
+                  color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
+                  letterSpacing: 1.0,
                 ),
               ),
             ],
@@ -352,14 +401,14 @@ class _TransactionPeriodSelectorState extends State<TransactionPeriodSelector> {
                 style: TextStyle(
                   fontSize: 14 * scalingFactor,
                   fontWeight: FontWeight.w900,
-                  color: AppColors.getPrimary(context),
+                  color: Theme.of(context).colorScheme.primary,
                 ),
               ),
               SizedBox(width: 4 * scalingFactor),
               Icon(
                 Icons.chevron_right_rounded,
-                size: 16 * scalingFactor,
-                color: AppColors.getPrimary(context).withValues(alpha: 0.5),
+                size: 18 * scalingFactor,
+                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.3),
               ),
             ],
           ),
@@ -535,87 +584,7 @@ class _TransactionPeriodSelectorState extends State<TransactionPeriodSelector> {
     );
   }
 
-  void _showWeekDayPicker(AppLocalizations l10n) {
-    int tempDayIndex = _selectedDay - 1;
-    PrecisionSheet.show(
-      context: context,
-      title: l10n.selectDay,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          PrecisionPicker.strings(
-            items: List.generate(7, (i) => _getWeekDays(l10n)[i]),
-            initialItem: tempDayIndex,
-            onSelectedItemChanged: (idx) => tempDayIndex = idx,
-          ),
-          const SizedBox(height: 32),
-          PrecisionButton(
-            label: l10n.ok,
-            onTap: () {
-              setState(() => _selectedDay = tempDayIndex + 1);
-              _notifyChanges();
-              Navigator.pop(context);
-              HapticFeedback.mediumImpact();
-            },
-          ),
-        ],
-      ),
-    );
-  }
 
-  void _showDatePicker(AppLocalizations l10n) {
-    int tempDay = _selectedDateForRecurrence.day;
-    int tempMonth = _selectedDateForRecurrence.month;
-    PrecisionSheet.show(
-      context: context,
-      title: l10n.selectDate,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          SizedBox(
-            height: 240,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                SizedBox(
-                  width: 100,
-                  child: PrecisionPicker.strings(
-                    items: List.generate(31, (i) => (i + 1).toString()),
-                    initialItem: tempDay - 1,
-                    onSelectedItemChanged: (idx) => tempDay = idx + 1,
-                  ),
-                ),
-                if (_periodType == 3) ...[
-                  const SizedBox(width: 20),
-                  SizedBox(
-                    width: 160,
-                    child: PrecisionPicker.strings(
-                      items: List.generate(12, (i) => _getMonths(l10n)[i]),
-                      initialItem: tempMonth - 1,
-                      onSelectedItemChanged: (idx) => tempMonth = idx + 1,
-                    ),
-                  ),
-                ],
-              ],
-            ),
-          ),
-          const SizedBox(height: 32),
-          PrecisionButton(
-            label: l10n.ok,
-            onTap: () {
-              setState(() {
-                _selectedDateForRecurrence = DateTime(_selectedDateForRecurrence.year, tempMonth, tempDay);
-                _selectedDay = tempDay;
-              });
-              _notifyChanges();
-              Navigator.pop(context);
-              HapticFeedback.mediumImpact();
-            },
-          ),
-        ],
-      ),
-    );
-  }
 
   void _showFullDatePicker(AppLocalizations l10n) {
     int tempDay = _selectedDateForRecurrence.day;

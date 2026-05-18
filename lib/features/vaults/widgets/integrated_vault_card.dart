@@ -53,7 +53,7 @@ class IntegratedVaultCard extends StatelessWidget {
     final double widthT = Curves.easeOutQuart.transform(morphProgress);
     
     final double cardWidth = lerpDouble(screenWidth * 0.70, screenWidth, widthT)!;
-    final double cardHeight = lerpDouble(280, 56, morphProgress)!;
+    final double cardHeight = lerpDouble(270, 56, morphProgress)!;
     
     // --- Glass Morphing Spread (2. Madde) ---
     final double decorationOpacity = (1 - morphProgress * 2.2).clamp(0.0, 1.0); 
@@ -128,9 +128,13 @@ class IntegratedVaultCard extends StatelessWidget {
     )!;
     
     // --- Geniş Mod (Expanded) Pozisyonları ---
-    final double titleExpandedTop = h * 0.12;
-    final double balanceExpandedTop = titleExpandedTop + 30; 
-    final double secondaryExpandedTop = balanceExpandedTop + 65; 
+    // Her iki durumda da (esnek işlem olsun veya olmasın) üst ve alt iç boşlukları (paddings) %100 simetrik hale getiriyoruz.
+    // hasFlexibleTx == true  => Üst: 25.0 px, Alt: 25.0 px (İçerideki boşlukları eşitlemek için)
+    // hasFlexibleTx == false => Üst: 25.0 px, Alt: 25.0 px
+    final double titleExpandedTop = 25.0;
+    // Ana tutarın (42 px) üstündeki ve altındaki boşlukları kusursuz (tam 20.0 px) eşitlemek için matematiksel hizalama:
+    final double secondaryExpandedTop = 119.0;
+    final double balanceExpandedTop = 57.0; 
     
     // --- Dar Mod (Compact) Pozisyonları ---
     final double titleCompactTop = (h - titleFontSize) / 2;
@@ -248,11 +252,12 @@ class IntegratedVaultCard extends StatelessWidget {
                     ),
                   ),
                   
-                  if (rangeOpacity > 0.01)
+                  // Ara çizgiyi sadece esnek/aralıklı işlemler varsa gösteriyoruz (Görsel sadelik ve simetri için)
+                  if (hasFlexibleTx && rangeOpacity > 0.01)
                     Opacity(
                       opacity: rangeOpacity,
                       child: Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        padding: const EdgeInsets.symmetric(vertical: 9.5),
                         child: Divider(
                           height: 1, 
                           thickness: 0.5, 
@@ -268,10 +273,14 @@ class IntegratedVaultCard extends StatelessWidget {
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           _buildRangeStats(txs, targetCurrency, exchangeRates),
-                          const SizedBox(height: 16),
+                          const SizedBox(height: 20),
                         ],
                       ),
                     ),
+
+                  // Esnek işlem yoksa, alt kaydırma oku ile mini istatistikler arasına dikey boşluk ekleyerek mükemmel simetriyi tamamlıyoruz
+                  if (!hasFlexibleTx && swapOpacity > 0.01)
+                    const SizedBox(height: 76),
 
                   if (swapOpacity > 0.01)
                     Opacity(

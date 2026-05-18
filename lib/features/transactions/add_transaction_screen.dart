@@ -611,33 +611,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
             : cat['name'] as String;
 
         DateTime initialDate = _periodData.selectedDateForRecurrence;
-        if (_periodData.periodType != 0) {
-          final now = DateTime.now();
-          if ([2, 3, 6, 7].contains(_periodData.periodType)) {
-            final day = _periodData.selectedDay;
-            // Artık geleceğe (now.month + 1) atmıyoruz. İçinde bulunduğumuz aya sabitliyoruz.
-            // Böylece ayın 18'inde, "Ayın 5'i" için bir işlem eklenirse, 5 Mayıs'tan başlar ve bakiyeden düşer.
-            initialDate = DateTime(
-              now.year,
-              now.month,
-              day,
-              now.hour,
-              now.minute,
-            );
-          } else if ([1, 4, 5].contains(_periodData.periodType)) {
-            final targetWeekday = _periodData.selectedDay; // 1 (Pazartesi) - 7 (Pazar)
-            int daysToAdd = targetWeekday - now.weekday;
-            // Geçtiyse (daysToAdd < 0) artık +7 ekleyip haftaya atmıyoruz!
-            // Bu sayede Çarşamba günü "Pazartesi" seçilirse, 2 gün öncesinden başlar.
-            initialDate = DateTime(
-              now.year,
-              now.month,
-              now.day + daysToAdd,
-              now.hour,
-              now.minute,
-            );
-          }
-        }
+
 
         final tx = TransactionRecord()
           ..title = catName
@@ -918,7 +892,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                     });
                   },
                 ),
-                const SizedBox(height: AppSizes.paddingMedium),
+                const SizedBox(height: 12),
                 TransactionAmountInput(
                   isFlexibleAmount: _isFlexibleAmount,
                   currency: _selectedCurrency,
@@ -927,16 +901,14 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                   maxController: _maxController,
                   amountFocusNode: _amountFocusNode,
                 ),
+                const SizedBox(height: 12),
                 Padding(
                   padding: const EdgeInsets.symmetric(
                     horizontal: AppSizes.paddingMedium,
                   ),
                   child: PrecisionCard(
                     scalingFactor: scalingFactor,
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 12,
-                    ),
+                    padding: const EdgeInsets.all(16),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
@@ -976,7 +948,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                     ),
                   ),
                 ),
-                const SizedBox(height: AppSizes.paddingLarge),
+                const SizedBox(height: 12),
                 TransactionCategorySelector(
                   categories: activeCategories,
                   selectedCategoryIndex: _selectedCategoryIndex,
@@ -993,13 +965,14 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                   onAddCustomSubcategory: _showAddCustomCategoryDialog,
                   onRemoveCustomSubcategory: _handleRemoveCustomCategory,
                 ),
+                const SizedBox(height: 12),
                 Padding(
                   padding: const EdgeInsets.symmetric(
                     horizontal: AppSizes.paddingMedium,
                   ),
                   child: PrecisionCard(
                     scalingFactor: scalingFactor,
-                    padding: const EdgeInsets.all(12),
+                    padding: const EdgeInsets.all(16),
                     child: Column(
                       children: [
                         TransactionVaultSelector(
@@ -1220,7 +1193,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                 ),
                 if (_errorMessage != null)
                   Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    padding: const EdgeInsets.symmetric(vertical: 12),
                     child: Container(
                       padding: const EdgeInsets.symmetric(
                         horizontal: 16,
@@ -1239,6 +1212,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                       ),
                     ),
                   ),
+                const SizedBox(height: 20),
                 Padding(
                   padding: const EdgeInsets.symmetric(
                     horizontal: AppSizes.paddingMedium,
