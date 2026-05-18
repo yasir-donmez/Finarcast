@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'dart:ui';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/theme/app_constants.dart';
+import '../../core/providers/settings_provider.dart';
 
 /// Finarcast "Yeni Nesil" Buzlu Cam Kapsayıcı (Frosted Glass Surface).
-/// Tasarım Dili: Maksimum verimlilik, pürüzsüz cam dokusu ve kristal netliğinde kenarlar.
-class PrecisionSurface extends StatelessWidget {
+/// Tasarım Dili: Mekansal Adaptif Cam Sistemi (Spatial Adaptive Glass).
+class PrecisionSurface extends ConsumerWidget {
   final Widget child;
   final double? width;
   final double? height;
@@ -29,28 +31,58 @@ class PrecisionSurface extends StatelessWidget {
     this.borderRadius = AppSizes.radiusDefault * 1.5,
     this.isGlass = true,
     this.color,
-    this.blur = 8.0, // Bulanıklığı düşürdük ki ince desenler silinmesin
+    this.blur = 8.0, 
     this.borderWidth,
     this.borderColor,
     this.showShadow = true,
     this.opacityMultiplier = 1.0,
-    // isConvex artık kullanılmıyor, yeni sade tasarım dilinde düz cam tercih ediliyor
     @Deprecated('Yeni sade tasarımda düz yüzeyler tercih ediliyor') bool isConvex = false,
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final bgColorStyle = ref.watch(settingsProvider.select((s) => s.bgColorStyle));
     
-    // Camın içindeki hafif renk tonu (Tint) ve Opaklık (Apple/Samsung Stili)
-    final Color surfaceBaseColor = color ?? AppColors.getSurface(context);
-    
-    // Karanlık modda çok daha şeffaf, aydınlık modda ise "sütlü cam" efekti
-    final Color glassTint = isDark 
-        ? Colors.white.withValues(alpha: 0.05) // Karanlıkta çok hafif beyaz sızıntısı
-        : Colors.white;
+    // Mekansal Adaptif Sistem Parametreleri
+    bool activeIsGlass = isGlass;
+    double activeBlur = blur;
+    Color activeGlassTint;
+    double activeGlassOpacity;
+    Color activeSurfaceColor;
+    Color activeBorderColor;
 
-    final double glassOpacity = (isDark ? 0.18 : 0.40) * opacityMultiplier; // Opaklığı %12-25'ten %18-40 seviyelerine çekerek okunabilirliği artırdık
+    if (bgColorStyle == 2) {
+      // 1. SADE MOD (Mat & Katı)
+      activeIsGlass = false;
+      activeBlur = 0.0;
+      activeSurfaceColor = color ?? (isDark ? const Color(0xFF161720) : Colors.white);
+      activeBorderColor = borderColor ?? (isDark 
+          ? const Color(0xFF2A2B36) 
+          : const Color(0xFFE4E7EB));
+      activeGlassTint = Colors.transparent;
+      activeGlassOpacity = 0.0;
+    } else if (bgColorStyle == 1) {
+      // 3. ZEMİNİ BOYA MODU (Doygun Mekansal / Koyu Cam)
+      activeIsGlass = isGlass;
+      activeBlur = 20.0;
+      activeGlassTint = isDark ? Colors.black : Colors.white;
+      activeGlassOpacity = (isDark ? 0.35 : 0.45) * opacityMultiplier;
+      activeSurfaceColor = color ?? AppColors.getSurface(context);
+      activeBorderColor = borderColor ?? (isDark 
+          ? Colors.white.withValues(alpha: 0.12 * opacityMultiplier)
+          : Colors.black.withValues(alpha: 0.15 * opacityMultiplier));
+    } else {
+      // 2. HAFİF BOYALI MOD (Pürüzsüz Mekansal / VisionOS)
+      activeIsGlass = isGlass;
+      activeBlur = 12.0;
+      activeGlassTint = isDark ? Colors.white : Colors.black;
+      activeGlassOpacity = (isDark ? 0.04 : 0.06) * opacityMultiplier;
+      activeSurfaceColor = color ?? AppColors.getSurface(context);
+      activeBorderColor = borderColor ?? (isDark 
+          ? Colors.white.withValues(alpha: 0.15 * opacityMultiplier)
+          : Colors.black.withValues(alpha: 0.10 * opacityMultiplier));
+    }
 
     final List<BoxShadow> shadows = [
       BoxShadow(
@@ -72,37 +104,36 @@ class PrecisionSurface extends StatelessWidget {
         ) : null,
         child: ClipRRect(
           borderRadius: BorderRadius.circular(borderRadius),
-          child: BackdropFilter(
-            filter: ImageFilter.blur(
-              sigmaX: isGlass ? blur : 0, 
-              sigmaY: isGlass ? blur : 0,
-            ),
-            child: Container(
-              padding: padding ?? const EdgeInsets.all(AppSizes.paddingMedium),
-              decoration: BoxDecoration(
-                color: isGlass 
-                    ? glassTint.withValues(alpha: glassOpacity) 
-                    : surfaceBaseColor,
-                borderRadius: BorderRadius.circular(borderRadius),
-                border: Border.all(
-                  color: borderColor ?? (isDark 
-                      ? Colors.white.withValues(alpha: 0.15 * opacityMultiplier) // Kenar parlaması
-                      : Colors.white.withValues(alpha: 0.4 * opacityMultiplier)),
-                  width: borderWidth ?? 0.5, // Daha ince kenarlar
-                ),
-              ),
-              child: child,
-            ),
-          ),
+          child: activeIsGlass 
+            ? BackdropFilter(
+                filter: ImageFilter.blur(sigmaX: activeBlur, sigmaY: activeBlur),
+                child: _buildInnerContainer(activeGlassTint, activeGlassOpacity, activeBorderColor, activeSurfaceColor, activeIsGlass),
+              )
+            : _buildInnerContainer(activeGlassTint, activeGlassOpacity, activeBorderColor, activeSurfaceColor, activeIsGlass),
         ),
       ),
+    );
+  }
+
+  Widget _buildInnerContainer(Color tint, double opacity, Color bColor, Color sColor, bool glass) {
+    return Container(
+      padding: padding ?? const EdgeInsets.all(AppSizes.paddingMedium),
+      decoration: BoxDecoration(
+        color: glass 
+            ? tint.withValues(alpha: opacity) 
+            : sColor,
+        borderRadius: BorderRadius.circular(borderRadius),
+        border: Border.all(
+          color: bColor,
+          width: borderWidth ?? 0.5,
+        ),
+      ),
+      child: child,
     );
   }
 }
 
 /// İçi boş gölge çizici (Hollow Shadow Painter)
-/// BackdropFilter'ın, kartın kendi gölgesini bulandırmasını (karanlık kutu hatasını) engeller.
-/// Sadece kartın dışına gölge çizer, içini şeffaf bırakır.
 class HollowShadowPainter extends CustomPainter {
   final double borderRadius;
   final List<BoxShadow> shadows;
@@ -123,7 +154,6 @@ class HollowShadowPainter extends CustomPainter {
       
       canvas.save();
       
-      // İçeriyi kesmek için Path.combine kullanıyoruz (clipOp desteklenmiyor)
       final Path outerPath = Path()..addRect(Rect.fromLTRB(-10000, -10000, 10000, 10000));
       final Path innerPath = Path()..addRRect(rrect);
       final Path clipPath = Path.combine(PathOperation.difference, outerPath, innerPath);

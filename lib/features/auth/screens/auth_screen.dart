@@ -174,6 +174,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen> with TickerProviderStat
     final double cardToBottomSpacer = screenHeight * 0.04;
 
     return PrecisionBackground(
+      showPattern: true,
       child: Scaffold(
         backgroundColor: Colors.transparent,
         body: SafeArea(

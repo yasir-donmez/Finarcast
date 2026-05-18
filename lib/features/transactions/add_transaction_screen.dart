@@ -11,6 +11,7 @@ import '../../core/services/custom_category_service.dart';
 import '../../core/providers/settings_provider.dart';
 import '../dashboard/dashboard_providers.dart';
 import '../../core/services/notification_service.dart';
+import '../auth/widgets/precision_background.dart';
 
 import 'widgets/transaction_vault_selector.dart';
 import 'widgets/transaction_currency_selector.dart';
@@ -734,9 +735,14 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
     final activeColor = ref.watch(rotaryColorProvider);
     final double safeTop = MediaQuery.of(context).padding.top;
 
-    return Scaffold(
-      backgroundColor: AppColors.getBackground(context),
-      body: CustomScrollView(
+    return Stack(
+      children: [
+        const Positioned.fill(
+          child: PrecisionBackground(useSystemBackground: false),
+        ),
+        Scaffold(
+          backgroundColor: Colors.transparent,
+          body: CustomScrollView(
         physics: const BouncingScrollPhysics(),
         slivers: [
           SliverAppBar(
@@ -1245,6 +1251,8 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
           ),
         ],
       ),
+    ),
+      ],
     );
   }
 }

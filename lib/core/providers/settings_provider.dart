@@ -148,6 +148,7 @@ class SettingsNotifier extends StateNotifier<AppSettings> {
     if (!value) {
       await NotificationService().cancelAll();
     } else {
+      await NotificationService().requestPermissions();
       final transactions = await DatabaseService.getAllTransactions();
       for (final tx in transactions) {
         if (tx.isNotificationEnabled) {

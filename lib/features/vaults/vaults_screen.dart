@@ -14,6 +14,7 @@ import '../transactions/add_transaction_screen.dart';
 import 'widgets/add_vault_sheet.dart';
 import 'widgets/vault_detail_sheet.dart';
 import 'widgets/precision_detail_sheet.dart';
+import 'widgets/in_app_notifications_sheet.dart';
 import '../dashboard/dashboard_providers.dart';
 import '../dashboard/dashboard_scroll_provider.dart';
 import 'widgets/header_delegate.dart';
@@ -49,6 +50,7 @@ class _VaultsScreenState extends ConsumerState<VaultsScreen> {
     final selectedVaultId = ref.watch(selectedVaultProvider);
     final selectedPeriod = ref.watch(selectedPeriodProvider);
     final activeColor = ref.watch(rotaryColorProvider);
+    final unseenNotificationsCount = ref.watch(unseenNotificationsCountProvider);
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     final filteredTransactions = ref.watch(filteredVaultTransactionsProvider);
@@ -75,7 +77,7 @@ class _VaultsScreenState extends ConsumerState<VaultsScreen> {
               maxScrollExtent: maxHeaderHeight - minHeaderHeight,
             ),
             slivers: [
-              _buildHeader(groups, allTransactions, selectedVaultId, activeColor, l10n, context),
+              _buildHeader(groups, allTransactions, selectedVaultId, activeColor, unseenNotificationsCount, l10n, context),
               _buildFilters(filter, selectedPeriod, activeColor, scalingFactor, l10n, context),
               
               if (filteredTransactions.isEmpty)
@@ -96,6 +98,7 @@ class _VaultsScreenState extends ConsumerState<VaultsScreen> {
     List<TransactionUI> allTransactions, 
     String? selectedVaultId, 
     Color activeColor, 
+    int unseenNotificationsCount,
     AppLocalizations l10n, 
     BuildContext context
   ) {
@@ -112,6 +115,8 @@ class _VaultsScreenState extends ConsumerState<VaultsScreen> {
         l10n: l10n,
         onVaultTap: (id) => _showVaultDetail(context, id),
         topPadding: MediaQuery.of(context).padding.top,
+        onShowNotifications: () => _showNotificationsSheet(context),
+        unseenNotificationsCount: unseenNotificationsCount,
       ),
     );
   }
@@ -437,6 +442,15 @@ class _VaultsScreenState extends ConsumerState<VaultsScreen> {
       context: context,
       title: AppLocalizations.of(context)!.vaultDetail,
       child: VaultDetailSheet(vaultId: vaultId),
+    );
+  }
+
+  void _showNotificationsSheet(BuildContext context) {
+    HapticFeedback.heavyImpact();
+    PrecisionSheet.show(
+      context: context,
+      title: "Uygulama İçi Bildirimler",
+      child: const InAppNotificationsSheet(),
     );
   }
 }

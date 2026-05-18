@@ -15,6 +15,8 @@ class TrueMorphDeckHeaderDelegate extends SliverPersistentHeaderDelegate {
   final AppLocalizations l10n;
   final Function(String?) onVaultTap;
   final double topPadding;
+  final VoidCallback onShowNotifications;
+  final int unseenNotificationsCount;
 
   TrueMorphDeckHeaderDelegate({
     required this.groups,
@@ -26,6 +28,8 @@ class TrueMorphDeckHeaderDelegate extends SliverPersistentHeaderDelegate {
     required this.l10n,
     required this.onVaultTap,
     required this.topPadding,
+    required this.onShowNotifications,
+    required this.unseenNotificationsCount,
   });
 
   // --- Tasarım Sistemi Sabitleri ---
@@ -118,6 +122,36 @@ class TrueMorphDeckHeaderDelegate extends SliverPersistentHeaderDelegate {
                       opacity: iconOpacity,
                       child: Row(
                         children: [
+                          Stack(
+                            clipBehavior: Clip.none,
+                            children: [
+                              HeaderIconButton(
+                                icon: Icons.notifications_none_rounded,
+                                onTap: onShowNotifications,
+                              ),
+                              if (unseenNotificationsCount > 0)
+                                Positioned(
+                                  right: 2,
+                                  top: 2,
+                                  child: Container(
+                                    width: 8,
+                                    height: 8,
+                                    decoration: BoxDecoration(
+                                      color: Colors.redAccent,
+                                      shape: BoxShape.circle,
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: Colors.redAccent.withValues(alpha: 0.5),
+                                          blurRadius: 4,
+                                          spreadRadius: 1,
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                            ],
+                          ),
+                          const SizedBox(width: 8),
                           HeaderIconButton(icon: Icons.add_rounded, onTap: onAddVault),
                         ],
                       ),

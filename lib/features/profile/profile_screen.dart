@@ -110,41 +110,28 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 const SubscriptionSetting(),
 
                 const SizedBox(height: 50),
+                ProfileListItems.buildSectionTitle("Görünüm ve Kişiselleştirme", activeColor),
+                const SizedBox(height: 12),
+                PrecisionCard(
+                  padding: EdgeInsets.zero,
+                  child: Column(
+                    children: [
+                      const ThemeSetting(),
+                      ProfileListItems.buildDivider(isDark),
+                      const ColorThemeSetting(),
+                      ProfileListItems.buildDivider(isDark),
+                      const BackgroundSetting(),
+                    ],
+                  ),
+                ),
+
+                const SizedBox(height: 60),
                 ProfileListItems.buildSectionTitle(l10n.preferences, activeColor, key: _preferencesKey),
                 const SizedBox(height: 12),
                 PrecisionCard(
                   padding: EdgeInsets.zero,
                   child: Column(
                     children: [
-                      Theme(
-                        data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
-                        child: ExpansionTile(
-                          iconColor: activeColor,
-                          collapsedIconColor: AppColors.getTextSecondary(context),
-                          title: Row(
-                            children: [
-                              Icon(Icons.palette_rounded, color: AppColors.getTextSecondary(context), size: 22),
-                              const SizedBox(width: 16),
-                              Text(
-                                "Görünüm ve Arka Plan",
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w600,
-                                  color: AppColors.getTextPrimary(context),
-                                ),
-                              ),
-                            ],
-                          ),
-                          children: [
-                            const ThemeSetting(),
-                            ProfileListItems.buildDivider(isDark),
-                            const ColorThemeSetting(),
-                            ProfileListItems.buildDivider(isDark),
-                            const BackgroundSetting(),
-                          ],
-                        ),
-                      ),
-                      ProfileListItems.buildDivider(isDark),
                       const LanguageSetting(),
                       ProfileListItems.buildDivider(isDark),
                       const CurrencySetting(),

@@ -13,6 +13,8 @@ import 'widgets/result/analysis_status_section.dart';
 import 'widgets/result/analysis_optimization_section.dart';
 import 'widgets/result/analysis_feedback_section.dart';
 
+import '../auth/widgets/precision_background.dart';
+
 class AnalysisDetailScreen extends StatefulWidget {
   final FinancialGoal goal;
   const AnalysisDetailScreen({super.key, required this.goal});
@@ -104,52 +106,59 @@ class _AnalysisDetailScreenState extends State<AnalysisDetailScreen> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
 
-    return Scaffold(
-      backgroundColor: AppColors.getBackground(context),
-      body: _hasError
-          ? _buildErrorState(l10n)
-          : CustomScrollView(
-              physics: const BouncingScrollPhysics(),
-              slivers: [
-                AnalysisSliverHeader(
-                  goal: widget.goal,
-                  l10n: l10n,
-                  currencyFormat: _currencyFormat,
-                  currencySymbol: _result.snapshot.currencySymbol,
-                ),
-                SliverPadding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 20,
-                    vertical: 24,
-                  ),
-                  sliver: SliverList(
-                    delegate: SliverChildListDelegate([
-                      AnalysisStatusSection(
-                        snapshot: _result.snapshot,
-                        l10n: l10n,
-                        currencyFormat: _currencyFormat,
+    return Stack(
+      children: [
+        const Positioned.fill(
+          child: PrecisionBackground(useSystemBackground: false),
+        ),
+        Scaffold(
+          backgroundColor: Colors.transparent,
+          body: _hasError
+              ? _buildErrorState(l10n)
+              : CustomScrollView(
+                  physics: const BouncingScrollPhysics(),
+                  slivers: [
+                    AnalysisSliverHeader(
+                      goal: widget.goal,
+                      l10n: l10n,
+                      currencyFormat: _currencyFormat,
+                      currencySymbol: _result.snapshot.currencySymbol,
+                    ),
+                    SliverPadding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 20,
+                        vertical: 24,
                       ),
-                      const SizedBox(height: 32),
-                      if (_result.optimizationResult != null) ...[
-                        AnalysisOptimizationSection(
-                          opt: _result.optimizationResult!,
-                          l10n: l10n,
-                          currencyFormat: _currencyFormat,
-                          currencySymbol: _result.snapshot.currencySymbol,
-                        ),
-                        const SizedBox(height: 24),
-                      ],
-                      AnalysisFeedbackSection(
-                        l10n: l10n,
-                        userApproval: _userApproval,
-                        onSubmitFeedback: _submitFeedback,
+                      sliver: SliverList(
+                        delegate: SliverChildListDelegate([
+                          AnalysisStatusSection(
+                            snapshot: _result.snapshot,
+                            l10n: l10n,
+                            currencyFormat: _currencyFormat,
+                          ),
+                          const SizedBox(height: 32),
+                          if (_result.optimizationResult != null) ...[
+                            AnalysisOptimizationSection(
+                              opt: _result.optimizationResult!,
+                              l10n: l10n,
+                              currencyFormat: _currencyFormat,
+                              currencySymbol: _result.snapshot.currencySymbol,
+                            ),
+                            const SizedBox(height: 24),
+                          ],
+                          AnalysisFeedbackSection(
+                            l10n: l10n,
+                            userApproval: _userApproval,
+                            onSubmitFeedback: _submitFeedback,
+                          ),
+                          const SizedBox(height: 60),
+                        ]),
                       ),
-                      const SizedBox(height: 60),
-                    ]),
-                  ),
+                    ),
+                  ],
                 ),
-              ],
-            ),
+        ),
+      ],
     );
   }
 

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../core/providers/db_providers.dart';
 import '../../core/database/database_service.dart';
 import '../../core/database/models/transaction_record.dart';
@@ -370,4 +371,58 @@ final filteredVaultTransactionsProvider = Provider<List<TransactionUI>>((ref) {
   }
 
   return filtered;
+});
+
+/// Son kontrol edilen uygulama içi bildirimlerin zaman damgası (SharedPreferences'ta saklanır)
+final lastCheckedNotificationsTimeProvider = StateNotifierProvider<LastCheckedNotificationsTimeNotifier, int>((ref) {
+  return LastCheckedNotificationsTimeNotifier();
+});
+
+class LastCheckedNotificationsTimeNotifier extends StateNotifier<int> {
+  LastCheckedNotificationsTimeNotifier() : super(0) {
+    _load();
+  }
+
+  Future<void> _load() async {
+    final prefs = await SharedPreferences.getInstance();
+    state = prefs.getInt('last_checked_notifications_time') ?? 0;
+  }
+
+  Future<void> updateToNow() async {
+    final now = DateTime.now().millisecondsSinceEpoch;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt('last_checked_notifications_time', now);
+    state = now;
+  }
+}
+
+/// Bildirim zamanı gelmiş (tetiklenmiş) tüm işlemleri getiren helper
+DateTime calculateTransactionReminderDateTime(TransactionUI tx) {
+  DateTime targetDate = tx.date;
+  targetDate = targetDate.subtract(Duration(days: tx.notificationReminderDays));
+  return DateTime(
+    targetDate.year,
+    targetDate.month,
+    targetDate.day,
+    tx.notificationHour,
+    tx.notificationMinute,
+  );
+}
+
+/// Okunmamış (tetiklenmiş ama son kontrolden sonra) bildirimlerin sayısı
+final unseenNotificationsCountProvider = Provider<int>((ref) {
+  final allTransactions = ref.watch(vaultTransactionsProvider);
+  final lastChecked = ref.watch(lastCheckedNotificationsTimeProvider);
+  final now = DateTime.now();
+
+  int count = 0;
+  for (final tx in allTransactions) {
+    if (!tx.isNotificationEnabled) continue;
+    final reminderTime = calculateTransactionReminderDateTime(tx);
+    // Bildirim zamanı geçmiş ve kullanıcının son kontrol ettiği zamandan sonra ise
+    if (reminderTime.isBefore(now) && reminderTime.millisecondsSinceEpoch > lastChecked) {
+      count++;
+    }
+  }
+  return count;
 });

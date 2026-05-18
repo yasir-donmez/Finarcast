@@ -45,6 +45,10 @@ void main() async {
     // Bildirimleri başlat
     debugPrint('🔔 [Finarcast] Bildirim servisi başlatılıyor...');
     await NotificationService().init();
+    final settings = await DatabaseService.getSettings();
+    if (settings.isNotificationsEnabled) {
+      await NotificationService().requestPermissions();
+    }
 
     // Döviz kurlarını güncelle (Async - Fire & Forget)
     CurrencyService.updateRates();

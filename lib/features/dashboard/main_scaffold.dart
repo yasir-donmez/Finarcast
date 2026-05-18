@@ -64,16 +64,12 @@ class _MainScaffoldState extends ConsumerState<MainScaffold> {
     final controller = _scrollController!;
     if (!controller.hasClients) return;
 
-    // Sayfanın en tepesindeyse her zaman göster
-    if (controller.offset < 50) {
-      if (!_isFloatingActionsVisible) setState(() => _isFloatingActionsVisible = true);
-      return;
-    }
-
-    if (controller.position.userScrollDirection == ScrollDirection.reverse) {
-      if (_isFloatingActionsVisible) setState(() => _isFloatingActionsVisible = false);
-    } else if (controller.position.userScrollDirection == ScrollDirection.forward) {
-      if (!_isFloatingActionsVisible) setState(() => _isFloatingActionsVisible = true);
+    // Sadece header açıkken (kasa kartları görünürken, yani en tepedeyken) göster
+    final isAtTop = controller.offset < 10;
+    if (_isFloatingActionsVisible != isAtTop) {
+      setState(() {
+        _isFloatingActionsVisible = isAtTop;
+      });
     }
   }
 
@@ -137,6 +133,16 @@ class _MainScaffoldState extends ConsumerState<MainScaffold> {
               setState(() {
                 _previousIndex = _currentIndex;
                 _currentIndex = index;
+                // Sekme değişimlerinde orb görünürlük durumunu akıllıca güncelle
+                if (index == 0) {
+                  _isFloatingActionsVisible = true;
+                } else if (index == 1) {
+                  if (_scrollController != null && _scrollController!.hasClients) {
+                    _isFloatingActionsVisible = _scrollController!.offset < 10;
+                  } else {
+                    _isFloatingActionsVisible = true;
+                  }
+                }
               });
             },
             children: _pages,
