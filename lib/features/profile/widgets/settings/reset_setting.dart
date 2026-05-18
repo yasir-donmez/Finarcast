@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../../core/theme/app_constants.dart';
 import '../../../../shared/widgets/precision_dialog.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../profile_list_items.dart';
@@ -9,6 +8,7 @@ import '../../../../core/providers/db_providers.dart';
 import '../../../../core/providers/settings_provider.dart';
 import '../../../../core/database/database_service.dart';
 import '../../../../shared/widgets/precision_notification.dart';
+import '../../../dashboard/dashboard_providers.dart';
 
 class ResetSetting extends ConsumerWidget {
   const ResetSetting({super.key});
@@ -18,10 +18,10 @@ class ResetSetting extends ConsumerWidget {
     final l10n = AppLocalizations.of(context)!;
 
     return ProfileListItems.buildSetting(
-      icon: Icons.delete_forever_rounded,
+      icon: Icons.delete_forever_outlined,
       title: "Verileri Sıfırla",
       onTap: () => _showResetDialog(context, l10n, ref),
-      activeColor: AppColors.getExpense(context),
+      activeColor: ProfileListItems.getSettingColor(context, SettingType.reset, ref.watch(rotaryColorProvider)),
       context: context,
       isAction: true,
     );

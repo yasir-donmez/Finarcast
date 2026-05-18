@@ -1186,13 +1186,13 @@ class AppLocalizationsEs extends AppLocalizations {
   String get freePlan => 'Ücretsiz Plan';
 
   @override
-  String get proPlan => 'Finarcast PRO';
+  String get proPlan => 'Finarcast Premium';
 
   @override
-  String get upgradeToPro => 'PRO\'ya Yükselt';
+  String get upgradeToPro => 'Premium\'a Yükselt';
 
   @override
-  String get proFeatures => 'PRO Özellikleri';
+  String get proFeatures => 'Premium Özellikleri';
 
   @override
   String get unlimitedVaults => 'Sınırsız Kasa';

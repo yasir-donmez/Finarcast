@@ -111,7 +111,7 @@ class _InAppNotificationsSheetState extends ConsumerState<InAppNotificationsShee
                   child: Text(
                     "SİSTEM BİLDİRİM İZİNLERİ KAPALI!\nLütfen telefon ayarlarınızdan Finarcast'e bildirim izni verin, aksi halde alarmlarınız çalışmayacaktır.",
                     style: TextStyle(
-                      color: Colors.redAccent.shade100,
+                      color: isDark ? Colors.redAccent.shade100 : Colors.red.shade900,
                       fontSize: 10.5,
                       fontWeight: FontWeight.w800,
                       height: 1.4,
@@ -190,7 +190,7 @@ class _InAppNotificationsSheetState extends ConsumerState<InAppNotificationsShee
             style: TextStyle(
               fontSize: 12,
               height: 1.4,
-              color: AppColors.getTextSecondary(context),
+              color: (isDark ? Colors.white : Colors.black).withValues(alpha: isDark ? 0.45 : 0.65),
             ),
           ),
         ],

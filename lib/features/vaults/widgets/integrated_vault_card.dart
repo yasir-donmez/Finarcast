@@ -318,31 +318,28 @@ class IntegratedVaultCard extends StatelessWidget {
 
   Widget _buildRangeStats(List<TransactionUI> txs, String targetCurrency, List<ExchangeRate> rates) {
     final activeTxs = txs.where((t) => !t.isArchived).toList();
+    final now = DateTime.now();
 
     final minNet = activeTxs.where((t) => t.isIncome).fold<double>(0, (s, t) {
           final amt = t.minAmount ?? t.amount;
-          final eff = t.effectiveAmount;
-          final monthly = (t.periodType == 0 || eff == 0) ? amt : (amt * (t.monthlyEquivalent / eff));
-          return s + CurrencyUtils.convert(monthly, t.currency ?? '₺', targetCurrency, rates);
+          final occurrences = t.getOccurrencesInMonth(now.year, now.month);
+          return s + CurrencyUtils.convert(amt * occurrences, t.currency ?? '₺', targetCurrency, rates);
         }) 
         - activeTxs.where((t) => !t.isIncome).fold<double>(0, (s, t) {
           final amt = t.maxAmount ?? t.amount;
-          final eff = t.effectiveAmount;
-          final monthly = (t.periodType == 0 || eff == 0) ? amt : (amt * (t.monthlyEquivalent / eff));
-          return s + CurrencyUtils.convert(monthly, t.currency ?? '₺', targetCurrency, rates);
+          final occurrences = t.getOccurrencesInMonth(now.year, now.month);
+          return s + CurrencyUtils.convert(amt * occurrences, t.currency ?? '₺', targetCurrency, rates);
         });
 
     final maxNet = activeTxs.where((t) => t.isIncome).fold<double>(0, (s, t) {
           final amt = t.maxAmount ?? t.amount;
-          final eff = t.effectiveAmount;
-          final monthly = (t.periodType == 0 || eff == 0) ? amt : (amt * (t.monthlyEquivalent / eff));
-          return s + CurrencyUtils.convert(monthly, t.currency ?? '₺', targetCurrency, rates);
+          final occurrences = t.getOccurrencesInMonth(now.year, now.month);
+          return s + CurrencyUtils.convert(amt * occurrences, t.currency ?? '₺', targetCurrency, rates);
         }) 
         - activeTxs.where((t) => !t.isIncome).fold<double>(0, (s, t) {
           final amt = t.minAmount ?? t.amount;
-          final eff = t.effectiveAmount;
-          final monthly = (t.periodType == 0 || eff == 0) ? amt : (amt * (t.monthlyEquivalent / eff));
-          return s + CurrencyUtils.convert(monthly, t.currency ?? '₺', targetCurrency, rates);
+          final occurrences = t.getOccurrencesInMonth(now.year, now.month);
+          return s + CurrencyUtils.convert(amt * occurrences, t.currency ?? '₺', targetCurrency, rates);
         });
     
     return Row(

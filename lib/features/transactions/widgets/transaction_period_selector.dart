@@ -201,93 +201,40 @@ class _TransactionPeriodSelectorState extends State<TransactionPeriodSelector> {
             ],
           ),
         ),
+        Divider(height: 1, thickness: 0.5, color: (isDark ? Colors.white : Colors.black).withValues(alpha: 0.08)),
         AnimatedSize(
           duration: const Duration(milliseconds: 400),
           curve: Curves.easeInOutQuart,
           alignment: Alignment.topCenter,
           child: AnimatedSwitcher(
             duration: const Duration(milliseconds: 350),
+            layoutBuilder: (Widget? currentChild, List<Widget> previousChildren) {
+              return Stack(
+                alignment: Alignment.topCenter,
+                children: <Widget>[
+                  ...previousChildren,
+                  if (currentChild != null) currentChild,
+                ],
+              );
+            },
             transitionBuilder: (Widget child, Animation<double> animation) {
               return FadeTransition(
                 opacity: animation,
                 child: SlideTransition(
                   position: Tween<Offset>(
-                    begin: const Offset(0.08, 0),
+                    begin: const Offset(0, 0.05),
                     end: Offset.zero,
                   ).animate(CurvedAnimation(parent: animation, curve: Curves.easeOutQuart)),
                   child: child,
                 ),
               );
             },
-            child: _periodType == 0 
-              ? Column(
-                  key: const ValueKey('period_date_selection'),
-                  children: [
-                    Divider(height: 1, thickness: 0.5, color: (isDark ? Colors.white : Colors.black).withValues(alpha: 0.08)),
-                    _buildStandardRow(
-                      l10n.selectDate,
-                      "${_selectedDateForRecurrence.day} ${_getMonths(l10n)[_selectedDateForRecurrence.month - 1]} ${_selectedDateForRecurrence.year}",
-                      Icons.calendar_today_rounded,
-                      () => _showFullDatePicker(l10n),
-                    ),
-                  ],
-                )
-              : Column(
-                  key: ValueKey('period_content_$_periodType'),
-                  children: [
-                    Divider(height: 1, thickness: 0.5, color: (isDark ? Colors.white : Colors.black).withValues(alpha: 0.08)),
-                    const SizedBox(height: 8),
-
-                    if (_periodType == 1 || [4, 5].contains(_periodType)) 
-                      _buildStandardRow(
-                        l10n.dayOfWeek,
-                        _getWeekDays(l10n)[_selectedDay - 1],
-                        Icons.calendar_view_week_rounded,
-                        () => _showWeekDayPicker(l10n),
-                      ),
-                    if ([2, 3, 6, 7, 9, 10].contains(_periodType))
-                      _buildStandardRow(
-                        [2, 6, 7, 9, 10].contains(_periodType) ? l10n.dayOfMonth : l10n.dayOfYear,
-                        _periodType == 3
-                            ? "${_selectedDateForRecurrence.day} ${_getMonths(l10n)[_selectedDateForRecurrence.month - 1]}"
-                            : "${l10n.dayOf} ${_selectedDateForRecurrence.day}",
-                        Icons.calendar_month_rounded,
-                        () => _showDatePicker(l10n),
-                      ),
-                    
-                    Divider(height: 1, thickness: 0.5, color: (isDark ? Colors.white : Colors.black).withValues(alpha: 0.08)),
-
-                    Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 16 * scalingFactor, vertical: 12 * scalingFactor),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Icon(
-                            Icons.timer_rounded,
-                            size: 20 * scalingFactor,
-                            color: AppColors.getPrimary(context).withValues(alpha: 0.7),
-                          ),
-                          SizedBox(width: 12 * scalingFactor),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  l10n.duration,
-                                  style: TextStyle(
-                                    fontSize: 15 * scalingFactor,
-                                    fontWeight: FontWeight.w600,
-                                    color: AppColors.getTextPrimary(context),
-                                  ),
-                                ),
-                                Text(
-                                  _duration == 0 ? l10n.repeatsIndefinitely : '$_duration ${l10n.endsAfter}',
-                                  style: TextStyle(
-                                    fontSize: 11 * scalingFactor,
-                                    color: AppColors.getTextSecondary(context).withValues(alpha: 0.6),
-                                  ),
-                                ),
-                              ],
+                              l10n.duration,
+                              style: TextStyle(
+                                fontSize: 15 * scalingFactor,
+                                fontWeight: FontWeight.w600,
+                                color: AppColors.getTextPrimary(context),
+                              ),
                             ),
                           ),
                           Row(
@@ -373,7 +320,8 @@ class _TransactionPeriodSelectorState extends State<TransactionPeriodSelector> {
       onTap: onTap,
       color: Colors.transparent,
       showFlash: false,
-      padding: EdgeInsets.symmetric(horizontal: 16 * scalingFactor, vertical: 12 * scalingFactor),
+      height: 56 * scalingFactor,
+      padding: EdgeInsets.symmetric(horizontal: 16 * scalingFactor),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [

@@ -10,6 +10,7 @@ import '../../../../shared/widgets/precision_action.dart';
 import '../../../../shared/widgets/precision_card.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../dashboard/dashboard_providers.dart';
+import '../profile_list_items.dart';
 
 final _currencyExpandedProvider = StateProvider.autoDispose<bool>((ref) => false);
 
@@ -19,7 +20,7 @@ class CurrencySetting extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final currencySymbol = ref.watch(settingsProvider.select((s) => s.currencySymbol));
-    final activeColor = ref.watch(rotaryColorProvider);
+    final activeColor = ProfileListItems.getSettingColor(context, SettingType.currency, ref.watch(rotaryColorProvider));
     final l10n = AppLocalizations.of(context)!;
     final isExpanded = ref.watch(_currencyExpandedProvider);
 
@@ -110,7 +111,7 @@ class CurrencySetting extends ConsumerWidget {
                       ),
                       const SizedBox(height: 16),
                       PrecisionCard(
-                        onTap: () => _showCurrencyPicker(context, ref, currencySymbol, l10n),
+                       onTap: () => _showCurrencyPicker(context, ref, currencySymbol, activeColor, l10n),
                         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                         child: Row(
                           children: [
@@ -144,9 +145,8 @@ class CurrencySetting extends ConsumerWidget {
     );
   }
 
-  void _showCurrencyPicker(BuildContext context, WidgetRef ref, String currentSymbol, AppLocalizations l10n) {
+  void _showCurrencyPicker(BuildContext context, WidgetRef ref, String currentSymbol, Color activeColor, AppLocalizations l10n) {
     HapticFeedback.lightImpact();
-    final activeColor = ref.read(rotaryColorProvider);
     final currencies = AppCurrency.supportedSymbols;
     int initialIndex = currencies.indexOf(currentSymbol);
     if (initialIndex == -1) initialIndex = 0;

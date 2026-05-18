@@ -121,7 +121,7 @@ class PrecisionSurface extends ConsumerWidget {
       decoration: BoxDecoration(
         color: glass 
             ? tint.withValues(alpha: opacity) 
-            : sColor,
+            : sColor.withValues(alpha: sColor.a * opacityMultiplier),
         borderRadius: BorderRadius.circular(borderRadius),
         border: Border.all(
           color: bColor,

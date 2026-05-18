@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../dashboard/dashboard_providers.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../l10n/app_localizations.dart';
 import '../../core/services/auth_service.dart';
 import '../../core/theme/app_constants.dart';
 import '../../shared/widgets/precision_sheet.dart';
 import '../../shared/widgets/precision_dialog.dart';
-import '../dashboard/dashboard_providers.dart';
 import '../../shared/widgets/precision_card.dart';
 import 'widgets/settings/theme_setting.dart';
 import 'widgets/settings/color_theme_setting.dart';
@@ -42,7 +42,6 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
 
   final _preferencesKey = GlobalKey();
   final _dataAiKey = GlobalKey();
-  final _managementKey = GlobalKey();
   final _supportKey = GlobalKey();
 
   @override
@@ -64,7 +63,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final activeColor = AppColors.getPrimary(context);
+    final activeColor = ref.watch(rotaryColorProvider);
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     final authState = ref.watch(authStateProvider);
@@ -105,12 +104,17 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             sliver: SliverList(
               delegate: SliverChildListDelegate([
                 const SizedBox(height: 20),
-                ProfileListItems.buildSectionTitle(l10n.membership, activeColor),
+                ProfileListItems.buildSectionTitle("Üyelik ve Hesap", activeColor),
                 const SizedBox(height: 12),
                 const SubscriptionSetting(),
+                const SizedBox(height: 16),
+                PrecisionCard(
+                  padding: EdgeInsets.zero,
+                  child: const AuthSetting(),
+                ),
 
                 const SizedBox(height: 50),
-                ProfileListItems.buildSectionTitle("Görünüm ve Kişiselleştirme", activeColor),
+                ProfileListItems.buildSectionTitle("Görünüm ve Stil", activeColor),
                 const SizedBox(height: 12),
                 PrecisionCard(
                   padding: EdgeInsets.zero,
@@ -125,7 +129,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   ),
                 ),
 
-                const SizedBox(height: 60),
+                const SizedBox(height: 50),
                 ProfileListItems.buildSectionTitle(l10n.preferences, activeColor, key: _preferencesKey),
                 const SizedBox(height: 12),
                 PrecisionCard(
@@ -141,32 +145,12 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                       const NotificationSetting(),
                       ProfileListItems.buildDivider(isDark),
                       const LocationSetting(),
-                      ProfileListItems.buildDivider(isDark),
-                      const AuthSetting(),
                     ],
                   ),
                 ),
 
-                const SizedBox(height: 60),
-                ProfileListItems.buildSectionTitle(l10n.dataAndAiSettings, activeColor, key: _dataAiKey),
-                const SizedBox(height: 16),
-                PrecisionCard(
-                  padding: EdgeInsets.zero,
-                  child: Column(
-                    children: [
-                      const RetentionSetting(),
-                      ProfileListItems.buildDivider(isDark),
-                      const PurgeSetting(),
-                    ],
-                  ),
-                ),
-
-                const SizedBox(height: 60),
-                ProfileListItems.buildSectionTitle(
-                  l10n.dataManagement, 
-                  AppColors.getSecondary(context), 
-                  key: _managementKey
-                ),
+                const SizedBox(height: 50),
+                ProfileListItems.buildSectionTitle("Veri ve Bulut Eşitleme", activeColor, key: _dataAiKey),
                 const SizedBox(height: 12),
                 PrecisionCard(
                   padding: EdgeInsets.zero,
@@ -175,10 +159,10 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                       const SyncSetting(),
                       ProfileListItems.buildDivider(isDark),
                       ProfileListItems.buildSetting(
-                        icon: Icons.cloud_upload_rounded,
+                        icon: Icons.cloud_upload_outlined,
                         title: l10n.driveBackup,
                         onTap: () => _showComingSoon(l10n.driveBackup, l10n),
-                        activeColor: AppColors.getSecondary(context),
+                        activeColor: ProfileListItems.getSettingColor(context, SettingType.backup, activeColor),
                         context: context,
                         isAction: true,
                       ),
@@ -187,22 +171,22 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                         icon: Icons.table_view_rounded,
                         title: l10n.exportExcel,
                         onTap: () => _showComingSoon(l10n.exportExcel, l10n),
-                        activeColor: AppColors.getSecondary(context),
+                        activeColor: ProfileListItems.getSettingColor(context, SettingType.export, activeColor),
                         context: context,
                         isAction: true,
                       ),
+                      ProfileListItems.buildDivider(isDark),
+                      const RetentionSetting(),
+                      ProfileListItems.buildDivider(isDark),
+                      const PurgeSetting(),
                       ProfileListItems.buildDivider(isDark),
                       const ResetSetting(),
                     ],
                   ),
                 ),
 
-                const SizedBox(height: 60),
-                ProfileListItems.buildSectionTitle(
-                  l10n.support, 
-                  AppColors.getPrimary(context), 
-                  key: _supportKey
-                ),
+                const SizedBox(height: 50),
+                ProfileListItems.buildSectionTitle(l10n.support, activeColor, key: _supportKey),
                 const SizedBox(height: 12),
                 PrecisionCard(
                   padding: EdgeInsets.zero,
@@ -212,7 +196,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                         icon: Icons.support_agent_rounded,
                         title: l10n.contact,
                         onTap: _launchEmail,
-                        activeColor: AppColors.getPrimary(context),
+                        activeColor: ProfileListItems.getSettingColor(context, SettingType.contact, activeColor),
                         context: context,
                         isAction: true,
                       ),
@@ -222,7 +206,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                         title: l10n.about,
                         trailing: "v1.0.0",
                         onTap: () => _showAboutDialog(l10n),
-                        activeColor: AppColors.getPrimary(context),
+                        activeColor: ProfileListItems.getSettingColor(context, SettingType.about, activeColor),
                         context: context,
                       ),
                     ],

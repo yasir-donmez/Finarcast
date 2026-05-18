@@ -33,9 +33,11 @@ class PrecisionButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // Renk belirleme: Olumlu ise aktif renk, olumsuz/nötr ise beyaz
-    final Color color = isPrimary 
-        ? (activeColor ?? AppColors.getPrimary(context)) 
-        : Colors.white.withValues(alpha: 0.9);
+    final Color color = activeColor ?? (isPrimary 
+        ? AppColors.getPrimary(context) 
+        : (Theme.of(context).brightness == Brightness.dark 
+            ? Colors.white.withValues(alpha: 0.9) 
+            : AppColors.getTextPrimary(context).withValues(alpha: 0.8)));
 
     return PrecisionAction(
       onTap: onTap,

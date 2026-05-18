@@ -18,7 +18,7 @@ import 'optimization_providers.dart';
 import 'ai_service.dart';
 import '../../l10n/app_localizations.dart';
 import '../../core/services/subscription_service.dart';
-import '../../shared/widgets/precision_glass_card.dart';
+import '../../shared/widgets/precision_card.dart';
 import '../../shared/widgets/precision_button.dart';
 
 import '../../shared/widgets/precision_picker.dart';
@@ -198,7 +198,7 @@ class _OptimizationScreenState extends ConsumerState<OptimizationScreen> {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          PrecisionGlassCard(
+          PrecisionCard(
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,

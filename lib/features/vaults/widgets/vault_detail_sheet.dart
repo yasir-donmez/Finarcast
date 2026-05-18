@@ -250,7 +250,7 @@ class _VaultDetailSheetState extends ConsumerState<VaultDetailSheet> with Single
             ),
           ),
           const SizedBox(height: 24),
-          Text(l10n.transactions, style: TextStyle(fontSize: 14 * sf, fontWeight: FontWeight.w900, color: Colors.grey.withValues(alpha: 0.6))),
+          Text(l10n.transactions, style: TextStyle(fontSize: 14 * sf, fontWeight: FontWeight.w900, color: (Theme.of(context).brightness == Brightness.dark ? Colors.white : Colors.black).withValues(alpha: Theme.of(context).brightness == Brightness.dark ? 0.45 : 0.65))),
           const SizedBox(height: 12),
           if (vaultTransactions.isNotEmpty)
             ConstrainedBox(
@@ -317,7 +317,7 @@ class _VaultDetailSheetState extends ConsumerState<VaultDetailSheet> with Single
             ],
           ),
           const SizedBox(height: 20),
-          Text(l10n.currency.toUpperCase(), style: TextStyle(fontSize: 10, fontWeight: FontWeight.w900, color: Colors.grey.withValues(alpha: 0.5), letterSpacing: 1)),
+          Text(l10n.currency.toUpperCase(), style: TextStyle(fontSize: 10, fontWeight: FontWeight.w900, color: (Theme.of(context).brightness == Brightness.dark ? Colors.white : Colors.black).withValues(alpha: Theme.of(context).brightness == Brightness.dark ? 0.45 : 0.65), letterSpacing: 1)),
           const SizedBox(height: 12),
           SingleChildScrollView(
             scrollDirection: Axis.horizontal,

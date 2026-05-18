@@ -615,23 +615,27 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
           final now = DateTime.now();
           if ([2, 3, 6, 7].contains(_periodData.periodType)) {
             final day = _periodData.selectedDay;
-            if (now.day <= day) {
-              initialDate = DateTime(
-                now.year,
-                now.month,
-                day,
-                now.hour,
-                now.minute,
-              );
-            } else {
-              initialDate = DateTime(
-                now.year,
-                now.month + 1,
-                day,
-                now.hour,
-                now.minute,
-              );
-            }
+            // Artık geleceğe (now.month + 1) atmıyoruz. İçinde bulunduğumuz aya sabitliyoruz.
+            // Böylece ayın 18'inde, "Ayın 5'i" için bir işlem eklenirse, 5 Mayıs'tan başlar ve bakiyeden düşer.
+            initialDate = DateTime(
+              now.year,
+              now.month,
+              day,
+              now.hour,
+              now.minute,
+            );
+          } else if ([1, 4, 5].contains(_periodData.periodType)) {
+            final targetWeekday = _periodData.selectedDay; // 1 (Pazartesi) - 7 (Pazar)
+            int daysToAdd = targetWeekday - now.weekday;
+            // Geçtiyse (daysToAdd < 0) artık +7 ekleyip haftaya atmıyoruz!
+            // Bu sayede Çarşamba günü "Pazartesi" seçilirse, 2 gün öncesinden başlar.
+            initialDate = DateTime(
+              now.year,
+              now.month,
+              now.day + daysToAdd,
+              now.hour,
+              now.minute,
+            );
           }
         }
 

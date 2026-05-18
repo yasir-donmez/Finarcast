@@ -44,7 +44,7 @@ class _SubscriptionSettingState extends ConsumerState<SubscriptionSetting> with 
   @override
   Widget build(BuildContext context) {
     final subscription = ref.watch(subscriptionServiceProvider);
-    final activeColor = ref.watch(rotaryColorProvider);
+    final activeColor = ProfileListItems.getSettingColor(context, SettingType.membership, ref.watch(rotaryColorProvider));
     final l10n = AppLocalizations.of(context)!;
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
@@ -174,7 +174,7 @@ class _SubscriptionSettingState extends ConsumerState<SubscriptionSetting> with 
           ),
           Expanded(
             child: Text(
-              "PRO",
+              "PREMIUM",
               textAlign: TextAlign.center,
               style: TextStyle(fontSize: 10, fontWeight: FontWeight.w900, color: ref.watch(rotaryColorProvider)),
             ),
@@ -363,7 +363,7 @@ class _SubscriptionSettingState extends ConsumerState<SubscriptionSetting> with 
                             borderRadius: BorderRadius.circular(8),
                           ),
                           child: Text(
-                            isPro ? "PRO" : "FREE",
+                            isPro ? "PREMIUM" : "FREE",
                             style: TextStyle(
                               color: isPro ? Colors.white : activeColor,
                               fontSize: 9,
@@ -374,7 +374,7 @@ class _SubscriptionSettingState extends ConsumerState<SubscriptionSetting> with 
                         ),
                         const Spacer(),
                         Text(
-                          isPro ? "Ayrıcalıklar Sizinle" : "Pro'ya Geçin",
+                          isPro ? "Ayrıcalıklar Sizinle" : "Premium'a Geçin",
                           style: TextStyle(
                             color: isPro ? Colors.white : AppColors.getTextPrimary(context),
                             fontSize: 20,
@@ -421,12 +421,8 @@ class _SubscriptionSettingState extends ConsumerState<SubscriptionSetting> with 
               decoration: BoxDecoration(
                 color: activeColor.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(14),
-                border: Border.all(
-                  color: activeColor.withValues(alpha: 0.15),
-                  width: 1,
-                ),
               ),
-              child: Icon(Icons.stars_rounded, size: 22, color: activeColor),
+              child: Icon(Icons.stars_outlined, size: 22, color: activeColor),
             ),
             const SizedBox(width: 16),
             Expanded(

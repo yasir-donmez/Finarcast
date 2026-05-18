@@ -6,6 +6,8 @@ import '../../../../core/theme/app_constants.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../../shared/widgets/precision_inline_picker.dart';
 import '../../../../shared/widgets/precision_action.dart';
+import '../profile_list_items.dart';
+import '../../../dashboard/dashboard_providers.dart';
 
 final _purgeExpandedProvider = StateProvider.autoDispose<bool>((ref) => false);
 
@@ -16,7 +18,7 @@ class PurgeSetting extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final permanentDays = ref.watch(settingsProvider.select((s) => s.permanentDeletionDays));
     final l10n = AppLocalizations.of(context)!;
-    final expenseColor = AppColors.getExpense(context);
+    final expenseColor = ProfileListItems.getSettingColor(context, SettingType.purge, ref.watch(rotaryColorProvider));
     final isExpanded = ref.watch(_purgeExpandedProvider);
 
     final options = [
@@ -56,7 +58,7 @@ class PurgeSetting extends ConsumerWidget {
                     color: expenseColor.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(14),
                   ),
-                  child: Icon(Icons.delete_forever_rounded, color: expenseColor, size: 22),
+                  child: Icon(Icons.delete_forever_outlined, color: expenseColor, size: 22),
                 ),
                 const SizedBox(width: 16),
                 Expanded(

@@ -7,6 +7,7 @@ import '../../../../shared/widgets/precision_action.dart';
 import '../../../../shared/widgets/precision_toggle.dart';
 import '../../../../shared/widgets/precision_animated_icon.dart';
 import '../../../dashboard/dashboard_providers.dart';
+import '../profile_list_items.dart';
 
 // Genişleme durumunu yöneten basit bir provider
 final _locationExpandedProvider = StateProvider.autoDispose<bool>((ref) => false);
@@ -17,7 +18,7 @@ class LocationSetting extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final isLocationEnabled = ref.watch(settingsProvider.select((s) => s.isLocationEnabled));
-    final activeColor = ref.watch(rotaryColorProvider);
+    final activeColor = ProfileListItems.getSettingColor(context, SettingType.location, ref.watch(rotaryColorProvider));
     final isExpanded = ref.watch(_locationExpandedProvider);
 
     return Column(
@@ -41,8 +42,8 @@ class LocationSetting extends ConsumerWidget {
                   ),
                   child: PrecisionAnimatedIcon(
                     isActive: isLocationEnabled,
-                    activeIcon: Icons.location_on_rounded,
-                    inactiveIcon: Icons.location_off_rounded,
+                    activeIcon: Icons.location_on_outlined,
+                    inactiveIcon: Icons.location_off_outlined,
                     color: activeColor,
                     size: 22,
                   ),

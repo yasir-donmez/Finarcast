@@ -12,6 +12,7 @@ import '../../../../shared/widgets/precision_button.dart';
 import '../../../../shared/widgets/precision_action.dart';
 import '../../../../core/theme/app_constants.dart';
 import '../../../../shared/widgets/precision_notification.dart';
+import '../profile_list_items.dart';
 
 class ExchangeRateSetting extends ConsumerStatefulWidget {
   const ExchangeRateSetting({super.key});
@@ -26,7 +27,7 @@ class _ExchangeRateSettingState extends ConsumerState<ExchangeRateSetting> with 
 
   @override
   Widget build(BuildContext context) {
-    final activeColor = ref.watch(rotaryColorProvider);
+    final activeColor = ProfileListItems.getSettingColor(context, SettingType.exchangeRate, ref.watch(rotaryColorProvider));
     final rates = ref.watch(exchangeRatesProvider).value ?? [];
     
     final lastUpdate = rates.isNotEmpty 
@@ -58,10 +59,6 @@ class _ExchangeRateSettingState extends ConsumerState<ExchangeRateSetting> with 
                   decoration: BoxDecoration(
                     color: activeColor.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(14),
-                    border: Border.all(
-                      color: activeColor.withValues(alpha: 0.15),
-                      width: 1,
-                    ),
                   ),
                   child: Icon(Icons.currency_exchange_rounded, size: 22, color: activeColor),
                 ),

@@ -134,6 +134,149 @@ class TransactionUI {
     return CurrencyUtils.convert(monthlyEquivalent, currency ?? '₺', targetCurrency, rates);
   }
 
+  /// Bugüne kadar gerçekleşmiş tekrar sayısını hesaplar.
+  int get passedOccurrences {
+    if (periodType == 0) {
+      final now = DateTime.now();
+      final today = DateTime(now.year, now.month, now.day);
+      final startDate = DateTime(date.year, date.month, date.day);
+      return today.isBefore(startDate) ? 0 : 1;
+    }
+
+    final now = DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day);
+    final start = DateTime(date.year, date.month, date.day);
+    
+    if (now.isBefore(start)) return 0;
+
+    final diffDays = now.difference(start).inDays;
+    int intervals = 0;
+    
+    switch (periodType) {
+      case 1: intervals = diffDays ~/ 7; break;
+      case 2: // Aylık
+        intervals = (now.year - start.year) * 12 + now.month - start.month;
+        if (now.day < start.day) intervals--;
+        break;
+      case 3: // Yıllık
+        intervals = now.year - start.year;
+        if (now.month < start.month || (now.month == start.month && now.day < start.day)) intervals--;
+        break;
+      case 4: intervals = diffDays ~/ 14; break;
+      case 5: intervals = diffDays ~/ 21; break;
+      case 6: // 3 Ayda bir
+        int months = (now.year - start.year) * 12 + now.month - start.month;
+        if (now.day < start.day) months--;
+        intervals = months ~/ 3;
+        break;
+      case 7: // 6 Ayda bir
+        int months = (now.year - start.year) * 12 + now.month - start.month;
+        if (now.day < start.day) months--;
+        intervals = months ~/ 6;
+        break;
+      case 8: intervals = diffDays; break; // Günlük
+      case 9: intervals = diffDays ~/ 2; break;
+      case 10: intervals = diffDays ~/ 3; break;
+      default: intervals = 0;
+    }
+    
+    int passed = (intervals < 0 ? 0 : intervals) + 1;
+    
+    if (recurrenceDuration != null && recurrenceDuration! > 0) {
+      if (passed > recurrenceDuration!) passed = recurrenceDuration!;
+    }
+    
+    return passed;
+  }
+
+  /// Belirtilen yıl ve ay içinde bu işlemin tam olarak kaç kez gerçekleşeceğini (veya gerçekleştiğini) hesaplar.
+  int getOccurrencesInMonth(int targetYear, int targetMonth) {
+    if (periodType == 0) {
+      return (date.year == targetYear && date.month == targetMonth) ? 1 : 0;
+    }
+
+    // Basit bir simülasyon: Ayın başından sonuna kadar tüm günleri gez ve tetiklenip tetiklenmediğine bak
+    final monthStart = DateTime(targetYear, targetMonth, 1);
+    final monthEnd = DateTime(targetYear, targetMonth + 1, 0); // Son gün
+    
+    final start = DateTime(date.year, date.month, date.day);
+    
+    // İşlem bu aydan sonra başlıyorsa 0
+    if (start.isAfter(monthEnd)) return 0;
+
+    // Eğer bitiş tarihi varsa, onu hesapla
+    DateTime? endDate;
+    if (recurrenceDuration != null && recurrenceDuration! > 0) {
+      final duration = recurrenceDuration! - 1;
+      if (duration <= 0) endDate = start;
+      else {
+        switch (periodType) {
+          case 1: endDate = start.add(Duration(days: duration * 7)); break;
+          case 2: endDate = DateTime(start.year, start.month + duration, start.day); break;
+          case 3: endDate = DateTime(start.year + duration, start.month, start.day); break;
+          case 4: endDate = start.add(Duration(days: duration * 14)); break;
+          case 5: endDate = start.add(Duration(days: duration * 21)); break;
+          case 6: endDate = DateTime(start.year, start.month + (duration * 3), start.day); break;
+          case 7: endDate = DateTime(start.year, start.month + (duration * 6), start.day); break;
+          case 8: endDate = start.add(Duration(days: duration)); break;
+          case 9: endDate = start.add(Duration(days: duration * 2)); break;
+          case 10: endDate = start.add(Duration(days: duration * 3)); break;
+        }
+      }
+    }
+
+    // İşlem tamamen bu aydan önce bittiyse 0
+    if (endDate != null && endDate.isBefore(monthStart)) return 0;
+
+    int occurrences = 0;
+    
+    // Günlük/Haftalık gibi gün bazlı periyotlar için: 
+    // Ayın ilk gününden son gününe iterasyon
+    DateTime current = monthStart.isBefore(start) ? start : monthStart;
+    final endIteration = endDate != null && endDate.isBefore(monthEnd) ? endDate : monthEnd;
+
+    if ([1, 4, 5, 8, 9, 10].contains(periodType)) {
+      while (current.isBefore(endIteration) || current.isAtSameMomentAs(endIteration)) {
+        final diffDays = current.difference(start).inDays;
+        bool isHit = false;
+        switch (periodType) {
+          case 1: isHit = diffDays % 7 == 0; break;
+          case 4: isHit = diffDays % 14 == 0; break;
+          case 5: isHit = diffDays % 21 == 0; break;
+          case 8: isHit = true; break;
+          case 9: isHit = diffDays % 2 == 0; break;
+          case 10: isHit = diffDays % 3 == 0; break;
+        }
+        if (isHit) occurrences++;
+        current = current.add(const Duration(days: 1));
+      }
+    } 
+    // Aylık/Yıllık bazlı periyotlar için:
+    else if ([2, 3, 6, 7].contains(periodType)) {
+      // Bu periyotlarda ayın o günü tetiklenir (veya o aya ait son gün)
+      int targetDay = recurrenceDate?.day ?? start.day;
+      
+      // Şubatta 30'u arıyorsak 28/29'a düşür
+      final lastDayOfMonth = DateTime(targetYear, targetMonth + 1, 0).day;
+      if (targetDay > lastDayOfMonth) targetDay = lastDayOfMonth;
+      
+      final candidateDate = DateTime(targetYear, targetMonth, targetDay);
+      
+      if (!candidateDate.isBefore(start) && (endDate == null || !candidateDate.isAfter(endDate))) {
+        // Ayların farkını bul
+        int monthsDiff = (candidateDate.year - start.year) * 12 + (candidateDate.month - start.month);
+        bool isHit = false;
+        switch (periodType) {
+          case 2: isHit = true; break;
+          case 3: isHit = monthsDiff % 12 == 0; break;
+          case 6: isHit = monthsDiff % 3 == 0; break;
+          case 7: isHit = monthsDiff % 6 == 0; break;
+        }
+        if (isHit) occurrences = 1;
+      }
+    }
+    return occurrences;
+  }
+
   /// TransactionRecord'dan TransactionUI'a dönüştür
   factory TransactionUI.fromDB(TransactionRecord record) {
     return TransactionUI(

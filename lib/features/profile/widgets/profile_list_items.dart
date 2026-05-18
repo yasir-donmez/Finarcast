@@ -4,7 +4,96 @@ import '../../../shared/widgets/precision_action.dart';
 import '../../../shared/widgets/precision_toggle.dart';
 import '../../../shared/widgets/precision_animated_icon.dart';
 
+enum SettingType {
+  membership,
+  theme,
+  colorTheme,
+  background,
+  language,
+  currency,
+  exchangeRate,
+  notification,
+  location,
+  auth,
+  retention,
+  purge,
+  sync,
+  backup,
+  export,
+  reset,
+  contact,
+  about,
+}
+
 class ProfileListItems {
+  static Color getSettingColor(BuildContext context, SettingType type, Color primaryColor) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    
+    if (isDark) {
+      // Karanlık modda en önemli ayarlar kendi renginde, diğer hepsi birincil renge (primaryColor)
+      switch (type) {
+        case SettingType.membership:
+          return const Color(0xFFFFB300); // Lüks Altın/Amber
+        case SettingType.reset:
+        case SettingType.purge:
+          return const Color(0xFFFF5252); // Dikkat Çekici Kırmızı (Tehlikeli eylem)
+        default:
+          return primaryColor; // Diğer tüm ayarlar tek renk (bütünleşik tasarım)
+      }
+    }
+
+    // Aydınlık modda her ayar grubu kendi uyumlu renk paletinde (bütünsel ve temiz görünüm)
+    switch (type) {
+        // --- 1. Üyelik ve Hesap Grubu (Prestijli Sıcak Renkler) ---
+        case SettingType.membership:
+          return const Color(0xFFFF8F00); // Lüks Amber/Altın
+        case SettingType.auth:
+          return const Color(0xFFE65100); // Derin Turuncu-Kahve (Hesap Güvenliği)
+
+        // --- 2. Görünüm ve Stil Grubu (Tasarım ve Estetik - Kreatif Mor/Eflatun Tonları) ---
+        case SettingType.theme:
+          return const Color(0xFF5E35B1); // Koyu Eflatun
+        case SettingType.colorTheme:
+          return const Color(0xFF7E57C2); // Orta Eflatun
+        case SettingType.background:
+          return const Color(0xFF9575CD); // Yumuşak Violet
+
+        // --- 3. Tercihler Grubu (Sistem Ayarları - Temiz ve Huzurlu Mavi/Camgöbeği Tonları) ---
+        case SettingType.language:
+          return const Color(0xFF1565C0); // Koyu Mavi
+        case SettingType.currency:
+          return const Color(0xFF1976D2); // Sistem Mavisi
+        case SettingType.exchangeRate:
+          return const Color(0xFF0288D1); // Açık Mavi
+        case SettingType.notification:
+          return const Color(0xFF0097A7); // Camgöbeği
+        case SettingType.location:
+          return const Color(0xFF00897B); // Teal
+
+        // --- 4. Veri ve Eşitleme Grubu (Güvenli Veri Akışı - Doğa Dostu Yeşil/Çam Tonları) ---
+        case SettingType.sync:
+          return const Color(0xFF2E7D32); // Koyu Orman Yeşili
+        case SettingType.backup:
+          return const Color(0xFF43A047); // Canlı Yeşil
+        case SettingType.export:
+          return const Color(0xFF4CAF50); // Yaprak Yeşili
+        case SettingType.retention:
+          return const Color(0xFF81C784); // Yumuşak Yeşil
+
+        // --- Tehlikeli/Kritik Veri Eylemleri (Evrensel Kırmızı Alarm Tonları) ---
+        case SettingType.purge:
+          return const Color(0xFFE53935); // Uyarı Kırmızısı
+        case SettingType.reset:
+          return const Color(0xFFC62828); // Kritik Sıfırlama Kırmızısı
+
+        // --- 5. Destek Grubu (Yardımsever Sıcak Mercan/Turuncu Tonları) ---
+        case SettingType.contact:
+          return const Color(0xFFF4511E); // Sıcak Mercan
+        case SettingType.about:
+          return const Color(0xFFFF7043); // Soft Turuncu
+      }
+  }
+
   static Widget buildSectionTitle(String title, Color activeColor, {Key? key}) {
     return Builder(
       builder: (context) {
@@ -48,10 +137,6 @@ class ProfileListItems {
               decoration: BoxDecoration(
                 color: activeColor.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(14),
-                border: Border.all(
-                  color: activeColor.withValues(alpha: 0.15),
-                  width: 1,
-                ),
               ),
               child: Icon(icon, size: 22, color: activeColor),
             ),
@@ -126,10 +211,6 @@ class ProfileListItems {
             decoration: BoxDecoration(
               color: activeColor.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(14),
-              border: Border.all(
-                color: activeColor.withValues(alpha: 0.15),
-                width: 1,
-              ),
             ),
             child: PrecisionAnimatedIcon(
               activeIcon: activeIcon ?? icon,

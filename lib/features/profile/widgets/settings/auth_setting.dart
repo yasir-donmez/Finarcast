@@ -14,12 +14,12 @@ class AuthSetting extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final authService = ref.watch(authServiceProvider);
     final user = authService.currentUser;
-    final activeColor = ref.watch(rotaryColorProvider);
+    final activeColor = ProfileListItems.getSettingColor(context, SettingType.auth, ref.watch(rotaryColorProvider));
     final l10n = AppLocalizations.of(context)!;
 
     if (user == null) {
       return ProfileListItems.buildSetting(
-        icon: Icons.login_rounded,
+        icon: Icons.login_outlined,
         title: "Giriş Yap / Kayıt Ol",
         trailing: "Oturum Açın",
         onTap: () {
@@ -35,7 +35,7 @@ class AuthSetting extends ConsumerWidget {
     }
 
     return ProfileListItems.buildSetting(
-      icon: Icons.account_circle_rounded,
+      icon: Icons.account_circle_outlined,
       title: "Oturum Ayarları",
       trailing: user.email?.split('@').first ?? "Hesabım",
       onTap: () => _showAuthOptions(context, ref, user.email ?? "", activeColor, l10n),

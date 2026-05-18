@@ -138,7 +138,7 @@ class BackgroundPreviewCard extends StatelessWidget {
     final label = labels[styleIndex];
 
     // Temel zemin rengi
-    final baseColor = isDark ? Colors.black : const Color(0xFFF5F7FA);
+    final baseColor = isDark ? Colors.black : AppColors.getBackground(context);
     Decoration previewDecoration = BoxDecoration(
       color: baseColor,
       borderRadius: BorderRadius.circular(16),
@@ -171,7 +171,7 @@ class BackgroundPreviewCard extends StatelessWidget {
             colors: gradient
                 .map((c) => isDark 
                     ? Color.lerp(Colors.black, c, 0.45)! 
-                    : Color.lerp(const Color(0xFFF5F7FA), c, 0.18)!)
+                    : Color.lerp(baseColor, c, 0.18)!)
                 .toList(),
           ),
         );
@@ -179,7 +179,7 @@ class BackgroundPreviewCard extends StatelessWidget {
         previewDecoration = (previewDecoration as BoxDecoration).copyWith(
           color: isDark 
               ? Color.lerp(Colors.black, Color(accentColorValue), 0.40)
-              : Color.lerp(const Color(0xFFF5F7FA), Color(accentColorValue), 0.12),
+              : Color.lerp(baseColor, Color(accentColorValue), 0.12),
         );
       }
     } else if (styleIndex == 0) {
@@ -192,7 +192,7 @@ class BackgroundPreviewCard extends StatelessWidget {
             colors: gradient
                 .map((c) => isDark 
                     ? Color.lerp(Colors.black, c, 0.15)! 
-                    : Color.lerp(const Color(0xFFF5F7FA), c, 0.05)!)
+                    : Color.lerp(baseColor, c, 0.05)!)
                 .toList(),
           ),
         );
@@ -200,7 +200,7 @@ class BackgroundPreviewCard extends StatelessWidget {
         previewDecoration = (previewDecoration as BoxDecoration).copyWith(
           color: isDark 
               ? Color.lerp(Colors.black, Color(accentColorValue), 0.12)
-              : Color.lerp(const Color(0xFFF5F7FA), Color(accentColorValue), 0.04),
+              : Color.lerp(baseColor, Color(accentColorValue), 0.04),
         );
       }
     }
@@ -208,6 +208,42 @@ class BackgroundPreviewCard extends StatelessWidget {
     final activeColor = accentColorValue == 0 || accentColorValue == 0xFF00E5FF
         ? primaryColor
         : Color(accentColorValue);
+
+    // Mock kart stilini dinamikleştiriyoruz (Kullanıcının seçimine göre tam eşleşme)
+    Color mockCardBg;
+    Color mockCardBorder;
+    List<BoxShadow>? mockCardShadow;
+
+    if (styleIndex == 2) {
+      // 1. SADE & MAT
+      mockCardBg = isDark ? const Color(0xFF161720) : Colors.white;
+      mockCardBorder = isDark ? const Color(0xFF2A2B36) : const Color(0xFFE2E8F0);
+      mockCardShadow = !isDark ? [
+        BoxShadow(
+          color: Colors.black.withValues(alpha: 0.06),
+          blurRadius: 4,
+          offset: const Offset(0, 1),
+        )
+      ] : null;
+    } else if (styleIndex == 1) {
+      // 3. DOYGUN CAM
+      mockCardBg = isDark 
+          ? Colors.black.withValues(alpha: 0.35) 
+          : Colors.white.withValues(alpha: 0.25);
+      mockCardBorder = isDark 
+          ? Colors.white.withValues(alpha: 0.12) 
+          : Colors.black.withValues(alpha: 0.15);
+      mockCardShadow = null;
+    } else {
+      // 2. PÜRÜZSÜZ CAM (Hafif Boyalı / VisionOS)
+      mockCardBg = isDark 
+          ? Colors.white.withValues(alpha: 0.04) 
+          : Colors.black.withValues(alpha: 0.04);
+      mockCardBorder = isDark 
+          ? Colors.white.withValues(alpha: 0.15) 
+          : Colors.black.withValues(alpha: 0.10);
+      mockCardShadow = null;
+    }
 
     return GestureDetector(
       onTap: onTap,
@@ -230,14 +266,13 @@ class BackgroundPreviewCard extends StatelessWidget {
                         width: 66,
                         height: 48,
                         decoration: BoxDecoration(
-                          color: (isDark ? Colors.white : Colors.black)
-                              .withValues(alpha: 0.05),
+                          color: mockCardBg,
                           borderRadius: BorderRadius.circular(10),
                           border: Border.all(
-                            color: (isDark ? Colors.white : Colors.black)
-                                .withValues(alpha: 0.1),
+                            color: mockCardBorder,
                             width: 1,
                           ),
+                          boxShadow: mockCardShadow,
                         ),
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,

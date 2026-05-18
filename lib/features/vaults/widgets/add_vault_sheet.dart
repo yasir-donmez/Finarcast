@@ -106,7 +106,7 @@ class _AddVaultSheetState extends ConsumerState<AddVaultSheet> with SingleTicker
                   style: TextStyle(
                     fontSize: 10,
                     fontWeight: FontWeight.w900,
-                    color: Colors.grey.withValues(alpha: 0.5),
+                    color: (Theme.of(context).brightness == Brightness.dark ? Colors.white : Colors.black).withValues(alpha: Theme.of(context).brightness == Brightness.dark ? 0.45 : 0.65),
                     letterSpacing: 1,
                   ),
                 ),

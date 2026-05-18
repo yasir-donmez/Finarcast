@@ -139,7 +139,7 @@ class _PrecisionDetailSheetState extends ConsumerState<PrecisionDetailSheet> {
                     style: TextStyle(
                       fontSize: 24 * sf,
                       fontWeight: FontWeight.w900,
-                      color: Colors.grey.withValues(alpha: 0.4),
+                      color: AppColors.getTextSecondary(context).withValues(alpha: isDark ? 0.4 : 0.6),
                       letterSpacing: 1,
                     ),
                   ),
@@ -148,7 +148,7 @@ class _PrecisionDetailSheetState extends ConsumerState<PrecisionDetailSheet> {
                     style: TextStyle(
                       fontSize: 12 * sf,
                       fontWeight: FontWeight.w600,
-                      color: Colors.grey.withValues(alpha: 0.3),
+                      color: AppColors.getTextSecondary(context).withValues(alpha: isDark ? 0.3 : 0.45),
                     ),
                   ),
                 ],
@@ -218,7 +218,7 @@ class _PrecisionDetailSheetState extends ConsumerState<PrecisionDetailSheet> {
                   context, 
                   icon: Icons.task_alt_rounded, 
                   label: l10n.occurred, 
-                  value: l10n.times(_calculatePassedOccurrences(tx)), 
+                  value: l10n.times(tx.passedOccurrences), 
                   color: Colors.teal
                 ),
                 if (tx.recurrenceDuration != null && tx.recurrenceDuration! > 0) ...[
@@ -227,7 +227,7 @@ class _PrecisionDetailSheetState extends ConsumerState<PrecisionDetailSheet> {
                     context, 
                     icon: Icons.hourglass_bottom_rounded, 
                     label: l10n.remainingCount, 
-                    value: l10n.times((tx.recurrenceDuration! - _calculatePassedOccurrences(tx)).clamp(0, tx.recurrenceDuration!)), 
+                    value: l10n.times((tx.recurrenceDuration! - tx.passedOccurrences).clamp(0, tx.recurrenceDuration!)), 
                     color: Colors.deepOrange
                   ),
                 ],
@@ -245,7 +245,7 @@ class _PrecisionDetailSheetState extends ConsumerState<PrecisionDetailSheet> {
 
         // 3. KASALAR
         if (_attachedVaults.isNotEmpty) ...[
-          Text(l10n.vaults.toUpperCase(), style: TextStyle(fontSize: 9, fontWeight: FontWeight.w900, color: Colors.grey.withValues(alpha: 0.5), letterSpacing: 1.5)),
+          Text(l10n.vaults.toUpperCase(), style: TextStyle(fontSize: 9, fontWeight: FontWeight.w900, color: AppColors.getTextSecondary(context).withValues(alpha: 0.6), letterSpacing: 1.5)),
           const SizedBox(height: 4),
           ..._attachedVaults.map((vault) => Padding(
             padding: const EdgeInsets.only(bottom: 4),
@@ -414,7 +414,7 @@ class _PrecisionDetailSheetState extends ConsumerState<PrecisionDetailSheet> {
           style: TextStyle(
             fontSize: 9 * sf,
             fontWeight: FontWeight.w900,
-            color: (isDark ? Colors.white : Colors.black).withValues(alpha: 0.2),
+            color: (isDark ? Colors.white : Colors.black).withValues(alpha: isDark ? 0.35 : 0.55),
             letterSpacing: 1,
           ),
         ),
@@ -425,7 +425,7 @@ class _PrecisionDetailSheetState extends ConsumerState<PrecisionDetailSheet> {
             style: TextStyle(
               fontSize: 14 * sf,
               fontWeight: FontWeight.w700,
-              color: (isDark ? Colors.white : Colors.black).withValues(alpha: 0.3),
+              color: (isDark ? Colors.white : Colors.black).withValues(alpha: isDark ? 0.45 : 0.7),
             ),
           ),
         ),
@@ -461,56 +461,6 @@ class _PrecisionDetailSheetState extends ConsumerState<PrecisionDetailSheet> {
     );
   }
 
-  int _calculatePassedOccurrences(TransactionUI tx) {
-    if (tx.periodType == 0) return 0;
-    
-    // Tarih bazlı karşılaştırma için saatleri sıfırlayalım (Date-only)
-    final now = DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day);
-    final start = DateTime(tx.date.year, tx.date.month, tx.date.day);
-    
-    if (now.isBefore(start)) return 0;
-
-    final diffDays = now.difference(start).inDays;
-    int intervals = 0;
-    
-    switch (tx.periodType) {
-      case 1: intervals = diffDays ~/ 7; break;
-      case 2: // Aylık
-        intervals = (now.year - start.year) * 12 + now.month - start.month;
-        if (now.day < start.day) intervals--;
-        break;
-      case 3: // Yıllık
-        intervals = now.year - start.year;
-        if (now.month < start.month || (now.month == start.month && now.day < start.day)) intervals--;
-        break;
-      case 4: intervals = diffDays ~/ 14; break;
-      case 5: intervals = diffDays ~/ 21; break;
-      case 6: // 3 Ayda bir
-        int months = (now.year - start.year) * 12 + now.month - start.month;
-        if (now.day < start.day) months--;
-        intervals = months ~/ 3;
-        break;
-      case 7: // 6 Ayda bir
-        int months = (now.year - start.year) * 12 + now.month - start.month;
-        if (now.day < start.day) months--;
-        intervals = months ~/ 6;
-        break;
-      case 8: intervals = diffDays; break; // Günlük
-      case 9: intervals = diffDays ~/ 2; break;
-      case 10: intervals = diffDays ~/ 3; break;
-      default: intervals = 0;
-    }
-    
-    // Gerçekleşen sayısı = tamamlanan aralıklar + başlangıçtaki ilk işlem (+1)
-    int passed = (intervals < 0 ? 0 : intervals) + 1;
-    
-    // Eğer bir süre sınırı varsa, gerçekleşen sayısı bu sınırı aşmamalı
-    if (tx.recurrenceDuration != null && tx.recurrenceDuration! > 0) {
-      if (passed > tx.recurrenceDuration!) passed = tx.recurrenceDuration!;
-    }
-    
-    return passed;
-  }
 
   DateTime? _calculateEndDate(TransactionUI tx) {
     if (tx.periodType == 0 || tx.recurrenceDuration == null || tx.recurrenceDuration! <= 0) return null;

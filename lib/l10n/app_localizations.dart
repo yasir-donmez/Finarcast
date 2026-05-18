@@ -2313,19 +2313,19 @@ abstract class AppLocalizations {
   /// No description provided for @proPlan.
   ///
   /// In tr, this message translates to:
-  /// **'Finarcast PRO'**
+  /// **'Finarcast Premium'**
   String get proPlan;
 
   /// No description provided for @upgradeToPro.
   ///
   /// In tr, this message translates to:
-  /// **'PRO\'ya Yükselt'**
+  /// **'Premium\'a Yükselt'**
   String get upgradeToPro;
 
   /// No description provided for @proFeatures.
   ///
   /// In tr, this message translates to:
-  /// **'PRO Özellikleri'**
+  /// **'Premium Özellikleri'**
   String get proFeatures;
 
   /// No description provided for @unlimitedVaults.

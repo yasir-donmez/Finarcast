@@ -45,7 +45,7 @@ class _PrecisionBackgroundState extends ConsumerState<PrecisionBackground> {
     }
 
     // Base layer styling
-    final baseColor = isDark ? Colors.black : const Color(0xFFF5F7FA);
+    final baseColor = AppColors.getBackground(context);
     Decoration baseDecoration = BoxDecoration(color: baseColor);
 
     if (bgColorStyle == 1) {
@@ -58,8 +58,8 @@ class _PrecisionBackgroundState extends ConsumerState<PrecisionBackground> {
             // Alpha yerine doğrudan renkleri harmanlıyoruz (Solid painting)
             colors: bgGradient
                 .map((c) => isDark 
-                    ? Color.lerp(Colors.black, c, 0.45)! 
-                    : Color.lerp(const Color(0xFFF5F7FA), c, 0.18)!)
+                    ? Color.lerp(baseColor, c, 0.45)! 
+                    : Color.lerp(baseColor, c, 0.18)!)
                 .toList(),
           ),
         );
@@ -67,8 +67,8 @@ class _PrecisionBackgroundState extends ConsumerState<PrecisionBackground> {
         final primaryColor = AppColors.getPrimary(context);
         baseDecoration = BoxDecoration(
           color: isDark 
-              ? Color.lerp(Colors.black, primaryColor, 0.40)
-              : Color.lerp(const Color(0xFFF5F7FA), primaryColor, 0.12),
+              ? Color.lerp(baseColor, primaryColor, 0.40)
+              : Color.lerp(baseColor, primaryColor, 0.12),
         );
       }
     } else if (bgColorStyle == 0) {
@@ -80,8 +80,8 @@ class _PrecisionBackgroundState extends ConsumerState<PrecisionBackground> {
             end: Alignment.bottomRight,
             colors: bgGradient
                 .map((c) => isDark 
-                    ? Color.lerp(Colors.black, c, 0.15)! 
-                    : Color.lerp(const Color(0xFFF5F7FA), c, 0.05)!)
+                    ? Color.lerp(baseColor, c, 0.15)! 
+                    : Color.lerp(baseColor, c, 0.05)!)
                 .toList(),
           ),
         );
@@ -89,8 +89,8 @@ class _PrecisionBackgroundState extends ConsumerState<PrecisionBackground> {
         final primaryColor = AppColors.getPrimary(context);
         baseDecoration = BoxDecoration(
           color: isDark 
-              ? Color.lerp(Colors.black, primaryColor, 0.12)
-              : Color.lerp(const Color(0xFFF5F7FA), primaryColor, 0.04),
+              ? Color.lerp(baseColor, primaryColor, 0.12)
+              : Color.lerp(baseColor, primaryColor, 0.04),
         );
       }
     }

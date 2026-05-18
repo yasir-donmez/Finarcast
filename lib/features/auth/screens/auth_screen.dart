@@ -413,11 +413,29 @@ class _AuthScreenState extends ConsumerState<AuthScreen> with TickerProviderStat
           label: 'Google ile Devam Et',
           onTap: _signInWithGoogle,
           isPrimary: false,
-          activeColor: AppColors.getTextPrimary(context).withValues(alpha: 0.6),
-          leading: Icon(
-            Icons.g_mobiledata, 
-            size: (screenHeight * 0.045).clamp(24.0, 42.0), 
-            color: AppColors.getTextPrimary(context)
+          activeColor: AppColors.getTextPrimary(context).withValues(alpha: 0.75),
+          leading: Container(
+            padding: const EdgeInsets.all(5),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              shape: BoxShape.circle,
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.12),
+                  blurRadius: 3,
+                  offset: const Offset(0, 1.5),
+                ),
+              ],
+            ),
+            child: const Text(
+              'G',
+              style: TextStyle(
+                color: Color(0xFF4285F4),
+                fontWeight: FontWeight.w900,
+                fontSize: 13,
+                fontFamily: 'Roboto',
+              ),
+            ),
           ),
         ),
       ],

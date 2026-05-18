@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 class AppColors {
   // --- Dark Colors ---
-  static const Color darkBackground = Color(0xFF000000);
+  static const Color darkBackground = Color(0xFF0D0E12); // Lüks Derin Gece/Kömür Siyahı (0xFF000000 -> 0xFF0D0E12)
   static const Color darkSurface = Color(0xFF2F3237);
   static const Color darkLightShadow = Color(0x1AFFFFFF);
   static const Color darkDarkShadow = Color(0x80000000);

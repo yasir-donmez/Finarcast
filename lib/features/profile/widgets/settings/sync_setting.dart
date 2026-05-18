@@ -7,6 +7,7 @@ import '../../../../shared/widgets/precision_action.dart';
 import '../../../../shared/widgets/precision_toggle.dart';
 import '../../../../shared/widgets/precision_animated_icon.dart';
 import '../../../dashboard/dashboard_providers.dart';
+import '../profile_list_items.dart';
 
 final _syncExpandedProvider = StateProvider.autoDispose<bool>((ref) => false);
 
@@ -16,7 +17,7 @@ class SyncSetting extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final isSyncEnabled = ref.watch(settingsProvider.select((s) => s.isSyncEnabled));
-    final activeColor = ref.watch(rotaryColorProvider);
+    final activeColor = ProfileListItems.getSettingColor(context, SettingType.sync, ref.watch(rotaryColorProvider));
     final isExpanded = ref.watch(_syncExpandedProvider);
 
     return Column(
@@ -40,8 +41,8 @@ class SyncSetting extends ConsumerWidget {
                   ),
                   child: PrecisionAnimatedIcon(
                     isActive: isSyncEnabled,
-                    activeIcon: Icons.cloud_done_rounded,
-                    inactiveIcon: Icons.cloud_sync_rounded,
+                    activeIcon: Icons.cloud_done_outlined,
+                    inactiveIcon: Icons.cloud_sync_outlined,
                     color: activeColor,
                     size: 22,
                   ),

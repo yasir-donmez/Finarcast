@@ -51,7 +51,7 @@ class ProUpgradeSheet extends ConsumerWidget {
                   ),
                   SizedBox(height: headerSpacing),
                   Text(
-                    'Finarcast Pro\'ya Geçin',
+                    'Finarcast Premium\'a Geçin',
                     style: TextStyle(
                       fontSize: isSmallScreen ? 22 : 26, 
                       fontWeight: FontWeight.w900, 
@@ -109,7 +109,7 @@ class ProUpgradeSheet extends ConsumerWidget {
                   padding: EdgeInsets.only(bottom: isSmallScreen ? 8 : 12),
                   child: _buildPlanCard(
                     context: context,
-                    title: isYearly ? 'Yıllık Pro' : 'Aylık Pro',
+                    title: isYearly ? 'Yıllık Premium' : 'Aylık Premium',
                     price: package.storeProduct.priceString,
                     subtitle: isYearly ? 'En iyi değer' : 'İstediğin zaman iptal et',
                     badge: isYearly ? 'AVANTAJLI' : null,
@@ -130,7 +130,7 @@ class ProUpgradeSheet extends ConsumerWidget {
                 children: [
                   _buildPlanCard(
                     context: context,
-                    title: 'Yıllık Pro (Simüle)',
+                    title: 'Yıllık Premium (Simüle)',
                     price: '₺199.99 / yıl',
                     subtitle: 'Aylık ₺16.66',
                     badge: 'AVANTAJLI',
@@ -146,7 +146,7 @@ class ProUpgradeSheet extends ConsumerWidget {
                   SizedBox(height: isSmallScreen ? 8 : 12),
                   _buildPlanCard(
                     context: context,
-                    title: 'Aylık Pro (Simüle)',
+                    title: 'Aylık Premium (Simüle)',
                     price: '₺24.99 / ay',
                     subtitle: 'İstediğin zaman iptal et',
                     isSmall: isSmallScreen,
@@ -235,6 +235,7 @@ class ProUpgradeSheet extends ConsumerWidget {
     bool isSmall = false,
   }) {
     final primaryColor = AppColors.getPrimary(context);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     
     return PrecisionAction(
       onTap: onTap,
@@ -247,13 +248,15 @@ class ProUpgradeSheet extends ConsumerWidget {
             padding: EdgeInsets.symmetric(horizontal: 16, vertical: isSmall ? 10 : 14),
             decoration: BoxDecoration(
               color: backgroundColor ?? (isCurrent 
-                  ? Colors.white.withValues(alpha: 0.002) 
-                  : (isPopular ? Colors.white.withValues(alpha: 0.08) : Colors.white.withValues(alpha: 0.04))),
+                  ? (isDark ? Colors.white : Colors.black).withValues(alpha: 0.002) 
+                  : (isPopular 
+                      ? (isDark ? Colors.white : Colors.black).withValues(alpha: isDark ? 0.08 : 0.04) 
+                      : (isDark ? Colors.white : Colors.black).withValues(alpha: isDark ? 0.04 : 0.02))),
               borderRadius: BorderRadius.circular(22),
               border: Border.all(
                 color: borderColor ?? (isCurrent 
-                    ? Colors.white.withValues(alpha: 0.01) 
-                    : (isPopular ? primaryColor : Colors.white.withValues(alpha: 0.08))),
+                    ? (isDark ? Colors.white : Colors.black).withValues(alpha: 0.01) 
+                    : (isPopular ? primaryColor : (isDark ? Colors.white : Colors.black).withValues(alpha: isDark ? 0.08 : 0.12))),
                 width: isPopular ? 2.5 : 1.2,
               ),
               boxShadow: [
@@ -276,7 +279,7 @@ class ProUpgradeSheet extends ConsumerWidget {
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
                       border: Border.all(
-                        color: isCurrent ? Colors.grey : (isPopular ? primaryColor : Colors.white.withValues(alpha: 0.2)),
+                        color: isCurrent ? Colors.grey : (isPopular ? primaryColor : (isDark ? Colors.white : Colors.black).withValues(alpha: 0.25)),
                         width: 1.5,
                       ),
                     ),

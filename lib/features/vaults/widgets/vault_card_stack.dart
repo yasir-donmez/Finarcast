@@ -119,22 +119,22 @@ class _VaultCardStackState extends ConsumerState<VaultCardStack> {
           
           // 1. Aylık Akış (Gelir/Gider İstatistikleri) - Sadece Arşivlenmemişler
           final activeTxs = txs.where((t) => !t.isArchived).toList();
+          final now = DateTime.now();
           
           final income = activeTxs.where((t) => t.isIncome).fold<double>(0, (sum, t) {
-            // Bir işlemin "aktif aylık akış" içinde olması için:
-            if (t.periodType == 0) return sum + t.getConvertedAmount(targetCurrency, rates);
-            return sum + t.getConvertedMonthlyEquivalent(targetCurrency, rates);
+            final occurrencesThisMonth = t.getOccurrencesInMonth(now.year, now.month);
+            return sum + (t.getConvertedAmount(targetCurrency, rates) * occurrencesThisMonth);
           });
           
           final expense = activeTxs.where((t) => !t.isIncome).fold<double>(0, (sum, t) {
-            if (t.periodType == 0) return sum + t.getConvertedAmount(targetCurrency, rates);
-            return sum + t.getConvertedMonthlyEquivalent(targetCurrency, rates);
+            final occurrencesThisMonth = t.getOccurrencesInMonth(now.year, now.month);
+            return sum + (t.getConvertedAmount(targetCurrency, rates) * occurrencesThisMonth);
           });
 
           // 2. Toplam Bakiye (Geçmişten Bugüne Tüm Hareketler)
-          // Bu Dashboard ile tutarlı olmalı.
+          // Bu Dashboard ile tutarlı olmalı. (Artık gerçekleşen tekrarlarla çarpılarak tam doğru bakiye veriliyor)
           final balance = txs.fold<double>(0, (sum, t) {
-            final amt = t.getConvertedAmount(targetCurrency, rates);
+            final amt = t.getConvertedAmount(targetCurrency, rates) * t.passedOccurrences;
             return t.isIncome ? sum + amt : sum - amt;
           });
 

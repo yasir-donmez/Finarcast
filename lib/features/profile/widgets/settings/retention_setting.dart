@@ -7,6 +7,7 @@ import '../../../../l10n/app_localizations.dart';
 import '../../../../shared/widgets/precision_inline_picker.dart';
 import '../../../../shared/widgets/precision_action.dart';
 import '../../../dashboard/dashboard_providers.dart';
+import '../profile_list_items.dart';
 
 final _retentionExpandedProvider = StateProvider.autoDispose<bool>((ref) => false);
 
@@ -16,7 +17,7 @@ class RetentionSetting extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final retentionDays = ref.watch(settingsProvider.select((s) => s.dataRetentionDays));
-    final activeColor = ref.watch(rotaryColorProvider);
+    final activeColor = ProfileListItems.getSettingColor(context, SettingType.retention, ref.watch(rotaryColorProvider));
     final l10n = AppLocalizations.of(context)!;
     final isExpanded = ref.watch(_retentionExpandedProvider);
 
@@ -50,7 +51,7 @@ class RetentionSetting extends ConsumerWidget {
                     color: activeColor.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(14),
                   ),
-                  child: Icon(Icons.visibility_off_rounded, color: activeColor, size: 22),
+                  child: Icon(Icons.visibility_off_outlined, color: activeColor, size: 22),
                 ),
                 const SizedBox(width: 16),
                 Expanded(

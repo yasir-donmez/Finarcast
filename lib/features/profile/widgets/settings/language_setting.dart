@@ -15,20 +15,20 @@ class LanguageSetting extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final languageCode = ref.watch(settingsProvider.select((s) => s.languageCode));
-    final activeColor = ref.watch(rotaryColorProvider);
+    final activeColor = ProfileListItems.getSettingColor(context, SettingType.language, ref.watch(rotaryColorProvider));
     final l10n = AppLocalizations.of(context)!;
 
     return ProfileListItems.buildSetting(
       icon: Icons.language_rounded,
       title: l10n.language,
       trailing: _getLanguageName(languageCode),
-      onTap: () => _showLanguagePicker(context, ref, languageCode, l10n),
+      onTap: () => _showLanguagePicker(context, ref, languageCode, activeColor, l10n),
       activeColor: activeColor,
       context: context,
     );
   }
 
-  void _showLanguagePicker(BuildContext context, WidgetRef ref, String currentCode, AppLocalizations l10n) {
+  void _showLanguagePicker(BuildContext context, WidgetRef ref, String currentCode, Color activeColor, AppLocalizations l10n) {
     final List<String> languages = ["Türkçe", "English", "Deutsch", "Español", "Français", "Português", "Italiano", "日本語", "中文", "한국어"];
     final List<String> codes = ["tr", "en", "de", "es", "fr", "pt", "it", "ja", "zh", "ko"];
     int initialIndex = codes.indexOf(currentCode);
@@ -54,7 +54,7 @@ class LanguageSetting extends ConsumerWidget {
               ref.read(settingsProvider.notifier).setLanguage(codes[tempIndex]);
               Navigator.pop(context);
             },
-            activeColor: ref.read(rotaryColorProvider.select((s) => s)),
+            activeColor: activeColor,
           ),
         ],
       ),

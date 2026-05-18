@@ -222,6 +222,7 @@ class _RotaryTimeDialState extends ConsumerState<RotaryTimeDial> with SingleTick
                           currentAngle: _currentAngle,
                           tickCount: 84,
                           activeColor: activeColor,
+                          isDark: Theme.of(context).brightness == Brightness.dark,
                         ),
                       ),
                     ),
@@ -347,8 +348,14 @@ class _DialTicksPainter extends CustomPainter {
   final double currentAngle;
   final int tickCount;
   final Color activeColor;
+  final bool isDark;
 
-  _DialTicksPainter({required this.currentAngle, required this.tickCount, required this.activeColor});
+  _DialTicksPainter({
+    required this.currentAngle,
+    required this.tickCount,
+    required this.activeColor,
+    required this.isDark,
+  });
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -398,7 +405,7 @@ class _DialTicksPainter extends CustomPainter {
       // Oyuk (Inset) Shading
       paint.color = isPassed 
           ? activeColor.withValues(alpha: 0.6 + (0.4 * bulge)) 
-          : Colors.black.withValues(alpha: 0.2 + (0.2 * majorWeight));
+          : (isDark ? Colors.white : Colors.black).withValues(alpha: 0.12 + (0.12 * majorWeight));
       paint.strokeWidth = tickWidth;
       canvas.drawLine(p1, p2, paint);
 
@@ -412,5 +419,8 @@ class _DialTicksPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(covariant _DialTicksPainter old) => old.currentAngle != currentAngle || old.activeColor != activeColor;
+  bool shouldRepaint(covariant _DialTicksPainter old) => 
+      old.currentAngle != currentAngle || 
+      old.activeColor != activeColor || 
+      old.isDark != isDark;
 }

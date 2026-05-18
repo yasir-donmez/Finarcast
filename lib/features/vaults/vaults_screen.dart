@@ -228,7 +228,7 @@ class _VaultsScreenState extends ConsumerState<VaultsScreen> {
                 child: Icon(
                   Icons.auto_graph_rounded,
                   size: 40,
-                  color: activeColor.withValues(alpha: isDark ? 0.3 : 0.1),
+                  color: activeColor.withValues(alpha: isDark ? 0.3 : 0.45),
                 ),
               ),
               const SizedBox(height: 24),
@@ -236,9 +236,7 @@ class _VaultsScreenState extends ConsumerState<VaultsScreen> {
                 "Kasa İşlemi Bulunmadı".toUpperCase(),
                 textAlign: TextAlign.center,
                 style: TextStyle(
-                  color: isDark
-                      ? Colors.white.withValues(alpha: 0.15)
-                      : Colors.grey.withValues(alpha: 0.3),
+                  color: AppColors.getTextSecondary(context).withValues(alpha: isDark ? 0.4 : 0.7),
                   fontSize: 13,
                   fontWeight: FontWeight.w900,
                   letterSpacing: 2,

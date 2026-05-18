@@ -3,11 +3,11 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/providers/settings_provider.dart';
 import '../../../../core/theme/app_constants.dart';
-import '../../../../l10n/app_localizations.dart';
 import '../../../../shared/widgets/precision_action.dart';
 import '../../../../shared/widgets/precision_toggle.dart';
 import '../../../../shared/widgets/precision_animated_icon.dart';
 import '../../../dashboard/dashboard_providers.dart';
+import '../profile_list_items.dart';
 
 final _notifExpandedProvider = StateProvider.autoDispose<bool>((ref) => false);
 
@@ -17,8 +17,7 @@ class NotificationSetting extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final isEnabled = ref.watch(settingsProvider.select((s) => s.isNotificationsEnabled));
-    final activeColor = ref.watch(rotaryColorProvider);
-    final l10n = AppLocalizations.of(context)!;
+    final activeColor = ProfileListItems.getSettingColor(context, SettingType.notification, ref.watch(rotaryColorProvider));
     final isExpanded = ref.watch(_notifExpandedProvider);
 
     return Column(
@@ -42,8 +41,8 @@ class NotificationSetting extends ConsumerWidget {
                   ),
                   child: PrecisionAnimatedIcon(
                     isActive: isEnabled,
-                    activeIcon: Icons.notifications_active_rounded,
-                    inactiveIcon: Icons.notifications_off_rounded,
+                    activeIcon: Icons.notifications_active_outlined,
+                    inactiveIcon: Icons.notifications_off_outlined,
                     color: activeColor,
                     size: 22,
                   ),
