@@ -6,10 +6,10 @@ import '../../../core/database/models/transaction_record.dart';
 import '../../../core/database/models/exchange_rate.dart';
 import '../../../core/utils/currency_utils.dart';
 import '../../../core/providers/settings_provider.dart';
-import '../../../shared/widgets/precision_multi_toggle.dart';
+import '../../../shared/widgets/multi_toggle.dart';
 import '../../../l10n/app_localizations.dart';
-import '../../transactions/widgets/transaction_category_data.dart';
-import '../../../core/utils/icon_utils.dart';
+import '../../../core/utils/category_utils.dart';
+import '../../../core/database/models/custom_category.dart';
 import '../../../core/theme/app_constants.dart';
 import 'dart:math' as math;
 
@@ -53,6 +53,7 @@ class _SpendingGiantsWidgetState extends ConsumerState<SpendingGiantsWidget> wit
     final symbol = settings.currencySymbol;
     final rates = ref.watch(exchangeRatesProvider).value ?? [];
     final transactions = ref.watch(expenseTransactionsProvider);
+    final customCategories = ref.watch(customCategoriesProvider);
     
     final periods = _getAnalysisPeriods();
     final currentTxs = transactions.where((tx) => tx.date.isAfter(periods['currentStart']!) && tx.date.isBefore(periods['currentEnd']!)).toList();
@@ -63,7 +64,7 @@ class _SpendingGiantsWidgetState extends ConsumerState<SpendingGiantsWidget> wit
     return Column(
       children: [
         Center(
-          child: PrecisionMultiToggle(
+          child: MultiToggle(
             labels: const ['H', 'A', 'Y'],
             selectedIndex: _selectedFilterIndex,
             onChanged: _handleFilterChange,
@@ -92,6 +93,7 @@ class _SpendingGiantsWidgetState extends ConsumerState<SpendingGiantsWidget> wit
                               painter: _TripleOverlapPainter(
                                 giants: giants,
                                 animationValue: _chartController.value,
+                                customCategories: customCategories,
                               ),
                             );
                           },
@@ -105,7 +107,7 @@ class _SpendingGiantsWidgetState extends ConsumerState<SpendingGiantsWidget> wit
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       crossAxisAlignment: CrossAxisAlignment.start,
-                      children: giants.map((g) => _buildDetailItem(g, symbol)).toList(),
+                      children: giants.map((g) => _buildDetailItem(g, symbol, customCategories)).toList(),
                     ),
                   ),
                 ],
@@ -115,9 +117,15 @@ class _SpendingGiantsWidgetState extends ConsumerState<SpendingGiantsWidget> wit
     );
   }
 
-  Widget _buildDetailItem(_AnalyticGiant g, String symbol) {
-    final Color catColor = IconUtils.getColor(g.categoryId);
-    final IconData catIcon = IconUtils.getIcon(g.categoryId);
+  Widget _buildDetailItem(_AnalyticGiant g, String symbol, List<CustomCategory> customCategories) {
+    final Color catColor = CategoryUtils.getCategoryColor(
+      categoryId: g.categoryId,
+      customCategories: customCategories,
+    );
+    final IconData catIcon = CategoryUtils.getCategoryIcon(
+      categoryId: g.categoryId,
+      customCategories: customCategories,
+    );
     
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 2),
@@ -139,7 +147,7 @@ class _SpendingGiantsWidgetState extends ConsumerState<SpendingGiantsWidget> wit
           Container(
             width: 24, height: 24,
             decoration: BoxDecoration(
-              color: catColor,
+              color: AppColors.getAccentDeep(context, catColor),
               borderRadius: BorderRadius.circular(6),
               boxShadow: [
                 BoxShadow(
@@ -158,8 +166,8 @@ class _SpendingGiantsWidgetState extends ConsumerState<SpendingGiantsWidget> wit
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
-                  _getLocalizedCategoryName(context, g.categoryId),
-                  style: const TextStyle(fontSize: 8, fontWeight: FontWeight.w700, color: Colors.white, letterSpacing: -0.2),
+                  _getLocalizedCategoryName(context, g.categoryId, customCategories),
+                  style: TextStyle(fontSize: 8, fontWeight: FontWeight.w700, color: AppColors.getTextPrimary(context), letterSpacing: -0.2),
                   maxLines: 1, overflow: TextOverflow.ellipsis,
                 ),
                 Text(
@@ -244,20 +252,12 @@ class _SpendingGiantsWidgetState extends ConsumerState<SpendingGiantsWidget> wit
     return giants;
   }
 
-  String _getLocalizedCategoryName(BuildContext context, String? categoryId) {
-    final l10n = AppLocalizations.of(context)!;
-    if (categoryId == null || categoryId == 'Diğer') return l10n.other;
-    final String targetId = categoryId.toLowerCase();
-    final categories = TransactionCategoryData.getExpenseCategories(context, l10n);
-    for (var cat in categories) {
-      if ((cat['id'] as String).toLowerCase() == targetId) return cat['name'] as String;
-      if (cat['subModels'] != null) {
-        for (var sub in (cat['subModels'] as List)) {
-          if ((sub['id'] as String).toLowerCase() == targetId) return sub['name'] as String;
-        }
-      }
-    }
-    return categoryId;
+  String _getLocalizedCategoryName(BuildContext context, String? categoryId, List<CustomCategory> customCategories) {
+    return CategoryUtils.getCategoryName(
+      categoryId: categoryId,
+      context: context,
+      customCategories: customCategories,
+    );
   }
 
   Widget _buildEmptyState() {
@@ -266,12 +266,12 @@ class _SpendingGiantsWidgetState extends ConsumerState<SpendingGiantsWidget> wit
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.auto_graph_rounded, color: Colors.white.withValues(alpha: 0.05), size: 48),
+          Icon(Icons.auto_graph_rounded, color: AppColors.getTextSecondary(context).withValues(alpha: 0.15), size: 48),
           const SizedBox(height: 12),
           Text(
             l10n.giantsWait,
             style: TextStyle(
-              color: Colors.white.withValues(alpha: 0.15),
+              color: AppColors.getTextSecondary(context).withValues(alpha: 0.5),
               fontSize: 10,
               fontWeight: FontWeight.w600,
               letterSpacing: 0.5,
@@ -294,8 +294,13 @@ class _AnalyticGiant {
 class _TripleOverlapPainter extends CustomPainter {
   final List<_AnalyticGiant> giants;
   final double animationValue;
+  final List<CustomCategory> customCategories;
 
-  _TripleOverlapPainter({required this.giants, required this.animationValue});
+  _TripleOverlapPainter({
+    required this.giants,
+    required this.animationValue,
+    required this.customCategories,
+  });
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -321,7 +326,10 @@ class _TripleOverlapPainter extends CustomPainter {
       
       if (currentRadius < 10) break; // Çok küçükse çizme
 
-      final Color catColor = IconUtils.getColor(g.categoryId);
+      final Color catColor = CategoryUtils.getCategoryColor(
+        categoryId: g.categoryId,
+        customCategories: customCategories,
+      );
       final Rect arcRect = Rect.fromCircle(center: center, radius: currentRadius);
       
       // Dinamik Gap (Her halkada aynı boşluk mesafesi)

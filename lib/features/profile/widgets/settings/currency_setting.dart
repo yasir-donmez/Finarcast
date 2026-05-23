@@ -3,11 +3,11 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/providers/settings_provider.dart';
 import '../../../../core/theme/app_constants.dart';
-import '../../../../shared/widgets/precision_sheet.dart';
-import '../../../../shared/widgets/precision_picker.dart';
-import '../../../../shared/widgets/precision_button.dart';
-import '../../../../shared/widgets/precision_action.dart';
-import '../../../../shared/widgets/precision_card.dart';
+import '../../../../shared/widgets/custom_bottom_sheet.dart';
+import '../../../../shared/widgets/wheel_picker.dart';
+import '../../../../shared/widgets/custom_button.dart';
+import '../../../../shared/widgets/clickable_action.dart';
+import '../../../../shared/widgets/custom_card.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../dashboard/dashboard_providers.dart';
 import '../profile_list_items.dart';
@@ -27,7 +27,7 @@ class CurrencySetting extends ConsumerWidget {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        PrecisionAction(
+        ClickableAction(
           onTap: () {
             HapticFeedback.selectionClick();
             ref.read(_currencyExpandedProvider.notifier).state = !isExpanded;
@@ -110,7 +110,7 @@ class CurrencySetting extends ConsumerWidget {
                         ),
                       ),
                       const SizedBox(height: 16),
-                      PrecisionCard(
+                      CustomCard(
                        onTap: () => _showCurrencyPicker(context, ref, currencySymbol, activeColor, l10n),
                         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                         child: Row(
@@ -147,19 +147,19 @@ class CurrencySetting extends ConsumerWidget {
 
   void _showCurrencyPicker(BuildContext context, WidgetRef ref, String currentSymbol, Color activeColor, AppLocalizations l10n) {
     HapticFeedback.lightImpact();
-    final currencies = AppCurrency.supportedSymbols;
+    final currencies = AppCurrency.displaySymbols;
     int initialIndex = currencies.indexOf(currentSymbol);
     if (initialIndex == -1) initialIndex = 0;
 
     int tempIndex = initialIndex;
 
-    PrecisionSheet.show(
+    CustomBottomSheet.show(
       context: context,
       title: l10n.selectCurrency,
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          PrecisionPicker(
+          WheelPicker(
             itemCount: currencies.length,
             initialItem: initialIndex,
             onSelectedItemChanged: (index) => tempIndex = index,
@@ -212,7 +212,7 @@ class CurrencySetting extends ConsumerWidget {
             },
           ),
           const SizedBox(height: 32),
-          PrecisionButton(
+          CustomButton(
             label: l10n.ok,
             onTap: () {
               ref.read(settingsProvider.notifier).setCurrency(currencies[tempIndex]);

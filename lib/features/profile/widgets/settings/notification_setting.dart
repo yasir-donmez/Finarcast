@@ -3,9 +3,9 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/providers/settings_provider.dart';
 import '../../../../core/theme/app_constants.dart';
-import '../../../../shared/widgets/precision_action.dart';
-import '../../../../shared/widgets/precision_toggle.dart';
-import '../../../../shared/widgets/precision_animated_icon.dart';
+import '../../../../shared/widgets/clickable_action.dart';
+import '../../../../shared/widgets/custom_switch.dart';
+import '../../../../shared/widgets/custom_animated_icon.dart';
 import '../../../dashboard/dashboard_providers.dart';
 import '../profile_list_items.dart';
 
@@ -23,7 +23,7 @@ class NotificationSetting extends ConsumerWidget {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        PrecisionAction(
+        ClickableAction(
           onTap: () {
             HapticFeedback.selectionClick();
             ref.read(_notifExpandedProvider.notifier).state = !isExpanded;
@@ -39,7 +39,7 @@ class NotificationSetting extends ConsumerWidget {
                     color: activeColor.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(14),
                   ),
-                  child: PrecisionAnimatedIcon(
+                  child: CustomAnimatedIcon(
                     isActive: isEnabled,
                     activeIcon: Icons.notifications_active_outlined,
                     inactiveIcon: Icons.notifications_off_outlined,
@@ -83,7 +83,7 @@ class NotificationSetting extends ConsumerWidget {
                     ],
                   ),
                 ),
-                PrecisionToggle(
+                CustomSwitch(
                   value: isEnabled,
                   onChanged: (val) {
                     HapticFeedback.mediumImpact();

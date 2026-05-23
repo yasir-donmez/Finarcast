@@ -1,32 +1,48 @@
-// This is a basic Flutter widget test.
-//
-// To perform an interaction with a widget in your test, use the WidgetTester
-// utility in the flutter_test package. For example, you can send tap and scroll
-// gestures. You can also use WidgetTester to find child widgets in the widget
-// tree, read text, and verify that the values of widget properties are correct.
-
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-
-import 'package:finarcast/main.dart';
+import 'package:finarcast/core/database/models/transaction_record.dart';
 
 void main() {
-  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
-    // Build our app and trigger a frame.
-    await tester.pumpWidget(const FinarcastApp());
+  group('TransactionRecord Period & Monthly Equivalent Tests', () {
+    test('monthlyEquivalent for one-time transaction should be 0', () {
+      final tx = TransactionRecord()
+        ..amount = 100.0
+        ..periodType = 0;
+      expect(tx.monthlyEquivalent, 0.0);
+    });
 
-    // Verify that our counter starts at 0.
-    expect(find.text('0'), findsOneWidget);
-    expect(find.text('1'), findsNothing);
+    test('monthlyEquivalent for daily transaction (101) should be amount * 30', () {
+      final tx = TransactionRecord()
+        ..amount = 10.0
+        ..periodType = 101;
+      expect(tx.monthlyEquivalent, 300.0);
+    });
 
-    // Tap the '+' icon and trigger a frame.
-    await tester.tap(find.byIcon(Icons.add));
-    await tester.pump();
+    test('monthlyEquivalent for 2 days transaction (102) should be amount * 15', () {
+      final tx = TransactionRecord()
+        ..amount = 10.0
+        ..periodType = 102;
+      expect(tx.monthlyEquivalent, 150.0);
+    });
 
-    // Verify that our counter has incremented.
-    expect(find.text('0'), findsNothing);
-    expect(find.text('1'), findsOneWidget);
+    test('monthlyEquivalent for weekly transaction (201) should be amount * 4.33', () {
+      final tx = TransactionRecord()
+        ..amount = 10.0
+        ..periodType = 201;
+      expect(tx.monthlyEquivalent, 43.3);
+    });
+
+    test('monthlyEquivalent for weekdays transaction (250) should be amount * 21.67', () {
+      final tx = TransactionRecord()
+        ..amount = 10.0
+        ..periodType = 250;
+      expect(tx.monthlyEquivalent, 216.7);
+    });
+
+    test('monthlyEquivalent for weekends transaction (251) should be amount * 8.67', () {
+      final tx = TransactionRecord()
+        ..amount = 10.0
+        ..periodType = 251;
+      expect(tx.monthlyEquivalent, 86.7);
+    });
   });
 }
-
-

@@ -4,9 +4,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/app_constants.dart';
 import '../../../core/database/database_service.dart';
 import '../../../core/database/models/vault.dart';
-import '../../../shared/widgets/precision_input.dart';
-import '../../../shared/widgets/precision_button.dart';
-import '../../auth/widgets/precision_wave.dart';
+import '../../../shared/widgets/custom_text_field.dart';
+import '../../../shared/widgets/custom_button.dart';
+import '../../auth/widgets/auth_wave.dart';
 import '../../../l10n/app_localizations.dart';
 
 class AddVaultSheet extends ConsumerStatefulWidget {
@@ -27,7 +27,7 @@ class _AddVaultSheetState extends ConsumerState<AddVaultSheet> with SingleTicker
       {'symbol': 'AUTO', 'label': l10n.auto},
     ];
     
-    for (var symbol in AppCurrency.supportedSymbols) {
+    for (var symbol in AppCurrency.displaySymbols) {
       String label = symbol;
       if (symbol == '₺') {
         label = 'TL';
@@ -74,7 +74,7 @@ class _AddVaultSheetState extends ConsumerState<AddVaultSheet> with SingleTicker
       children: [
         Positioned.fill(
           child: IgnorePointer(
-            child: PrecisionWave(
+            child: AuthWave(
               controller: _waveController,
               color: secondaryColor,
               isTriggered: true,
@@ -89,7 +89,7 @@ class _AddVaultSheetState extends ConsumerState<AddVaultSheet> with SingleTicker
             children: [
               SizedBox(
                 height: 50 * sf,
-                child: PrecisionInput(
+                child: CustomTextField(
                   controller: _nameController,
                   hintText: l10n.vaultNameHint,
                   icon: Icons.drive_file_rename_outline_rounded,
@@ -106,7 +106,7 @@ class _AddVaultSheetState extends ConsumerState<AddVaultSheet> with SingleTicker
                   style: TextStyle(
                     fontSize: 10,
                     fontWeight: FontWeight.w900,
-                    color: (Theme.of(context).brightness == Brightness.dark ? Colors.white : Colors.black).withValues(alpha: Theme.of(context).brightness == Brightness.dark ? 0.45 : 0.65),
+                    color: AppColors.getTextSecondary(context),
                     letterSpacing: 1,
                   ),
                 ),
@@ -140,7 +140,7 @@ class _AddVaultSheetState extends ConsumerState<AddVaultSheet> with SingleTicker
                             style: TextStyle(
                               fontSize: 10,
                               fontWeight: FontWeight.w900,
-                              color: isSelected ? Colors.white : AppColors.getTextPrimary(context).withValues(alpha: 0.5),
+                              color: isSelected ? Colors.white : AppColors.getTextSecondary(context),
                               letterSpacing: 0.5,
                             ),
                           ),
@@ -154,7 +154,7 @@ class _AddVaultSheetState extends ConsumerState<AddVaultSheet> with SingleTicker
               SizedBox(height: 20 * sf),
               SizedBox(
                 height: 50 * sf,
-                child: PrecisionInput(
+                child: CustomTextField(
                   controller: _balanceController,
                   hintText: l10n.initialBalance,
                   icon: Icons.payments_rounded,
@@ -167,7 +167,7 @@ class _AddVaultSheetState extends ConsumerState<AddVaultSheet> with SingleTicker
                 ),
               ),
               SizedBox(height: 24 * sf),
-              PrecisionButton(
+              CustomButton(
                 label: l10n.createVault,
                 onTap: () async {
                   if (_nameController.text.isNotEmpty) {

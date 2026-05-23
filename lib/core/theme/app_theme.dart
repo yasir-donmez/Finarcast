@@ -11,7 +11,7 @@ class AppTheme {
       colorScheme: ColorScheme.dark(
         primary: accentColor,
         onPrimary: Colors.white,
-        secondary: AppColors.secondary,
+        secondary: AppColors.getThemeSecondary(accentColor),
         onSecondary: Colors.white,
         surface: AppColors.darkSurface,
         onSurface: AppColors.darkTextPrimary,
@@ -41,7 +41,7 @@ class AppTheme {
       scaffoldBackgroundColor: AppColors.lightBackground,
       colorScheme: ColorScheme.light(
         primary: readableAccent,
-        secondary: AppColors.secondary,
+        secondary: AppColors.getThemeSecondary(readableAccent),
         surface: AppColors.lightSurface,
         onSurface: AppColors.lightTextPrimary,
         error: AppColors.error,

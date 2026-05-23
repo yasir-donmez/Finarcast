@@ -16,6 +16,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'core/services/subscription_service.dart';
 import 'core/services/notification_service.dart';
+import 'core/widgets/sync_bootstrap.dart';
 import 'package:dynamic_color/dynamic_color.dart';
 
 void main() async {
@@ -81,21 +82,12 @@ void main() async {
     debugPrint('❌ [Finarcast FATAL] Başlangıç hatası: $e');
     debugPrint('📜 [Finarcast FATAL] Stack Trace:\n$stack');
     
-    // Uygulama kritik bir hata aldığında en azından bir hata ekranı gösterelim
+    // Uygulama kritik bir hata aldığında kurtarma arayüzünü gösterelim
     runApp(
       MaterialApp(
-        home: Scaffold(
-          body: Center(
-            child: Padding(
-              padding: const EdgeInsets.all(24.0),
-              child: SelectableText(
-                'Kritik Başlangıç Hatası\n\n$e\n\n$stack',
-                textAlign: TextAlign.center,
-                style: const TextStyle(color: Colors.red),
-              ),
-            ),
-          ),
-        ),
+        debugShowCheckedModeBanner: false,
+        theme: ThemeData.dark(),
+        home: DatabaseCrashScreen(error: e, stackTrace: stack),
       ),
     );
   }
@@ -173,7 +165,7 @@ class FinarcastApp extends ConsumerWidget {
                 return authState.when(
                   data: (state) {
                     if (state.session != null) {
-                      return const MainScaffold();
+                      return const SyncBootstrap(child: MainScaffold());
                     }
                     return const AuthScreen();
                   },
@@ -201,5 +193,176 @@ class FinarcastApp extends ConsumerWidget {
       case 2: return ThemeMode.dark;
       default: return ThemeMode.system;
     }
+  }
+}
+
+class DatabaseCrashScreen extends StatefulWidget {
+  final Object error;
+  final StackTrace stackTrace;
+
+  const DatabaseCrashScreen({
+    super.key,
+    required this.error,
+    required this.stackTrace,
+  });
+
+  @override
+  State<DatabaseCrashScreen> createState() => _DatabaseCrashScreenState();
+}
+
+class _DatabaseCrashScreenState extends State<DatabaseCrashScreen> {
+  bool _isResetting = false;
+
+  Future<void> _resetDatabase() async {
+    setState(() {
+      _isResetting = true;
+    });
+    try {
+      debugPrint('🚨 [DatabaseCrashScreen] Veritabanı dosyaları siliniyor...');
+      await DatabaseService.deleteDatabaseFiles();
+      debugPrint('✅ [DatabaseCrashScreen] Veritabanı dosyaları silindi. Yeniden başlatılıyor...');
+      
+      // Tekrar başlatma adımları
+      await DatabaseService.init();
+      await DataRetentionService.archiveExpiredTransactions();
+      await initializeDateFormatting('tr_TR', null);
+      final prefs = await SharedPreferences.getInstance();
+
+      if (mounted) {
+        runApp(
+          ProviderScope(
+            overrides: [
+              subscriptionServiceProvider.overrideWith((ref) => SubscriptionService(prefs)),
+            ],
+            child: const FinarcastApp(),
+          ),
+        );
+      }
+    } catch (e, stack) {
+      debugPrint('❌ [DatabaseCrashScreen] Kurtarma sırasında hata: $e\n$stack');
+      if (mounted) {
+        setState(() {
+          _isResetting = false;
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Sıfırlama başarısız oldu: $e'),
+            backgroundColor: Colors.redAccent,
+          ),
+        );
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: const Color(0xFF0F0F11),
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 32.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.red.withValues(alpha: 0.1),
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(
+                  Icons.warning_amber_rounded,
+                  color: Colors.redAccent,
+                  size: 56,
+                ),
+              ),
+              const SizedBox(height: 24),
+              const Text(
+                'Kritik Veritabanı Hatası',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 22,
+                  fontWeight: FontWeight.w900,
+                  letterSpacing: -0.5,
+                ),
+              ),
+              const SizedBox(height: 12),
+              const Text(
+                'Uygulama veritabanında okunamayan/bozuk veriler tespit edildi. Aşağıdaki butona basarak veritabanını temizleyip uygulamayı sıfırdan başlatabilirsiniz.',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: Colors.grey,
+                  fontSize: 14,
+                  height: 1.5,
+                ),
+              ),
+              const SizedBox(height: 32),
+              if (_isResetting)
+                const CircularProgressIndicator(color: Colors.redAccent)
+              else
+                SizedBox(
+                  width: double.infinity,
+                  height: 52,
+                  child: ElevatedButton.icon(
+                    onPressed: _resetDatabase,
+                    icon: const Icon(Icons.refresh_rounded, color: Colors.white),
+                    label: const Text(
+                      'Veritabanını Sıfırla ve Yeniden Başlat',
+                      style: TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
+                    ),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.redAccent,
+                      elevation: 0,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                    ),
+                  ),
+                ),
+              const SizedBox(height: 32),
+              const Align(
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  'Hata Ayrıntısı:',
+                  style: TextStyle(
+                    color: Colors.grey,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 13,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 8),
+              Expanded(
+                child: Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF16161A),
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: Colors.white.withValues(alpha: 0.05)),
+                  ),
+                  child: SingleChildScrollView(
+                    physics: const BouncingScrollPhysics(),
+                    child: SelectableText(
+                      '${widget.error}\n\n${widget.stackTrace}',
+                      style: TextStyle(
+                        color: Colors.redAccent.withValues(alpha: 0.8),
+                        fontFamily: 'monospace',
+                        fontSize: 12,
+                        height: 1.4,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 }

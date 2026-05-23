@@ -29,15 +29,13 @@ class TransactionRecord {
   double? minAmount;
   double? maxAmount;
 
-  /// "Kırmızı Çizgi / Kilit Mekanizması" (Zorunlu Gider mi?)
-  /// Eğer true ise algoritma (Yapay Zeka) tasarruf tavsiyesi verirken bu kaleme asla dokunmaz!
-  bool isLocked = false;
-
   /// "Taksit/Süreli Borç Mekanizması"
   /// Eğer null değilse, bu giderin kalan ay sayısıdır. Her ay bu rakam düşer.
   int? remainingInstallments;
 
-  /// Tekrarlama Periyodu (0: Tek Seferlik, 1: Haftalık, 2: Aylık, 3: Yıllık, 4: 2 Haftada Bir, 5: 3 Haftada Bir, 6: 3 Ayda Bir, 7: 6 Ayda Bir, 8: Günlük, 9: 2 Günde Bir, 10: 3 Günde Bir)
+  /// Tekrarlama Periyodu: (Birim * 100) + Sıklık (Interval)
+  /// Birim: 1->Gün, 2->Hafta, 3->Ay, 4->Yıl
+  /// Özel: 250->Hafta İçi, 251->Hafta Sonu, 0->Tek Seferlik
   int periodType = 0;
 
   /// Tekrarlama Detayları (Haftanın Hangi Günü, Ayın Hangi Günü vb.)
@@ -79,6 +77,7 @@ class TransactionRecord {
   
   // --- Bildirim Ayarları ---
   bool isNotificationEnabled = false;
+  bool hasNotification = false;
   int notificationReminderDays = 0; // 0: Aynı gün, 1: Bir gün önce...
   int notificationHour = 9;
   int notificationMinute = 0;
@@ -112,30 +111,35 @@ class TransactionRecord {
   @ignore
   double get monthlyEquivalent {
     final baseAmount = effectiveAmount;
-    double monthly;
-    switch (periodType) {
-      case 1: // Haftalık
-        monthly = baseAmount * 4.33;
-      case 2: // Aylık
-        monthly = baseAmount;
-      case 3: // Yıllık
-        monthly = baseAmount / 12;
-      case 4: // 2 Haftada Bir
-        monthly = baseAmount * 2.16;
-      case 5: // 3 Haftada Bir
-        monthly = baseAmount * 1.44;
-      case 6: // 3 Ayda Bir
-        monthly = baseAmount / 3;
-      case 7: // 6 Ayda Bir
-        monthly = baseAmount / 6;
-      case 8: // Günlük
-        monthly = baseAmount * 30;
-      case 9: // 2 Günde Bir
-        monthly = baseAmount * 15;
-      case 10: // 3 Günde Bir
-        monthly = baseAmount * 10;
-      default: // Tek seferlik
-        monthly = 0;
+    double monthly = 0;
+    
+    if (periodType == 0) {
+      monthly = 0;
+    } else if (periodType == 250) {
+      // Hafta İçi (Pzt-Cum) -> ortalama 21.67 gün
+      monthly = baseAmount * 21.67;
+    } else if (periodType == 251) {
+      // Hafta Sonu (Cmt-Paz) -> ortalama 8.67 gün
+      monthly = baseAmount * 8.67;
+    } else {
+      final unit = periodType ~/ 100;
+      final interval = periodType % 100;
+      if (interval > 0) {
+        switch (unit) {
+          case 1: // Gün
+            monthly = baseAmount * (30 / interval);
+            break;
+          case 2: // Hafta
+            monthly = baseAmount * (4.33 / interval);
+            break;
+          case 3: // Ay
+            monthly = baseAmount / interval;
+            break;
+          case 4: // Yıl
+            monthly = baseAmount / (12 * interval);
+            break;
+        }
+      }
     }
     // Kuruş karmaşasını önlemek için 2 haneye yuvarla
     return double.parse(monthly.toStringAsFixed(2));

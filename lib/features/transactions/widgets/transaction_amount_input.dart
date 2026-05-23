@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../../core/theme/app_constants.dart';
-import '../../../shared/widgets/precision_input.dart';
+import '../../../shared/widgets/custom_text_field.dart';
 import '../../../l10n/app_localizations.dart';
 
 class TransactionAmountInput extends StatelessWidget {
@@ -50,7 +50,7 @@ class TransactionAmountInput extends StatelessWidget {
       height: 100,
       alignment: Alignment.center,
       padding: const EdgeInsets.symmetric(horizontal: AppSizes.paddingLarge),
-      child: PrecisionInput(
+      child: CustomTextField(
         controller: amountController,
         hintText: "0,00",
         icon: Icons.attach_money_rounded,
@@ -110,7 +110,7 @@ class TransactionAmountInput extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 4),
-        PrecisionInput(
+        CustomTextField(
           controller: controller,
           hintText: "0,00",
           icon: Icons.attach_money_rounded,

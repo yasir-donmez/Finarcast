@@ -4,13 +4,13 @@ import 'dashboard_widget.dart';
 import 'package:intl/intl.dart';
 import '../../../core/providers/db_providers.dart';
 import '../../../core/database/models/transaction_record.dart';
+import '../../../core/database/models/custom_category.dart';
 import '../../../core/database/models/exchange_rate.dart';
 import '../../../core/utils/currency_utils.dart';
 import '../../../core/providers/settings_provider.dart';
 import '../../../core/theme/app_constants.dart';
-import '../../../core/utils/icon_utils.dart';
+import '../../../core/utils/category_utils.dart';
 import '../../../l10n/app_localizations.dart';
-import '../../transactions/widgets/transaction_category_data.dart';
 
 class TimelineActivityWidget extends ConsumerWidget {
   final DashboardWidgetSize size;
@@ -19,6 +19,7 @@ class TimelineActivityWidget extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final transactions = ref.watch(allTransactionsProvider);
+    final customCategories = ref.watch(customCategoriesProvider);
     final rates = ref.watch(exchangeRatesProvider).value ?? [];
     final settings = ref.watch(settingsProvider);
     final symbol = settings.currencySymbol;
@@ -48,20 +49,27 @@ class TimelineActivityWidget extends ConsumerWidget {
       children: [
         // SOL: Gelirler
         Expanded(
-          child: _buildColumn(context, incomeTxs, symbol, rates, true),
+          child: _buildColumn(context, incomeTxs, symbol, rates, true, customCategories),
         ),
         
         const SizedBox(width: 8),
         
         // SAĞ: Giderler
         Expanded(
-          child: _buildColumn(context, expenseTxs, symbol, rates, false),
+          child: _buildColumn(context, expenseTxs, symbol, rates, false, customCategories),
         ),
       ],
     );
   }
 
-  Widget _buildColumn(BuildContext context, List<TransactionRecord> txs, String symbol, List<ExchangeRate> rates, bool isIncome) {
+  Widget _buildColumn(
+    BuildContext context,
+    List<TransactionRecord> txs,
+    String symbol,
+    List<ExchangeRate> rates,
+    bool isIncome,
+    List<CustomCategory> customCategories,
+  ) {
     final Color semanticColor = isIncome ? AppColors.getIncome(context) : AppColors.getExpense(context);
     
     return Container(
@@ -87,7 +95,7 @@ class TimelineActivityWidget extends ConsumerWidget {
             padding: const EdgeInsets.only(top: 10, bottom: 6, left: 4, right: 4),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.start, // Tepeden başla
-              children: txs.map((tx) => _buildMiniCard(context, tx, symbol, rates, isLeft: isIncome)).toList(),
+              children: txs.map((tx) => _buildMiniCard(context, tx, symbol, rates, customCategories, isLeft: isIncome)).toList(),
             ),
           ),
         ],
@@ -95,26 +103,33 @@ class TimelineActivityWidget extends ConsumerWidget {
     );
   }
 
-  Widget _buildMiniCard(BuildContext context, TransactionRecord tx, String symbol, List<ExchangeRate> rates, {required bool isLeft}) {
+  Widget _buildMiniCard(
+    BuildContext context,
+    TransactionRecord tx,
+    String symbol,
+    List<ExchangeRate> rates,
+    List<CustomCategory> customCategories, {
+    required bool isLeft,
+  }) {
     final isIncome = tx.isIncome;
     final Color semanticColor = isIncome ? AppColors.getIncome(context) : AppColors.getExpense(context);
-    final Color categoryColor = IconUtils.getColor(tx.iconCode ?? tx.categoryId);
-    final IconData categoryIcon = IconUtils.getIcon(tx.iconCode ?? tx.categoryId);
+    final Color categoryColor = CategoryUtils.getCategoryColor(
+      categoryId: tx.categoryId,
+      customCategories: customCategories,
+    );
+    final IconData categoryIcon = CategoryUtils.getCategoryIcon(
+      categoryId: tx.categoryId,
+      customCategories: customCategories,
+      iconCode: tx.iconCode,
+    );
     
     final l10n = AppLocalizations.of(context)!;
-    final categoryInfo = _getCategoryInfo(context, l10n, tx.categoryId, isIncome);
-    final String subName = categoryInfo['sub'] ?? '';
-    final String parentName = categoryInfo['parent'] ?? '';
-    final String cleanTitle = tx.title.trim();
-    
-    String displayTitle;
-    if (cleanTitle.isNotEmpty && cleanTitle.toLowerCase() != subName.toLowerCase() && cleanTitle.toLowerCase() != parentName.toLowerCase()) {
-      displayTitle = cleanTitle;
-    } else if (subName.isNotEmpty) {
-      displayTitle = subName;
-    } else {
-      displayTitle = parentName;
-    }
+    final String displayTitle = CategoryUtils.getCategoryName(
+      categoryId: tx.categoryId,
+      context: context,
+      customCategories: customCategories,
+      fallbackTitle: tx.title,
+    );
 
     return Container(
       margin: const EdgeInsets.only(bottom: 3),
@@ -131,10 +146,10 @@ class TimelineActivityWidget extends ConsumerWidget {
       child: Row(
         mainAxisAlignment: isLeft ? MainAxisAlignment.end : MainAxisAlignment.start,
         children: [
-          if (!isLeft) _buildIcon(categoryIcon, categoryColor),
+          if (!isLeft) _buildIcon(context, categoryIcon, categoryColor),
           if (!isLeft) const SizedBox(width: 5),
           
-          if (isLeft) _buildDateText(tx, isLeft, l10n),
+          if (isLeft) _buildDateText(tx, isLeft, l10n, context),
           
           Expanded(
             child: Column(
@@ -143,11 +158,11 @@ class TimelineActivityWidget extends ConsumerWidget {
               children: [
                 Text(
                   displayTitle,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 8, 
                     fontWeight: FontWeight.w800, 
                     letterSpacing: -0.2,
-                    color: Colors.white, // Daha net başlık
+                    color: AppColors.getTextPrimary(context), // Daha net başlık
                   ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
@@ -164,58 +179,37 @@ class TimelineActivityWidget extends ConsumerWidget {
             ),
           ),
           
-          if (!isLeft) _buildDateText(tx, isLeft, l10n),
+          if (!isLeft) _buildDateText(tx, isLeft, l10n, context),
           if (isLeft) const SizedBox(width: 5),
-          if (isLeft) _buildIcon(categoryIcon, categoryColor),
+          if (isLeft) _buildIcon(context, categoryIcon, categoryColor),
         ],
       ),
     );
   }
 
-  Widget _buildDateText(TransactionRecord tx, bool isLeft, AppLocalizations l10n) {
+  Widget _buildDateText(TransactionRecord tx, bool isLeft, AppLocalizations l10n, BuildContext context) {
     return Padding(
       padding: EdgeInsets.only(left: isLeft ? 0 : 5, right: isLeft ? 5 : 0),
       child: Text(
         _formatSmartDate(tx.updatedAt, l10n), // EKlenme zamanını (updatedAt) kullan
         style: TextStyle(
           fontSize: 6, 
-          color: Colors.white.withValues(alpha: 0.25), 
+          color: AppColors.getTextSecondary(context).withValues(alpha: 0.5), 
           fontWeight: FontWeight.w700
         ),
       ),
     );
   }
 
-  Widget _buildIcon(IconData icon, Color color) {
+  Widget _buildIcon(BuildContext context, IconData icon, Color color) {
     return Container(
       width: 17, height: 17,
-      decoration: BoxDecoration(color: color, borderRadius: BorderRadius.circular(5)),
+      decoration: BoxDecoration(
+        color: AppColors.getAccentDeep(context, color), 
+        borderRadius: BorderRadius.circular(5),
+      ),
       child: Icon(icon, size: 9, color: Colors.white),
     );
-  }
-
-  Map<String, String> _getCategoryInfo(BuildContext context, AppLocalizations l10n, String? categoryId, bool isIncome) {
-    if (categoryId == null) return {'parent': l10n.other, 'sub': l10n.other};
-    final String targetId = categoryId.toLowerCase();
-    
-    final categories = isIncome 
-        ? TransactionCategoryData.getIncomeCategories(context, l10n)
-        : TransactionCategoryData.getExpenseCategories(context, l10n);
-        
-    for (var cat in categories) {
-      final String parentName = cat['name'] as String;
-      if ((cat['id'] as String).toLowerCase() == targetId) return {'parent': parentName, 'sub': parentName};
-      
-      if (cat['subModels'] != null) {
-        for (var sub in (cat['subModels'] as List)) {
-          if ((sub['id'] as String).toLowerCase() == targetId) {
-            return {'parent': parentName, 'sub': sub['name'] as String};
-          }
-        }
-      }
-    }
-    
-    return {'parent': categoryId, 'sub': categoryId};
   }
 
 
@@ -248,12 +242,12 @@ class TimelineActivityWidget extends ConsumerWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.history_rounded, color: Colors.white.withValues(alpha: 0.05), size: 48),
+          Icon(Icons.history_rounded, color: AppColors.getTextSecondary(context).withValues(alpha: 0.15), size: 48),
           const SizedBox(height: 12),
           Text(
             l10n.historyEmpty,
             style: TextStyle(
-              color: Colors.white.withValues(alpha: 0.15),
+              color: AppColors.getTextSecondary(context).withValues(alpha: 0.5),
               fontSize: 10,
               fontWeight: FontWeight.w600,
               letterSpacing: 0.5,

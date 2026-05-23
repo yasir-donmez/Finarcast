@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/app_constants.dart';
 import '../../../core/utils/currency_utils.dart';
-import '../../../shared/widgets/precision_knob_surface.dart';
+import '../../../shared/widgets/knob_surface.dart';
 import '../dashboard_providers.dart';
 import '../../../core/providers/settings_provider.dart';
 
@@ -34,7 +34,7 @@ class AnimatedCurrencySelector extends ConsumerWidget {
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           // Sol: Para Birimi Simgesi (Sabit Boyut)
-          PrecisionKnobSurface(
+          KnobSurface(
             size: 54,
             child: Center(
               child: Text(

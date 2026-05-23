@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../core/theme/app_constants.dart';
-import '../../../shared/widgets/precision_picker_field.dart';
+import '../../../shared/widgets/picker_field.dart';
 import '../../../l10n/app_localizations.dart';
 
 class TransactionCurrencySelector extends StatefulWidget {
@@ -28,7 +28,7 @@ class _TransactionCurrencySelectorState extends State<TransactionCurrencySelecto
     int currentIndex = _options.indexOf(widget.selectedCurrency);
     if (currentIndex == -1) currentIndex = 0;
 
-    return PrecisionPickerField(
+    return PickerField(
       icon: Icons.currency_exchange_rounded,
       label: l10n.currency,
       items: _options,

@@ -86,7 +86,4 @@ class CurrencyUtils {
       default: return symbol;
     }
   }
-
-  /// Mevcut tüm para birimi sembollerini getir (Seçim listesi için)
-  static List<String> get availableSymbols => ['₺', r'$', '€', '£', '¥', '₩', '元', r'R$', 'Fr', 'G', 'Ag', 'SR', 'KD'];
 }

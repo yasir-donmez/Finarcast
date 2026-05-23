@@ -9,12 +9,12 @@ import '../../../core/providers/settings_provider.dart';
 import '../../../core/utils/currency_utils.dart';
 import '../../../core/utils/icon_utils.dart';
 import '../../../core/database/models/exchange_rate.dart';
-import '../../../shared/widgets/precision_toggle.dart';
-import '../../../shared/widgets/precision_segmented_control.dart';
-import '../../../shared/widgets/precision_card.dart';
-import '../../../shared/widgets/precision_input.dart';
-import '../../../shared/widgets/precision_icon_button.dart';
-import '../../../shared/widgets/precision_dialog.dart';
+import '../../../shared/widgets/custom_switch.dart';
+import '../../../shared/widgets/segmented_control.dart';
+import '../../../shared/widgets/custom_card.dart';
+import '../../../shared/widgets/custom_text_field.dart';
+import '../../../shared/widgets/custom_icon_button.dart';
+import '../../../shared/widgets/custom_dialog.dart';
 import '../../../l10n/app_localizations.dart';
 import '../vaults_providers.dart';
 
@@ -37,13 +37,23 @@ class _VaultDetailSheetState extends ConsumerState<VaultDetailSheet> with Single
   Set<int>? _tempSelectedTxIds;
   bool _isInitialized = false;
 
-  List<Map<String, String>> _getCurrencies(AppLocalizations l10n) => [
-    {'symbol': 'AUTO', 'label': l10n.auto},
-    {'symbol': '₺', 'label': 'TL'},
-    {'symbol': '\$', 'label': 'USD'},
-    {'symbol': '€', 'label': 'EUR'},
-    {'symbol': 'G', 'label': l10n.gold},
-  ];
+  List<Map<String, String>> _getCurrencies(AppLocalizations l10n) {
+    final List<Map<String, String>> items = [
+      {'symbol': 'AUTO', 'label': l10n.auto},
+    ];
+    for (var symbol in AppCurrency.displaySymbols) {
+      String label = symbol;
+      if (symbol == '₺') {
+        label = 'TL';
+      } else if (symbol == r'$') {
+        label = 'USD';
+      } else if (symbol == '€') {
+        label = 'EUR';
+      }
+      items.add({'symbol': symbol, 'label': label});
+    }
+    return items;
+  }
 
   @override
   void initState() {
@@ -173,7 +183,7 @@ class _VaultDetailSheetState extends ConsumerState<VaultDetailSheet> with Single
         mainAxisSize: MainAxisSize.min,
         children: [
           if (!isMainVault)
-            PrecisionSegmentedControl(
+            SegmentedControl(
               tabs: [l10n.transactions, l10n.manage],
               selectedIndex: _activeTab == VaultDetailTab.transactions ? 0 : 1,
               onTabChanged: (index) => _switchTab(index == 0 ? VaultDetailTab.transactions : VaultDetailTab.manage),
@@ -198,9 +208,36 @@ class _VaultDetailSheetState extends ConsumerState<VaultDetailSheet> with Single
   }
 
   Widget _buildMainView(BuildContext context, Vault vault, List<TransactionUI> vaultTransactions, Color activeColor, bool isDark, bool isMainVault, String currency, double sf, List<ExchangeRate> rates, AppLocalizations l10n) {
-    final incomeLoad = vaultTransactions.where((t) => t.isIncome).fold<double>(0, (sum, t) => sum + t.getConvertedMonthlyEquivalent(currency, rates));
-    final expenseLoad = vaultTransactions.where((t) => !t.isIncome).fold<double>(0, (sum, t) => sum + t.getConvertedMonthlyEquivalent(currency, rates));
+    // === FİNANSAL HESAPLAMALAR ===
+    final recurringTxs = vaultTransactions.where((t) => t.periodType != 0).toList();
+    final incomeLoad = recurringTxs.where((t) => t.isIncome).fold<double>(0, (sum, t) => sum + t.getConvertedMonthlyEquivalent(currency, rates));
+    final expenseLoad = recurringTxs.where((t) => !t.isIncome).fold<double>(0, (sum, t) => sum + t.getConvertedMonthlyEquivalent(currency, rates));
     final netLoad = incomeLoad - expenseLoad;
+    final savingsRate = incomeLoad > 0 ? ((netLoad / incomeLoad) * 100).clamp(-999.0, 100.0) : 0.0;
+    final yearlyProjection = netLoad * 12;
+
+    // En büyük gelir ve gider kalemleri
+    final incomeItems = recurringTxs.where((t) => t.isIncome).toList()..sort((a, b) => b.getConvertedMonthlyEquivalent(currency, rates).compareTo(a.getConvertedMonthlyEquivalent(currency, rates)));
+    final expenseItems = recurringTxs.where((t) => !t.isIncome).toList()..sort((a, b) => b.getConvertedMonthlyEquivalent(currency, rates).compareTo(a.getConvertedMonthlyEquivalent(currency, rates)));
+    final topIncome = incomeItems.isNotEmpty ? incomeItems.first : null;
+    final topExpense = expenseItems.isNotEmpty ? expenseItems.first : null;
+
+    // İşlem sayısı dağılımı
+    final incomeCount = vaultTransactions.where((t) => t.isIncome).length;
+    final expenseCount = vaultTransactions.where((t) => !t.isIncome).length;
+
+    // Senaryo analizi (esnek işlemlerin min/max değerlerine göre)
+    final hasFlexible = recurringTxs.any((t) => t.minAmount != null || t.maxAmount != null);
+    double monthlyBest = 0, monthlyWorst = 0;
+    for (final tx in recurringTxs) {
+      if (tx.isIncome) {
+        monthlyBest += tx.maxMonthlyEquivalent > 0 ? CurrencyUtils.convert(tx.maxMonthlyEquivalent, tx.currency ?? '₺', currency, rates) : tx.getConvertedMonthlyEquivalent(currency, rates);
+        monthlyWorst += tx.minMonthlyEquivalent > 0 ? CurrencyUtils.convert(tx.minMonthlyEquivalent, tx.currency ?? '₺', currency, rates) : tx.getConvertedMonthlyEquivalent(currency, rates);
+      } else {
+        monthlyBest -= tx.minMonthlyEquivalent > 0 ? CurrencyUtils.convert(tx.minMonthlyEquivalent, tx.currency ?? '₺', currency, rates) : tx.getConvertedMonthlyEquivalent(currency, rates);
+        monthlyWorst -= tx.maxMonthlyEquivalent > 0 ? CurrencyUtils.convert(tx.maxMonthlyEquivalent, tx.currency ?? '₺', currency, rates) : tx.getConvertedMonthlyEquivalent(currency, rates);
+      }
+    }
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -209,6 +246,7 @@ class _VaultDetailSheetState extends ConsumerState<VaultDetailSheet> with Single
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // === HEADER ===
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             child: Row(
@@ -228,57 +266,329 @@ class _VaultDetailSheetState extends ConsumerState<VaultDetailSheet> with Single
               ],
             ),
           ),
+
           const SizedBox(height: 8),
-          PrecisionCard(
+
+          // === 1. AYLIK NET BAKİYE (Hero Kart) ===
+          CustomCard(
             scalingFactor: sf,
-            backgroundColor: activeColor.withValues(alpha: 0.05),
-            borderColor: activeColor.withValues(alpha: 0.1),
-            padding: const EdgeInsets.all(16),
-            child: Row(
+            backgroundColor: activeColor.withValues(alpha: 0.06),
+            borderColor: activeColor.withValues(alpha: 0.12),
+            padding: EdgeInsets.all(16 * sf),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                Row(
                   children: [
-                    Text(l10n.averageMonthlyLoad.toUpperCase(), style: TextStyle(fontSize: 9 * sf, fontWeight: FontWeight.w900, color: activeColor.withValues(alpha: 0.6), letterSpacing: 1)),
-                    const SizedBox(height: 4),
-                    Text(CurrencyUtils.formatFullAmount(netLoad, symbol: currency), style: TextStyle(fontSize: 20 * sf, fontWeight: FontWeight.w900, color: netLoad >= 0 ? AppColors.getIncome(context) : AppColors.getExpense(context))),
+                    Container(
+                      padding: EdgeInsets.all(8 * sf),
+                      decoration: BoxDecoration(
+                        color: activeColor.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(10 * sf),
+                      ),
+                      child: Icon(Icons.account_balance_wallet_rounded, color: activeColor, size: 18 * sf),
+                    ),
+                    SizedBox(width: 10 * sf),
+                    Text(l10n.monthlyNetBalance, style: TextStyle(fontSize: 9 * sf, fontWeight: FontWeight.w900, color: activeColor.withValues(alpha: isDark ? 0.7 : 0.95), letterSpacing: 1.2)),
+                    const Spacer(),
+                    Text(l10n.perMonth, style: TextStyle(fontSize: 10 * sf, fontWeight: FontWeight.w700, color: AppColors.getTextSecondary(context).withValues(alpha: isDark ? 0.4 : 0.7))),
                   ],
                 ),
-                const Spacer(),
-                Icon(Icons.query_stats_rounded, color: activeColor.withValues(alpha: 0.3), size: 24 * sf),
+                SizedBox(height: 12 * sf),
+                Text(
+                  CurrencyUtils.formatFullAmount(netLoad, symbol: currency),
+                  style: TextStyle(fontSize: 28 * sf, fontWeight: FontWeight.w900, color: netLoad >= 0 ? AppColors.getIncome(context) : AppColors.getExpense(context), letterSpacing: -1),
+                ),
+                SizedBox(height: 12 * sf),
+                // Gelir & Gider satırı
+                Row(
+                  children: [
+                    _buildMiniMetric(context, l10n.income, CurrencyUtils.formatFullAmount(incomeLoad, symbol: currency), AppColors.getIncome(context), sf),
+                    SizedBox(width: 16 * sf),
+                    _buildMiniMetric(context, l10n.expense, CurrencyUtils.formatFullAmount(expenseLoad, symbol: currency), AppColors.getExpense(context), sf),
+                  ],
+                ),
               ],
             ),
           ),
-          const SizedBox(height: 24),
-          Text(l10n.transactions, style: TextStyle(fontSize: 14 * sf, fontWeight: FontWeight.w900, color: (Theme.of(context).brightness == Brightness.dark ? Colors.white : Colors.black).withValues(alpha: Theme.of(context).brightness == Brightness.dark ? 0.45 : 0.65))),
-          const SizedBox(height: 12),
-          if (vaultTransactions.isNotEmpty)
-            ConstrainedBox(
-              constraints: BoxConstraints(maxHeight: MediaQuery.of(context).size.height * 0.35 * sf),
-              child: ListView.separated(
-                shrinkWrap: true,
-                padding: EdgeInsets.symmetric(vertical: 4 * sf),
-                itemCount: vaultTransactions.length,
-                separatorBuilder: (_, __) => SizedBox(height: 10 * sf),
-                itemBuilder: (context, index) => _buildTransactionItem(context, vaultTransactions[index], sf, isDark),
-              ),
-            )
-          else
-            Container(
-              width: double.infinity,
-              padding: EdgeInsets.symmetric(vertical: 40 * sf),
-              child: Opacity(
-                opacity: 0.5,
-                child: Column(
-                  children: [
-                    Icon(Icons.receipt_long_rounded, size: 40 * sf),
-                    SizedBox(height: 8 * sf),
-                    Text(l10n.noTransactionsInVault, style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13 * sf)),
-                  ],
+
+          SizedBox(height: 10 * sf),
+
+          // === 2. TASARRUF ORANI & YILLIK PROJEKSİYON (İkili Kart) ===
+          Row(
+            children: [
+              Expanded(
+                child: CustomCard(
+                  scalingFactor: sf,
+                  padding: EdgeInsets.all(14 * sf),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Icon(Icons.savings_rounded, color: savingsRate >= 0 ? Colors.teal : AppColors.getExpense(context), size: 14 * sf),
+                          SizedBox(width: 6 * sf),
+                          Flexible(child: Text(l10n.savingsRate, style: TextStyle(fontSize: 8 * sf, fontWeight: FontWeight.w900, color: AppColors.getTextSecondary(context).withValues(alpha: isDark ? 0.5 : 0.8), letterSpacing: 0.8))),
+                        ],
+                      ),
+                      SizedBox(height: 8 * sf),
+                      Text(
+                        incomeLoad > 0 ? '%${savingsRate.toStringAsFixed(1)}' : '—',
+                        style: TextStyle(fontSize: 22 * sf, fontWeight: FontWeight.w900, color: savingsRate >= 20 ? Colors.teal : savingsRate >= 0 ? Colors.orange : AppColors.getExpense(context)),
+                      ),
+                    ],
+                  ),
                 ),
               ),
+              SizedBox(width: 10 * sf),
+              Expanded(
+                child: CustomCard(
+                  scalingFactor: sf,
+                  padding: EdgeInsets.all(14 * sf),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Icon(Icons.trending_up_rounded, color: yearlyProjection >= 0 ? AppColors.getIncome(context) : AppColors.getExpense(context), size: 14 * sf),
+                          SizedBox(width: 6 * sf),
+                          Flexible(child: Text(l10n.yearlyProjection, style: TextStyle(fontSize: 8 * sf, fontWeight: FontWeight.w900, color: AppColors.getTextSecondary(context).withValues(alpha: isDark ? 0.5 : 0.8), letterSpacing: 0.8))),
+                        ],
+                      ),
+                      SizedBox(height: 8 * sf),
+                      FittedBox(
+                        fit: BoxFit.scaleDown,
+                        alignment: Alignment.centerLeft,
+                        child: Text(
+                          CurrencyUtils.formatFullAmount(yearlyProjection, symbol: currency),
+                          style: TextStyle(fontSize: 20 * sf, fontWeight: FontWeight.w900, color: yearlyProjection >= 0 ? AppColors.getIncome(context) : AppColors.getExpense(context)),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+
+          SizedBox(height: 10 * sf),
+
+          // === 3. EN BÜYÜK GELİR & GİDER (İkili Kart) ===
+          Row(
+            children: [
+              Expanded(
+                child: CustomCard(
+                  scalingFactor: sf,
+                  padding: EdgeInsets.all(14 * sf),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(l10n.topIncome, style: TextStyle(fontSize: 8 * sf, fontWeight: FontWeight.w900, color: AppColors.getIncome(context).withValues(alpha: isDark ? 0.6 : 0.85), letterSpacing: 0.8)),
+                      SizedBox(height: 6 * sf),
+                      if (topIncome != null) ...[
+                        Row(
+                          children: [
+                            Icon(topIncome.icon, color: topIncome.color, size: 16 * sf),
+                            SizedBox(width: 6 * sf),
+                            Flexible(child: Text(topIncome.name, style: TextStyle(fontSize: 12 * sf, fontWeight: FontWeight.w800), maxLines: 1, overflow: TextOverflow.ellipsis)),
+                          ],
+                        ),
+                        SizedBox(height: 4 * sf),
+                        Text(CurrencyUtils.formatFullAmount(topIncome.getConvertedMonthlyEquivalent(currency, rates), symbol: currency), style: TextStyle(fontSize: 14 * sf, fontWeight: FontWeight.w900, color: AppColors.getIncome(context))),
+                      ] else
+                        Text('—', style: TextStyle(fontSize: 14 * sf, fontWeight: FontWeight.w700, color: AppColors.getTextSecondary(context).withValues(alpha: 0.3))),
+                    ],
+                  ),
+                ),
+              ),
+              SizedBox(width: 10 * sf),
+              Expanded(
+                child: CustomCard(
+                  scalingFactor: sf,
+                  padding: EdgeInsets.all(14 * sf),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(l10n.topExpense, style: TextStyle(fontSize: 8 * sf, fontWeight: FontWeight.w900, color: AppColors.getExpense(context).withValues(alpha: isDark ? 0.6 : 0.85), letterSpacing: 0.8)),
+                      SizedBox(height: 6 * sf),
+                      if (topExpense != null) ...[
+                        Row(
+                          children: [
+                            Icon(topExpense.icon, color: topExpense.color, size: 16 * sf),
+                            SizedBox(width: 6 * sf),
+                            Flexible(child: Text(topExpense.name, style: TextStyle(fontSize: 12 * sf, fontWeight: FontWeight.w800), maxLines: 1, overflow: TextOverflow.ellipsis)),
+                          ],
+                        ),
+                        SizedBox(height: 4 * sf),
+                        Text(CurrencyUtils.formatFullAmount(topExpense.getConvertedMonthlyEquivalent(currency, rates), symbol: currency), style: TextStyle(fontSize: 14 * sf, fontWeight: FontWeight.w900, color: AppColors.getExpense(context))),
+                      ] else
+                        Text('—', style: TextStyle(fontSize: 14 * sf, fontWeight: FontWeight.w700, color: AppColors.getTextSecondary(context).withValues(alpha: 0.3))),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+
+          SizedBox(height: 10 * sf),
+
+          // === 4. İŞLEM DAĞILIMI ===
+          CustomCard(
+            scalingFactor: sf,
+            padding: EdgeInsets.all(14 * sf),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(l10n.transactionBreakdown, style: TextStyle(fontSize: 9 * sf, fontWeight: FontWeight.w900, color: AppColors.getTextSecondary(context).withValues(alpha: isDark ? 0.5 : 0.8), letterSpacing: 1)),
+                SizedBox(height: 10 * sf),
+                // Progress bar
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(6),
+                  child: SizedBox(
+                    height: 8 * sf,
+                    child: Row(
+                      children: [
+                        if (incomeCount > 0)
+                          Flexible(
+                            flex: incomeCount,
+                            child: Container(color: AppColors.getIncome(context)),
+                          ),
+                        if (expenseCount > 0)
+                          Flexible(
+                            flex: expenseCount,
+                            child: Container(color: AppColors.getExpense(context)),
+                          ),
+                        if (incomeCount == 0 && expenseCount == 0)
+                          Expanded(child: Container(color: AppColors.getTextSecondary(context).withValues(alpha: 0.1))),
+                      ],
+                    ),
+                  ),
+                ),
+                SizedBox(height: 10 * sf),
+                Row(
+                  children: [
+                    _buildCountChip(context, l10n.incomeCount, incomeCount, AppColors.getIncome(context), sf),
+                    SizedBox(width: 12 * sf),
+                    _buildCountChip(context, l10n.expenseCount, expenseCount, AppColors.getExpense(context), sf),
+                    const Spacer(),
+                    Text(l10n.itemCount(vaultTransactions.length), style: TextStyle(fontSize: 11 * sf, fontWeight: FontWeight.w700, color: AppColors.getTextSecondary(context).withValues(alpha: isDark ? 0.4 : 0.7))),
+                  ],
+                ),
+              ],
             ),
-          const SizedBox(height: 20),
+          ),
+
+          // === 5. SENARYO ANALİZİ (sadece esnek işlem varsa) ===
+          if (hasFlexible) ...[
+            SizedBox(height: 10 * sf),
+            CustomCard(
+              scalingFactor: sf,
+              backgroundColor: Colors.deepPurple.withValues(alpha: isDark ? 0.08 : 0.04),
+              borderColor: Colors.deepPurple.withValues(alpha: 0.12),
+              padding: EdgeInsets.all(14 * sf),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Icon(Icons.analytics_rounded, color: Colors.deepPurple, size: 16 * sf),
+                      SizedBox(width: 8 * sf),
+                      Text(l10n.scenarioAnalysis, style: TextStyle(fontSize: 9 * sf, fontWeight: FontWeight.w900, color: Colors.deepPurple.withValues(alpha: isDark ? 0.7 : 0.95), letterSpacing: 1)),
+                    ],
+                  ),
+                  SizedBox(height: 12 * sf),
+                  // Aylık senaryolar
+                  Row(
+                    children: [
+                      Expanded(child: _buildScenarioCell(context, l10n.monthlyBest, monthlyBest, currency, AppColors.getIncome(context), sf)),
+                      SizedBox(width: 10 * sf),
+                      Expanded(child: _buildScenarioCell(context, l10n.monthlyWorst, monthlyWorst, currency, AppColors.getExpense(context), sf)),
+                    ],
+                  ),
+                  SizedBox(height: 8 * sf),
+                  // Yıllık senaryolar
+                  Row(
+                    children: [
+                      Expanded(child: _buildScenarioCell(context, l10n.yearlyBest, monthlyBest * 12, currency, AppColors.getIncome(context), sf)),
+                      SizedBox(width: 10 * sf),
+                      Expanded(child: _buildScenarioCell(context, l10n.yearlyWorst, monthlyWorst * 12, currency, AppColors.getExpense(context), sf)),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ],
+
+          SizedBox(height: 16 * sf),
+        ],
+      ),
+    );
+  }
+
+  // === YARDIMCI WİDGETLER ===
+
+  Widget _buildMiniMetric(BuildContext context, String label, String value, Color color, double sf) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return Expanded(
+      child: Container(
+        padding: EdgeInsets.symmetric(horizontal: 12 * sf, vertical: 8 * sf),
+        decoration: BoxDecoration(
+          color: color.withValues(alpha: 0.08),
+          borderRadius: BorderRadius.circular(10 * sf),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(label.toUpperCase(), style: TextStyle(fontSize: 8 * sf, fontWeight: FontWeight.w900, color: color.withValues(alpha: isDark ? 0.6 : 0.85), letterSpacing: 0.8)),
+            SizedBox(height: 2 * sf),
+            FittedBox(
+              fit: BoxFit.scaleDown,
+              alignment: Alignment.centerLeft,
+              child: Text(value, style: TextStyle(fontSize: 15 * sf, fontWeight: FontWeight.w900, color: color)),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCountChip(BuildContext context, String label, int count, Color color, double sf) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          width: 8 * sf, height: 8 * sf,
+          decoration: BoxDecoration(color: color, borderRadius: BorderRadius.circular(2)),
+        ),
+        SizedBox(width: 4 * sf),
+        Text('$label: $count', style: TextStyle(fontSize: 11 * sf, fontWeight: FontWeight.w700, color: AppColors.getTextSecondary(context).withValues(alpha: isDark ? 0.6 : 0.85))),
+      ],
+    );
+  }
+
+  Widget _buildScenarioCell(BuildContext context, String label, double value, String currency, Color accentColor, double sf) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final isPositive = value >= 0;
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 12 * sf, vertical: 8 * sf),
+      decoration: BoxDecoration(
+        color: (isPositive ? AppColors.getIncome(context) : AppColors.getExpense(context)).withValues(alpha: 0.06),
+        borderRadius: BorderRadius.circular(10 * sf),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(label, style: TextStyle(fontSize: 8 * sf, fontWeight: FontWeight.w900, color: AppColors.getTextSecondary(context).withValues(alpha: isDark ? 0.5 : 0.8), letterSpacing: 0.5)),
+          SizedBox(height: 4 * sf),
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            alignment: Alignment.centerLeft,
+            child: Text(
+              CurrencyUtils.formatFullAmount(value, symbol: currency),
+              style: TextStyle(fontSize: 14 * sf, fontWeight: FontWeight.w900, color: isPositive ? AppColors.getIncome(context) : AppColors.getExpense(context)),
+            ),
+          ),
         ],
       ),
     );
@@ -298,7 +608,7 @@ class _VaultDetailSheetState extends ConsumerState<VaultDetailSheet> with Single
           Row(
             children: [
               Expanded(
-                child: PrecisionInput(
+                child: CustomTextField(
                   controller: _nameController,
                   hintText: l10n.vaultNameHint,
                   icon: Icons.edit_rounded,
@@ -306,7 +616,7 @@ class _VaultDetailSheetState extends ConsumerState<VaultDetailSheet> with Single
                 ),
               ),
               const SizedBox(width: 12),
-              PrecisionIconButton(
+              CustomIconButton(
                 icon: Icons.delete_outline_rounded,
                 onTap: () => _confirmDeleteVault(context, vault),
                 color: AppColors.error,
@@ -317,7 +627,7 @@ class _VaultDetailSheetState extends ConsumerState<VaultDetailSheet> with Single
             ],
           ),
           const SizedBox(height: 20),
-          Text(l10n.currency.toUpperCase(), style: TextStyle(fontSize: 10, fontWeight: FontWeight.w900, color: (Theme.of(context).brightness == Brightness.dark ? Colors.white : Colors.black).withValues(alpha: Theme.of(context).brightness == Brightness.dark ? 0.45 : 0.65), letterSpacing: 1)),
+          Text(l10n.currency.toUpperCase(), style: TextStyle(fontSize: 10, fontWeight: FontWeight.w900, color: AppColors.getTextSecondary(context), letterSpacing: 1)),
           const SizedBox(height: 12),
           SingleChildScrollView(
             scrollDirection: Axis.horizontal,
@@ -339,7 +649,7 @@ class _VaultDetailSheetState extends ConsumerState<VaultDetailSheet> with Single
                         borderRadius: BorderRadius.circular(20),
                         border: Border.all(color: isSelected ? activeColor : activeColor.withValues(alpha: 0.1), width: 1.5),
                       ),
-                      child: Text(c['label']!, style: TextStyle(fontSize: 10, fontWeight: FontWeight.w900, color: isSelected ? Colors.white : AppColors.getTextPrimary(context).withValues(alpha: 0.5), letterSpacing: 0.5)),
+                      child: Text(c['label']!, style: TextStyle(fontSize: 10, fontWeight: FontWeight.w900, color: isSelected ? Colors.white : AppColors.getTextSecondary(context), letterSpacing: 0.5)),
                     ),
                   ),
                 );
@@ -359,18 +669,18 @@ class _VaultDetailSheetState extends ConsumerState<VaultDetailSheet> with Single
               itemBuilder: (context, index) {
                 final tx = standaloneTransactions[index];
                 final isSelected = _tempSelectedTxIds?.contains(tx.dbId) ?? false;
-                return PrecisionCard(
+                return CustomCard(
                   scalingFactor: sf,
                   child: Row(
                     children: [
                       Container(
                         padding: EdgeInsets.all(8 * sf),
-                        decoration: BoxDecoration(color: tx.color.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(12 * sf)),
-                        child: Icon(tx.icon, color: tx.color, size: 20 * sf),
+                        decoration: BoxDecoration(color: AppColors.getAccentDeep(context, tx.color).withValues(alpha: 0.1), borderRadius: BorderRadius.circular(12 * sf)),
+                        child: Icon(tx.icon, color: AppColors.getAccentDeep(context, tx.color), size: 20 * sf),
                       ),
                       const SizedBox(width: 12),
                       Expanded(child: Text(tx.name, style: TextStyle(fontWeight: FontWeight.w700, fontSize: 14 * sf))),
-                      PrecisionToggle(
+                      CustomSwitch(
                         value: isSelected,
                         activeColor: activeColor,
                         activeIcon: Icons.check_rounded,
@@ -399,35 +709,9 @@ class _VaultDetailSheetState extends ConsumerState<VaultDetailSheet> with Single
       ),
     );
   }
-
-  Widget _buildTransactionItem(BuildContext context, TransactionUI tx, double sf, bool isDark) {
-    return PrecisionCard(
-      scalingFactor: sf,
-      child: Row(
-        children: [
-          Container(
-            padding: EdgeInsets.all(8 * sf),
-            decoration: BoxDecoration(color: tx.color.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(12 * sf)),
-            child: Icon(tx.icon, color: tx.color, size: 20 * sf),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(tx.name, style: TextStyle(fontWeight: FontWeight.w800, fontSize: 14 * sf, letterSpacing: -0.5)),
-                Text(CurrencyUtils.formatAmount(tx.effectiveAmount, currencySymbol: tx.currency ?? "₺"), style: TextStyle(fontSize: 12 * sf, fontWeight: FontWeight.w900, color: tx.isIncome ? AppColors.getIncome(context) : AppColors.getExpense(context))),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
   Future<void> _confirmDeleteVault(BuildContext context, Vault vault) async {
     final l10n = AppLocalizations.of(context)!;
-    final confirm = await showPrecisionDialog<bool>(
+    final confirm = await showCustomDialog<bool>(
       context: context,
       accentColor: AppColors.error,
       title: l10n.deleteVault,

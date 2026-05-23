@@ -5,7 +5,8 @@ import '../../core/providers/db_providers.dart';
 import '../../core/database/database_service.dart';
 import '../../core/database/models/transaction_record.dart';
 import '../../core/database/models/exchange_rate.dart';
-import '../../core/utils/icon_utils.dart';
+import '../../core/database/models/custom_category.dart';
+import '../../core/utils/category_utils.dart';
 import '../../core/utils/currency_utils.dart';
 
 /// Tek bir işlem kaydı (UI Model)
@@ -39,6 +40,7 @@ class TransactionUI {
   
   // --- Bildirim Ayarları ---
   final bool isNotificationEnabled;
+  final bool hasNotification;
   final int notificationReminderDays;
   final int notificationHour;
   final int notificationMinute;
@@ -68,6 +70,7 @@ class TransactionUI {
     this.isArchived = false,
     List<String>? groupIds,
     this.isNotificationEnabled = false,
+    this.hasNotification = false,
     this.notificationReminderDays = 0,
     this.notificationHour = 9,
     this.notificationMinute = 0,
@@ -75,30 +78,32 @@ class TransactionUI {
 
   /// Belirli bir tutarın aylık karşılığını hesaplar.
   double _calculateMonthly(double baseAmount) {
-    double monthly;
-    switch (periodType) {
-      case 1: // Haftalık
-        monthly = baseAmount * 4.33;
-      case 2: // Aylık
-        monthly = baseAmount;
-      case 3: // Yıllık
-        monthly = baseAmount / 12;
-      case 4: // 2 Haftada Bir
-        monthly = baseAmount * 2.16;
-      case 5: // 3 Haftada Bir
-        monthly = baseAmount * 1.44;
-      case 6: // 3 Ayda Bir
-        monthly = baseAmount / 3;
-      case 7: // 6 Ayda Bir
-        monthly = baseAmount / 6;
-      case 8: // Günlük
-        monthly = baseAmount * 30;
-      case 9: // 2 Günde Bir
-        monthly = baseAmount * 15;
-      case 10: // 3 Günde Bir
-        monthly = baseAmount * 10;
-      default: // Tek seferlik
-        monthly = 0;
+    double monthly = 0;
+    if (periodType == 0) {
+      monthly = 0;
+    } else if (periodType == 250) {
+      monthly = baseAmount * 21.67;
+    } else if (periodType == 251) {
+      monthly = baseAmount * 8.67;
+    } else {
+      final unit = periodType ~/ 100;
+      final interval = periodType % 100;
+      if (interval > 0) {
+        switch (unit) {
+          case 1: // Gün
+            monthly = baseAmount * (30 / interval);
+            break;
+          case 2: // Hafta
+            monthly = baseAmount * (4.33 / interval);
+            break;
+          case 3: // Ay
+            monthly = baseAmount / interval;
+            break;
+          case 4: // Yıl
+            monthly = baseAmount / (12 * interval);
+            break;
+        }
+      }
     }
     return double.parse(monthly.toStringAsFixed(2));
   }
@@ -135,6 +140,30 @@ class TransactionUI {
   }
 
   /// Bugüne kadar gerçekleşmiş tekrar sayısını hesaplar.
+  int _countWeekdays(DateTime start, DateTime end) {
+    int count = 0;
+    DateTime cur = start;
+    while (!cur.isAfter(end)) {
+      if (cur.weekday >= 1 && cur.weekday <= 5) {
+        count++;
+      }
+      cur = cur.add(const Duration(days: 1));
+    }
+    return count;
+  }
+
+  int _countWeekends(DateTime start, DateTime end) {
+    int count = 0;
+    DateTime cur = start;
+    while (!cur.isAfter(end)) {
+      if (cur.weekday == 6 || cur.weekday == 7) {
+        count++;
+      }
+      cur = cur.add(const Duration(days: 1));
+    }
+    return count;
+  }
+
   int get passedOccurrences {
     if (periodType == 0) {
       final now = DateTime.now();
@@ -151,32 +180,33 @@ class TransactionUI {
     final diffDays = now.difference(start).inDays;
     int intervals = 0;
     
-    switch (periodType) {
-      case 1: intervals = diffDays ~/ 7; break;
-      case 2: // Aylık
-        intervals = (now.year - start.year) * 12 + now.month - start.month;
-        if (now.day < start.day) intervals--;
-        break;
-      case 3: // Yıllık
-        intervals = now.year - start.year;
-        if (now.month < start.month || (now.month == start.month && now.day < start.day)) intervals--;
-        break;
-      case 4: intervals = diffDays ~/ 14; break;
-      case 5: intervals = diffDays ~/ 21; break;
-      case 6: // 3 Ayda bir
-        int months = (now.year - start.year) * 12 + now.month - start.month;
-        if (now.day < start.day) months--;
-        intervals = months ~/ 3;
-        break;
-      case 7: // 6 Ayda bir
-        int months = (now.year - start.year) * 12 + now.month - start.month;
-        if (now.day < start.day) months--;
-        intervals = months ~/ 6;
-        break;
-      case 8: intervals = diffDays; break; // Günlük
-      case 9: intervals = diffDays ~/ 2; break;
-      case 10: intervals = diffDays ~/ 3; break;
-      default: intervals = 0;
+    if (periodType == 250) {
+      intervals = _countWeekdays(start, now) - 1;
+    } else if (periodType == 251) {
+      intervals = _countWeekends(start, now) - 1;
+    } else {
+      final unit = periodType ~/ 100;
+      final interval = periodType % 100;
+      if (interval > 0) {
+        switch (unit) {
+          case 1: // Gün
+            intervals = diffDays ~/ interval;
+            break;
+          case 2: // Hafta
+            intervals = diffDays ~/ (interval * 7);
+            break;
+          case 3: // Ay
+            int months = (now.year - start.year) * 12 + now.month - start.month;
+            if (now.day < start.day) months--;
+            intervals = months ~/ interval;
+            break;
+          case 4: // Yıl
+            int years = now.year - start.year;
+            if (now.month < start.month || (now.month == start.month && now.day < start.day)) years--;
+            intervals = years ~/ interval;
+            break;
+        }
+      }
     }
     
     int passed = (intervals < 0 ? 0 : intervals) + 1;
@@ -207,19 +237,45 @@ class TransactionUI {
     DateTime? endDate;
     if (recurrenceDuration != null && recurrenceDuration! > 0) {
       final duration = recurrenceDuration! - 1;
-      if (duration <= 0) endDate = start;
+      if (duration <= 0) {
+        endDate = start;
+      }
       else {
-        switch (periodType) {
-          case 1: endDate = start.add(Duration(days: duration * 7)); break;
-          case 2: endDate = DateTime(start.year, start.month + duration, start.day); break;
-          case 3: endDate = DateTime(start.year + duration, start.month, start.day); break;
-          case 4: endDate = start.add(Duration(days: duration * 14)); break;
-          case 5: endDate = start.add(Duration(days: duration * 21)); break;
-          case 6: endDate = DateTime(start.year, start.month + (duration * 3), start.day); break;
-          case 7: endDate = DateTime(start.year, start.month + (duration * 6), start.day); break;
-          case 8: endDate = start.add(Duration(days: duration)); break;
-          case 9: endDate = start.add(Duration(days: duration * 2)); break;
-          case 10: endDate = start.add(Duration(days: duration * 3)); break;
+        if (periodType == 250) {
+          DateTime temp = start;
+          for (int i = 0; i < duration; i++) {
+            int addDays = 1;
+            if (temp.weekday == DateTime.friday) {
+              addDays = 3;
+            } else if (temp.weekday == DateTime.saturday) {
+              addDays = 2;
+            }
+            temp = temp.add(Duration(days: addDays));
+          }
+          endDate = temp;
+        } else if (periodType == 251) {
+          DateTime temp = start;
+          for (int i = 0; i < duration; i++) {
+            int addDays = 1;
+            if (temp.weekday == DateTime.sunday) {
+              addDays = 6;
+            } else if (temp.weekday >= DateTime.monday && temp.weekday <= DateTime.friday) {
+              addDays = DateTime.saturday - temp.weekday;
+            }
+            temp = temp.add(Duration(days: addDays));
+          }
+          endDate = temp;
+        } else {
+          final unit = periodType ~/ 100;
+          final interval = periodType % 100;
+          if (interval > 0) {
+            switch (unit) {
+              case 1: endDate = start.add(Duration(days: duration * interval)); break;
+              case 2: endDate = start.add(Duration(days: duration * interval * 7)); break;
+              case 3: endDate = DateTime(start.year, start.month + (duration * interval), start.day); break;
+              case 4: endDate = DateTime(start.year + (duration * interval), start.month, start.day); break;
+            }
+          }
         }
       }
     }
@@ -234,24 +290,30 @@ class TransactionUI {
     DateTime current = monthStart.isBefore(start) ? start : monthStart;
     final endIteration = endDate != null && endDate.isBefore(monthEnd) ? endDate : monthEnd;
 
-    if ([1, 4, 5, 8, 9, 10].contains(periodType)) {
+    final unit = periodType ~/ 100;
+    final interval = periodType % 100;
+
+    if (periodType == 250 || periodType == 251 || unit == 1 || unit == 2) {
       while (current.isBefore(endIteration) || current.isAtSameMomentAs(endIteration)) {
         final diffDays = current.difference(start).inDays;
         bool isHit = false;
-        switch (periodType) {
-          case 1: isHit = diffDays % 7 == 0; break;
-          case 4: isHit = diffDays % 14 == 0; break;
-          case 5: isHit = diffDays % 21 == 0; break;
-          case 8: isHit = true; break;
-          case 9: isHit = diffDays % 2 == 0; break;
-          case 10: isHit = diffDays % 3 == 0; break;
+        if (periodType == 250) {
+          isHit = current.weekday >= 1 && current.weekday <= 5;
+        } else if (periodType == 251) {
+          isHit = current.weekday == 6 || current.weekday == 7;
+        } else if (interval > 0) {
+          if (unit == 1) {
+            isHit = diffDays % interval == 0;
+          } else if (unit == 2) {
+            isHit = diffDays % (interval * 7) == 0;
+          }
         }
         if (isHit) occurrences++;
         current = current.add(const Duration(days: 1));
       }
     } 
     // Aylık/Yıllık bazlı periyotlar için:
-    else if ([2, 3, 6, 7].contains(periodType)) {
+    else if (unit == 3 || unit == 4) {
       // Bu periyotlarda ayın o günü tetiklenir (veya o aya ait son gün)
       int targetDay = recurrenceDate?.day ?? start.day;
       
@@ -265,11 +327,12 @@ class TransactionUI {
         // Ayların farkını bul
         int monthsDiff = (candidateDate.year - start.year) * 12 + (candidateDate.month - start.month);
         bool isHit = false;
-        switch (periodType) {
-          case 2: isHit = true; break;
-          case 3: isHit = monthsDiff % 12 == 0; break;
-          case 6: isHit = monthsDiff % 3 == 0; break;
-          case 7: isHit = monthsDiff % 6 == 0; break;
+        if (interval > 0) {
+          if (unit == 3) {
+            isHit = monthsDiff % interval == 0;
+          } else if (unit == 4) {
+            isHit = monthsDiff % (interval * 12) == 0;
+          }
         }
         if (isHit) occurrences = 1;
       }
@@ -278,12 +341,19 @@ class TransactionUI {
   }
 
   /// TransactionRecord'dan TransactionUI'a dönüştür
-  factory TransactionUI.fromDB(TransactionRecord record) {
+  factory TransactionUI.fromDB(TransactionRecord record, List<CustomCategory> customCategories) {
     return TransactionUI(
       id: 'db_${record.id}',
       name: record.title,
-      icon: IconUtils.getIcon(record.categoryId ?? record.iconCode ?? record.title),
-      color: IconUtils.getColor(record.categoryId ?? record.iconCode ?? record.title),
+      icon: CategoryUtils.getCategoryIcon(
+        categoryId: record.categoryId,
+        customCategories: customCategories,
+        iconCode: record.iconCode,
+      ),
+      color: CategoryUtils.getCategoryColor(
+        categoryId: record.categoryId,
+        customCategories: customCategories,
+      ),
       amount: record.amount,
       minAmount: record.minAmount,
       maxAmount: record.maxAmount,
@@ -304,6 +374,7 @@ class TransactionUI {
       isArchived: record.isArchived,
       groupIds: record.vaultIds.map((vId) => 'v_$vId').toList(),
       isNotificationEnabled: record.isNotificationEnabled,
+      hasNotification: record.hasNotification,
       notificationReminderDays: record.notificationReminderDays,
       notificationHour: record.notificationHour,
       notificationMinute: record.notificationMinute,
@@ -337,7 +408,8 @@ final transactionFilterProvider = StateProvider<TransactionFilter>(
 /// DB'den gelen işlemleri UI modeline çeviren provider
 final vaultTransactionsProvider = Provider<List<TransactionUI>>((ref) {
   final dbRecords = ref.watch(allTransactionsProvider);
-  return dbRecords.map((r) => TransactionUI.fromDB(r)).toList();
+  final customCategories = ref.watch(customCategoriesProvider);
+  return dbRecords.map((r) => TransactionUI.fromDB(r, customCategories)).toList();
 });
 
 /// Gruplama işlemi için yardımcı notifier

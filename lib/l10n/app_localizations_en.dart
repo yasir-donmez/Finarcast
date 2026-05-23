@@ -1216,4 +1216,138 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get disabled => 'Disabled';
+
+  @override
+  String get financialOverview => 'FINANCIAL OVERVIEW';
+
+  @override
+  String get monthlyNetBalance => 'MONTHLY NET BALANCE';
+
+  @override
+  String get savingsRate => 'SAVINGS RATE';
+
+  @override
+  String get yearlyProjection => 'YEARLY PROJECTION';
+
+  @override
+  String get topExpense => 'TOP EXPENSE';
+
+  @override
+  String get topIncome => 'TOP INCOME';
+
+  @override
+  String get transactionBreakdown => 'TRANSACTION BREAKDOWN';
+
+  @override
+  String get incomeCount => 'Income';
+
+  @override
+  String get expenseCount => 'Expense';
+
+  @override
+  String get scenarioAnalysis => 'SCENARIO ANALYSIS';
+
+  @override
+  String get monthlyBest => 'MONTHLY BEST';
+
+  @override
+  String get monthlyWorst => 'MONTHLY WORST';
+
+  @override
+  String get yearlyBest => 'YEARLY BEST';
+
+  @override
+  String get yearlyWorst => 'YEARLY WORST';
+
+  @override
+  String get noRecurring => 'No recurring transactions';
+
+  @override
+  String get perMonth => '/mo';
+
+  @override
+  String get perYear => '/yr';
+
+  @override
+  String itemCount(int count) {
+    return '$count Items';
+  }
+
+  @override
+  String get authEmailRequired => 'Please enter your email address.';
+
+  @override
+  String get authEmailInvalid => 'Please enter a valid email address.';
+
+  @override
+  String get authPasswordRequired => 'Please enter your password.';
+
+  @override
+  String get authPasswordTooShort =>
+      'Your password must be at least 6 characters.';
+
+  @override
+  String get authConfirmPasswordRequired => 'Please re-enter your password.';
+
+  @override
+  String get authPasswordsDoNotMatch =>
+      'The passwords you entered do not match.';
+
+  @override
+  String get authUsernameRequired => 'Please choose a username.';
+
+  @override
+  String get authUsernameTooShort =>
+      'The username must be at least 3 characters.';
+
+  @override
+  String get authUsernameInvalid =>
+      'The username can only contain letters, numbers, and underscores (_).';
+
+  @override
+  String get authUsernameTaken => 'This username is already taken.';
+
+  @override
+  String get authEmailNotConfirmed =>
+      'Your email address is not verified yet. Please enter the verification code sent to your email or request a new one.';
+
+  @override
+  String get authInvalidCredentials =>
+      'Your email address or password is incorrect.';
+
+  @override
+  String get authEmailExists =>
+      'An account with this email address already exists.';
+
+  @override
+  String get authWeakPassword =>
+      'Your password is too weak. Please enter a stronger password with at least 6 characters.';
+
+  @override
+  String get authOtpExpired =>
+      'The verification code has expired. Please request a new one.';
+
+  @override
+  String get authBadCode =>
+      'The verification code you entered is incorrect or invalid.';
+
+  @override
+  String get authSignupDisabled =>
+      'New user registration is currently disabled. Please contact the administrator.';
+
+  @override
+  String get authRateLimitExceeded =>
+      'Too many requests sent. Email rate limit exceeded, please try again in a while.';
+
+  @override
+  String get authOtpRequired =>
+      'Please enter the verification code (6 or 8 digits).';
+
+  @override
+  String get authOtpSent =>
+      'A new verification code has been sent to your email.';
+
+  @override
+  String get authRegistrationSuccess =>
+      'Registration successful! Please enter the verification code sent to your email.';
 }

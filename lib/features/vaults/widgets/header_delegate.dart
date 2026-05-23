@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'dart:ui';
 import '../../../l10n/app_localizations.dart';
 import '../../../core/theme/app_constants.dart';
+import '../../../shared/widgets/glass_surface.dart';
 import '../vaults_providers.dart';
 import 'vault_card_stack.dart';
 
@@ -59,29 +60,17 @@ class TrueMorphDeckHeaderDelegate extends SliverPersistentHeaderDelegate {
       child: Stack(
         clipBehavior: Clip.none,
         children: [
-          // GPU-Friendly Blur Layer: Constant blur radius, dynamic opacity
+          // Solid Background Layer: Dynamic opacity with glass surface
           if (bgAlpha > 0.01)
             Positioned.fill(
-              child: Opacity(
-                opacity: bgAlpha,
-                child: ClipRect(
-                  child: BackdropFilter(
-                    filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: AppColors.getBackground(context).withValues(alpha: 0.15),
-                        border: Border(
-                          bottom: BorderSide(
-                            color: (isDark ? Colors.white : Colors.black).withValues(
-                              alpha: progress > 0.95 ? (progress - 0.95) * 2 : 0.0,
-                            ),
-                            width: 0.5,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
+              child: GlassSurface(
+                borderRadius: 0,
+                showShadow: false,
+                opacityMultiplier: bgAlpha,
+                borderColor: (isDark ? Colors.white : Colors.black).withValues(
+                  alpha: progress > 0.95 ? (progress - 0.95) * 2 : 0.0,
                 ),
+                child: const SizedBox.expand(),
               ),
             ),
           // Content Layer
@@ -139,11 +128,11 @@ class TrueMorphDeckHeaderDelegate extends SliverPersistentHeaderDelegate {
                                     width: 8,
                                     height: 8,
                                     decoration: BoxDecoration(
-                                      color: Colors.redAccent,
+                                      color: AppColors.error,
                                       shape: BoxShape.circle,
                                       boxShadow: [
                                         BoxShadow(
-                                          color: Colors.redAccent.withValues(alpha: 0.5),
+                                          color: AppColors.error.withValues(alpha: 0.5),
                                           blurRadius: 4,
                                           spreadRadius: 1,
                                         ),
@@ -204,36 +193,31 @@ class HeaderIconButton extends StatelessWidget {
           child: AnimatedScale(
             scale: isPressed ? 0.95 : 1.0,
             duration: const Duration(milliseconds: 100),
-            child: ClipOval(
-              child: BackdropFilter(
-                filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-                child: AnimatedContainer(
-                  duration: const Duration(milliseconds: 150),
-                  padding: const EdgeInsets.all(10),
-                  decoration: BoxDecoration(
-                    color: isPressed
-                        ? (isDark ? Colors.white.withValues(alpha: 0.1) : Colors.black.withValues(alpha: 0.05))
-                        : (isDark ? Colors.black.withValues(alpha: 0.4) : Colors.white.withValues(alpha: 0.8)),
-                    shape: BoxShape.circle,
-                    border: Border.all(
-                      color: (activeColor ?? AppColors.getPrimary(context)).withValues(alpha: 0.15),
-                    ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: isPressed ? 0.05 : 0.1),
-                        blurRadius: isPressed ? 4 : 8,
-                        offset: Offset(0, isPressed ? 1 : 2),
-                      ),
-                    ],
-                  ),
-                  child: Icon(
-                    icon, 
-                    size: 20, 
-                    color: isSelected 
-                        ? (activeColor ?? AppColors.getPrimary(context)) 
-                        : AppColors.getTextPrimary(context).withValues(alpha: 0.7),
-                  ),
+            child: GlassSurface(
+              borderRadius: 999, // Tam dairesel buton
+              padding: const EdgeInsets.all(10),
+              showShadow: true,
+              backgroundColor: isPressed
+                  ? (isDark
+                      ? AppColors.getThemeSurface(context, 2).withValues(alpha: 0.75)
+                      : Colors.grey[200]!.withValues(alpha: 0.85))
+                  : (isDark
+                      ? Colors.black.withValues(alpha: 0.35)
+                      : Colors.white.withValues(alpha: 0.65)),
+              borderColor: (activeColor ?? AppColors.getPrimary(context)).withValues(alpha: isPressed ? 0.3 : 0.15),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: isPressed ? 0.03 : 0.08),
+                  blurRadius: isPressed ? 4 : 8,
+                  offset: Offset(0, isPressed ? 1 : 2),
                 ),
+              ],
+              child: Icon(
+                icon, 
+                size: 20, 
+                color: isPressed
+                    ? (activeColor ?? AppColors.getPrimary(context))
+                    : AppColors.getTextPrimary(context).withValues(alpha: 0.8),
               ),
             ),
           ),

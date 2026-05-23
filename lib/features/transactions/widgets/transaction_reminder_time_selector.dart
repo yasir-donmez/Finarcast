@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import '../../../shared/widgets/precision_sheet.dart';
-import '../../../shared/widgets/precision_picker.dart';
-import '../../../shared/widgets/precision_button.dart';
-import '../../../shared/widgets/precision_action.dart';
+import '../../../shared/widgets/custom_bottom_sheet.dart';
+import '../../../shared/widgets/wheel_picker.dart';
+import '../../../shared/widgets/custom_button.dart';
+import '../../../shared/widgets/clickable_action.dart';
 
 class TransactionReminderTimeSelector extends StatelessWidget {
   final TimeOfDay selectedTime;
@@ -23,7 +23,7 @@ class TransactionReminderTimeSelector extends StatelessWidget {
     int tempHour = selectedTime.hour;
     int tempMinute = selectedTime.minute;
 
-    PrecisionSheet.show(
+    CustomBottomSheet.show(
       context: context,
       title: 'HATIRLATMA SAATİ',
       child: Column(
@@ -37,7 +37,7 @@ class TransactionReminderTimeSelector extends StatelessWidget {
               children: [
                 SizedBox(
                   width: 100,
-                  child: PrecisionPicker.strings(
+                  child: WheelPicker.strings(
                     items: List.generate(24, (i) => i.toString().padLeft(2, '0')),
                     initialItem: tempHour,
                     onSelectedItemChanged: (idx) => tempHour = idx,
@@ -56,7 +56,7 @@ class TransactionReminderTimeSelector extends StatelessWidget {
                 ),
                 SizedBox(
                   width: 100,
-                  child: PrecisionPicker.strings(
+                  child: WheelPicker.strings(
                     items: List.generate(60, (i) => i.toString().padLeft(2, '0')),
                     initialItem: tempMinute,
                     onSelectedItemChanged: (idx) => tempMinute = idx,
@@ -66,7 +66,7 @@ class TransactionReminderTimeSelector extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 32),
-          PrecisionButton(
+          CustomButton(
             onTap: () {
               onChanged(TimeOfDay(hour: tempHour, minute: tempMinute));
               Navigator.pop(context);
@@ -83,7 +83,7 @@ class TransactionReminderTimeSelector extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return PrecisionAction(
+    return ClickableAction(
       onTap: () => _showTimePickerSheet(context),
       color: Colors.transparent,
       showFlash: false,

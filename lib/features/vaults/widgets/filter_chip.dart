@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../../shared/widgets/precision_glass_card.dart';
+import '../../../shared/widgets/solid_surface.dart';
 import '../../../core/theme/app_constants.dart';
 
 class VaultFilterChip extends StatelessWidget {
@@ -20,17 +20,16 @@ class VaultFilterChip extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: onTap,
-      child: PrecisionGlassCard(
+      child: SolidSurface(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         borderRadius: 16,
-        isGlass: true,
         color: null, // Parlamayı kaldırdık
         child: Text(
           label,
           style: TextStyle(
             fontSize: 12,
             fontWeight: isActive ? FontWeight.w800 : FontWeight.w500,
-            color: isActive ? activeColor : AppColors.getTextSecondary(context).withValues(alpha: 0.7),
+            color: isActive ? AppColors.getAccentDeep(context, activeColor) : AppColors.getTextSecondary(context).withValues(alpha: 0.7),
           ),
         ),
       ),

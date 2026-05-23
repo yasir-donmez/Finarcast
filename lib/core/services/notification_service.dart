@@ -303,19 +303,41 @@ class NotificationService {
   }
 
   DateTime _calculateNextOccurrence(DateTime current, int periodType) {
-    switch (periodType) {
-      case 8: return current.add(const Duration(days: 1)); // Günlük
-      case 9: return current.add(const Duration(days: 2)); // 2 Günde Bir
-      case 10: return current.add(const Duration(days: 3)); // 3 Günde Bir
-      case 1: return current.add(const Duration(days: 7)); // Haftalık
-      case 4: return current.add(const Duration(days: 14)); // 2 Haftada Bir
-      case 5: return current.add(const Duration(days: 21)); // 3 Haftada Bir
-      case 2: return DateTime(current.year, current.month + 1, current.day, current.hour, current.minute); // Aylık
-      case 6: return DateTime(current.year, current.month + 3, current.day, current.hour, current.minute); // 3 Ayda Bir
-      case 7: return DateTime(current.year, current.month + 6, current.day, current.hour, current.minute); // 6 Ayda Bir
-      case 3: return DateTime(current.year + 1, current.month, current.day, current.hour, current.minute); // Yıllık
-      default: return current.add(const Duration(days: 30)); // Varsayılan aylık
+    if (periodType == 250) {
+      // Hafta İçi (Pzt-Cum)
+      int addDays = 1;
+      if (current.weekday == DateTime.friday) {
+        addDays = 3;
+      } else if (current.weekday == DateTime.saturday) {
+        addDays = 2;
+      }
+      return current.add(Duration(days: addDays));
+    } else if (periodType == 251) {
+      // Hafta Sonu (Cmt-Paz)
+      int addDays = 1;
+      if (current.weekday == DateTime.sunday) {
+        addDays = 6;
+      } else if (current.weekday >= DateTime.monday && current.weekday <= DateTime.friday) {
+        addDays = DateTime.saturday - current.weekday;
+      }
+      return current.add(Duration(days: addDays));
+    } else {
+      final unit = periodType ~/ 100;
+      final interval = periodType % 100;
+      if (interval > 0) {
+        switch (unit) {
+          case 1: // Gün
+            return current.add(Duration(days: interval));
+          case 2: // Hafta
+            return current.add(Duration(days: interval * 7));
+          case 3: // Ay
+            return DateTime(current.year, current.month + interval, current.day, current.hour, current.minute);
+          case 4: // Yıl
+            return DateTime(current.year + interval, current.month, current.day, current.hour, current.minute);
+        }
+      }
     }
+    return current.add(const Duration(days: 30)); // Varsayılan aylık
   }
 
   DateTimeComponents? _getMatchComponents(int periodType) {

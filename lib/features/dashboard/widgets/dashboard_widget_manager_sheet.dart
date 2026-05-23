@@ -3,16 +3,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/app_constants.dart';
-import '../../../shared/widgets/precision_segmented_control.dart';
-import '../../../shared/widgets/precision_card.dart';
-import '../../../shared/widgets/precision_selector_field.dart';
-import '../../../shared/widgets/precision_multi_toggle.dart';
-import '../../../shared/widgets/precision_button.dart';
-import '../../../shared/widgets/precision_icon_button.dart';
+import '../../../shared/widgets/segmented_control.dart';
+import '../../../shared/widgets/custom_card.dart';
+import '../../../shared/widgets/selector_field.dart';
+import '../../../shared/widgets/multi_toggle.dart';
+import '../../../shared/widgets/custom_button.dart';
+import '../../../shared/widgets/custom_icon_button.dart';
 import '../../../l10n/app_localizations.dart';
 import '../providers/widget_layout_provider.dart';
 import 'dashboard_widget.dart'; // for DashboardWidgetSize
-import '../../../shared/widgets/precision_notification.dart';
+import '../../../shared/widgets/custom_notification.dart';
 
 enum WidgetManagerTab { active, library }
 
@@ -64,7 +64,7 @@ class _DashboardWidgetManagerSheetState extends ConsumerState<DashboardWidgetMan
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Center(
-            child: PrecisionSegmentedControl(
+            child: SegmentedControl(
               tabs: [l10n.dashboard, l10n.library],
               selectedIndex: _activeTab == WidgetManagerTab.active ? 0 : 1,
               onTabChanged: (index) => _switchTab(index == 0 ? WidgetManagerTab.active : WidgetManagerTab.library),
@@ -224,7 +224,7 @@ class _DashboardWidgetManagerSheetState extends ConsumerState<DashboardWidgetMan
           child: Opacity(opacity: value.clamp(0, 1), child: child),
         );
       },
-      child: PrecisionCard(
+      child: CustomCard(
         scalingFactor: scalingFactor,
         child: Column(
           children: [
@@ -246,7 +246,7 @@ class _DashboardWidgetManagerSheetState extends ConsumerState<DashboardWidgetMan
                     ),
                   ),
                 ),
-                PrecisionIconButton(
+                CustomIconButton(
                   icon: Icons.remove_circle_outline_rounded,
                   color: AppColors.error,
                   size: 20 * scalingFactor,
@@ -265,7 +265,7 @@ class _DashboardWidgetManagerSheetState extends ConsumerState<DashboardWidgetMan
                 ),
               ],
             ),
-            PrecisionSelectorField(
+            SelectorField(
               icon: Icons.dashboard_rounded,
               label: l10n.pageLabel,
               pickerWidth: 160,
@@ -298,7 +298,7 @@ class _DashboardWidgetManagerSheetState extends ConsumerState<DashboardWidgetMan
                       ),
                     ),
                   ),
-                  PrecisionMultiToggle(
+                  MultiToggle(
                     labels: allowedSizes.map((s) => s == DashboardWidgetSize.small ? 'S' : s == DashboardWidgetSize.wide ? 'W' : 'L').toList(),
                     selectedIndex: allowedSizes.indexOf(widget.size).clamp(0, allowedSizes.length - 1),
                     activeColors: List.generate(allowedSizes.length, (_) => Theme.of(context).colorScheme.primary),
@@ -329,7 +329,7 @@ class _DashboardWidgetManagerSheetState extends ConsumerState<DashboardWidgetMan
           child: Opacity(opacity: value.clamp(0, 1), child: child),
         );
       },
-      child: PrecisionCard(
+      child: CustomCard(
         scalingFactor: scalingFactor,
         child: Row(
           children: [
@@ -349,7 +349,7 @@ class _DashboardWidgetManagerSheetState extends ConsumerState<DashboardWidgetMan
                 ),
               ),
             ),
-            PrecisionButton(
+            CustomButton(
               label: l10n.addNewVault.split(' ').last, // Use 'Add' or similar
               onTap: () {
                 HapticFeedback.heavyImpact();
@@ -358,7 +358,7 @@ class _DashboardWidgetManagerSheetState extends ConsumerState<DashboardWidgetMan
                   libItem['defaultSize'] as DashboardWidgetSize,
                 );
                 
-                PrecisionNotification.success(
+                CustomNotification.success(
                   context,
                   l10n.widgetAdded(libItem['name'] as String),
                 );

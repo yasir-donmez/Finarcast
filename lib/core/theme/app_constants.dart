@@ -19,18 +19,57 @@ class AppColors {
   static const Color lightTextPrimary = Color(0xFF1E2124); 
   static const Color lightTextSecondary = Color(0xFF707780); 
 
-
   // --- Dynamic Color Helpers ---
   static Color getPrimary(BuildContext context) => Theme.of(context).colorScheme.primary;
   static Color getSecondary(BuildContext context) => Theme.of(context).colorScheme.secondary;
   static Color getError(BuildContext context) => Theme.of(context).colorScheme.error;
   static Color getSurface(BuildContext context) => Theme.of(context).colorScheme.surface;
+
+  /// Seçilen birincil (accent) renge karşılık gelen ikincil (secondary) rengi döner (Telegram stili)
+  static Color getThemeSecondary(Color primaryColor) {
+    final value = primaryColor.toARGB32() & 0xFFFFFFFF;
+    switch (value) {
+      // --- Basit Renkler (Simple Colors) ---
+      case 0xFF2979FF: // Ocean Blue
+        return const Color(0xFF1565C0);
+      case 0xFF00C853: // Emerald Green
+        return const Color(0xFF003300);
+      case 0xFFD50000: // Crimson Red
+        return const Color(0xFFFF5252);
+      case 0xFFFF8F00: // Amber/Orange
+        return const Color(0xFFFFE082);
+      case 0xFF8E24AA: // Deep Purple
+        return const Color(0xFFE1BEE7);
+      case 0xFFE91E63: // Pink
+        return const Color(0xFFF8BBD0);
+      case 0xFF00BCD4: // Cyan
+        return const Color(0xFFB2EBF2);
+      case 0xFF607D8B: // Blue Grey
+        return const Color(0xFFCFD8DC);
+
+      // --- Canlı Renkler (Gradients) ---
+      case 0xFFF50057: // Sunset
+        return const Color(0xFFF5576C);
+      case 0xFF8A2387: // Aurora
+        return const Color(0xFF4A00E0);
+      case 0xFF2193B0: // Deep Ocean
+        return const Color(0xFF000851);
+      case 0xFF11998E: // Emerald
+        return const Color(0xFF96C93D);
+      case 0xFF6A11CB: // Royal
+        return const Color(0xFF2575FC);
+
+      default:
+        // Sistem/Varsayılan veya diğer renkler için dinamik lerp fallback
+        return Color.lerp(primaryColor, Colors.white, 0.35)!;
+    }
+  }
   
-  static Color getSuccess(BuildContext context) => const Color(0xFF00E676);
-  static Color getWarning(BuildContext context) => const Color(0xFFFFAB40);
-  static Color getInfo(BuildContext context) => const Color(0xFF29B6F6);
-  static Color getIncome(BuildContext context) => const Color(0xFF00E676);
-  static Color getExpense(BuildContext context) => const Color(0xFFFF5252);
+  static Color getSuccess(BuildContext context) => getAccentDeep(context, const Color(0xFF00E676));
+  static Color getWarning(BuildContext context) => getAccentDeep(context, const Color(0xFFFFAB40));
+  static Color getInfo(BuildContext context) => getAccentDeep(context, const Color(0xFF29B6F6));
+  static Color getIncome(BuildContext context) => getAccentDeep(context, const Color(0xFF00E676));
+  static Color getExpense(BuildContext context) => getAccentDeep(context, const Color(0xFFFF5252));
 
   static Color getTextPrimary(BuildContext context) => Theme.of(context).colorScheme.onSurface;
   static Color getTextSecondary(BuildContext context) => Theme.of(context).brightness == Brightness.dark ? darkTextSecondary : lightTextSecondary;
@@ -45,6 +84,87 @@ class AppColors {
   static Color getLightShadow(BuildContext context) => Theme.of(context).brightness == Brightness.dark ? darkLightShadow : lightLightShadow;
   static Color getDarkShadow(BuildContext context) => Theme.of(context).brightness == Brightness.dark ? darkDarkShadow : lightDarkShadow;
   static Color getInnerSurface(BuildContext context) => Theme.of(context).brightness == Brightness.dark ? darkInnerSurface : lightInnerSurface;
+
+  // Background gradient colors lookup
+  static List<Color>? getGradientColors(Color accentColor) {
+    final value = accentColor.toARGB32() & 0xFFFFFFFF; // Make sure it's 32-bit int comparison
+    switch (value) {
+      case 0xFFF50057:
+        return const [Color(0xFFF093FB), Color(0xFFF5576C)];
+      case 0xFF8A2387:
+        return const [Color(0xFF8E2DE2), Color(0xFF4A00E0)];
+      case 0xFF2193B0:
+        return const [Color(0xFF1CB5E0), Color(0xFF000851)];
+      case 0xFF11998E:
+        return const [Color(0xFF00B09B), Color(0xFF96C93D)];
+      case 0xFF6A11CB:
+        return const [Color(0xFF6A11CB), Color(0xFF2575FC)];
+      default:
+        return null;
+    }
+  }
+
+  /// Arayüz stiline göre dinamik zemin rengini döner
+  static Color getThemeBackground(BuildContext context, int bgColorStyle) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final accentColor = getPrimary(context);
+    final gradient = getGradientColors(accentColor);
+    final tint = gradient != null ? gradient.first : accentColor;
+
+    if (bgColorStyle == 2) {
+      // ═══ SADE ═══
+      return isDark ? darkBackground : lightBackground;
+    } else {
+      // ═══ RENKLİ ═══ (Varsayılan)
+      return isDark
+          ? Color.lerp(darkBackground, tint, 0.20)!
+          : Color.lerp(lightBackground, tint, 0.10)!;
+    }
+  }
+
+  /// Arayüz stiline göre dinamik kart/yüzey rengini döner
+  static Color getThemeSurface(BuildContext context, int bgColorStyle, {bool isInsideSheet = false}) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final accentColor = getPrimary(context);
+    final gradient = getGradientColors(accentColor);
+    final tint = gradient != null ? gradient.first : accentColor;
+
+    if (bgColorStyle == 2) {
+      // ═══ SADE ═══
+      if (isDark) {
+        return isInsideSheet ? darkInnerSurface : const Color(0xFF161720);
+      } else {
+        return isInsideSheet ? lightInnerSurface : Colors.white;
+      }
+    } else {
+      // ═══ RENKLİ ═══ (Varsayılan)
+      if (isDark) {
+        final base = isInsideSheet ? darkInnerSurface : const Color(0xFF161720);
+        return Color.lerp(base, tint, isInsideSheet ? 0.16 : 0.12)!;
+      } else {
+        final base = isInsideSheet ? lightInnerSurface : Colors.white;
+        return Color.lerp(base, tint, isInsideSheet ? 0.08 : 0.06)!;
+      }
+    }
+  }
+
+  /// Arayüz stiline göre dinamik sınır/kenarlık rengini döner
+  static Color getThemeBorder(BuildContext context, int bgColorStyle) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final accentColor = getPrimary(context);
+    final gradient = getGradientColors(accentColor);
+    final tint = gradient != null ? gradient.first : accentColor;
+
+    if (bgColorStyle == 2) {
+      // ═══ SADE ═══
+      return isDark ? const Color(0xFF2A2B36) : const Color(0xFFE4E7EB);
+    } else {
+      // ═══ RENKLİ ═══ (Varsayılan)
+      return isDark
+          ? Color.lerp(const Color(0xFF2A2B36), tint, 0.15)!
+          : Color.lerp(const Color(0xFFE4E7EB), tint, 0.12)!;
+    }
+  }
 
   // Aydınlık modda okunabilirliği artıran derin renkler
   static Color getAccentDeep(BuildContext context, Color baseColor) {
@@ -96,7 +216,18 @@ class AppSizes {
   static const double paddingXLarge = 32.0;
 }
 class AppCurrency {
+  /// Tüm desteklenen semboller (dönüşüm motoru + işlem girişi)
   static const List<String> supportedSymbols = ['₺', r'$', '€', '£', '¥', '₩', '元', r'R$', 'Fr', 'G', 'Ag', 'SR', 'KD'];
+
+  /// Emtia (commodity) sembolleri — görüntüleme birimi olarak kullanılamaz
+  static const List<String> commoditySymbols = ['G', 'Ag'];
+
+  /// Görüntüleme birimleri (Fiat) — Profil ana birimi, Kasa birimi, Dashboard, İstatistikler
+  static List<String> get displaySymbols => supportedSymbols.where((s) => !commoditySymbols.contains(s)).toList();
+
+  /// Giriş birimleri (Tümü) — İşlem ekleme ekranı
+  static const List<String> inputSymbols = supportedSymbols;
+
   static const Map<String, String> symbolToCode = {
     '₺': 'TRY',
     r'$': 'USD',
@@ -113,6 +244,9 @@ class AppCurrency {
     'KD': 'KWD',
   };
   static String getCode(String symbol) => symbolToCode[symbol] ?? symbol;
+
+  /// Bir sembolün emtia (commodity) olup olmadığını kontrol eder
+  static bool isCommodity(String symbol) => commoditySymbols.contains(symbol);
 }
 class AppAssets {
   static const String logoNormal = 'assets/images/app_logo_normal.png';

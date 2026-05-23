@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'dart:async';
 import '../../../core/theme/app_constants.dart';
@@ -8,8 +7,9 @@ import '../../../l10n/app_localizations.dart';
 import '../vaults_providers.dart';
 import '../../dashboard/dashboard_providers.dart';
 import '../../transactions/add_transaction_screen.dart';
-import '../../../shared/widgets/precision_surface.dart';
-import 'precision_transaction_card.dart';
+import '../../../shared/widgets/solid_surface.dart';
+import '../../../core/utils/category_utils.dart';
+import '../../../core/providers/db_providers.dart';
 
 class InAppNotificationsSheet extends ConsumerStatefulWidget {
   const InAppNotificationsSheet({super.key});
@@ -41,20 +41,27 @@ class _InAppNotificationsSheetState extends ConsumerState<InAppNotificationsShee
   }
 
   String _getRecurrenceText(int periodType) {
-    switch (periodType) {
-      case 0: return "Tek Seferlik";
-      case 8: return "Günlük";
-      case 9: return "2 Günde Bir";
-      case 10: return "3 Günde Bir";
-      case 1: return "Haftalık";
-      case 4: return "2 Haftada Bir";
-      case 5: return "3 Haftada Bir";
-      case 2: return "Aylık";
-      case 6: return "3 Ayda Bir";
-      case 7: return "6 Ayda Bir";
-      case 3: return "Yıllık";
-      default: return "Tek Seferlik";
+    if (periodType == 0) {
+      return "Tek Seferlik";
+    } else if (periodType == 250) {
+      return "Hafta İçi";
+    } else if (periodType == 251) {
+      return "Hafta Sonu";
+    } else {
+      final unit = periodType ~/ 100;
+      final interval = periodType % 100;
+      switch (unit) {
+        case 1:
+          return interval == 1 ? "Günlük" : "$interval Günde Bir";
+        case 2:
+          return interval == 1 ? "Haftalık" : "$interval Haftada Bir";
+        case 3:
+          return interval == 1 ? "Aylık" : "$interval Ayda Bir";
+        case 4:
+          return interval == 1 ? "Yıllık" : "$interval Yılda Bir";
+      }
     }
+    return "Tek Seferlik";
   }
 
   @override
@@ -93,17 +100,17 @@ class _InAppNotificationsSheetState extends ConsumerState<InAppNotificationsShee
             margin: const EdgeInsets.only(bottom: 16),
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: Colors.redAccent.withValues(alpha: 0.1),
+              color: AppColors.error.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(12),
               border: Border.all(
-                color: Colors.redAccent.withValues(alpha: 0.3),
+                color: AppColors.error.withValues(alpha: 0.3),
               ),
             ),
             child: Row(
               children: [
-                const Icon(
+                Icon(
                   Icons.warning_amber_rounded,
-                  color: Colors.redAccent,
+                  color: AppColors.error,
                   size: 20,
                 ),
                 const SizedBox(width: 10),
@@ -111,7 +118,7 @@ class _InAppNotificationsSheetState extends ConsumerState<InAppNotificationsShee
                   child: Text(
                     "SİSTEM BİLDİRİM İZİNLERİ KAPALI!\nLütfen telefon ayarlarınızdan Finarcast'e bildirim izni verin, aksi halde alarmlarınız çalışmayacaktır.",
                     style: TextStyle(
-                      color: isDark ? Colors.redAccent.shade100 : Colors.red.shade900,
+                      color: AppColors.error,
                       fontSize: 10.5,
                       fontWeight: FontWeight.w800,
                       height: 1.4,
@@ -170,7 +177,7 @@ class _InAppNotificationsSheetState extends ConsumerState<InAppNotificationsShee
             child: Icon(
               Icons.notifications_off_rounded,
               size: 28,
-              color: activeColor.withValues(alpha: 0.7),
+              color: AppColors.getAccentDeep(context, activeColor).withValues(alpha: 0.7),
             ),
           ),
           const SizedBox(height: 16),
@@ -208,15 +215,19 @@ class _InAppNotificationsSheetState extends ConsumerState<InAppNotificationsShee
     // Hatırlatma zamanının güzel bir şekilde formatlanması
     final timeStr = "${reminderTime.hour.toString().padLeft(2, '0')}:${reminderTime.minute.toString().padLeft(2, '0')}";
     final dateStr = "${reminderTime.day} ${_getMonthName(reminderTime.month)}";
-    final categoryName = localizedCategoryName(tx.categoryId, l10n) ?? tx.name;
+    final customCategories = ref.watch(customCategoriesProvider);
+    final categoryName = CategoryUtils.getCategoryName(
+      categoryId: tx.categoryId,
+      context: context,
+      customCategories: customCategories,
+      fallbackTitle: tx.name,
+    );
 
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
-      child: PrecisionSurface(
+      child: SolidSurface(
         padding: const EdgeInsets.all(14),
         borderRadius: 16,
-        isGlass: true,
-        blur: 10,
         child: InkWell(
           onTap: () => _navigateToEdit(tx),
           borderRadius: BorderRadius.circular(16),
@@ -227,16 +238,16 @@ class _InAppNotificationsSheetState extends ConsumerState<InAppNotificationsShee
                 width: 44,
                 height: 44,
                 decoration: BoxDecoration(
-                  color: tx.color.withValues(alpha: 0.12),
+                  color: AppColors.getAccentDeep(context, tx.color).withValues(alpha: 0.12),
                   shape: BoxShape.circle,
                   border: Border.all(
-                    color: tx.color.withValues(alpha: 0.25),
+                    color: AppColors.getAccentDeep(context, tx.color).withValues(alpha: 0.25),
                     width: 1,
                   ),
                 ),
                 child: Icon(
                   tx.icon,
-                  color: tx.color,
+                  color: AppColors.getAccentDeep(context, tx.color),
                   size: 20,
                 ),
               ),
@@ -266,7 +277,7 @@ class _InAppNotificationsSheetState extends ConsumerState<InAppNotificationsShee
                           style: TextStyle(
                             fontSize: 11,
                             fontWeight: FontWeight.w900,
-                            color: activeColor.withValues(alpha: 0.8),
+                            color: AppColors.getAccentDeep(context, activeColor).withValues(alpha: 0.8),
                           ),
                         ),
                       ],

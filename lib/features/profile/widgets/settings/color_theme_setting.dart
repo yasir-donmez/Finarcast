@@ -8,22 +8,23 @@ import '../../../../l10n/app_localizations.dart';
 class ThemeColorOption {
   final Color primaryColor;
   final List<Color>? gradientColors;
+  final Color? secondaryColor; // Basit renkler için manuel ikincil renk tanımı
 
-  const ThemeColorOption(this.primaryColor, {this.gradientColors});
+  const ThemeColorOption(this.primaryColor, {this.gradientColors, this.secondaryColor});
 }
 
 class ColorThemeSetting extends ConsumerWidget {
   const ColorThemeSetting({super.key});
 
   static const List<ThemeColorOption> _simpleColors = [
-    ThemeColorOption(Color(0xFF2979FF)), // Ocean Blue
-    ThemeColorOption(Color(0xFF00C853)), // Emerald Green
-    ThemeColorOption(Color(0xFFD50000)), // Crimson Red
-    ThemeColorOption(Color(0xFFFF8F00)), // Amber/Orange
-    ThemeColorOption(Color(0xFF8E24AA)), // Deep Purple
-    ThemeColorOption(Color(0xFFE91E63)), // Pink
-    ThemeColorOption(Color(0xFF00BCD4)), // Cyan
-    ThemeColorOption(Color(0xFF607D8B)), // Blue Grey
+    ThemeColorOption(Color(0xFF2979FF), secondaryColor: Color(0xFF1565C0)), // Ocean Blue -> Koyu Mavi
+    ThemeColorOption(Color(0xFF00C853), secondaryColor: Color(0xFF003300)), // Emerald Green -> Koyu Yeşil
+    ThemeColorOption(Color(0xFFD50000), secondaryColor: Color(0xFFFF5252)), // Crimson Red -> Açık Kırmızı
+    ThemeColorOption(Color(0xFFFF8F00), secondaryColor: Color(0xFFFFE082)), // Amber/Orange -> Açık Kehribar
+    ThemeColorOption(Color(0xFF8E24AA), secondaryColor: Color(0xFFE1BEE7)), // Deep Purple -> Açık Lila
+    ThemeColorOption(Color(0xFFE91E63), secondaryColor: Color(0xFFF8BBD0)), // Pink -> Açık Pembe
+    ThemeColorOption(Color(0xFF00BCD4), secondaryColor: Color(0xFFB2EBF2)), // Cyan -> Açık Turkuaz
+    ThemeColorOption(Color(0xFF607D8B), secondaryColor: Color(0xFFCFD8DC)), // Blue Grey -> Açık Gri
   ];
 
   static const List<ThemeColorOption> vibrantColors = [
@@ -116,7 +117,7 @@ class ColorThemeSetting extends ConsumerWidget {
     final dynamicColor = ref.watch(dynamicColorProvider);
 
     return LiquidColorDrop(
-      option: ThemeColorOption(dynamicColor),
+      option: ThemeColorOption(dynamicColor, secondaryColor: Color.lerp(dynamicColor, Colors.black, 0.3)),
       isSelected: isSelected,
       isSystem: true,
       onTap: () {
@@ -169,24 +170,18 @@ class LiquidColorDrop extends StatefulWidget {
 class _LiquidColorDropState extends State<LiquidColorDrop> {
   @override
   Widget build(BuildContext context) {
-    // Eger gradyan varsa linear gradyan kullan, yoksa rengin koyusuyla radial gradyan yap
+    // Renkleri belirle (Telegram stili dış daire ve iç daire)
     final bool hasGradient =
         widget.option.gradientColors != null &&
         widget.option.gradientColors!.isNotEmpty;
 
-    final Gradient dropGradient = hasGradient
-        ? LinearGradient(
-            colors: widget.option.gradientColors!,
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          )
-        : RadialGradient(
-            colors: [
-              widget.option.primaryColor,
-              Color.lerp(widget.option.primaryColor, Colors.black, 0.2)!,
-            ],
-            center: const Alignment(-0.3, -0.3),
-          );
+    final Color outerColor = hasGradient 
+        ? widget.option.gradientColors!.first 
+        : widget.option.primaryColor;
+
+    final Color innerColor = hasGradient 
+        ? widget.option.gradientColors!.last 
+        : (widget.option.secondaryColor ?? Color.lerp(widget.option.primaryColor, Colors.white, 0.35)!);
 
     return GestureDetector(
       onTap: widget.onTap,
@@ -198,39 +193,58 @@ class _LiquidColorDropState extends State<LiquidColorDrop> {
           child: Stack(
             alignment: Alignment.center,
             children: [
-              // Ana Damla
+              // Dış Daire (Telegram stili ana renk)
               AnimatedScale(
-                duration: const Duration(milliseconds: 400),
-                scale: widget.isSelected ? 1.1 : 0.85,
-                curve: Curves.elasticOut,
+                duration: const Duration(milliseconds: 300),
+                scale: widget.isSelected ? 1.15 : 0.9,
+                curve: Curves.easeOutBack,
                 child: Container(
                   width: 44,
                   height: 44,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    gradient: dropGradient,
+                    color: outerColor,
                     border: Border.all(
-                      color: Colors.white.withValues(
-                        alpha: widget.isSelected ? 0.8 : 0.2,
+                      color: AppColors.getTextPrimary(context).withValues(
+                        alpha: widget.isSelected ? 0.8 : 0.12,
                       ),
                       width: widget.isSelected ? 2.5 : 1,
                     ),
+                    boxShadow: const [],
                   ),
-                  child: AnimatedSwitcher(
-                    duration: const Duration(milliseconds: 300),
-                    child: widget.isSelected
-                        ? const Icon(
-                            Icons.check_rounded,
-                            color: Colors.white,
-                            size: 20,
+                  child: Center(
+                    // İç Daire (Telegram stili ikincil/vurgu rengi)
+                    child: Container(
+                      width: 22,
+                      height: 22,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: innerColor,
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.15),
+                            blurRadius: 3,
+                            offset: const Offset(0, 1),
                           )
-                        : (widget.isSystem
-                              ? const Icon(
-                                  Icons.auto_awesome_rounded,
-                                  color: Colors.white,
-                                  size: 18,
-                                )
-                              : null),
+                        ],
+                      ),
+                      child: AnimatedSwitcher(
+                        duration: const Duration(milliseconds: 200),
+                        child: widget.isSelected
+                            ? const Icon(
+                                Icons.check_rounded,
+                                color: Colors.white,
+                                size: 14,
+                              )
+                            : (widget.isSystem
+                                ? const Icon(
+                                    Icons.auto_awesome_rounded,
+                                    color: Colors.white,
+                                    size: 12,
+                                  )
+                                : null),
+                      ),
+                    ),
                   ),
                 ),
               ),

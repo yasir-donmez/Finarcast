@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'dart:ui';
 
 class ProfileBlob extends StatelessWidget {
   final Color color;
@@ -24,10 +23,6 @@ class ProfileBlob extends StatelessWidget {
             color.withValues(alpha: 0.0),
           ],
         ),
-      ),
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 50, sigmaY: 50),
-        child: Container(color: Colors.transparent),
       ),
     );
   }

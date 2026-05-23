@@ -75,8 +75,7 @@ class SubscriptionService extends ChangeNotifier {
   /// Satın Alma İşlemini Başlat
   Future<bool> purchasePackage(Package package) async {
     try {
-      // purchasePackage artık PurchaseResult döner
-      final result = await Purchases.purchasePackage(package);
+      final result = await Purchases.purchase(PurchaseParams.package(package));
       _updateProStatus(result.customerInfo);
       return _isPro;
     } catch (e) {

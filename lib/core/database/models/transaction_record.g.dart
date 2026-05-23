@@ -47,24 +47,24 @@ const TransactionRecordSchema = CollectionSchema(
       name: r'date',
       type: IsarType.dateTime,
     ),
-    r'iconCode': PropertySchema(
+    r'hasNotification': PropertySchema(
       id: 6,
+      name: r'hasNotification',
+      type: IsarType.bool,
+    ),
+    r'iconCode': PropertySchema(
+      id: 7,
       name: r'iconCode',
       type: IsarType.string,
     ),
     r'isArchived': PropertySchema(
-      id: 7,
+      id: 8,
       name: r'isArchived',
       type: IsarType.bool,
     ),
     r'isIncome': PropertySchema(
-      id: 8,
-      name: r'isIncome',
-      type: IsarType.bool,
-    ),
-    r'isLocked': PropertySchema(
       id: 9,
-      name: r'isLocked',
+      name: r'isIncome',
       type: IsarType.bool,
     ),
     r'isNotificationEnabled': PropertySchema(
@@ -275,10 +275,10 @@ void _transactionRecordSerialize(
   writer.writeLong(offsets[3], object.dashboardLayoutType);
   writer.writeLong(offsets[4], object.dashboardOrder);
   writer.writeDateTime(offsets[5], object.date);
-  writer.writeString(offsets[6], object.iconCode);
-  writer.writeBool(offsets[7], object.isArchived);
-  writer.writeBool(offsets[8], object.isIncome);
-  writer.writeBool(offsets[9], object.isLocked);
+  writer.writeBool(offsets[6], object.hasNotification);
+  writer.writeString(offsets[7], object.iconCode);
+  writer.writeBool(offsets[8], object.isArchived);
+  writer.writeBool(offsets[9], object.isIncome);
   writer.writeBool(offsets[10], object.isNotificationEnabled);
   writer.writeDouble(offsets[11], object.latitude);
   writer.writeDouble(offsets[12], object.longitude);
@@ -314,11 +314,11 @@ TransactionRecord _transactionRecordDeserialize(
   object.dashboardLayoutType = reader.readLong(offsets[3]);
   object.dashboardOrder = reader.readLong(offsets[4]);
   object.date = reader.readDateTime(offsets[5]);
-  object.iconCode = reader.readStringOrNull(offsets[6]);
+  object.hasNotification = reader.readBool(offsets[6]);
+  object.iconCode = reader.readStringOrNull(offsets[7]);
   object.id = id;
-  object.isArchived = reader.readBool(offsets[7]);
-  object.isIncome = reader.readBool(offsets[8]);
-  object.isLocked = reader.readBool(offsets[9]);
+  object.isArchived = reader.readBool(offsets[8]);
+  object.isIncome = reader.readBool(offsets[9]);
   object.isNotificationEnabled = reader.readBool(offsets[10]);
   object.latitude = reader.readDoubleOrNull(offsets[11]);
   object.longitude = reader.readDoubleOrNull(offsets[12]);
@@ -362,9 +362,9 @@ P _transactionRecordDeserializeProp<P>(
     case 5:
       return (reader.readDateTime(offset)) as P;
     case 6:
-      return (reader.readStringOrNull(offset)) as P;
-    case 7:
       return (reader.readBool(offset)) as P;
+    case 7:
+      return (reader.readStringOrNull(offset)) as P;
     case 8:
       return (reader.readBool(offset)) as P;
     case 9:
@@ -1324,6 +1324,16 @@ extension TransactionRecordQueryFilter
   }
 
   QueryBuilder<TransactionRecord, TransactionRecord, QAfterFilterCondition>
+      hasNotificationEqualTo(bool value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'hasNotification',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<TransactionRecord, TransactionRecord, QAfterFilterCondition>
       iconCodeIsNull() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(const FilterCondition.isNull(
@@ -1548,16 +1558,6 @@ extension TransactionRecordQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
         property: r'isIncome',
-        value: value,
-      ));
-    });
-  }
-
-  QueryBuilder<TransactionRecord, TransactionRecord, QAfterFilterCondition>
-      isLockedEqualTo(bool value) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'isLocked',
         value: value,
       ));
     });
@@ -3234,6 +3234,20 @@ extension TransactionRecordQuerySortBy
   }
 
   QueryBuilder<TransactionRecord, TransactionRecord, QAfterSortBy>
+      sortByHasNotification() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'hasNotification', Sort.asc);
+    });
+  }
+
+  QueryBuilder<TransactionRecord, TransactionRecord, QAfterSortBy>
+      sortByHasNotificationDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'hasNotification', Sort.desc);
+    });
+  }
+
+  QueryBuilder<TransactionRecord, TransactionRecord, QAfterSortBy>
       sortByIconCode() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'iconCode', Sort.asc);
@@ -3272,20 +3286,6 @@ extension TransactionRecordQuerySortBy
       sortByIsIncomeDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'isIncome', Sort.desc);
-    });
-  }
-
-  QueryBuilder<TransactionRecord, TransactionRecord, QAfterSortBy>
-      sortByIsLocked() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'isLocked', Sort.asc);
-    });
-  }
-
-  QueryBuilder<TransactionRecord, TransactionRecord, QAfterSortBy>
-      sortByIsLockedDesc() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'isLocked', Sort.desc);
     });
   }
 
@@ -3643,6 +3643,20 @@ extension TransactionRecordQuerySortThenBy
   }
 
   QueryBuilder<TransactionRecord, TransactionRecord, QAfterSortBy>
+      thenByHasNotification() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'hasNotification', Sort.asc);
+    });
+  }
+
+  QueryBuilder<TransactionRecord, TransactionRecord, QAfterSortBy>
+      thenByHasNotificationDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'hasNotification', Sort.desc);
+    });
+  }
+
+  QueryBuilder<TransactionRecord, TransactionRecord, QAfterSortBy>
       thenByIconCode() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'iconCode', Sort.asc);
@@ -3694,20 +3708,6 @@ extension TransactionRecordQuerySortThenBy
       thenByIsIncomeDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'isIncome', Sort.desc);
-    });
-  }
-
-  QueryBuilder<TransactionRecord, TransactionRecord, QAfterSortBy>
-      thenByIsLocked() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'isLocked', Sort.asc);
-    });
-  }
-
-  QueryBuilder<TransactionRecord, TransactionRecord, QAfterSortBy>
-      thenByIsLockedDesc() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'isLocked', Sort.desc);
     });
   }
 
@@ -4023,6 +4023,13 @@ extension TransactionRecordQueryWhereDistinct
   }
 
   QueryBuilder<TransactionRecord, TransactionRecord, QDistinct>
+      distinctByHasNotification() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'hasNotification');
+    });
+  }
+
+  QueryBuilder<TransactionRecord, TransactionRecord, QDistinct>
       distinctByIconCode({bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'iconCode', caseSensitive: caseSensitive);
@@ -4040,13 +4047,6 @@ extension TransactionRecordQueryWhereDistinct
       distinctByIsIncome() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'isIncome');
-    });
-  }
-
-  QueryBuilder<TransactionRecord, TransactionRecord, QDistinct>
-      distinctByIsLocked() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addDistinctBy(r'isLocked');
     });
   }
 
@@ -4239,6 +4239,13 @@ extension TransactionRecordQueryProperty
     });
   }
 
+  QueryBuilder<TransactionRecord, bool, QQueryOperations>
+      hasNotificationProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'hasNotification');
+    });
+  }
+
   QueryBuilder<TransactionRecord, String?, QQueryOperations>
       iconCodeProperty() {
     return QueryBuilder.apply(this, (query) {
@@ -4255,12 +4262,6 @@ extension TransactionRecordQueryProperty
   QueryBuilder<TransactionRecord, bool, QQueryOperations> isIncomeProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'isIncome');
-    });
-  }
-
-  QueryBuilder<TransactionRecord, bool, QQueryOperations> isLockedProperty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r'isLocked');
     });
   }
 

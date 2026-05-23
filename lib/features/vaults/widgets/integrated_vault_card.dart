@@ -5,7 +5,7 @@ import '../../../core/database/models/exchange_rate.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../core/theme/app_constants.dart';
 import '../../../core/utils/currency_utils.dart';
-import '../../../shared/widgets/precision_glass_card.dart';
+import '../../../shared/widgets/solid_surface.dart';
 import '../vaults_providers.dart';
 
 class IntegratedVaultCard extends StatelessWidget {
@@ -56,8 +56,8 @@ class IntegratedVaultCard extends StatelessWidget {
     final double cardHeight = lerpDouble(270, 56, morphProgress)!;
     
     // --- Glass Morphing Spread (2. Madde) ---
-    final double decorationOpacity = (1 - morphProgress * 2.2).clamp(0.0, 1.0); 
-    final double cardRadius = lerpDouble(32, 0, Curves.easeInOutCubic.transform((morphProgress * 1.8).clamp(0.0, 1.0)))!;
+    final double decorationOpacity = 1.0 - Curves.easeOut.transform((morphProgress * 1.35).clamp(0.0, 1.0)); 
+    final double cardRadius = lerpDouble(32, 0, Curves.easeInOutCubic.transform((morphProgress * 1.35).clamp(0.0, 1.0)))!;
     
     final double hPad = lerpDouble(24, 20, morphProgress)!;
     final double effectiveWidth = isCurrent ? cardWidth : screenWidth * 0.70;
@@ -72,13 +72,12 @@ class IntegratedVaultCard extends StatelessWidget {
           clipBehavior: Clip.none,
           children: [
             // === ARKA PLAN: Premium Glass (morph sırasında kaybolur) ===
-            if (decorationOpacity > 0.01)
+            if (decorationOpacity > 0.0)
               Positioned.fill(
-                child: PrecisionGlassCard(
+                child: SolidSurface(
                   borderRadius: cardRadius,
-                  isGlass: true,
-                  blur: 10.0 * decorationOpacity, // Blur değerini sıfıra kadar yumuşatarak çekiyoruz
-                  opacityMultiplier: decorationOpacity, // Renkleri, gölgeleri ve sınırları yumuşakça siliyoruz
+                  opacityMultiplier: decorationOpacity,
+                  animationDuration: Duration.zero,
                   child: const SizedBox.expand(),
                 ),
               ),
@@ -115,15 +114,16 @@ class IntegratedVaultCard extends StatelessWidget {
 
     // Smooth Color Logic
     final Color textColor = AppColors.getTextPrimary(context);
+    final Color deepActiveColor = AppColors.getAccentDeep(context, activeColor);
     final Color nameColor = Color.lerp(
-      activeColor.withValues(alpha: 0.9),
+      deepActiveColor.withValues(alpha: 0.9),
       textColor,
       contentT,
     )!;
 
     final Color balanceColor = Color.lerp(
-      activeColor,
-      activeColor, 
+      deepActiveColor,
+      deepActiveColor, 
       contentT,
     )!;
     
@@ -143,9 +143,9 @@ class IntegratedVaultCard extends StatelessWidget {
     final double titleTop = lerpDouble(titleExpandedTop, titleCompactTop, magneticT)!;
     final double balanceTop = lerpDouble(balanceExpandedTop, balanceCompactTop, magneticT)!;
     
-    final double statsOpacity = (1 - morphProgress * 5.0).clamp(0.0, 1.0); 
-    final double rangeOpacity = (1 - morphProgress * 8.0).clamp(0.0, 1.0); 
-    final double swapOpacity  = (1 - morphProgress * 12.0).clamp(0.0, 1.0); 
+    final double statsOpacity = (1 - morphProgress * 3.0).clamp(0.0, 1.0); 
+    final double rangeOpacity = (1 - morphProgress * 5.0).clamp(0.0, 1.0); 
+    final double swapOpacity  = (1 - morphProgress * 8.0).clamp(0.0, 1.0); 
 
     // Yukarı kaçma efekti (Parallax)
     final double parallaxOffset = morphProgress * -80.0; 
@@ -223,7 +223,7 @@ class IntegratedVaultCard extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 11,
                     fontWeight: FontWeight.w700,
-                    color: AppColors.getTextPrimary(context).withValues(alpha: 0.4),
+                    color: AppColors.getTextSecondary(context).withValues(alpha: 0.6),
                     letterSpacing: 0.3,
                   ),
                 ),
@@ -245,9 +245,9 @@ class IntegratedVaultCard extends StatelessWidget {
                     opacity: statsOpacity,
                     child: Row(
                       children: [
-                        Expanded(child: _buildMiniStat(l10n.income, income, AppColors.getIncome(context))),
-                        Container(width: 1, height: 30, color: activeColor.withValues(alpha: 0.15)),
-                        Expanded(child: _buildMiniStat(l10n.expense, expense, AppColors.getExpense(context))),
+                        Expanded(child: _buildMiniStat(context, l10n.income, income, AppColors.getIncome(context))),
+                        Container(width: 1, height: 30, color: AppColors.getAccentDeep(context, activeColor).withValues(alpha: 0.15)),
+                        Expanded(child: _buildMiniStat(context, l10n.expense, expense, AppColors.getExpense(context))),
                       ],
                     ),
                   ),
@@ -261,7 +261,7 @@ class IntegratedVaultCard extends StatelessWidget {
                         child: Divider(
                           height: 1, 
                           thickness: 0.5, 
-                          color: (isDark ? Colors.white : Colors.black).withValues(alpha: 0.1)
+                          color: AppColors.getTextSecondary(context).withValues(alpha: 0.15),
                         ),
                       ),
                     ),
@@ -272,7 +272,7 @@ class IntegratedVaultCard extends StatelessWidget {
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          _buildRangeStats(txs, targetCurrency, exchangeRates),
+                          _buildRangeStats(context, txs, targetCurrency, exchangeRates),
                           const SizedBox(height: 20),
                         ],
                       ),
@@ -285,9 +285,9 @@ class IntegratedVaultCard extends StatelessWidget {
                   if (swapOpacity > 0.01)
                     Opacity(
                       opacity: swapOpacity,
-                      child: Transform.translate(
+                    child: Transform.translate(
                         offset: Offset(0, parallaxOffset * 0.5), 
-                        child: const Icon(Icons.swap_horiz_rounded, size: 20, color: Colors.grey),
+                        child: Icon(Icons.swap_horiz_rounded, size: 20, color: AppColors.getTextSecondary(context)),
                       ),
                     ),
                 ],
@@ -298,7 +298,7 @@ class IntegratedVaultCard extends StatelessWidget {
     );
   }
 
-  Widget _buildMiniStat(String label, double amount, Color color) {
+  Widget _buildMiniStat(BuildContext context, String label, double amount, Color color) {
     return Column(
       children: [
         FittedBox(
@@ -308,7 +308,7 @@ class IntegratedVaultCard extends StatelessWidget {
             style: TextStyle(
               fontSize: 9, 
               fontWeight: FontWeight.w900, 
-              color: Colors.grey.withValues(alpha: 0.6), 
+              color: AppColors.getTextSecondary(context), 
               letterSpacing: 1,
             ),
           ),
@@ -325,7 +325,7 @@ class IntegratedVaultCard extends StatelessWidget {
     );
   }
 
-  Widget _buildRangeStats(List<TransactionUI> txs, String targetCurrency, List<ExchangeRate> rates) {
+  Widget _buildRangeStats(BuildContext context, List<TransactionUI> txs, String targetCurrency, List<ExchangeRate> rates) {
     final activeTxs = txs.where((t) => !t.isArchived).toList();
     final now = DateTime.now();
 
@@ -354,13 +354,13 @@ class IntegratedVaultCard extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceAround,
       children: [
-        _buildRangeStat(l10n.worstCase, minNet, Colors.orange),
-        _buildRangeStat(l10n.bestCase, maxNet, Colors.blue),
+        _buildRangeStat(context, l10n.worstCase, minNet, Colors.orange),
+        _buildRangeStat(context, l10n.bestCase, maxNet, Colors.blue),
       ],
     );
   }
 
-  Widget _buildRangeStat(String label, double amount, Color color) {
+  Widget _buildRangeStat(BuildContext context, String label, double amount, Color color) {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -371,7 +371,7 @@ class IntegratedVaultCard extends StatelessWidget {
           children: [
             Text(
               label, 
-              style: const TextStyle(fontSize: 8, fontWeight: FontWeight.bold, color: Colors.grey),
+              style: TextStyle(fontSize: 8, fontWeight: FontWeight.bold, color: AppColors.getTextSecondary(context)),
             ),
             FittedBox(
               fit: BoxFit.scaleDown,

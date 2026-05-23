@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import '../database/database_service.dart';
 import '../database/models/app_settings.dart';
 import '../services/notification_service.dart';
+import '../services/sync_coordinator.dart';
 
 extension AppSettingsCopy on AppSettings {
   AppSettings copyWith({
@@ -24,7 +25,7 @@ extension AppSettingsCopy on AppSettings {
     int? syncStatus,
   }) {
     return AppSettings()
-      ..id = this.id
+      ..id = id
       ..themeModeIndex = themeModeIndex ?? this.themeModeIndex
       ..bgPatternDensity = bgPatternDensity ?? this.bgPatternDensity
       ..bgColorStyle = bgColorStyle ?? this.bgColorStyle
@@ -52,7 +53,11 @@ class SettingsNotifier extends StateNotifier<AppSettings> {
   }
 
   Future<void> _loadSettings() async {
-    final settings = await DatabaseService.getSettings();
+    var settings = await DatabaseService.getSettings();
+    if (settings.bgColorStyle == 0) {
+      settings = settings.copyWith(bgColorStyle: 1);
+      await DatabaseService.saveSettings(settings);
+    }
     state = settings;
     _updateIntl(state.languageCode);
   }
@@ -166,6 +171,15 @@ class SettingsNotifier extends StateNotifier<AppSettings> {
   Future<void> toggleSync(bool value) async {
     if (state.isSyncEnabled == value) return;
     await _save(state.copyWith(isSyncEnabled: value));
+    if (value) {
+      await SyncCoordinator.syncNow();
+    }
+  }
+
+  /// Buluttan cekilen ayarlari yansit
+  Future<void> reloadFromDb() async {
+    state = await DatabaseService.getSettings();
+    _updateIntl(state.languageCode);
   }
 
   Future<void> setCountry(String? name) async {

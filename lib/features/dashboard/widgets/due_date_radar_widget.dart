@@ -5,8 +5,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'dashboard_widget.dart';
 import '../../../core/providers/db_providers.dart';
 import '../../../core/database/models/transaction_record.dart';
+import '../../../core/database/models/custom_category.dart';
 import '../../../core/utils/currency_utils.dart';
-import '../../../core/utils/icon_utils.dart';
+import '../../../core/utils/category_utils.dart';
+import '../../../core/theme/app_constants.dart';
 
 class DueDateRadarWidget extends ConsumerStatefulWidget {
   final DashboardWidgetSize size;
@@ -23,6 +25,7 @@ class _DueDateRadarWidgetState extends ConsumerState<DueDateRadarWidget> {
   @override
   Widget build(BuildContext context) {
     final transactions = ref.watch(allTransactionsProvider);
+    final customCategories = ref.watch(customCategoriesProvider);
     final items = _getUpcomingItems(transactions);
 
     if (items.isEmpty) return _buildEmptyState(context);
@@ -88,12 +91,21 @@ class _DueDateRadarWidgetState extends ConsumerState<DueDateRadarWidget> {
               _expandedGroups.add(key);
             }
           }),
+          customCategories,
         );
       },
     );
   }
 
-  Widget _buildTemporalGroup(DateTime date, List<TransactionRecord> groupItems, int diff, String key, bool isExpanded, VoidCallback onToggle) {
+  Widget _buildTemporalGroup(
+    DateTime date,
+    List<TransactionRecord> groupItems,
+    int diff,
+    String key,
+    bool isExpanded,
+    VoidCallback onToggle,
+    List<CustomCategory> customCategories,
+  ) {
     final incomeItems = groupItems.where((tx) => tx.isIncome).toList();
     final expenseItems = groupItems.where((tx) => !tx.isIncome).toList();
     
@@ -123,7 +135,7 @@ class _DueDateRadarWidgetState extends ConsumerState<DueDateRadarWidget> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Container(width: 20, height: 0.5, color: Colors.white.withValues(alpha: 0.05)),
+                Container(width: 20, height: 0.5, color: AppColors.getTextSecondary(context).withValues(alpha: 0.15)),
                 const SizedBox(width: 8),
                 // İkon Animasyonu
                 AnimatedRotation(
@@ -132,7 +144,7 @@ class _DueDateRadarWidgetState extends ConsumerState<DueDateRadarWidget> {
                   child: Icon(
                     Icons.keyboard_arrow_right_rounded,
                     size: 12,
-                    color: Colors.white.withValues(alpha: isExpanded ? 0.5 : 0.2),
+                    color: AppColors.getTextSecondary(context).withValues(alpha: isExpanded ? 0.6 : 0.3),
                   ),
                 ),
                 const SizedBox(width: 4),
@@ -141,7 +153,7 @@ class _DueDateRadarWidgetState extends ConsumerState<DueDateRadarWidget> {
                   style: TextStyle(
                     fontSize: 7, 
                     fontWeight: FontWeight.w900, 
-                    color: Colors.white.withValues(alpha: isExpanded ? 0.4 : 0.2), 
+                    color: AppColors.getTextSecondary(context).withValues(alpha: isExpanded ? 0.7 : 0.4), 
                     letterSpacing: 1.0
                   ),
                 ),
@@ -150,17 +162,17 @@ class _DueDateRadarWidgetState extends ConsumerState<DueDateRadarWidget> {
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
                     decoration: BoxDecoration(
-                      color: Colors.white.withValues(alpha: 0.05),
+                      color: AppColors.getTextSecondary(context).withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(4),
                     ),
                     child: Text(
                       '${groupItems.length}',
-                      style: TextStyle(fontSize: 6, fontWeight: FontWeight.w900, color: Colors.white.withValues(alpha: 0.3)),
+                      style: TextStyle(fontSize: 6, fontWeight: FontWeight.w900, color: AppColors.getTextSecondary(context).withValues(alpha: 0.7)),
                     ),
                   ),
                 ],
                 const SizedBox(width: 8),
-                Container(width: 20, height: 0.5, color: Colors.white.withValues(alpha: 0.05)),
+                Container(width: 20, height: 0.5, color: AppColors.getTextSecondary(context).withValues(alpha: 0.15)),
               ],
             ),
           ),
@@ -180,26 +192,26 @@ class _DueDateRadarWidgetState extends ConsumerState<DueDateRadarWidget> {
                   return IntrinsicHeight(
                     child: Row(
                       children: [
-                        Expanded(child: incomeTx != null ? _buildMiniCard(incomeTx, isLeft: true, showDetailDate: diff > 7) : const SizedBox()),
+                        Expanded(child: incomeTx != null ? _buildMiniCard(context, incomeTx, isLeft: true, showDetailDate: diff > 7, customCategories: customCategories) : const SizedBox()),
                         SizedBox(
                           width: 16,
                           child: Stack(
                             alignment: Alignment.center,
                             children: [
-                              Container(width: 1, color: Colors.white.withValues(alpha: 0.03)),
+                              Container(width: 1, color: AppColors.getTextSecondary(context).withValues(alpha: 0.15)),
                               Container(
                                 width: 4, height: 4,
                                 decoration: BoxDecoration(
                                   color: (incomeTx != null || expenseTx != null) 
                                       ? (expenseTx != null ? Colors.orange : Colors.green) 
-                                      : Colors.white.withValues(alpha: 0.05),
+                                      : AppColors.getTextSecondary(context).withValues(alpha: 0.3),
                                   shape: BoxShape.circle,
                                 ),
                               ),
                             ],
                           ),
                         ),
-                        Expanded(child: expenseTx != null ? _buildMiniCard(expenseTx, isLeft: false, showDetailDate: diff > 7) : const SizedBox()),
+                        Expanded(child: expenseTx != null ? _buildMiniCard(context, expenseTx, isLeft: false, showDetailDate: diff > 7, customCategories: customCategories) : const SizedBox()),
                       ],
                     ),
                   );
@@ -213,8 +225,17 @@ class _DueDateRadarWidgetState extends ConsumerState<DueDateRadarWidget> {
     );
   }
 
-  Widget _buildMiniCard(TransactionRecord tx, {required bool isLeft, bool showDetailDate = false}) {
-    final Color color = IconUtils.getColor(tx.iconCode ?? tx.categoryId);
+  Widget _buildMiniCard(
+    BuildContext context,
+    TransactionRecord tx, {
+    required bool isLeft,
+    bool showDetailDate = false,
+    required List<CustomCategory> customCategories,
+  }) {
+    final Color color = CategoryUtils.getCategoryColor(
+      categoryId: tx.categoryId,
+      customCategories: customCategories,
+    );
     
     return Container(
       margin: EdgeInsets.only(left: isLeft ? 4 : 0, right: isLeft ? 0 : 4, bottom: 4),
@@ -231,10 +252,10 @@ class _DueDateRadarWidgetState extends ConsumerState<DueDateRadarWidget> {
       child: Row(
         mainAxisAlignment: isLeft ? MainAxisAlignment.end : MainAxisAlignment.start,
         children: [
-          if (!isLeft) _buildIcon(tx, color),
+          if (!isLeft) _buildIcon(context, tx, color, customCategories),
           if (!isLeft) const SizedBox(width: 6),
           
-          if (isLeft && showDetailDate) _buildDateText(tx, isLeft),
+          if (isLeft && showDetailDate) _buildDateText(context, tx, isLeft),
           
           Expanded(
             child: Column(
@@ -242,8 +263,8 @@ class _DueDateRadarWidgetState extends ConsumerState<DueDateRadarWidget> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Text(
-                  _getSmartTitle(tx),
-                  style: const TextStyle(fontSize: 8, fontWeight: FontWeight.w800),
+                  _getSmartTitle(tx, customCategories),
+                  style: TextStyle(fontSize: 8, fontWeight: FontWeight.w800, color: AppColors.getTextPrimary(context)),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -259,40 +280,54 @@ class _DueDateRadarWidgetState extends ConsumerState<DueDateRadarWidget> {
             ),
           ),
           
-          if (!isLeft && showDetailDate) _buildDateText(tx, isLeft),
+          if (!isLeft && showDetailDate) _buildDateText(context, tx, isLeft),
           if (isLeft) const SizedBox(width: 6),
-          if (isLeft) _buildIcon(tx, color),
+          if (isLeft) _buildIcon(context, tx, color, customCategories),
         ],
       ),
     );
   }
 
-  Widget _buildDateText(TransactionRecord tx, bool isLeft) {
+  Widget _buildDateText(BuildContext context, TransactionRecord tx, bool isLeft) {
     return Padding(
       padding: EdgeInsets.only(left: isLeft ? 0 : 6, right: isLeft ? 6 : 0),
       child: Text(
         DateFormat('d MMM').format(tx.date),
         style: TextStyle(
           fontSize: 6.5, 
-          color: Colors.white.withValues(alpha: 0.3), 
+          color: AppColors.getTextSecondary(context).withValues(alpha: 0.6), 
           fontWeight: FontWeight.w700
         ),
       ),
     );
   }
 
-  Widget _buildIcon(TransactionRecord tx, Color color) {
+  Widget _buildIcon(BuildContext context, TransactionRecord tx, Color color, List<CustomCategory> customCategories) {
     return Container(
       width: 18, height: 18,
-      decoration: BoxDecoration(color: color, borderRadius: BorderRadius.circular(5)),
-      child: Icon(IconUtils.getIcon(tx.iconCode ?? tx.categoryId), size: 9, color: Colors.white),
+      decoration: BoxDecoration(
+        color: AppColors.getAccentDeep(context, color), 
+        borderRadius: BorderRadius.circular(5),
+      ),
+      child: Icon(
+        CategoryUtils.getCategoryIcon(
+          categoryId: tx.categoryId,
+          customCategories: customCategories,
+          iconCode: tx.iconCode,
+        ),
+        size: 9,
+        color: Colors.white,
+      ),
     );
   }
 
-  String _getSmartTitle(TransactionRecord tx) {
-    final String cleanTitle = tx.title.trim();
-    if (cleanTitle.isNotEmpty) return cleanTitle;
-    return tx.categoryId ?? 'İşlem';
+  String _getSmartTitle(TransactionRecord tx, List<CustomCategory> customCategories) {
+    return CategoryUtils.getCategoryName(
+      categoryId: tx.categoryId,
+      context: context,
+      customCategories: customCategories,
+      fallbackTitle: tx.title,
+    );
   }
 
   Widget _buildEmptyState(BuildContext context) {
@@ -300,12 +335,12 @@ class _DueDateRadarWidgetState extends ConsumerState<DueDateRadarWidget> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.event_available_rounded, color: Colors.white.withValues(alpha: 0.05), size: 48),
+          Icon(Icons.event_available_rounded, color: AppColors.getTextSecondary(context).withValues(alpha: 0.15), size: 48),
           const SizedBox(height: 12),
           Text(
             'Yaklaşan Ödeme Bulunmadı',
             style: TextStyle(
-              color: Colors.white.withValues(alpha: 0.15),
+              color: AppColors.getTextSecondary(context).withValues(alpha: 0.5),
               fontSize: 10, 
               fontWeight: FontWeight.w600,
               letterSpacing: 0.5,
@@ -399,18 +434,40 @@ class _DueDateRadarWidgetState extends ConsumerState<DueDateRadarWidget> {
   }
 
   DateTime _getNextOccurrence(DateTime current, int periodType) {
-    switch (periodType) {
-      case 1: return current.add(const Duration(days: 7)); // Haftalık
-      case 2: return DateTime(current.year, current.month + 1, current.day, current.hour, current.minute); // Aylık
-      case 3: return DateTime(current.year + 1, current.month, current.day, current.hour, current.minute); // Yıllık
-      case 4: return current.add(const Duration(days: 14));
-      case 5: return current.add(const Duration(days: 21));
-      case 6: return DateTime(current.year, current.month + 3, current.day, current.hour, current.minute); // 3 Ayda bir
-      case 7: return DateTime(current.year, current.month + 6, current.day, current.hour, current.minute); // 6 Ayda bir
-      case 8: return current.add(const Duration(days: 1)); // Günlük
-      case 9: return current.add(const Duration(days: 2));
-      case 10: return current.add(const Duration(days: 3));
-      default: return current.add(const Duration(days: 30));
+    if (periodType == 250) {
+      // Hafta İçi (Pzt-Cum)
+      int addDays = 1;
+      if (current.weekday == DateTime.friday) {
+        addDays = 3;
+      } else if (current.weekday == DateTime.saturday) {
+        addDays = 2;
+      }
+      return current.add(Duration(days: addDays));
+    } else if (periodType == 251) {
+      // Hafta Sonu (Cmt-Paz)
+      int addDays = 1;
+      if (current.weekday == DateTime.sunday) {
+        addDays = 6;
+      } else if (current.weekday >= DateTime.monday && current.weekday <= DateTime.friday) {
+        addDays = DateTime.saturday - current.weekday;
+      }
+      return current.add(Duration(days: addDays));
+    } else {
+      final unit = periodType ~/ 100;
+      final interval = periodType % 100;
+      if (interval > 0) {
+        switch (unit) {
+          case 1: // Gün
+            return current.add(Duration(days: interval));
+          case 2: // Hafta
+            return current.add(Duration(days: interval * 7));
+          case 3: // Ay
+            return DateTime(current.year, current.month + interval, current.day, current.hour, current.minute);
+          case 4: // Yıl
+            return DateTime(current.year + interval, current.month, current.day, current.hour, current.minute);
+        }
+      }
     }
+    return current.add(const Duration(days: 30));
   }
 }

@@ -34,6 +34,9 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 const SizedBox(height: AppSizes.paddingSmall),
+            
+           
+                
                 
                 // 1. Widget Board
                 const DashboardWidgetBoard(),

@@ -410,5 +410,51 @@
   "active": "Aktif",
   "inactive": "Aktif Değil",
   "notifications": "Bildirimler",
-  "disabled": "Kapalı"
+  "disabled": "Kapalı",
+  "financialOverview": "FİNANSAL ÖZET",
+  "monthlyNetBalance": "AYLIK NET BAKİYE",
+  "savingsRate": "TASARRUF ORANI",
+  "yearlyProjection": "YILLIK PROJEKSİYON",
+  "topExpense": "EN BÜYÜK GİDER",
+  "topIncome": "EN BÜYÜK GELİR",
+  "transactionBreakdown": "İŞLEM DAĞILIMI",
+  "incomeCount": "Gelir",
+  "expenseCount": "Gider",
+  "scenarioAnalysis": "SENARYO ANALİZİ",
+  "monthlyBest": "AYLIK EN İYİ",
+  "monthlyWorst": "AYLIK EN KÖTÜ",
+  "yearlyBest": "YILLIK EN İYİ",
+  "yearlyWorst": "YILLIK EN KÖTÜ",
+  "noRecurring": "Tekrarlayan işlem yok",
+  "perMonth": "/ay",
+  "perYear": "/yıl",
+  "itemCount": "{count} Kalem",
+  "@itemCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "authEmailRequired": "Lütfen e-posta adresinizi girin.",
+  "authEmailInvalid": "Lütfen geçerli bir e-posta adresi girin.",
+  "authPasswordRequired": "Lütfen şifrenizi girin.",
+  "authPasswordTooShort": "Şifreniz en az 6 karakterden oluşmalıdır.",
+  "authConfirmPasswordRequired": "Lütfen şifrenizi tekrar girin.",
+  "authPasswordsDoNotMatch": "Girdiğiniz şifreler birbiriyle eşleşmiyor.",
+  "authUsernameRequired": "Lütfen bir kullanıcı adı belirleyin.",
+  "authUsernameTooShort": "Kullanıcı adı en az 3 karakterden oluşmalıdır.",
+  "authUsernameInvalid": "Kullanıcı adı yalnızca harf, rakam ve alt çizgi (_) içerebilir.",
+  "authUsernameTaken": "Bu kullanıcı adı zaten alınmış.",
+  "authEmailNotConfirmed": "E-posta adresiniz henüz doğrulanmamış. Lütfen e-postanıza gönderilen doğrulama kodunu girin veya tekrar kod isteyin.",
+  "authInvalidCredentials": "E-posta adresiniz veya şifreniz hatalı.",
+  "authEmailExists": "Bu e-posta adresiyle zaten bir kayıtlı hesap bulunuyor.",
+  "authWeakPassword": "Şifreniz çok zayıf. Lütfen en az 6 karakterli daha güçlü bir şifre girin.",
+  "authOtpExpired": "Doğrulama kodunun süresi dolmuş. Lütfen yeni bir kod isteyin.",
+  "authBadCode": "Girdiğiniz doğrulama kodu hatalı veya geçersiz.",
+  "authSignupDisabled": "Yeni kullanıcı kaydı şu anda devre dışıdır. Lütfen yöneticiyle iletişime geçin.",
+  "authRateLimitExceeded": "Çok fazla istek gönderildi. E-posta limitini aştınız, lütfen bir süre bekleyip tekrar deneyin.",
+  "authOtpRequired": "Lütfen gelen doğrulama kodunu (6 veya 8 haneli) girin.",
+  "authOtpSent": "Yeni doğrulama kodu e-postanıza gönderildi.",
+  "authRegistrationSuccess": "Kayıt başarılı! Lütfen e-postanıza gelen doğrulama kodunu girin."
 }

@@ -1216,4 +1216,136 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String get disabled => 'Kapalı';
+
+  @override
+  String get financialOverview => 'FİNANSAL ÖZET';
+
+  @override
+  String get monthlyNetBalance => 'AYLIK NET BAKİYE';
+
+  @override
+  String get savingsRate => 'TASARRUF ORANI';
+
+  @override
+  String get yearlyProjection => 'YILLIK PROJEKSİYON';
+
+  @override
+  String get topExpense => 'EN BÜYÜK GİDER';
+
+  @override
+  String get topIncome => 'EN BÜYÜK GELİR';
+
+  @override
+  String get transactionBreakdown => 'İŞLEM DAĞILIMI';
+
+  @override
+  String get incomeCount => 'Gelir';
+
+  @override
+  String get expenseCount => 'Gider';
+
+  @override
+  String get scenarioAnalysis => 'SENARYO ANALİZİ';
+
+  @override
+  String get monthlyBest => 'AYLIK EN İYİ';
+
+  @override
+  String get monthlyWorst => 'AYLIK EN KÖTÜ';
+
+  @override
+  String get yearlyBest => 'YILLIK EN İYİ';
+
+  @override
+  String get yearlyWorst => 'YILLIK EN KÖTÜ';
+
+  @override
+  String get noRecurring => 'Tekrarlayan işlem yok';
+
+  @override
+  String get perMonth => '/ay';
+
+  @override
+  String get perYear => '/yıl';
+
+  @override
+  String itemCount(int count) {
+    return '$count Kalem';
+  }
+
+  @override
+  String get authEmailRequired => 'Lütfen e-posta adresinizi girin.';
+
+  @override
+  String get authEmailInvalid => 'Lütfen geçerli bir e-posta adresi girin.';
+
+  @override
+  String get authPasswordRequired => 'Lütfen şifrenizi girin.';
+
+  @override
+  String get authPasswordTooShort =>
+      'Şifreniz en az 6 karakterden oluşmalıdır.';
+
+  @override
+  String get authConfirmPasswordRequired => 'Lütfen şifrenizi tekrar girin.';
+
+  @override
+  String get authPasswordsDoNotMatch =>
+      'Girdiğiniz şifreler birbiriyle eşleşmiyor.';
+
+  @override
+  String get authUsernameRequired => 'Lütfen bir kullanıcı adı belirleyin.';
+
+  @override
+  String get authUsernameTooShort =>
+      'Kullanıcı adı en az 3 karakterden oluşmalıdır.';
+
+  @override
+  String get authUsernameInvalid =>
+      'Kullanıcı adı yalnızca harf, rakam ve alt çizgi (_) içerebilir.';
+
+  @override
+  String get authUsernameTaken => 'Bu kullanıcı adı zaten alınmış.';
+
+  @override
+  String get authEmailNotConfirmed =>
+      'E-posta adresiniz henüz doğrulanmamış. Lütfen e-postanıza gönderilen doğrulama kodunu girin veya tekrar kod isteyin.';
+
+  @override
+  String get authInvalidCredentials =>
+      'E-posta adresiniz veya şifreniz hatalı.';
+
+  @override
+  String get authEmailExists =>
+      'Bu e-posta adresiyle zaten bir kayıtlı hesap bulunuyor.';
+
+  @override
+  String get authWeakPassword =>
+      'Şifreniz çok zayıf. Lütfen en az 6 karakterli daha güçlü bir şifre girin.';
+
+  @override
+  String get authOtpExpired =>
+      'Doğrulama kodunun süresi dolmuş. Lütfen yeni bir kod isteyin.';
+
+  @override
+  String get authBadCode => 'Girdiğiniz doğrulama kodu hatalı veya geçersiz.';
+
+  @override
+  String get authSignupDisabled =>
+      'Yeni kullanıcı kaydı şu anda devre dışıdır. Lütfen yöneticiyle iletişime geçin.';
+
+  @override
+  String get authRateLimitExceeded =>
+      'Çok fazla istek gönderildi. E-posta limitini aştınız, lütfen bir süre bekleyip tekrar deneyin.';
+
+  @override
+  String get authOtpRequired =>
+      'Lütfen gelen doğrulama kodunu (6 veya 8 haneli) girin.';
+
+  @override
+  String get authOtpSent => 'Yeni doğrulama kodu e-postanıza gönderildi.';
+
+  @override
+  String get authRegistrationSuccess =>
+      'Kayıt başarılı! Lütfen e-postanıza gelen doğrulama kodunu girin.';
 }

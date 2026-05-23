@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import '../../../shared/widgets/precision_sheet.dart';
-import '../../../shared/widgets/precision_picker.dart';
-import '../../../shared/widgets/precision_button.dart';
-import '../../../shared/widgets/precision_action.dart';
+import '../../../shared/widgets/custom_bottom_sheet.dart';
+import '../../../shared/widgets/wheel_picker.dart';
+import '../../../shared/widgets/custom_button.dart';
+import '../../../shared/widgets/clickable_action.dart';
 
 class TransactionReminderDaysSelector extends StatelessWidget {
   final int selectedDays;
@@ -34,19 +34,19 @@ class TransactionReminderDaysSelector extends StatelessWidget {
     int tempIndex = keys.indexOf(selectedDays);
     if (tempIndex == -1) tempIndex = 0;
 
-    PrecisionSheet.show(
+    CustomBottomSheet.show(
       context: context,
       title: 'HATIRLATMA GÜNÜ',
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          PrecisionPicker.strings(
+          WheelPicker.strings(
             items: values,
             initialItem: tempIndex,
             onSelectedItemChanged: (idx) => tempIndex = idx,
           ),
           const SizedBox(height: 32),
-          PrecisionButton(
+          CustomButton(
             onTap: () {
               onChanged(keys[tempIndex]);
               Navigator.pop(context);
@@ -71,7 +71,7 @@ class TransactionReminderDaysSelector extends StatelessWidget {
       7: '1 Hafta Önce',
     };
 
-    return PrecisionAction(
+    return ClickableAction(
       onTap: () => _showDaysPickerSheet(context),
       color: Colors.transparent,
       showFlash: false,

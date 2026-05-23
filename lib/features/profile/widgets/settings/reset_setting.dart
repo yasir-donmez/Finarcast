@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../../shared/widgets/precision_dialog.dart';
+import '../../../../shared/widgets/custom_dialog.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../profile_list_items.dart';
 import '../../../../core/providers/db_providers.dart';
 import '../../../../core/providers/settings_provider.dart';
 import '../../../../core/database/database_service.dart';
-import '../../../../shared/widgets/precision_notification.dart';
+import '../../../../shared/widgets/custom_notification.dart';
 import '../../../dashboard/dashboard_providers.dart';
 
 class ResetSetting extends ConsumerWidget {
@@ -28,7 +28,7 @@ class ResetSetting extends ConsumerWidget {
   }
 
   void _showResetDialog(BuildContext context, AppLocalizations l10n, WidgetRef ref) {
-    showPrecisionDialog(
+    showCustomDialog(
       context: context,
       title: "Verileri Sıfırla?",
       content: "Tüm finansal verileriniz ve ayarlarınız kalıcı olarak silinecek. Bu işlem geri alınamaz.",
@@ -53,7 +53,7 @@ class ResetSetting extends ConsumerWidget {
             
             if (context.mounted) {
               Navigator.pop(context);
-              PrecisionNotification.success(context, "Tüm veriler ve ayarlar başarıyla sıfırlandı.");
+              CustomNotification.success(context, "Tüm veriler ve ayarlar başarıyla sıfırlandı.");
             }
           },
         ),

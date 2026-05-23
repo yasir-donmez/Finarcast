@@ -1,0 +1,763 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flutter: Görsel Sunum</title>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #0a0e27;
+            color: #e0e0e0;
+            overflow: hidden;
+            height: 100vh;
+        }
+
+        .container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .progress {
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #00d4ff, #0099ff);
+            transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            width: 33.33%;
+            z-index: 100;
+            box-shadow: 0 0 20px rgba(0, 212, 255, 0.8);
+        }
+
+        .mesh {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                linear-gradient(90deg, rgba(0, 212, 255, 0.03) 1px, transparent 1px),
+                linear-gradient(rgba(0, 212, 255, 0.03) 1px, transparent 1px),
+                linear-gradient(135deg, rgba(0, 212, 255, 0.05) 0%, transparent 50%),
+                radial-gradient(circle at 20% 50%, rgba(0, 212, 255, 0.1), transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(255, 0, 200, 0.1), transparent 50%);
+            background-size: 50px 50px, 50px 50px, 100% 100%, 100% 100%, 100% 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .slides-wrapper {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            display: flex;
+        }
+
+        .slide {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transform: translateX(100%);
+            transition: opacity 0.8s ease, transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 10;
+            padding: 60px;
+        }
+
+        .slide.active {
+            opacity: 1;
+            transform: translateX(0);
+            z-index: 20;
+        }
+
+        .slide.exit {
+            transform: translateX(-100%);
+        }
+
+        /* SLAYT 1: TEK KOD, ÇOKLU ÇIKTI */
+        .code-center {
+            position: relative;
+            width: 200px;
+            height: 200px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 40px;
+        }
+
+        .code-blob {
+            position: absolute;
+            width: 140px;
+            height: 140px;
+            background: linear-gradient(135deg, #00d4ff, #0099ff);
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.7rem;
+            color: #0a0e27;
+            font-weight: 700;
+            box-shadow: 0 0 40px rgba(0, 212, 255, 0.6);
+            animation: codePulse 2s ease-in-out infinite;
+            z-index: 5;
+        }
+
+        @keyframes codePulse {
+            0%, 100% {
+                box-shadow: 0 0 40px rgba(0, 212, 255, 0.6);
+                transform: scale(1);
+            }
+            50% {
+                box-shadow: 0 0 60px rgba(0, 212, 255, 1);
+                transform: scale(1.05);
+            }
+        }
+
+        .platform-icon {
+            position: absolute;
+            width: 80px;
+            height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            opacity: 0;
+            transform: scale(0);
+            transition: all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+            border: 2px solid rgba(0, 212, 255, 0.3);
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 0 30px rgba(0, 212, 255, 0.2);
+        }
+
+        .platform-icon.show {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        .platform-icon:nth-child(1) { top: -100px; left: 50%; transform-origin: center center; margin-left: -40px; }
+        .platform-icon:nth-child(2) { bottom: -100px; left: 50%; transform-origin: center center; margin-left: -40px; }
+        .platform-icon:nth-child(3) { top: 50%; left: -100px; transform-origin: center center; margin-top: -40px; }
+        .platform-icon:nth-child(4) { top: 50%; right: -100px; transform-origin: center center; margin-top: -40px; }
+
+        .platform-line {
+            position: absolute;
+            background: linear-gradient(90deg, rgba(0, 212, 255, 0.8), transparent);
+            transform-origin: center;
+            opacity: 0;
+        }
+
+        .platform-line.show {
+            animation: drawLine 0.6s ease-out forwards;
+        }
+
+        @keyframes drawLine {
+            from {
+                opacity: 0;
+                transform: scaleX(0);
+            }
+            to {
+                opacity: 1;
+                transform: scaleX(1);
+            }
+        }
+
+        .line-top {
+            width: 90px;
+            height: 2px;
+            top: -45px;
+            left: 50%;
+            margin-left: -45px;
+        }
+
+        .line-bottom {
+            width: 90px;
+            height: 2px;
+            bottom: -45px;
+            left: 50%;
+            margin-left: -45px;
+        }
+
+        .line-left {
+            width: 2px;
+            height: 90px;
+            top: 50%;
+            left: -45px;
+            margin-top: -45px;
+        }
+
+        .line-right {
+            width: 2px;
+            height: 90px;
+            top: 50%;
+            right: -45px;
+            margin-top: -45px;
+        }
+
+        .slide-title-center {
+            position: absolute;
+            bottom: 60px;
+            text-align: center;
+            width: 100%;
+        }
+
+        .slide-title-center h1 {
+            font-size: 2.5rem;
+            background: linear-gradient(135deg, #00d4ff, #00ff88);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .slide-subtitle-center {
+            font-size: 1rem;
+            color: #00d4ff;
+            letter-spacing: 2px;
+        }
+
+        /* SLAYT 2: KATMAN YAPI */
+        .layer-stack {
+            position: relative;
+            width: 500px;
+            height: 400px;
+            perspective: 1000px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .layer {
+            position: absolute;
+            width: 450px;
+            padding: 30px;
+            border-radius: 15px;
+            border: 2px solid rgba(0, 212, 255, 0.3);
+            backdrop-filter: blur(10px);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            opacity: 0;
+            transform: translateY(50px) rotateX(45deg);
+            transition: all 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+            box-shadow: 0 0 30px rgba(0, 212, 255, 0.1);
+        }
+
+        .layer.show {
+            opacity: 1;
+            transform: translateY(0) rotateX(0);
+        }
+
+        .layer-app {
+            background: linear-gradient(135deg, rgba(0, 255, 136, 0.2), rgba(0, 212, 255, 0.2));
+            border-color: rgba(0, 255, 136, 0.5);
+            z-index: 30;
+            color: #00ff88;
+        }
+
+        .layer-widgets {
+            background: linear-gradient(135deg, rgba(255, 100, 200, 0.15), rgba(0, 212, 255, 0.15));
+            border-color: rgba(255, 100, 200, 0.4);
+            z-index: 20;
+            top: 80px;
+            color: #ff64c8;
+        }
+
+        .layer-render {
+            background: linear-gradient(135deg, rgba(255, 150, 0, 0.15), rgba(0, 212, 255, 0.15));
+            border-color: rgba(255, 150, 0, 0.4);
+            z-index: 10;
+            top: 160px;
+            color: #ff9600;
+        }
+
+        .layer-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .layer-description {
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+
+        .layer-icon {
+            font-size: 2rem;
+            margin-bottom: 15px;
+        }
+
+        /* SLAYT 3: HOT RELOAD */
+        .hot-reload-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 60px;
+            width: 100%;
+            max-width: 1200px;
+            align-items: center;
+        }
+
+        .code-editor {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .tree {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+            background: rgba(10, 14, 39, 0.9);
+            border: 1px solid rgba(0, 255, 136, 0.3);
+            border-radius: 12px;
+            padding: 20px;
+            color: #00ff88;
+            line-height: 1.8;
+            max-height: 350px;
+            overflow-y: auto;
+        }
+
+        .node {
+            color: #00d4ff;
+            font-weight: 600;
+            margin-left: 0;
+        }
+
+        .prop {
+            color: #ff64c8;
+            margin-left: 20px;
+        }
+
+        .value {
+            color: #ffd700;
+        }
+
+        .reload-btn {
+            background: linear-gradient(135deg, #00d4ff, #0099ff);
+            color: #0a0e27;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: 700;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+            align-self: flex-start;
+        }
+
+        .reload-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 0 30px rgba(0, 212, 255, 0.5);
+        }
+
+        .reload-btn:active {
+            transform: translateY(0);
+        }
+
+        .phone-simulator {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .phone-frame {
+            position: relative;
+            width: 280px;
+            height: 520px;
+            background: #1a1f3a;
+            border: 12px solid #2a3050;
+            border-radius: 45px;
+            overflow: hidden;
+            box-shadow: 0 20px 60px rgba(0, 212, 255, 0.3);
+        }
+
+        .phone-frame::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 180px;
+            height: 28px;
+            background: #0a0e27;
+            border-radius: 0 0 25px 25px;
+            z-index: 10;
+        }
+
+        .phone-screen {
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #0f1729, #1a2540);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 20px;
+            gap: 20px;
+        }
+
+        .phone-button {
+            padding: 12px 30px;
+            border-radius: 8px;
+            border: none;
+            font-weight: 700;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+            background-color: #0099ff;
+            color: white;
+        }
+
+        .phone-button.changed {
+            background-color: #00ff88;
+            animation: buttonPulse 0.6s ease-out;
+        }
+
+        @keyframes buttonPulse {
+            0% {
+                transform: scale(0.9);
+                box-shadow: 0 0 20px rgba(0, 255, 136, 0.8);
+            }
+            100% {
+                transform: scale(1);
+                box-shadow: 0 0 10px rgba(0, 255, 136, 0.3);
+            }
+        }
+
+        .pulse-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, #00ff88, #00d4ff);
+            color: #0a0e27;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: 700;
+            font-size: 0.85rem;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        .pulse-dot {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            background: #ff00ff;
+            border-radius: 50%;
+            margin-right: 8px;
+            animation: pulseDot 1.5s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                box-shadow: 0 0 20px rgba(0, 255, 136, 0.8);
+                transform: scale(1);
+            }
+            50% {
+                box-shadow: 0 0 40px rgba(0, 255, 136, 1);
+                transform: scale(1.05);
+            }
+        }
+
+        @keyframes pulseDot {
+            0%, 100% {
+                box-shadow: 0 0 10px rgba(255, 0, 255, 0.8);
+                transform: scale(1);
+            }
+            50% {
+                box-shadow: 0 0 20px rgba(255, 0, 255, 1);
+                transform: scale(1.2);
+            }
+        }
+
+        .flutter-logo {
+            font-size: 3rem;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-10px);
+            }
+        }
+
+        .fade-in {
+            opacity: 0;
+            transition: opacity 0.6s ease;
+        }
+
+        .fade-in.show {
+            opacity: 1;
+        }
+
+        .nav {
+            position: absolute;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 20px;
+            z-index: 50;
+            align-items: center;
+        }
+
+        .nav-btn {
+            background: rgba(0, 212, 255, 0.1);
+            border: 2px solid rgba(0, 212, 255, 0.3);
+            color: #00d4ff;
+            padding: 10px 20px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .nav-btn:hover {
+            background: rgba(0, 212, 255, 0.2);
+            box-shadow: 0 0 20px rgba(0, 212, 255, 0.4);
+            transform: translateY(-2px);
+        }
+
+        .nav-btn:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        .slide-counter {
+            color: #00d4ff;
+            font-weight: 600;
+            margin: 0 15px;
+        }
+
+        @media (max-width: 1200px) {
+            .hot-reload-container {
+                grid-template-columns: 1fr;
+                gap: 30px;
+            }
+
+            .slide {
+                padding: 40px;
+            }
+
+            .slide-title-center h1 {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="progress"></div>
+        <div class="mesh"></div>
+        
+        <div class="slides-wrapper">
+            <!-- SLAYT 1: TEK KOD, ÇOKLU ÇIKTI -->
+            <div class="slide active">
+                <div style="position: relative; width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center;">
+                    <div class="code-center">
+                        <div class="code-blob">Dart</div>
+                        
+                        <div class="platform-line line-top show"></div>
+                        <div class="platform-icon show" id="icon-ios">🍎</div>
+                        
+                        <div class="platform-line line-bottom show"></div>
+                        <div class="platform-icon show" id="icon-android">🤖</div>
+                        
+                        <div class="platform-line line-left show"></div>
+                        <div class="platform-icon show" id="icon-web">🌐</div>
+                        
+                        <div class="platform-line line-right show"></div>
+                        <div class="platform-icon show" id="icon-windows">🪟</div>
+                    </div>
+
+                    <div class="slide-title-center">
+                        <h1>Tek Kod, Dört Platform</h1>
+                        <div class="slide-subtitle-center">
+                            <span class="pulse-dot"></span>YAZDIR → TÜME ÇALIŞIR
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SLAYT 2: KATMAN YAPISI -->
+            <div class="slide">
+                <div style="position: relative; width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center;">
+                    <div style="position: absolute; top: 60px; text-align: center;">
+                        <h1 style="font-size: 2.5rem; background: linear-gradient(135deg, #00d4ff, #00ff88); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; font-weight: 700; margin-bottom: 10px;">Piksel Mükemmelliği</h1>
+                        <div style="font-size: 1rem; color: #00d4ff; letter-spacing: 2px;">HER CİHAZDA AYNI GÖRÜNÜM</div>
+                    </div>
+
+                    <div class="layer-stack">
+                        <div class="layer layer-app">
+                            <div class="layer-icon">🎨</div>
+                            <div class="layer-title">Mükemmel UI</div>
+                            <div class="layer-description">Tutarlı tasarım</div>
+                        </div>
+                        <div class="layer layer-widgets">
+                            <div class="layer-icon">🧩</div>
+                            <div class="layer-title">Widgets Motoru</div>
+                            <div class="layer-description">Material & Cupertino</div>
+                        </div>
+                        <div class="layer layer-render">
+                            <div class="layer-icon">⚙️</div>
+                            <div class="layer-title">Impeller Engine</div>
+                            <div class="layer-description">Kendi piksellerini çiziyor</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SLAYT 3: HOT RELOAD -->
+            <div class="slide">
+                <div style="position: absolute; top: 40px; left: 50%; transform: translateX(-50%); text-align: center; z-index: 30;">
+                    <h1 style="font-size: 2rem; background: linear-gradient(135deg, #00d4ff, #00ff88); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; font-weight: 700; margin-bottom: 5px;">Hot Reload: Canlı Geliştirme</h1>
+                    <div style="font-size: 0.95rem; color: #00d4ff; letter-spacing: 1px;">
+                        <span class="pulse-dot"></span>KOD YAZARKEN EKRAN GÜNCELLENİYOR
+                    </div>
+                </div>
+
+                <div class="hot-reload-container">
+                    <div class="code-editor">
+                        <div class="tree" id="codeTree">
+class MyButton extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    <span class="node">return</span> ElevatedButton(
+      <span class="prop">onPressed:</span> <span class="value">() {}</span>,
+      <span class="prop">style:</span> ButtonStyle(
+        <span class="prop">backgroundColor:</span> 
+          <span class="value">MaterialStateProperty.all(</span>
+            <span class="value" id="colorValue">Colors.blue</span>
+          <span class="value">)</span>,
+      ),
+      <span class="prop">child:</span> <span class="value">Text('Tıkla')</span>,
+    );
+  }
+}
+                        </div>
+                        <button class="reload-btn" onclick="triggerHotReload()">🔄 Hot Reload Simulasyonu</button>
+                    </div>
+
+                    <div class="phone-simulator">
+                        <div class="phone-frame">
+                            <div class="phone-screen">
+                                <div style="margin-bottom: 40px; text-align: center;">
+                                    <div class="flutter-logo">📱</div>
+                                </div>
+                                <button class="phone-button" id="demoButton">Tıkla</button>
+                            </div>
+                        </div>
+                        <div class="pulse-badge">🔴 CANLI DEMO AKTİF</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="nav">
+            <button class="nav-btn" id="prevBtn" onclick="previousSlide()">← Önceki</button>
+            <span class="slide-counter"><span id="currentSlide">1</span> / 3</span>
+            <button class="nav-btn" id="nextBtn" onclick="nextSlide()">Sonraki →</button>
+        </div>
+    </div>
+
+    <script>
+        let currentSlide = 1;
+        const totalSlides = 3;
+
+        function showSlide(n) {
+            const slides = document.querySelectorAll('.slide');
+            
+            if (n > totalSlides) currentSlide = totalSlides;
+            if (n < 1) currentSlide = 1;
+
+            slides.forEach((slide, index) => {
+                slide.classList.remove('active', 'exit');
+                if (index + 1 === currentSlide) {
+                    slide.classList.add('active');
+                    if (index + 1 === 2) triggerLayerAnimation();
+                } else if (index + 1 < currentSlide) {
+                    slide.classList.add('exit');
+                }
+            });
+
+            document.getElementById('currentSlide').textContent = currentSlide;
+            document.getElementById('prevBtn').disabled = currentSlide === 1;
+            document.getElementById('nextBtn').disabled = currentSlide === totalSlides;
+
+            const progress = (currentSlide / totalSlides) * 100;
+            document.querySelector('.progress').style.width = progress + '%';
+
+            resetHotReload();
+        }
+
+        function nextSlide() {
+            currentSlide++;
+            showSlide(currentSlide);
+        }
+
+        function previousSlide() {
+            currentSlide--;
+            showSlide(currentSlide);
+        }
+
+        function triggerLayerAnimation() {
+            const layers = document.querySelectorAll('.layer');
+            layers.forEach((layer, index) => {
+                setTimeout(() => {
+                    layer.classList.add('show');
+                }, index * 300);
+            });
+        }
+
+        function triggerHotReload() {
+            const colorValue = document.getElementById('colorValue');
+            const button = document.getElementById('demoButton');
+            
+            if (colorValue.textContent === 'Colors.blue') {
+                colorValue.textContent = 'Colors.green';
+                button.classList.add('changed');
+                button.style.backgroundColor = '#00ff88';
+            } else {
+                colorValue.textContent = 'Colors.blue';
+                button.classList.remove('changed');
+                button.style.backgroundColor = '#0099ff';
+            }
+        }
+
+        function resetHotReload() {
+            const colorValue = document.getElementById('colorValue');
+            const button = document.getElementById('demoButton');
+            colorValue.textContent = 'Colors.blue';
+            button.classList.remove('changed');
+            button.style.backgroundColor = '#0099ff';
+        }
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight') nextSlide();
+            if (e.key === 'ArrowLeft') previousSlide();
+        });
+
+        showSlide(currentSlide);
+    </script>
+</body>
+</html>

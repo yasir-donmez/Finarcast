@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../../core/theme/app_constants.dart';
 import '../../../l10n/app_localizations.dart';
-import '../../../shared/widgets/precision_sheet.dart';
-import '../../../shared/widgets/precision_action.dart';
-import '../../../shared/widgets/precision_picker.dart';
-import '../../../shared/widgets/precision_button.dart';
-import '../../../shared/widgets/precision_icon_button.dart';
+import '../../../shared/widgets/custom_bottom_sheet.dart';
+import '../../../shared/widgets/clickable_action.dart';
+import '../../../shared/widgets/wheel_picker.dart';
+import '../../../shared/widgets/custom_button.dart';
+import '../../../shared/widgets/custom_icon_button.dart';
 
 class TransactionPeriodData {
   final int periodType;
@@ -56,12 +56,15 @@ class _TransactionPeriodSelectorState extends State<TransactionPeriodSelector> {
     
     // Eğer null gönderildiyse (Düzenleme modu vb.), periodType'a göre otomatik çıkarım yap
     if (_expandedPeriodCategory == null) {
-      if ([8, 9, 10].contains(_periodType)) {
+      final unit = _periodType ~/ 100;
+      if (unit == 1) {
         _expandedPeriodCategory = 'gun';
-      } else if ([1, 4, 5].contains(_periodType)) {
+      } else if (unit == 2 || [250, 251].contains(_periodType)) {
         _expandedPeriodCategory = 'hafta';
-      } else if ([2, 6, 7].contains(_periodType)) {
+      } else if (unit == 3) {
         _expandedPeriodCategory = 'ay';
+      } else if (unit == 4) {
+        _expandedPeriodCategory = 'yil';
       }
     }
     
@@ -81,10 +84,6 @@ class _TransactionPeriodSelectorState extends State<TransactionPeriodSelector> {
     ));
   }
 
-  List<String> _getWeekDays(AppLocalizations l10n) => [
-    l10n.monday, l10n.tuesday, l10n.wednesday, l10n.thursday,
-    l10n.friday, l10n.saturday, l10n.sunday,
-  ];
 
   List<String> _getMonths(AppLocalizations l10n) => [
     l10n.january, l10n.february, l10n.march, l10n.april,
@@ -102,7 +101,7 @@ class _TransactionPeriodSelectorState extends State<TransactionPeriodSelector> {
       children: [
         // --- ESNEK PERİYOT ŞERİDİ (INLINE EXPANSION) ---
         Padding(
-          padding: EdgeInsets.symmetric(vertical: 8 * scalingFactor),
+          padding: EdgeInsets.symmetric(vertical: 2 * scalingFactor),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -137,10 +136,10 @@ class _TransactionPeriodSelectorState extends State<TransactionPeriodSelector> {
                   builder: (context, constraints) {
                     final List<Map<String, dynamic>> cats = [
                       {'label': l10n.oneTime, 'type': 0, 'cat': null},
-                      {'label': l10n.day, 'type': 8, 'cat': 'gun'},
-                      {'label': l10n.week, 'type': 1, 'cat': 'hafta'},
-                      {'label': l10n.month, 'type': 2, 'cat': 'ay'},
-                      {'label': l10n.yearly, 'type': 3, 'cat': null},
+                      {'label': l10n.day, 'type': 101, 'cat': 'gun'},
+                      {'label': l10n.week, 'type': 201, 'cat': 'hafta'},
+                      {'label': l10n.month, 'type': 301, 'cat': 'ay'},
+                      {'label': l10n.yearly, 'type': 401, 'cat': 'yil'},
                     ];
 
                     final double spacing = 4.0 * scalingFactor;
@@ -160,7 +159,17 @@ class _TransactionPeriodSelectorState extends State<TransactionPeriodSelector> {
                       final double charWeight = labelText.length * 0.12;
 
                       if (c['cat'] != null) {
-                        return 3.2 + charWeight;
+                        int subCount = 0;
+                        if (c['cat'] == 'gun') {
+                          subCount = 4;
+                        } else if (c['cat'] == 'hafta') {
+                          subCount = 5;
+                        } else if (c['cat'] == 'ay') {
+                          subCount = 4;
+                        } else if (c['cat'] == 'yil') {
+                          subCount = 2;
+                        }
+                        return 1.8 + (subCount * 0.45) + charWeight;
                       } else {
                         return 0.8 + charWeight;
                       }
@@ -365,7 +374,7 @@ class _TransactionPeriodSelectorState extends State<TransactionPeriodSelector> {
 
   Widget _buildStandardRow(String label, String value, IconData icon, VoidCallback onTap) {
     final scalingFactor = widget.scalingFactor;
-    return PrecisionAction(
+    return ClickableAction(
       onTap: onTap,
       color: Colors.transparent,
       showFlash: false,
@@ -430,7 +439,7 @@ class _TransactionPeriodSelectorState extends State<TransactionPeriodSelector> {
     final bool isAnyOtherExpanded = _expandedPeriodCategory != null && !isThisExpanded;
     final String abb = label.isNotEmpty ? label[0].toUpperCase() : "";
 
-    return PrecisionAction(
+    return ClickableAction(
       onTap: () {
         HapticFeedback.selectionClick();
         setState(() {
@@ -521,27 +530,34 @@ class _TransactionPeriodSelectorState extends State<TransactionPeriodSelector> {
   }
 
   Widget _buildSubPeriodInlineOptions(String category, AppLocalizations l10n, double scalingFactor) {
+    final isTr = Localizations.localeOf(context).languageCode == 'tr';
     List<Widget> options = [];
     if (category == 'gun') {
-      final d = l10n.day[0].toUpperCase();
       options = [
-        _buildPeriodBtnSheet('1$d', 8, scalingFactor),
-        _buildPeriodBtnSheet('2$d', 9, scalingFactor),
-        _buildPeriodBtnSheet('3$d', 10, scalingFactor),
+        _buildPeriodBtnSheet('1g', 101, scalingFactor),
+        _buildPeriodBtnSheet('2g', 102, scalingFactor),
+        _buildPeriodBtnSheet('3g', 103, scalingFactor),
+        _buildPeriodBtnSheet('4g', 104, scalingFactor),
       ];
     } else if (category == 'hafta') {
-      final h = l10n.week[0].toUpperCase();
       options = [
-        _buildPeriodBtnSheet('1$h', 1, scalingFactor),
-        _buildPeriodBtnSheet('2$h', 4, scalingFactor),
-        _buildPeriodBtnSheet('3$h', 5, scalingFactor),
+        _buildPeriodBtnSheet('1h', 201, scalingFactor),
+        _buildPeriodBtnSheet('2h', 202, scalingFactor),
+        _buildPeriodBtnSheet('3h', 203, scalingFactor),
+        _buildPeriodBtnSheet(isTr ? 'İçi' : 'Wkd', 250, scalingFactor),
+        _buildPeriodBtnSheet(isTr ? 'Sonu' : 'Wke', 251, scalingFactor),
       ];
     } else if (category == 'ay') {
-      final a = l10n.month[0].toUpperCase();
       options = [
-        _buildPeriodBtnSheet('1$a', 2, scalingFactor),
-        _buildPeriodBtnSheet('3$a', 6, scalingFactor),
-        _buildPeriodBtnSheet('6$a', 7, scalingFactor),
+        _buildPeriodBtnSheet('1a', 301, scalingFactor),
+        _buildPeriodBtnSheet('2a', 302, scalingFactor),
+        _buildPeriodBtnSheet('3a', 303, scalingFactor),
+        _buildPeriodBtnSheet('6a', 306, scalingFactor),
+      ];
+    } else if (category == 'yil') {
+      options = [
+        _buildPeriodBtnSheet('1y', 401, scalingFactor),
+        _buildPeriodBtnSheet('2y', 402, scalingFactor),
       ];
     }
 
@@ -553,19 +569,19 @@ class _TransactionPeriodSelectorState extends State<TransactionPeriodSelector> {
 
   Widget _buildPeriodBtnSheet(String label, int type, double scalingFactor) {
     final bool isActive = _periodType == type;
-    return PrecisionAction(
+    return ClickableAction(
       onTap: () {
         HapticFeedback.lightImpact();
         setState(() => _periodType = type);
         _notifyChanges();
       },
       color: isActive ? AppColors.getPrimary(context).withValues(alpha: 0.2) : Colors.transparent,
-      padding: EdgeInsets.symmetric(horizontal: 5 * scalingFactor, vertical: 4 * scalingFactor),
+      padding: EdgeInsets.symmetric(horizontal: 4 * scalingFactor, vertical: 4 * scalingFactor),
       borderRadius: BorderRadius.circular(6 * scalingFactor),
       child: Text(
         label,
         style: TextStyle(
-          fontSize: 9.5 * scalingFactor,
+          fontSize: 9 * scalingFactor,
           fontWeight: isActive ? FontWeight.w900 : FontWeight.w600,
           color: isActive ? AppColors.getPrimary(context) : AppColors.getTextSecondary(context).withValues(alpha: 0.8),
         ),
@@ -574,7 +590,7 @@ class _TransactionPeriodSelectorState extends State<TransactionPeriodSelector> {
   }
 
   Widget _buildDurationBtn(IconData icon, VoidCallback onTap, double scalingFactor) {
-    return PrecisionIconButton(
+    return CustomIconButton(
       icon: icon,
       onTap: onTap,
       size: 18 * scalingFactor,
@@ -591,7 +607,7 @@ class _TransactionPeriodSelectorState extends State<TransactionPeriodSelector> {
     int tempMonth = _selectedDateForRecurrence.month;
     int tempYear = _selectedDateForRecurrence.year;
     
-    PrecisionSheet.show(
+    CustomBottomSheet.show(
       context: context,
       title: l10n.selectDate,
       child: Column(
@@ -605,7 +621,7 @@ class _TransactionPeriodSelectorState extends State<TransactionPeriodSelector> {
                 // Day
                 SizedBox(
                   width: 70,
-                  child: PrecisionPicker.strings(
+                  child: WheelPicker.strings(
                     items: List.generate(31, (i) => (i + 1).toString()),
                     initialItem: tempDay - 1,
                     onSelectedItemChanged: (idx) => tempDay = idx + 1,
@@ -615,7 +631,7 @@ class _TransactionPeriodSelectorState extends State<TransactionPeriodSelector> {
                 // Month
                 SizedBox(
                   width: 130,
-                  child: PrecisionPicker.strings(
+                  child: WheelPicker.strings(
                     items: List.generate(12, (i) => _getMonths(l10n)[i]),
                     initialItem: tempMonth - 1,
                     onSelectedItemChanged: (idx) => tempMonth = idx + 1,
@@ -625,7 +641,7 @@ class _TransactionPeriodSelectorState extends State<TransactionPeriodSelector> {
                 // Year
                 SizedBox(
                   width: 90,
-                  child: PrecisionPicker.strings(
+                  child: WheelPicker.strings(
                     items: List.generate(11, (i) => (DateTime.now().year - 5 + i).toString()),
                     initialItem: tempYear - (DateTime.now().year - 5),
                     onSelectedItemChanged: (idx) => tempYear = DateTime.now().year - 5 + idx,
@@ -635,7 +651,7 @@ class _TransactionPeriodSelectorState extends State<TransactionPeriodSelector> {
             ),
           ),
           const SizedBox(height: 32),
-          PrecisionButton(
+          CustomButton(
             label: l10n.ok,
             onTap: () {
               setState(() {

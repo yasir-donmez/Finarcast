@@ -3,16 +3,16 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:purchases_flutter/purchases_flutter.dart';
 import '../../../core/theme/app_constants.dart';
 import '../../../core/services/subscription_service.dart';
-import '../../../shared/widgets/precision_action.dart';
-import '../../../shared/widgets/precision_sheet.dart';
-import '../../../shared/widgets/precision_membership_orb.dart';
+import '../../../shared/widgets/clickable_action.dart';
+import '../../../shared/widgets/custom_bottom_sheet.dart';
+import '../../../shared/widgets/membership_orb.dart';
 
 /// Finarcast "Pro Üyelik" (Paywall) Sayfası.
 class ProUpgradeSheet extends ConsumerWidget {
   const ProUpgradeSheet({super.key});
 
   static void show(BuildContext context) {
-    PrecisionSheet.show(
+    CustomBottomSheet.show(
       context: context,
       child: const ProUpgradeSheet(),
     );
@@ -23,6 +23,7 @@ class ProUpgradeSheet extends ConsumerWidget {
     final subService = ref.watch(subscriptionServiceProvider);
     final primaryColor = AppColors.getPrimary(context);
     final secondaryTextColor = AppColors.getTextSecondary(context);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -44,7 +45,7 @@ class ProUpgradeSheet extends ConsumerWidget {
                 children: [
                   Hero(
                     tag: 'pro_orb',
-                    child: PrecisionMembershipOrb(
+                    child: MembershipOrb(
                       color: primaryColor,
                       size: isSmallScreen ? 36 : 44,
                     ),
@@ -65,7 +66,7 @@ class ProUpgradeSheet extends ConsumerWidget {
                       'Finansal potansiyelinizi %100 açığa çıkarın.',
                       style: TextStyle(
                         fontSize: 14, 
-                        color: secondaryTextColor.withValues(alpha: 0.6)
+                        color: secondaryTextColor.withValues(alpha: isDark ? 0.6 : 0.85)
                       ),
                       textAlign: TextAlign.center,
                     ),
@@ -90,7 +91,7 @@ class ProUpgradeSheet extends ConsumerWidget {
                   fontSize: 10, 
                   fontWeight: FontWeight.w900, 
                   letterSpacing: 1.2,
-                  color: secondaryTextColor.withValues(alpha: 0.4),
+                  color: secondaryTextColor.withValues(alpha: isDark ? 0.4 : 0.7),
                 ),
               ),
             ),
@@ -168,7 +169,7 @@ class ProUpgradeSheet extends ConsumerWidget {
                   '7 gün ücretsiz deneme içerir.',
                   style: TextStyle(
                     fontSize: 10, 
-                    color: secondaryTextColor.withValues(alpha: 0.3)
+                    color: secondaryTextColor.withValues(alpha: isDark ? 0.3 : 0.7)
                   ),
                 ),
                 TextButton(
@@ -178,7 +179,7 @@ class ProUpgradeSheet extends ConsumerWidget {
                     style: TextStyle(
                       fontSize: 10,
                       fontWeight: FontWeight.bold,
-                      color: primaryColor.withValues(alpha: 0.6),
+                      color: isDark ? primaryColor.withValues(alpha: 0.8) : AppColors.getAccentDeep(context, primaryColor),
                     ),
                   ),
                 ),
@@ -192,6 +193,7 @@ class ProUpgradeSheet extends ConsumerWidget {
 
   Widget _buildFeatureItem(BuildContext context, IconData icon, String title, String subtitle, bool isSmall) {
     final primaryColor = AppColors.getPrimary(context);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Padding(
       padding: EdgeInsets.symmetric(vertical: isSmall ? 4 : 8),
       child: Row(
@@ -208,7 +210,7 @@ class ProUpgradeSheet extends ConsumerWidget {
                     subtitle, 
                     style: TextStyle(
                       fontSize: isSmall ? 11 : 12, 
-                      color: AppColors.getTextSecondary(context).withValues(alpha: 0.5)
+                      color: AppColors.getTextSecondary(context).withValues(alpha: isDark ? 0.5 : 0.85)
                     ),
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -237,7 +239,7 @@ class ProUpgradeSheet extends ConsumerWidget {
     final primaryColor = AppColors.getPrimary(context);
     final isDark = Theme.of(context).brightness == Brightness.dark;
     
-    return PrecisionAction(
+    return ClickableAction(
       onTap: onTap,
       width: double.infinity,
       borderRadius: BorderRadius.circular(22),
@@ -270,7 +272,7 @@ class ProUpgradeSheet extends ConsumerWidget {
               ],
             ),
             child: Opacity(
-              opacity: isCurrent ? 0.4 : 1.0,
+              opacity: isCurrent ? (isDark ? 0.4 : 0.65) : 1.0,
               child: Row(
                 children: [
                   Container(
@@ -301,7 +303,7 @@ class ProUpgradeSheet extends ConsumerWidget {
                         ),
                         Text(
                           subtitle, 
-                          style: TextStyle(fontSize: 12, color: AppColors.getTextSecondary(context).withValues(alpha: 0.5)),
+                          style: TextStyle(fontSize: 12, color: AppColors.getTextSecondary(context).withValues(alpha: isDark ? 0.5 : 0.85)),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),

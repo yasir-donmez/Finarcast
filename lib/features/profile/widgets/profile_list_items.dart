@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import '../../../core/theme/app_constants.dart';
-import '../../../shared/widgets/precision_action.dart';
-import '../../../shared/widgets/precision_toggle.dart';
-import '../../../shared/widgets/precision_animated_icon.dart';
+import '../../../shared/widgets/clickable_action.dart';
+import '../../../shared/widgets/custom_switch.dart';
+import '../../../shared/widgets/custom_animated_icon.dart';
 
 enum SettingType {
   membership,
@@ -124,7 +124,7 @@ class ProfileListItems {
     bool isAction = false,
     BorderRadius? borderRadius,
   }) {
-    return PrecisionAction(
+    return ClickableAction(
       onTap: onTap,
       borderRadius: borderRadius,
       child: Padding(
@@ -212,7 +212,7 @@ class ProfileListItems {
               color: activeColor.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(14),
             ),
-            child: PrecisionAnimatedIcon(
+            child: CustomAnimatedIcon(
               activeIcon: activeIcon ?? icon,
               inactiveIcon: inactiveIcon ?? icon,
               isActive: value,
@@ -232,7 +232,7 @@ class ProfileListItems {
               ),
             ),
           ),
-          PrecisionToggle(
+          CustomSwitch(
             value: value,
             onChanged: onChanged,
             activeColor: activeColor,

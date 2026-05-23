@@ -5,9 +5,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/providers/settings_provider.dart';
 import '../../../../core/theme/app_constants.dart';
 import '../../../../l10n/app_localizations.dart';
-import '../../../dashboard/dashboard_providers.dart';
-import '../../../../shared/widgets/precision_surface.dart';
-import '../../../../shared/widgets/precision_animated_icon.dart';
 
 class ThemeSetting extends ConsumerWidget {
   const ThemeSetting({super.key});
@@ -160,19 +157,12 @@ class _CelestialSwitcherState extends ConsumerState<CelestialSwitcher> with Tick
         const availableSpace = totalWidth - orbBaseSize - (padding * 2);
 
         // 🍬 SAKIZ MATEMATİĞİ (Zıplamasız Versiyon)
-        // tValue'nun hedef t'ye ne kadar yakın olduğunu bularak tek bir esneme döngüsü yaratıyoruz
-        final double animationProgress = (1.0 - (tValue - targetT).abs() / 1.0).clamp(0.0, 1.0);
         // tValue bir birimden fazla hareket ediyorsa (0->2 gibi), o zaman tamsayı olmayan kısmı kullan
         final double effectiveProgress = (targetT - tValue).abs() > 1.1 
             ? (1.0 - (tValue - targetT).abs() / 2.0).clamp(0.0, 1.0)
             : (1.0 - (tValue - targetT).abs()).clamp(0.0, 1.0);
             
         final stretchFactor = 1.0 + (effectiveProgress < 0.5 ? effectiveProgress : 1.0 - effectiveProgress) * 1.0;
-        final currentGlowColor = widget.currentIndex == 1 
-            ? Colors.orange 
-            : widget.currentIndex == 2 
-                ? Colors.blue.shade200 
-                : systemColor;
 
         final leftPos = padding + ((tValue / 2.0) * availableSpace);
 
@@ -243,14 +233,6 @@ class _CelestialSwitcherState extends ConsumerState<CelestialSwitcher> with Tick
     );
   }
 
-  Alignment _getOrbAlignment(int index) {
-    switch (index) {
-      case 1: return Alignment.centerLeft;
-      case 0: return Alignment.center;
-      case 2: return Alignment.centerRight;
-      default: return Alignment.center;
-    }
-  }
 }
 
 class OrganicSkyPainter extends CustomPainter {
@@ -324,44 +306,7 @@ class OrganicSkyPainter extends CustomPainter {
     _drawInnerShadow(canvas, size);
   }
 
-  void _drawSplitSky(Canvas canvas, Size size) {
-    // 1. Önce tüm zemine Gündüz Gökyüzünü çiziyoruz
-    _drawLightSky(canvas, size, Offset(32, size.height / 2));
 
-    // 2. Gece Gökyüzünü yumuşak bir maske ile üzerine bindiriyoruz
-    // saveLayer kullanarak şeffaflık ve yumuşak geçiş (feathering) sağlıyoruz
-    final paint = Paint()..blendMode = BlendMode.dstIn;
-    canvas.saveLayer(Offset.zero & size, Paint());
-    
-    // Gece tarafını çiz
-    _drawDarkSky(canvas, size, Offset(size.width - 32, size.height / 2));
-
-    // Maske: Soldan sağa şeffaftan opağa geçerek geceyi sağ tarafa hapsediyor ama yumuşakça
-    final maskPaint = Paint()
-      ..shader = LinearGradient(
-        begin: Alignment.centerLeft,
-        end: Alignment.centerRight,
-        colors: [Colors.transparent, Colors.white],
-        stops: [0.4, 0.6], // Geçişin tam ortada ve yumuşak olmasını sağlar
-      ).createShader(Offset.zero & size);
-    
-    canvas.drawRect(Offset.zero & size, maskPaint..blendMode = BlendMode.dstIn);
-    canvas.restore();
-  }
-
-  void _drawInterpolatedSky(Canvas canvas, Size size, double start, double end, double t) {
-    final startCenter = start == 0.0 ? Offset(size.width / 2, size.height / 2) : Offset(32, size.height / 2);
-    final endCenter = end == 1.0 ? Offset(32, size.height / 2) : Offset(size.width - 32, size.height / 2);
-    final center = Offset.lerp(startCenter, endCenter, t)!;
-
-    for (int i = 0; i < 8; i++) {
-      final color = _getTransitionColor(i, start, end, t);
-      final radius = size.width * (1.2 - (i * 0.14)); 
-      if (radius > 0) {
-        canvas.drawCircle(center, radius, Paint()..color = color);
-      }
-    }
-  }
 
   void _drawLightSky(Canvas canvas, Size size, Offset center) {
     final colors = [
@@ -401,41 +346,7 @@ class OrganicSkyPainter extends CustomPainter {
     }
   }
 
-  void _drawSimpleLayeredSky(Canvas canvas, Size size, bool isLight, Offset center) {
-    if (isLight) {
-      _drawLightSky(canvas, size, center);
-    } else {
-      _drawDarkSky(canvas, size, center);
-    }
-  }
 
-  void _drawInterpolatedParticles(Canvas canvas, Size size, double t) {
-    double cloudOpacity = 0.0;
-    double starOpacity = 0.0;
-
-    if (t == 0.0) {
-      canvas.save();
-      canvas.clipRect(Rect.fromLTWH(0, 0, size.width / 2, size.height));
-      _drawScallopedClouds(canvas, size, 1.0);
-      canvas.restore();
-      canvas.save();
-      canvas.clipRect(Rect.fromLTWH(size.width / 2, 0, size.width / 2, size.height));
-      _drawCleanStars(canvas, size, 1.0);
-      canvas.restore();
-      return;
-    }
-
-    if (t <= 1.0) {
-      cloudOpacity = t;
-      starOpacity = 1.0 - t;
-    } else {
-      cloudOpacity = 1.0 - (t - 1.0);
-      starOpacity = (t - 1.0);
-    }
-
-    if (cloudOpacity > 0.01) _drawScallopedClouds(canvas, size, cloudOpacity);
-    if (starOpacity > 0.01) _drawCleanStars(canvas, size, starOpacity);
-  }
 
   void _drawScallopedClouds(Canvas canvas, Size size, double opacity) {
     // Gri yerine gökyüzüyle uyumlu, düşük opaklıklı mavi bir ton
@@ -496,19 +407,6 @@ class OrganicSkyPainter extends CustomPainter {
         ..style = PaintingStyle.stroke
         ..strokeWidth = 10
     );
-  }
-
-  Color _getTransitionColor(int i, double start, double end, double t) {
-    final light = [
-      const Color(0xFF0D47A1), const Color(0xFF1565C0), const Color(0xFF1976D2), 
-      const Color(0xFF1E88E5), const Color(0xFF2196F3), const Color(0xFF42A5F5),
-      const Color(0xFF64B5F6), const Color(0xFF90CAF9)
-    ];
-    final dark = List.generate(8, (index) => Color.lerp(Colors.black, const Color(0xFF424242), index / 7)!);
-    
-    final startColors = start == 0.0 ? dark : light;
-    final endColors = end == 1.0 ? light : dark;
-    return Color.lerp(startColors[i], endColors[i], t)!;
   }
 
   @override

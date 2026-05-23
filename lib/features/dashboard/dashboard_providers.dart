@@ -106,7 +106,7 @@ final dashboardItemsProvider = Provider<List<DashboardItem>>((ref) {
         iconCode: dominantIconCode,
         isGroup: true,
         itemIconCodes: groupTx
-            .map((t) => t.name)
+            .map((t) => t.iconCode ?? t.categoryId ?? '')
             .where((c) => c.isNotEmpty)
             .take(50)
             .toList(),

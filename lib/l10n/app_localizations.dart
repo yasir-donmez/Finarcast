@@ -2375,6 +2375,240 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'Kapalı'**
   String get disabled;
+
+  /// No description provided for @financialOverview.
+  ///
+  /// In tr, this message translates to:
+  /// **'FİNANSAL ÖZET'**
+  String get financialOverview;
+
+  /// No description provided for @monthlyNetBalance.
+  ///
+  /// In tr, this message translates to:
+  /// **'AYLIK NET BAKİYE'**
+  String get monthlyNetBalance;
+
+  /// No description provided for @savingsRate.
+  ///
+  /// In tr, this message translates to:
+  /// **'TASARRUF ORANI'**
+  String get savingsRate;
+
+  /// No description provided for @yearlyProjection.
+  ///
+  /// In tr, this message translates to:
+  /// **'YILLIK PROJEKSİYON'**
+  String get yearlyProjection;
+
+  /// No description provided for @topExpense.
+  ///
+  /// In tr, this message translates to:
+  /// **'EN BÜYÜK GİDER'**
+  String get topExpense;
+
+  /// No description provided for @topIncome.
+  ///
+  /// In tr, this message translates to:
+  /// **'EN BÜYÜK GELİR'**
+  String get topIncome;
+
+  /// No description provided for @transactionBreakdown.
+  ///
+  /// In tr, this message translates to:
+  /// **'İŞLEM DAĞILIMI'**
+  String get transactionBreakdown;
+
+  /// No description provided for @incomeCount.
+  ///
+  /// In tr, this message translates to:
+  /// **'Gelir'**
+  String get incomeCount;
+
+  /// No description provided for @expenseCount.
+  ///
+  /// In tr, this message translates to:
+  /// **'Gider'**
+  String get expenseCount;
+
+  /// No description provided for @scenarioAnalysis.
+  ///
+  /// In tr, this message translates to:
+  /// **'SENARYO ANALİZİ'**
+  String get scenarioAnalysis;
+
+  /// No description provided for @monthlyBest.
+  ///
+  /// In tr, this message translates to:
+  /// **'AYLIK EN İYİ'**
+  String get monthlyBest;
+
+  /// No description provided for @monthlyWorst.
+  ///
+  /// In tr, this message translates to:
+  /// **'AYLIK EN KÖTÜ'**
+  String get monthlyWorst;
+
+  /// No description provided for @yearlyBest.
+  ///
+  /// In tr, this message translates to:
+  /// **'YILLIK EN İYİ'**
+  String get yearlyBest;
+
+  /// No description provided for @yearlyWorst.
+  ///
+  /// In tr, this message translates to:
+  /// **'YILLIK EN KÖTÜ'**
+  String get yearlyWorst;
+
+  /// No description provided for @noRecurring.
+  ///
+  /// In tr, this message translates to:
+  /// **'Tekrarlayan işlem yok'**
+  String get noRecurring;
+
+  /// No description provided for @perMonth.
+  ///
+  /// In tr, this message translates to:
+  /// **'/ay'**
+  String get perMonth;
+
+  /// No description provided for @perYear.
+  ///
+  /// In tr, this message translates to:
+  /// **'/yıl'**
+  String get perYear;
+
+  /// No description provided for @itemCount.
+  ///
+  /// In tr, this message translates to:
+  /// **'{count} Kalem'**
+  String itemCount(int count);
+
+  /// No description provided for @authEmailRequired.
+  ///
+  /// In tr, this message translates to:
+  /// **'Lütfen e-posta adresinizi girin.'**
+  String get authEmailRequired;
+
+  /// No description provided for @authEmailInvalid.
+  ///
+  /// In tr, this message translates to:
+  /// **'Lütfen geçerli bir e-posta adresi girin.'**
+  String get authEmailInvalid;
+
+  /// No description provided for @authPasswordRequired.
+  ///
+  /// In tr, this message translates to:
+  /// **'Lütfen şifrenizi girin.'**
+  String get authPasswordRequired;
+
+  /// No description provided for @authPasswordTooShort.
+  ///
+  /// In tr, this message translates to:
+  /// **'Şifreniz en az 6 karakterden oluşmalıdır.'**
+  String get authPasswordTooShort;
+
+  /// No description provided for @authConfirmPasswordRequired.
+  ///
+  /// In tr, this message translates to:
+  /// **'Lütfen şifrenizi tekrar girin.'**
+  String get authConfirmPasswordRequired;
+
+  /// No description provided for @authPasswordsDoNotMatch.
+  ///
+  /// In tr, this message translates to:
+  /// **'Girdiğiniz şifreler birbiriyle eşleşmiyor.'**
+  String get authPasswordsDoNotMatch;
+
+  /// No description provided for @authUsernameRequired.
+  ///
+  /// In tr, this message translates to:
+  /// **'Lütfen bir kullanıcı adı belirleyin.'**
+  String get authUsernameRequired;
+
+  /// No description provided for @authUsernameTooShort.
+  ///
+  /// In tr, this message translates to:
+  /// **'Kullanıcı adı en az 3 karakterden oluşmalıdır.'**
+  String get authUsernameTooShort;
+
+  /// No description provided for @authUsernameInvalid.
+  ///
+  /// In tr, this message translates to:
+  /// **'Kullanıcı adı yalnızca harf, rakam ve alt çizgi (_) içerebilir.'**
+  String get authUsernameInvalid;
+
+  /// No description provided for @authUsernameTaken.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu kullanıcı adı zaten alınmış.'**
+  String get authUsernameTaken;
+
+  /// No description provided for @authEmailNotConfirmed.
+  ///
+  /// In tr, this message translates to:
+  /// **'E-posta adresiniz henüz doğrulanmamış. Lütfen e-postanıza gönderilen doğrulama kodunu girin veya tekrar kod isteyin.'**
+  String get authEmailNotConfirmed;
+
+  /// No description provided for @authInvalidCredentials.
+  ///
+  /// In tr, this message translates to:
+  /// **'E-posta adresiniz veya şifreniz hatalı.'**
+  String get authInvalidCredentials;
+
+  /// No description provided for @authEmailExists.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu e-posta adresiyle zaten bir kayıtlı hesap bulunuyor.'**
+  String get authEmailExists;
+
+  /// No description provided for @authWeakPassword.
+  ///
+  /// In tr, this message translates to:
+  /// **'Şifreniz çok zayıf. Lütfen en az 6 karakterli daha güçlü bir şifre girin.'**
+  String get authWeakPassword;
+
+  /// No description provided for @authOtpExpired.
+  ///
+  /// In tr, this message translates to:
+  /// **'Doğrulama kodunun süresi dolmuş. Lütfen yeni bir kod isteyin.'**
+  String get authOtpExpired;
+
+  /// No description provided for @authBadCode.
+  ///
+  /// In tr, this message translates to:
+  /// **'Girdiğiniz doğrulama kodu hatalı veya geçersiz.'**
+  String get authBadCode;
+
+  /// No description provided for @authSignupDisabled.
+  ///
+  /// In tr, this message translates to:
+  /// **'Yeni kullanıcı kaydı şu anda devre dışıdır. Lütfen yöneticiyle iletişime geçin.'**
+  String get authSignupDisabled;
+
+  /// No description provided for @authRateLimitExceeded.
+  ///
+  /// In tr, this message translates to:
+  /// **'Çok fazla istek gönderildi. E-posta limitini aştınız, lütfen bir süre bekleyip tekrar deneyin.'**
+  String get authRateLimitExceeded;
+
+  /// No description provided for @authOtpRequired.
+  ///
+  /// In tr, this message translates to:
+  /// **'Lütfen gelen doğrulama kodunu (6 veya 8 haneli) girin.'**
+  String get authOtpRequired;
+
+  /// No description provided for @authOtpSent.
+  ///
+  /// In tr, this message translates to:
+  /// **'Yeni doğrulama kodu e-postanıza gönderildi.'**
+  String get authOtpSent;
+
+  /// No description provided for @authRegistrationSuccess.
+  ///
+  /// In tr, this message translates to:
+  /// **'Kayıt başarılı! Lütfen e-postanıza gelen doğrulama kodunu girin.'**
+  String get authRegistrationSuccess;
 }
 
 class _AppLocalizationsDelegate

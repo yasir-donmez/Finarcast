@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/providers/settings_provider.dart';
-import '../../../../shared/widgets/precision_sheet.dart';
-import '../../../../shared/widgets/precision_picker.dart';
-import '../../../../shared/widgets/precision_button.dart';
+import '../../../../shared/widgets/custom_bottom_sheet.dart';
+import '../../../../shared/widgets/wheel_picker.dart';
+import '../../../../shared/widgets/custom_button.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../dashboard/dashboard_providers.dart';
 import '../profile_list_items.dart';
@@ -36,19 +36,19 @@ class LanguageSetting extends ConsumerWidget {
 
     int tempIndex = initialIndex;
 
-    PrecisionSheet.show(
+    CustomBottomSheet.show(
       context: context,
       title: l10n.selectLanguage,
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          PrecisionPicker.strings(
+          WheelPicker.strings(
             items: languages,
             initialItem: initialIndex,
             onSelectedItemChanged: (index) => tempIndex = index,
           ),
           const SizedBox(height: 24),
-          PrecisionButton(
+          CustomButton(
             label: l10n.ok,
             onTap: () {
               ref.read(settingsProvider.notifier).setLanguage(codes[tempIndex]);

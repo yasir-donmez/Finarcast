@@ -10,19 +10,27 @@ class IconUtils {
 
     final lowerCode = code.toLowerCase();
     
+    // Check if code is a numeric codepoint (custom category icon)
+    final int? codepoint = int.tryParse(code);
+    if (codepoint != null) {
+      return IconData(codepoint, fontFamily: 'MaterialIcons');
+    }
+    
     // ==========================================
-    // 1. STANDARDIZED CATEGORY IDs (PREFFERED)
+    // 1. STANDARDIZED CATEGORY IDs (PREFERRED)
     // ==========================================
-    // Unified matching for all 8 languages using persistent IDs.
     switch (lowerCode) {
       // --- GİDER (EXPENSE) ---
       case 'exp_grocery':
+        return Icons.shopping_basket_rounded;
       case 'exp_grocery_food':
         return Icons.egg_rounded;
       case 'exp_grocery_cleaning':
         return Icons.cleaning_services_rounded;
       case 'exp_grocery_personal':
         return Icons.face_rounded;
+      case 'exp_grocery_pet':
+        return Icons.pets_rounded;
       
       case 'exp_dining':
         return Icons.restaurant_rounded;
@@ -56,19 +64,19 @@ class IconUtils {
         return Icons.wifi_rounded;
       case 'exp_bill_phone':
         return Icons.phone_android_rounded;
+      case 'exp_bill_dues':
+        return Icons.home_work_rounded;
 
-      case 'exp_trans':
-        return Icons.directions_car_rounded;
-      case 'exp_trans_taxi':
-        return Icons.local_taxi_rounded;
-      case 'exp_trans_bus':
-        return Icons.directions_bus_rounded;
-      case 'exp_trans_train':
-        return Icons.train_rounded;
-      case 'exp_trans_flight':
-        return Icons.flight_rounded;
-      case 'exp_trans_fuel':
-        return Icons.local_gas_station_rounded;
+      case 'exp_home':
+        return Icons.weekend_rounded;
+      case 'exp_home_furniture':
+        return Icons.chair_rounded;
+      case 'exp_home_maintenance':
+        return Icons.build_rounded;
+      case 'exp_home_supplies':
+        return Icons.shopping_bag_rounded;
+      case 'exp_home_garden':
+        return Icons.yard_rounded;
 
       case 'exp_fun':
         return Icons.movie_creation_rounded;
@@ -80,6 +88,8 @@ class IconUtils {
         return Icons.sports_esports_rounded;
       case 'exp_fun_event':
         return Icons.event_rounded;
+      case 'exp_fun_hobby':
+        return Icons.palette_rounded;
 
       case 'exp_sub':
         return Icons.subscriptions_rounded;
@@ -103,6 +113,30 @@ class IconUtils {
       case 'exp_health_dentist':
         return Icons.sentiment_satisfied_alt_rounded;
 
+      case 'exp_trans':
+        return Icons.directions_transit_rounded;
+      case 'exp_trans_taxi':
+        return Icons.local_taxi_rounded;
+      case 'exp_trans_bus':
+        return Icons.directions_bus_rounded;
+      case 'exp_trans_train':
+        return Icons.train_rounded;
+      case 'exp_trans_flight':
+        return Icons.flight_rounded;
+      case 'exp_trans_travel':
+        return Icons.luggage_rounded;
+
+      case 'exp_car':
+        return Icons.directions_car_rounded;
+      case 'exp_car_fuel':
+        return Icons.local_gas_station_rounded;
+      case 'exp_car_maintenance':
+        return Icons.construction_rounded;
+      case 'exp_car_insurance':
+        return Icons.shield_rounded;
+      case 'exp_car_parking':
+        return Icons.local_parking_rounded;
+
       case 'exp_cloth':
         return Icons.checkroom_rounded;
       case 'exp_cloth_daily':
@@ -111,6 +145,15 @@ class IconUtils {
         return Icons.ice_skating_rounded;
       case 'exp_cloth_acc':
         return Icons.watch_rounded;
+
+      case 'exp_beauty':
+        return Icons.spa_rounded;
+      case 'exp_beauty_salon':
+        return Icons.content_cut_rounded;
+      case 'exp_beauty_cosmetics':
+        return Icons.brush_rounded;
+      case 'exp_beauty_spa':
+        return Icons.spa_rounded;
 
       case 'exp_edu':
         return Icons.school_rounded;
@@ -121,13 +164,52 @@ class IconUtils {
       case 'exp_edu_school':
         return Icons.account_balance_rounded;
 
+      case 'exp_family':
+        return Icons.child_care_rounded;
+      case 'exp_family_baby':
+        return Icons.child_friendly_rounded;
+      case 'exp_family_toy':
+        return Icons.smart_toy_rounded;
+      case 'exp_family_allowance':
+        return Icons.savings_rounded;
+
       case 'exp_debt':
+        return Icons.credit_card_rounded;
       case 'exp_debt_credit_card':
         return Icons.credit_score_rounded;
       case 'exp_debt_loan':
         return Icons.account_balance_rounded;
       case 'exp_debt_personal':
         return Icons.handshake_rounded;
+
+      case 'exp_tax':
+        return Icons.gavel_rounded;
+      case 'exp_tax_income':
+        return Icons.receipt_rounded;
+      case 'exp_tax_fine':
+        return Icons.warning_amber_rounded;
+      case 'exp_tax_fee':
+        return Icons.assured_workload_rounded;
+
+      case 'exp_invest':
+        return Icons.trending_up_rounded;
+      case 'exp_invest_gold':
+        return Icons.workspace_premium_rounded;
+      case 'exp_invest_stock':
+        return Icons.show_chart_rounded;
+      case 'exp_invest_crypto':
+        return Icons.currency_bitcoin_rounded;
+      case 'exp_invest_savings':
+        return Icons.savings_rounded;
+
+      case 'exp_other':
+        return Icons.more_horiz_rounded;
+      case 'exp_other_general':
+        return Icons.category_rounded;
+      case 'exp_other_donation':
+        return Icons.volunteer_activism_rounded;
+      case 'exp_other_insurance':
+        return Icons.security_rounded;
 
       // --- GELİR (INCOME) ---
       case 'inc_salary':
@@ -138,6 +220,8 @@ class IconUtils {
         return Icons.card_giftcard_rounded;
       case 'inc_salary_dividend':
         return Icons.celebration_rounded;
+      case 'inc_salary_pension':
+        return Icons.elderly_rounded;
 
       case 'inc_extra':
         return Icons.monetization_on_rounded;
@@ -156,6 +240,10 @@ class IconUtils {
         return Icons.currency_bitcoin_rounded;
       case 'inc_invest_interest':
         return Icons.savings_rounded;
+      case 'inc_invest_gold':
+        return Icons.currency_exchange_rounded;
+      case 'inc_invest_property':
+        return Icons.real_estate_agent_rounded;
 
       case 'inc_scholarship':
         return Icons.school_rounded;
@@ -163,6 +251,8 @@ class IconUtils {
         return Icons.emoji_events_rounded;
       case 'inc_scholarship_loan':
         return Icons.account_balance_rounded;
+      case 'inc_scholarship_gov':
+        return Icons.assured_workload_rounded;
 
       case 'inc_sale':
         return Icons.store_rounded;
@@ -177,9 +267,24 @@ class IconUtils {
         return Icons.apartment_rounded;
       case 'inc_rent_office':
         return Icons.business_rounded;
+      case 'inc_rent_car':
+        return Icons.car_rental_rounded;
 
       case 'inc_gift':
         return Icons.card_giftcard_rounded;
+      case 'inc_gift_general':
+        return Icons.cake_rounded;
+      case 'inc_gift_award':
+        return Icons.emoji_events_rounded;
+
+      case 'inc_other':
+        return Icons.more_horiz_rounded;
+      case 'inc_other_general':
+        return Icons.category_rounded;
+      case 'inc_other_refund':
+        return Icons.assignment_return_rounded;
+      case 'inc_other_lottery':
+        return Icons.casino_rounded;
     }
 
     // ==========================================
@@ -195,19 +300,25 @@ class IconUtils {
     final lowerCode = code.toLowerCase();
 
     // ==========================================
-    // 1. STANDARDIZED CATEGORY IDs (PREFFERED)
+    // 1. STANDARDIZED CATEGORY IDs (PREFERRED)
     // ==========================================
     if (lowerCode.startsWith('exp_grocery')) return Colors.orange;
     if (lowerCode.startsWith('exp_dining')) return Colors.deepOrangeAccent;
     if (lowerCode.startsWith('exp_rent')) return Colors.blue;
     if (lowerCode.startsWith('exp_bill')) return Colors.lightBlue;
+    if (lowerCode.startsWith('exp_home')) return Colors.deepPurple;
     if (lowerCode.startsWith('exp_trans')) return Colors.teal;
+    if (lowerCode.startsWith('exp_car')) return Colors.cyan;
     if (lowerCode.startsWith('exp_fun')) return AppColors.secondary;
     if (lowerCode.startsWith('exp_sub')) return AppColors.error;
     if (lowerCode.startsWith('exp_health')) return Colors.greenAccent;
     if (lowerCode.startsWith('exp_cloth')) return Colors.pinkAccent;
+    if (lowerCode.startsWith('exp_beauty')) return Colors.purpleAccent;
     if (lowerCode.startsWith('exp_edu')) return Colors.amber;
+    if (lowerCode.startsWith('exp_family')) return Colors.indigo;
     if (lowerCode.startsWith('exp_debt')) return Colors.redAccent;
+    if (lowerCode.startsWith('exp_tax')) return Colors.blueGrey;
+    if (lowerCode.startsWith('exp_invest')) return Colors.amberAccent;
     
     if (lowerCode.startsWith('inc_salary')) return AppColors.primary;
     if (lowerCode.startsWith('inc_extra')) return Colors.green;

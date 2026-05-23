@@ -4,8 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/providers/settings_provider.dart';
 import '../../../../core/theme/app_constants.dart';
 import '../../../../l10n/app_localizations.dart';
-import '../../../../shared/widgets/precision_inline_picker.dart';
-import '../../../../shared/widgets/precision_action.dart';
+import '../../../../shared/widgets/inline_picker.dart';
+import '../../../../shared/widgets/clickable_action.dart';
 import '../../../dashboard/dashboard_providers.dart';
 import '../profile_list_items.dart';
 
@@ -35,7 +35,7 @@ class RetentionSetting extends ConsumerWidget {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        PrecisionAction(
+        ClickableAction(
           onTap: () {
             HapticFeedback.selectionClick();
             ref.read(_retentionExpandedProvider.notifier).state = !isExpanded;
@@ -89,6 +89,15 @@ class RetentionSetting extends ConsumerWidget {
                     ],
                   ),
                 ),
+                AnimatedRotation(
+                  turns: isExpanded ? 0.25 : 0,
+                  duration: const Duration(milliseconds: 300),
+                  curve: Curves.easeOutBack,
+                  child: Icon(
+                    Icons.chevron_right_rounded,
+                    color: activeColor.withValues(alpha: isExpanded ? 1.0 : 0.3),
+                  ),
+                ),
               ],
             ),
           ),
@@ -132,7 +141,7 @@ class RetentionSetting extends ConsumerWidget {
                             ),
                           ),
                           const Spacer(),
-                          PrecisionInlinePicker(
+                          InlinePicker(
                             width: 100,
                             height: 60,
                             items: options.map((opt) => opt['label'] as String).toList(),

@@ -3,11 +3,13 @@ import 'package:flutter/material.dart';
 class StaggeredEntryAnim extends StatefulWidget {
   final Widget child;
   final int index;
+  final bool animate;
 
   const StaggeredEntryAnim({
     super.key,
     required this.child,
     required this.index,
+    this.animate = true,
   });
 
   @override
@@ -40,11 +42,15 @@ class _StaggeredEntryAnimState extends State<StaggeredEntryAnim> with SingleTick
       curve: Curves.easeOutBack, // O meşhur "pıt" (spring) efekti
     ));
 
-    // Kartın sırasına (index) göre bekleme süresini hesapla (Çok uzun listelerde max 15'e sabitle)
-    final delay = (widget.index.clamp(0, 15)) * 60;
-    Future.delayed(Duration(milliseconds: delay), () {
-      if (mounted) _controller.forward();
-    });
+    if (widget.animate) {
+      // Kartın sırasına (index) göre bekleme süresini hesapla (Çok uzun listelerde max 15'e sabitle)
+      final delay = (widget.index.clamp(0, 15)) * 60;
+      Future.delayed(Duration(milliseconds: delay), () {
+        if (mounted) _controller.forward();
+      });
+    } else {
+      _controller.value = 1.0; // Animasyon bitmiş gibi göster
+    }
   }
 
   @override
@@ -55,11 +61,14 @@ class _StaggeredEntryAnimState extends State<StaggeredEntryAnim> with SingleTick
 
   @override
   Widget build(BuildContext context) {
-    return SlideTransition(
-      position: _slideAnimation,
-      child: ScaleTransition(
-        scale: _scaleAnimation,
-        child: widget.child,
+    return FadeTransition(
+      opacity: _fadeAnimation,
+      child: SlideTransition(
+        position: _slideAnimation,
+        child: ScaleTransition(
+          scale: _scaleAnimation,
+          child: widget.child,
+        ),
       ),
     );
   }

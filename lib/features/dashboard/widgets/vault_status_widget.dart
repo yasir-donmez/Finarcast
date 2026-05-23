@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../core/theme/app_constants.dart';
 
 /// Kasa durumunu gösteren küçük widget (1x1)
 class VaultStatusWidget extends StatelessWidget {
@@ -14,7 +15,7 @@ class VaultStatusWidget extends StatelessWidget {
           'KASALAR',
           style: theme.textTheme.labelLarge?.copyWith(
             fontSize: 9,
-            color: theme.colorScheme.onSurface.withValues(alpha: 0.4),
+            color: AppColors.getTextSecondary(context),
           ),
         ),
         const SizedBox(height: 4),

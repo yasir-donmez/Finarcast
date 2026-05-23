@@ -4,16 +4,18 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../l10n/app_localizations.dart';
 import '../../core/theme/app_constants.dart';
 import '../../core/database/database_service.dart';
-import '../../shared/widgets/precision_sheet.dart';
-import '../../shared/widgets/precision_dialog.dart';
-import '../../shared/widgets/precision_inset.dart';
+import '../../shared/widgets/custom_bottom_sheet.dart';
+import '../../shared/widgets/custom_dialog.dart';
+import '../../shared/widgets/inset_container.dart';
 import 'vaults_providers.dart';
-import 'widgets/precision_transaction_card.dart';
+import 'widgets/transaction_card.dart';
 import '../transactions/add_transaction_screen.dart';
+import '../../core/utils/category_utils.dart';
+import '../../core/providers/db_providers.dart';
 
 import 'widgets/add_vault_sheet.dart';
 import 'widgets/vault_detail_sheet.dart';
-import 'widgets/precision_detail_sheet.dart';
+import 'widgets/detail_sheet.dart';
 import 'widgets/in_app_notifications_sheet.dart';
 import '../dashboard/dashboard_providers.dart';
 import '../dashboard/dashboard_scroll_provider.dart';
@@ -30,6 +32,9 @@ class VaultsScreen extends ConsumerStatefulWidget {
 }
 
 class _VaultsScreenState extends ConsumerState<VaultsScreen> {
+  // İşlem kartlarının sadece bir kere animasyon oynamasını garanti etmek için benzersiz ID'leri saklarız.
+  // GlobalKey sayesinde bu state korunduğu için sekmeler arası geçişlerde animasyon tekrarlamaz.
+  final Set<String> _animatedTxIds = {};
 
   @override
   void initState() {
@@ -237,7 +242,7 @@ class _VaultsScreenState extends ConsumerState<VaultsScreen> {
                 tween: Tween(begin: 0.0, end: 1.0),
                 curve: Curves.elasticOut,
                 builder: (context, value, child) {
-                  return PrecisionInset(
+                  return InsetContainer(
                     size: 100,
                     child: Transform.scale(
                       scale: 0.4 + (0.6 * value),
@@ -291,10 +296,17 @@ class _VaultsScreenState extends ConsumerState<VaultsScreen> {
         delegate: SliverChildBuilderDelegate(
           (context, index) {
             final tx = transactions[index];
+            final txId = tx.id;
+            final shouldAnimate = !_animatedTxIds.contains(txId);
+            if (shouldAnimate) {
+              _animatedTxIds.add(txId);
+            }
+
             return StaggeredEntryAnim(
-              key: ValueKey(tx.id),
+              key: ValueKey(txId),
               index: index,
-              child: PrecisionTransactionCard(
+              animate: shouldAnimate,
+              child: TransactionCard(
                 transaction: tx,
                 onTap: () => _showTransactionActions(context, tx),
                 onLongPress: () {
@@ -351,20 +363,31 @@ class _VaultsScreenState extends ConsumerState<VaultsScreen> {
   void _showTransactionActions(BuildContext context, TransactionUI tx) {
     if (tx.dbId == null) return;
     
-    final l10n = AppLocalizations.of(context)!;
-    final categoryName = localizedCategoryName(tx.categoryId, l10n) ?? l10n.all;
+    final customCategories = ref.read(customCategoriesProvider);
+    final categoryName = CategoryUtils.getCategoryName(
+      categoryId: tx.categoryId,
+      context: context,
+      customCategories: customCategories,
+      fallbackTitle: tx.name,
+    );
     final parentId = tx.categoryId?.split('_').take(2).join('_');
-    final parentName = parentId != null ? localizedCategoryName(parentId, l10n) : null;
+    final parentName = parentId != null
+        ? CategoryUtils.getCategoryName(
+            categoryId: parentId,
+            context: context,
+            customCategories: customCategories,
+          )
+        : null;
     final fullTitle = parentName != null && parentName != categoryName 
         ? '$parentName / $categoryName' 
         : categoryName;
 
     final selectedVaultId = ref.read(selectedVaultProvider);
 
-    PrecisionSheet.show(
+    CustomBottomSheet.show(
       context: context,
       title: fullTitle,
-      child: PrecisionDetailSheet(
+      child: DetailSheet(
         transaction: tx,
         onEdit: () {
           final selectedVaultId = ref.read(selectedVaultProvider);
@@ -408,7 +431,7 @@ class _VaultsScreenState extends ConsumerState<VaultsScreen> {
           );
         },
         onDelete: () async {
-          final confirm = await showPrecisionDialog<bool>(
+          final confirm = await showCustomDialog<bool>(
             context: context,
             accentColor: AppColors.error,
             title: AppLocalizations.of(context)!.permanentDelete,
@@ -452,7 +475,7 @@ class _VaultsScreenState extends ConsumerState<VaultsScreen> {
 
   void _showAddVaultSheet(BuildContext context) {
     HapticFeedback.heavyImpact();
-    PrecisionSheet.show(
+    CustomBottomSheet.show(
       context: context,
       title: AppLocalizations.of(context)!.addNewVault,
       child: const AddVaultSheet(),
@@ -461,7 +484,7 @@ class _VaultsScreenState extends ConsumerState<VaultsScreen> {
 
   void _showVaultDetail(BuildContext context, String? vaultId) {
     HapticFeedback.mediumImpact();
-    PrecisionSheet.show(
+    CustomBottomSheet.show(
       context: context,
       title: AppLocalizations.of(context)!.vaultDetail,
       child: VaultDetailSheet(vaultId: vaultId),
@@ -470,7 +493,7 @@ class _VaultsScreenState extends ConsumerState<VaultsScreen> {
 
   void _showNotificationsSheet(BuildContext context) {
     HapticFeedback.heavyImpact();
-    PrecisionSheet.show(
+    CustomBottomSheet.show(
       context: context,
       title: "Uygulama İçi Bildirimler",
       child: const InAppNotificationsSheet(),

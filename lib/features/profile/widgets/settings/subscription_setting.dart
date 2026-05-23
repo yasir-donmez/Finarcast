@@ -1,16 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:purchases_flutter/purchases_flutter.dart';
-import 'dart:ui';
-import 'dart:math' as math;
+
 import '../../../../core/services/subscription_service.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../../core/theme/app_constants.dart';
-import '../../../../shared/widgets/precision_button.dart';
-import '../../../../shared/widgets/precision_card.dart';
-import '../../../../shared/widgets/precision_membership_orb.dart';
-import '../../../../shared/widgets/precision_action.dart';
-import '../../../../shared/widgets/precision_segmented_control.dart';
+import '../../../../shared/widgets/custom_button.dart';
+import '../../../../shared/widgets/clickable_action.dart';
+import '../../../../shared/widgets/segmented_control.dart';
 import '../../../dashboard/dashboard_providers.dart';
 import '../profile_list_items.dart';
 
@@ -21,23 +18,17 @@ class SubscriptionSetting extends ConsumerStatefulWidget {
   ConsumerState<SubscriptionSetting> createState() => _SubscriptionSettingState();
 }
 
-class _SubscriptionSettingState extends ConsumerState<SubscriptionSetting> with SingleTickerProviderStateMixin {
+class _SubscriptionSettingState extends ConsumerState<SubscriptionSetting> {
   bool _isExpanded = false;
   SubscriptionPeriod _selectedPeriod = SubscriptionPeriod.yearly;
-  late AnimationController _glowController;
 
   @override
   void initState() {
     super.initState();
-    _glowController = AnimationController(
-      vsync: this,
-      duration: const Duration(seconds: 5),
-    )..repeat();
   }
 
   @override
   void dispose() {
-    _glowController.dispose();
     super.dispose();
   }
 
@@ -49,41 +40,32 @@ class _SubscriptionSettingState extends ConsumerState<SubscriptionSetting> with 
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Column(
+      mainAxisSize: MainAxisSize.min,
       children: [
-        _buildPremiumHeroCard(context, subscription, activeColor, l10n),
-        const SizedBox(height: 16),
-        PrecisionCard(
-          padding: EdgeInsets.zero,
-          child: Column(
-            children: [
-              _buildExpandableHeader(context, activeColor, l10n),
-              AnimatedCrossFade(
-                firstChild: const SizedBox(width: double.infinity),
-                secondChild: _buildExpandedContent(context, activeColor, subscription, isDark),
-                crossFadeState: _isExpanded ? CrossFadeState.showSecond : CrossFadeState.showFirst,
-                duration: const Duration(milliseconds: 400),
-                firstCurve: Curves.easeOutCubic,
-                secondCurve: Curves.easeInCubic,
-              ),
-              if (!_isExpanded) ProfileListItems.buildDivider(isDark),
-              ProfileListItems.buildSetting(
-                icon: Icons.restore_rounded,
-                title: l10n.restorePurchases,
-                onTap: () async {
-                  await ref.read(subscriptionServiceProvider).restorePurchases();
-                  if (context.mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text(l10n.done)),
-                    );
-                  }
-                },
-                activeColor: activeColor,
-                context: context,
-                isAction: true,
-                borderRadius: BorderRadius.circular(16),
-              ),
-            ],
-          ),
+        _buildExpandableHeader(context, activeColor, subscription, l10n),
+        AnimatedCrossFade(
+          firstChild: const SizedBox(width: double.infinity),
+          secondChild: _buildExpandedContent(context, activeColor, subscription, isDark),
+          crossFadeState: _isExpanded ? CrossFadeState.showSecond : CrossFadeState.showFirst,
+          duration: const Duration(milliseconds: 400),
+          firstCurve: Curves.easeOutCubic,
+          secondCurve: Curves.easeInCubic,
+        ),
+        ProfileListItems.buildDivider(isDark),
+        ProfileListItems.buildSetting(
+          icon: Icons.restore_rounded,
+          title: l10n.restorePurchases,
+          onTap: () async {
+            await ref.read(subscriptionServiceProvider).restorePurchases();
+            if (context.mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text(l10n.done)),
+              );
+            }
+          },
+          activeColor: activeColor,
+          context: context,
+          isAction: true,
         ),
       ],
     );
@@ -101,7 +83,7 @@ class _SubscriptionSettingState extends ConsumerState<SubscriptionSetting> with 
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               if (!subscription.isPro) ...[
-                PrecisionSegmentedControl(
+                SegmentedControl(
                   tabs: const ["Aylık", "Yıllık (-%33)"],
                   selectedIndex: _selectedPeriod == SubscriptionPeriod.monthly ? 0 : 1,
                   onTabChanged: (index) {
@@ -141,7 +123,7 @@ class _SubscriptionSettingState extends ConsumerState<SubscriptionSetting> with 
               if (subscription.isPro) ...[
                 const SizedBox(height: 24),
                 Center(
-                  child: PrecisionButton(
+                  child: CustomButton(
                     label: "Aboneliği İptal Et (Test)",
                     onTap: () async => await ref.read(subscriptionServiceProvider).setProStatus(false),
                     isPrimary: false,
@@ -263,7 +245,7 @@ class _SubscriptionSettingState extends ConsumerState<SubscriptionSetting> with 
             ],
           ),
           const SizedBox(height: 16),
-          PrecisionButton(
+          CustomButton(
             label: "PREMIUM'A YÜKSELT",
             onTap: () {
               final subService = ref.read(subscriptionServiceProvider);
@@ -291,124 +273,16 @@ class _SubscriptionSettingState extends ConsumerState<SubscriptionSetting> with 
     );
   }
 
-  Widget _buildPremiumHeroCard(
+
+
+  Widget _buildExpandableHeader(
     BuildContext context, 
-    SubscriptionService subscription, 
     Color activeColor, 
+    SubscriptionService subscription, 
     AppLocalizations l10n
   ) {
     final isPro = subscription.isPro;
-    final cardColor = isPro ? activeColor : AppColors.getTextSecondary(context).withValues(alpha: 0.08);
-
-    return AnimatedBuilder(
-      animation: _glowController,
-      builder: (context, child) {
-        return Container(
-          width: double.infinity,
-          height: 150,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(24),
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [
-                cardColor.withValues(alpha: isPro ? 0.9 : 0.08),
-                cardColor.withValues(alpha: isPro ? 0.5 : 0.03),
-              ],
-            ),
-            boxShadow: isPro ? [
-              BoxShadow(
-                color: activeColor.withValues(alpha: 0.15),
-                blurRadius: 15,
-                offset: const Offset(0, 6),
-              )
-            ] : [],
-          ),
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(24),
-            child: BackdropFilter(
-              filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-              child: Stack(
-                children: [
-                  Positioned(
-                    right: -10,
-                    bottom: -30,
-                    child: PrecisionMembershipOrb(
-                      color: isPro ? Colors.white : activeColor,
-                      size: 150,
-                      morphFactor: isPro ? 1.0 : 0.2,
-                      showParticles: isPro,
-                    ),
-                  ),
-                  if (isPro)
-                    Positioned.fill(
-                      child: IgnorePointer(
-                        child: CustomPaint(
-                          painter: _PremiumRimPainter(
-                            progress: _glowController.value,
-                            color: Colors.white.withValues(alpha: 0.4),
-                          ),
-                        ),
-                      ),
-                    ),
-                  Padding(
-                    padding: const EdgeInsets.all(20),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                          decoration: BoxDecoration(
-                            color: (isPro ? Colors.white : activeColor).withValues(alpha: 0.15),
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: Text(
-                            isPro ? "PREMIUM" : "FREE",
-                            style: TextStyle(
-                              color: isPro ? Colors.white : activeColor,
-                              fontSize: 9,
-                              fontWeight: FontWeight.w900,
-                              letterSpacing: 1.0,
-                            ),
-                          ),
-                        ),
-                        const Spacer(),
-                        Text(
-                          isPro ? "Ayrıcalıklar Sizinle" : "Premium'a Geçin",
-                          style: TextStyle(
-                            color: isPro ? Colors.white : AppColors.getTextPrimary(context),
-                            fontSize: 20,
-                            fontWeight: FontWeight.w800,
-                          ),
-                        ),
-                        Text(
-                          isPro 
-                            ? "Premium özellikler aktif."
-                            : "Sınırları kaldırın.",
-                          style: TextStyle(
-                            color: (isPro ? Colors.white : AppColors.getTextSecondary(context)).withValues(alpha: 0.6),
-                            fontSize: 12,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  PrecisionAction(
-                    onTap: () => setState(() => _isExpanded = !_isExpanded),
-                    borderRadius: BorderRadius.circular(24),
-                    child: const SizedBox(width: double.infinity, height: double.infinity),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        );
-      },
-    );
-  }
-
-  Widget _buildExpandableHeader(BuildContext context, Color activeColor, AppLocalizations l10n) {
-    return PrecisionAction(
+    return ClickableAction(
       onTap: () => setState(() => _isExpanded = !_isExpanded),
       borderRadius: BorderRadius.circular(16),
       child: Padding(
@@ -422,19 +296,54 @@ class _SubscriptionSettingState extends ConsumerState<SubscriptionSetting> with 
                 color: activeColor.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(14),
               ),
-              child: Icon(Icons.stars_outlined, size: 22, color: activeColor),
+              child: Icon(
+                isPro ? Icons.stars_rounded : Icons.stars_outlined, 
+                size: 22, 
+                color: activeColor
+              ),
             ),
             const SizedBox(width: 16),
             Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    isPro ? "Premium Üyelik" : "Ücretsiz Üyelik",
+                    style: TextStyle(
+                      color: AppColors.getTextPrimary(context),
+                      fontSize: 16,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    isPro ? "Ayrıcalıklar aktif" : "Yükseltmek ve sınırları kaldırmak için dokunun",
+                    style: TextStyle(
+                      color: AppColors.getTextSecondary(context).withValues(alpha: 0.5),
+                      fontSize: 11,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(width: 8),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              decoration: BoxDecoration(
+                color: (isPro ? activeColor : AppColors.getTextSecondary(context)).withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(8),
+              ),
               child: Text(
-                "Ayrıcalıkları İncele",
+                isPro ? "PREMIUM" : "FREE",
                 style: TextStyle(
-                  color: AppColors.getTextPrimary(context),
-                  fontSize: 16,
-                  fontWeight: FontWeight.w700,
+                  color: isPro ? activeColor : AppColors.getTextSecondary(context),
+                  fontSize: 10,
+                  fontWeight: FontWeight.w900,
+                  letterSpacing: 0.5,
                 ),
               ),
             ),
+            const SizedBox(width: 8),
             AnimatedRotation(
               turns: _isExpanded ? 0.25 : 0.0,
               duration: const Duration(milliseconds: 300),
@@ -452,30 +361,4 @@ class _SubscriptionSettingState extends ConsumerState<SubscriptionSetting> with 
 
 }
 
-class _PremiumRimPainter extends CustomPainter {
-  final double progress;
-  final Color color;
-  _PremiumRimPainter({required this.progress, required this.color});
-  @override
-  void paint(Canvas canvas, Size size) {
-    final rect = Offset.zero & size;
-    final rrect = RRect.fromRectAndRadius(rect, const Radius.circular(24));
-    final paint = Paint()
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 1.0
-      ..shader = SweepGradient(
-        colors: [
-          Colors.transparent,
-          color.withValues(alpha: 0.0),
-          color.withValues(alpha: 0.4),
-          color.withValues(alpha: 0.0),
-          Colors.transparent,
-        ],
-        stops: const [0.0, 0.45, 0.5, 0.55, 1.0],
-        transform: GradientRotation(progress * 2 * math.pi),
-      ).createShader(rect);
-    canvas.drawRRect(rrect, paint);
-  }
-  @override
-  bool shouldRepaint(covariant _PremiumRimPainter oldDelegate) => oldDelegate.progress != progress;
-}
+

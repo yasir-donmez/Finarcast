@@ -55,6 +55,7 @@ dependencies:
   timezone: ^0.10.1
   purchases_flutter: ^10.0.2
   dynamic_color: ^1.8.1
+  image_picker: ^1.2.2
 
 dev_dependencies:
   flutter_test:

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../core/theme/app_constants.dart';
 
 /// Günlük bütçe durumunu gösteren yatay widget (2x1)
 class DailyBudgetWidget extends StatelessWidget {
@@ -31,7 +32,7 @@ class DailyBudgetWidget extends StatelessWidget {
                 'GÜNLÜK LİMİT',
                 style: theme.textTheme.labelLarge?.copyWith(
                   fontSize: 9,
-                  color: theme.colorScheme.onSurface.withValues(alpha: 0.4),
+                  color: AppColors.getTextSecondary(context),
                 ),
               ),
               const Text(

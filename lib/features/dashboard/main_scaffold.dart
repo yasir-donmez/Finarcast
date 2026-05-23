@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import '../../shared/widgets/glass_surface.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../l10n/app_localizations.dart';
 import '../../core/theme/app_constants.dart';
@@ -8,14 +9,13 @@ import 'dashboard_screen.dart';
 import 'dashboard_providers.dart';
 import '../vaults/vaults_screen.dart';
 import '../vaults/vaults_providers.dart';
-import '../optimization/optimization_screen.dart';
+import '../smart_inbox/smart_inbox_screen.dart';
 import '../profile/profile_screen.dart';
-import '../../shared/widgets/precision_surface.dart';
-import 'package:flutter/rendering.dart';
+
 import '../../core/services/subscription_service.dart';
 import '../subscription/widgets/pro_upgrade_sheet.dart';
-import '../../shared/widgets/precision_membership_orb.dart';
-import '../auth/widgets/precision_background.dart';
+import '../../shared/widgets/membership_orb.dart';
+import '../auth/widgets/auth_background.dart';
 import 'dashboard_scroll_provider.dart';
 
 class MainScaffold extends ConsumerStatefulWidget {
@@ -27,17 +27,37 @@ class MainScaffold extends ConsumerStatefulWidget {
 
 class _MainScaffoldState extends ConsumerState<MainScaffold> {
   int _currentIndex = 0;
-  int _previousIndex = 0;
   bool _isFloatingActionsVisible = true;
   late final PageController _pageController = PageController(initialPage: _currentIndex);
   ScrollController? _scrollController; 
 
-  final List<Widget> _pages = [
-    const DashboardScreen(),
-    const VaultsScreen(),
-    const OptimizationScreen(),
-    const ProfileScreen(),
+  // GlobalKey listesi: Sayfaların durumunu (state) reparenting esnasında korumak için
+  late final List<GlobalKey> _pageKeys = List.generate(4, (_) => GlobalKey());
+
+  late final List<Widget> _pages = [
+    DashboardScreen(key: _pageKeys[0]),
+    VaultsScreen(key: _pageKeys[1]),
+    SmartInboxScreen(key: _pageKeys[2]),
+    ProfileScreen(key: _pageKeys[3]),
   ];
+
+  bool _isTransitioning = false;
+  List<Widget>? _transitioningPages;
+
+  List<Widget> _getTransitionPages(int from, int to) {
+    if ((to - from).abs() <= 1) return _pages;
+    
+    // Diğer sayfaları boş kutularla (SizedBox) doldurarak hem performansı artırır
+    // hem de aynı GlobalKey'e sahip widget'ların ağaçta aynı anda iki kez bulunmasını engeller.
+    final list = List<Widget>.generate(4, (_) => const SizedBox());
+    list[from] = _pages[from];
+    if (to > from) {
+      list[from + 1] = _pages[to];
+    } else {
+      list[from - 1] = _pages[to];
+    }
+    return list;
+  }
 
   @override
   void initState() {
@@ -104,7 +124,7 @@ class _MainScaffoldState extends ConsumerState<MainScaffold> {
     
     final isKeyboardVisible = MediaQuery.of(context).viewInsets.bottom > 0;
     final bottomPadding = MediaQuery.of(context).padding.bottom;
-    const navbarHeight = 66.0;
+    const navbarHeight = 58.0;
     const navbarBottomMargin = 12.0;
     const gapAboveNavbar = 18.0;
     
@@ -116,7 +136,7 @@ class _MainScaffoldState extends ConsumerState<MainScaffold> {
         Positioned.fill(
           child: Stack(
             children: [
-              const PrecisionBackground(useSystemBackground: false),
+              const AuthBackground(useSystemBackground: false),
               // RadialGradient animasyonu tamamen kaldırıldı, çünkü geçiş sırasında BackdropFilter'ı bozuyor
               // ve kartların bir anda opak/şeffaf olmasına (pıt efekti) neden oluyordu.
             ],
@@ -130,8 +150,8 @@ class _MainScaffoldState extends ConsumerState<MainScaffold> {
             controller: _pageController,
             physics: const NeverScrollableScrollPhysics(),
             onPageChanged: (index) {
+              if (_isTransitioning) return;
               setState(() {
-                _previousIndex = _currentIndex;
                 _currentIndex = index;
                 // Sekme değişimlerinde orb görünürlük durumunu akıllıca güncelle
                 if (index == 0) {
@@ -142,10 +162,12 @@ class _MainScaffoldState extends ConsumerState<MainScaffold> {
                   } else {
                     _isFloatingActionsVisible = true;
                   }
+                } else {
+                  _isFloatingActionsVisible = false;
                 }
               });
             },
-            children: _pages,
+            children: _isTransitioning && _transitioningPages != null ? _transitioningPages! : _pages,
           ),
         ),
 
@@ -172,7 +194,7 @@ class _MainScaffoldState extends ConsumerState<MainScaffold> {
                           enabled: shouldShowProButton && scaleFactor > 0.5,
                           child: Hero(
                             tag: 'pro_orb',
-                            child: PrecisionMembershipOrb(
+                            child: MembershipOrb(
                               color: activeColor,
                               size: 60,
                               morphFactor: scaleFactor,
@@ -231,69 +253,86 @@ class _MainScaffoldState extends ConsumerState<MainScaffold> {
     final itemWidth = availableWidth / 4;
 
     return RepaintBoundary(
-      child: PrecisionSurface(
-        height: 66, 
-        padding: EdgeInsets.zero,
-        borderRadius: 33,
-        isGlass: true,
-        blur: 28,
-        child: Stack(
-          children: [
-            AnimatedPositioned(
-              duration: const Duration(milliseconds: 600),
-              curve: Curves.easeOutQuart,
-              left: 10 + (_currentIndex * itemWidth),
-              top: 6,
-              bottom: 6,
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 350),
-                curve: Curves.easeOutCubic,
-                width: itemWidth,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(30),
-                  color: activeColor.withValues(alpha: isDark ? 0.25 : 0.15),
-                  boxShadow: [
-                    BoxShadow(
-                      color: activeColor.withValues(alpha: 0.15),
-                      blurRadius: 12,
-                      offset: const Offset(0, 4),
+      child: Container(
+        height: 58,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(29),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: isDark ? 0.35 : 0.06),
+              blurRadius: 30,
+              offset: const Offset(0, 10),
+              spreadRadius: -5,
+            ),
+          ],
+        ),
+        child: GlassSurface(
+          borderRadius: 29,
+          blurSigma: 28,
+          showShadow: false,
+          child: Stack(
+            children: [
+              AnimatedPositioned(
+                duration: const Duration(milliseconds: 380),
+                curve: Curves.easeOutQuart,
+                left: 10 + (_currentIndex * itemWidth) + 10,
+                top: 6,
+                bottom: 6,
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 380),
+                  curve: Curves.easeOutQuart,
+                  width: itemWidth - 20,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(23),
+                    color: activeColor.withValues(alpha: isDark ? 0.25 : 0.15),
+                    boxShadow: [
+                      BoxShadow(
+                        color: activeColor.withValues(alpha: 0.15),
+                        blurRadius: 12,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
+                    border: Border.all(
+                      color: activeColor.withValues(alpha: isDark ? 0.3 : 0.2),
+                      width: 1.2,
                     ),
-                  ],
-                  border: Border.all(
-                    color: activeColor.withValues(alpha: isDark ? 0.3 : 0.2),
-                    width: 1.2,
                   ),
-                ),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(30),
-                  child: Container(
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                        colors: [
-                          Colors.white.withValues(alpha: isDark ? 0.05 : 0.2),
-                          Colors.transparent,
-                        ],
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(23),
+                    child: Container(
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                          colors: [
+                            Colors.white.withValues(alpha: isDark ? 0.05 : 0.2),
+                            Colors.transparent,
+                          ],
+                        ),
                       ),
                     ),
                   ),
                 ),
               ),
-            ),
-            
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 10),
-              child: Row(
-                children: [
-                  _buildNavItem(0, Icons.home_rounded, Icons.home_outlined, AppLocalizations.of(context)!.home),
-                  _buildNavItem(1, Icons.account_balance_wallet_rounded, Icons.account_balance_wallet_outlined, AppLocalizations.of(context)!.vaults),
-                  _buildNavItem(2, Icons.bar_chart_rounded, Icons.bar_chart_outlined, AppLocalizations.of(context)!.analysis),
-                  _buildNavItem(3, Icons.person_rounded, Icons.person_outline_rounded, AppLocalizations.of(context)!.profile),
-                ],
+              
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 10),
+                child: Row(
+                  children: [
+                    _buildNavItem(0, Icons.home_rounded, Icons.home_outlined, AppLocalizations.of(context)!.home),
+                    _buildNavItem(1, Icons.account_balance_wallet_rounded, Icons.account_balance_wallet_outlined, AppLocalizations.of(context)!.vaults),
+                    _buildNavItem(
+                      2,
+                      Icons.auto_awesome_rounded,
+                      Icons.auto_awesome_outlined,
+                      Localizations.localeOf(context).languageCode == 'tr' ? 'Sepet' : 'AI Inbox',
+                    ),
+                    _buildNavItem(3, Icons.person_rounded, Icons.person_outline_rounded, AppLocalizations.of(context)!.profile),
+                  ],
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -328,7 +367,7 @@ class _MainScaffoldState extends ConsumerState<MainScaffold> {
                   children: [
                     Hero(
                       tag: 'fab_bubble',
-                      child: PrecisionMembershipOrb(
+                      child: MembershipOrb(
                         color: activeColor,
                         size: 60, 
                         morphFactor: scaleFactor,
@@ -378,23 +417,63 @@ class _MainScaffoldState extends ConsumerState<MainScaffold> {
 
     return Expanded(
       child: GestureDetector(
-        onTap: () {
+        onTap: () async {
           if (_currentIndex == index) return;
+          if (_isTransitioning) return;
           
           HapticFeedback.selectionClick();
           
-          // Akıllı Kayma: Eğer hedef çok uzaktaysa, önce hedefin yanına ışınlan
-          final distance = (index - _currentIndex).abs();
-          if (distance > 1) {
-            final jumpTo = index > _currentIndex ? index - 1 : index + 1;
-            _pageController.jumpToPage(jumpTo);
-          }
+          final int fromIndex = _currentIndex;
+          final int toIndex = index;
+          final distance = (toIndex - fromIndex).abs();
           
-          _pageController.animateToPage(
-            index,
-            duration: const Duration(milliseconds: 450),
-            curve: Curves.easeOutQuart,
-          );
+          setState(() {
+            _currentIndex = toIndex;
+            
+            // Sekme değişimlerinde orb görünürlük durumunu akıllıca güncelle
+            if (toIndex == 0) {
+              _isFloatingActionsVisible = true;
+            } else if (toIndex == 1) {
+              if (_scrollController != null && _scrollController!.hasClients) {
+                _isFloatingActionsVisible = _scrollController!.offset < 10;
+              } else {
+                _isFloatingActionsVisible = true;
+              }
+            } else {
+              _isFloatingActionsVisible = false;
+            }
+          });
+          
+          if (distance <= 1) {
+            await _pageController.animateToPage(
+              toIndex,
+              duration: const Duration(milliseconds: 380),
+              curve: Curves.easeOutQuart,
+            );
+          } else {
+            final tempPages = _getTransitionPages(fromIndex, toIndex);
+            
+            setState(() {
+              _isTransitioning = true;
+              _transitioningPages = tempPages;
+            });
+            
+            final int animateTo = toIndex > fromIndex ? fromIndex + 1 : fromIndex - 1;
+            
+            await _pageController.animateToPage(
+              animateTo,
+              duration: const Duration(milliseconds: 380),
+              curve: Curves.easeOutQuart,
+            );
+            
+            if (mounted) {
+              _pageController.jumpToPage(toIndex);
+              setState(() {
+                _isTransitioning = false;
+                _transitioningPages = null;
+              });
+            }
+          }
         },
         behavior: HitTestBehavior.opaque,
         child: Column(

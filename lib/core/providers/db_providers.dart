@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../database/database_service.dart';
 import '../database/models/transaction_record.dart';
+import '../database/models/custom_category.dart';
 import '../utils/currency_utils.dart';
 
 import '../database/models/vault.dart';
@@ -120,4 +121,14 @@ final allVaultsProvider = Provider<List<Vault>>((ref) {
 /// Döviz kurlarını canlı dinle
 final exchangeRatesProvider = StreamProvider<List<ExchangeRate>>((ref) {
   return DatabaseService.watchAllExchangeRates();
+});
+
+/// Özel alt kategorileri canlı dinleyen stream provider
+final customCategoriesStreamProvider = StreamProvider<List<CustomCategory>>((ref) {
+  return DatabaseService.watchAllCustomCategories();
+});
+
+/// Özel alt kategorilerin anlık listesi
+final customCategoriesProvider = Provider<List<CustomCategory>>((ref) {
+  return ref.watch(customCategoriesStreamProvider).valueOrNull ?? [];
 });

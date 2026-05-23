@@ -410,5 +410,51 @@
   "active": "Active",
   "inactive": "Inactive",
   "notifications": "Notifications",
-  "disabled": "Disabled"
+  "disabled": "Disabled",
+  "financialOverview": "FINANCIAL OVERVIEW",
+  "monthlyNetBalance": "MONTHLY NET BALANCE",
+  "savingsRate": "SAVINGS RATE",
+  "yearlyProjection": "YEARLY PROJECTION",
+  "topExpense": "TOP EXPENSE",
+  "topIncome": "TOP INCOME",
+  "transactionBreakdown": "TRANSACTION BREAKDOWN",
+  "incomeCount": "Income",
+  "expenseCount": "Expense",
+  "scenarioAnalysis": "SCENARIO ANALYSIS",
+  "monthlyBest": "MONTHLY BEST",
+  "monthlyWorst": "MONTHLY WORST",
+  "yearlyBest": "YEARLY BEST",
+  "yearlyWorst": "YEARLY WORST",
+  "noRecurring": "No recurring transactions",
+  "perMonth": "/mo",
+  "perYear": "/yr",
+  "itemCount": "{count} Items",
+  "@itemCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "authEmailRequired": "Please enter your email address.",
+  "authEmailInvalid": "Please enter a valid email address.",
+  "authPasswordRequired": "Please enter your password.",
+  "authPasswordTooShort": "Your password must be at least 6 characters.",
+  "authConfirmPasswordRequired": "Please re-enter your password.",
+  "authPasswordsDoNotMatch": "The passwords you entered do not match.",
+  "authUsernameRequired": "Please choose a username.",
+  "authUsernameTooShort": "The username must be at least 3 characters.",
+  "authUsernameInvalid": "The username can only contain letters, numbers, and underscores (_).",
+  "authUsernameTaken": "This username is already taken.",
+  "authEmailNotConfirmed": "Your email address is not verified yet. Please enter the verification code sent to your email or request a new one.",
+  "authInvalidCredentials": "Your email address or password is incorrect.",
+  "authEmailExists": "An account with this email address already exists.",
+  "authWeakPassword": "Your password is too weak. Please enter a stronger password with at least 6 characters.",
+  "authOtpExpired": "The verification code has expired. Please request a new one.",
+  "authBadCode": "The verification code you entered is incorrect or invalid.",
+  "authSignupDisabled": "New user registration is currently disabled. Please contact the administrator.",
+  "authRateLimitExceeded": "Too many requests sent. Email rate limit exceeded, please try again in a while.",
+  "authOtpRequired": "Please enter the verification code (6 or 8 digits).",
+  "authOtpSent": "A new verification code has been sent to your email.",
+  "authRegistrationSuccess": "Registration successful! Please enter the verification code sent to your email."
 }

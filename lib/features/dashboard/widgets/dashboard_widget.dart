@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import '../../../shared/widgets/precision_glass_card.dart';
+import '../../../shared/widgets/solid_surface.dart';
 import '../../../core/theme/app_constants.dart';
 
 /// Dashboard widget'larının boyut tipleri
@@ -86,10 +86,9 @@ class _DashboardWidgetState extends State<DashboardWidget> with SingleTickerProv
           HapticFeedback.heavyImpact();
           widget.onLongPress?.call();
         },
-        child: PrecisionGlassCard(
+        child: SolidSurface(
           padding: const EdgeInsets.all(AppSizes.paddingSmall),
           borderRadius: 24, // Daha yumuşak köşeler
-          blur: 20,
           child: Stack(
             clipBehavior: Clip.none,
             children: [

@@ -7,11 +7,12 @@ import '../../../../core/providers/db_providers.dart';
 import '../../../../core/providers/settings_provider.dart';
 import '../../../../core/utils/currency_utils.dart';
 import '../../../../features/dashboard/dashboard_providers.dart';
-import '../../../../shared/widgets/precision_card.dart';
-import '../../../../shared/widgets/precision_button.dart';
-import '../../../../shared/widgets/precision_action.dart';
+import '../../../../shared/widgets/custom_card.dart';
+import '../../../../shared/widgets/custom_button.dart';
+import '../../../../shared/widgets/clickable_action.dart';
 import '../../../../core/theme/app_constants.dart';
-import '../../../../shared/widgets/precision_notification.dart';
+import '../../../../shared/widgets/custom_notification.dart';
+import '../../../../core/database/models/exchange_rate.dart';
 import '../profile_list_items.dart';
 
 class ExchangeRateSetting extends ConsumerStatefulWidget {
@@ -24,6 +25,7 @@ class ExchangeRateSetting extends ConsumerStatefulWidget {
 class _ExchangeRateSettingState extends ConsumerState<ExchangeRateSetting> with SingleTickerProviderStateMixin {
   bool _isExpanded = false;
   bool _isUpdating = false;
+  bool _showAllRates = false;
 
   @override
   Widget build(BuildContext context) {
@@ -44,7 +46,7 @@ class _ExchangeRateSettingState extends ConsumerState<ExchangeRateSetting> with 
       mainAxisSize: MainAxisSize.min,
       children: [
         // Ana Ayar Satırı
-        PrecisionAction(
+        ClickableAction(
           onTap: () {
             HapticFeedback.selectionClick();
             setState(() => _isExpanded = !_isExpanded);
@@ -131,7 +133,7 @@ class _ExchangeRateSettingState extends ConsumerState<ExchangeRateSetting> with 
                       if (userCurrency != '₺')
                         Padding(
                           padding: const EdgeInsets.only(bottom: 8),
-                          child: PrecisionCard(
+                          child: CustomCard(
                             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                             child: Row(
                               children: [
@@ -162,51 +164,9 @@ class _ExchangeRateSettingState extends ConsumerState<ExchangeRateSetting> with 
                             ),
                           ),
                         ),
-
-                      // 2. Diğer kurları göster (Kendi birimi hariç)
-                      ...rates.where((r) {
-                        final code = r.currencyCode;
-                        final isSupported = ['USD', 'EUR', 'GBP', 'GOLD', 'SILVER', 'CHF', 'JPY', 'SAR', 'KWD'].contains(code);
-                        return isSupported && code != _normalizeSymbol(userCurrency);
-                      }).toList().reversed.map((rate) {
-                        // Kuru kullanıcının birimine çevir
-                        final displayRate = CurrencyUtils.convert(1.0, rate.currencyCode, userCurrency, rates);
-                        
-                        return Padding(
-                          padding: const EdgeInsets.only(bottom: 8),
-                          child: PrecisionCard(
-                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                            child: Row(
-                              children: [
-                                Text(
-                                  _getCurrencyEmoji(rate.currencyCode),
-                                  style: const TextStyle(fontSize: 16),
-                                ),
-                                const SizedBox(width: 12),
-                                Text(
-                                  _getCurrencyName(rate.currencyCode),
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.w800,
-                                    fontSize: 14,
-                                    color: AppColors.getTextPrimary(context),
-                                  ),
-                                ),
-                                const Spacer(),
-                                Text(
-                                  "$userCurrency${displayRate.toStringAsFixed(displayRate < 1 ? 4 : 2)}",
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.w900,
-                                    fontSize: 16,
-                                    color: activeColor,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        );
-                      }),
+                      ..._buildRatesList(context, rates, userCurrency, activeColor),
                       const SizedBox(height: 16),
-                      PrecisionButton(
+                      CustomButton(
                         label: _isUpdating ? "GÜNCELLENİYOR..." : "KURLARI ŞİMDİ GÜNCELLE",
                         height: 48,
                         fontSize: 13,
@@ -218,9 +178,9 @@ class _ExchangeRateSettingState extends ConsumerState<ExchangeRateSetting> with 
 
                           if (!context.mounted) return;
                           if (success) {
-                            PrecisionNotification.success(context, "Kurlar başarıyla güncellendi.");
+                            CustomNotification.success(context, "Kurlar başarıyla güncellendi.");
                           } else {
-                            PrecisionNotification.error(context, "Güncelleme başarısız. İnternet bağlantınızı kontrol edin.");
+                            CustomNotification.error(context, "Güncelleme başarısız. İnternet bağlantınızı kontrol edin.");
                           }
                         },
                         activeColor: activeColor,
@@ -232,6 +192,179 @@ class _ExchangeRateSettingState extends ConsumerState<ExchangeRateSetting> with 
         ),
       ],
     );
+  }
+
+  List<Widget> _buildRatesList(
+    BuildContext context,
+    List<ExchangeRate> rates,
+    String userCurrency,
+    Color activeColor,
+  ) {
+    final commonCodes = ['USD', 'EUR', 'GOLD', 'G'];
+    final normalizedUserCurrency = _normalizeSymbol(userCurrency);
+
+    // Listeyi filtreleyelim
+    final commonRates = rates.where((r) {
+      final code = r.currencyCode;
+      return commonCodes.contains(code) && code != normalizedUserCurrency;
+    }).toList();
+
+    final otherRates = rates.where((r) {
+      final code = r.currencyCode;
+      // Ortak olanlar ve kullanıcının ana para birimi dışındaki kurlar
+      return !commonCodes.contains(code) && code != normalizedUserCurrency;
+    }).toList();
+
+    // Sadece göstermek istediğimiz ve isminin tanımlı olduğu kurları listeleyelim (G gereksiz yere GOLD ile mükerrer olmasın)
+    final filteredCommon = <dynamic>[];
+    final seenCommon = <String>{};
+    for (final rate in commonRates) {
+      // GOLD ve G ikisi de Altın, sadece GOLD'u gösterelim
+      final displayCode = rate.currencyCode == 'G' ? 'GOLD' : rate.currencyCode;
+      if (!seenCommon.contains(displayCode)) {
+        seenCommon.add(displayCode);
+        filteredCommon.add(rate);
+      }
+    }
+
+    final filteredOther = <dynamic>[];
+    final seenOther = <String>{};
+    for (final rate in otherRates) {
+      final code = rate.currencyCode;
+      // Sadece isimlendirilmiş/desteklenen kurları ve mükerrer olmayanları ekleyelim.
+      if (code == 'G') continue;
+      final hasName = ['GBP', 'CHF', 'KWD', 'SAR', 'JPY', 'SILVER'].contains(code);
+      if (hasName && !seenOther.contains(code)) {
+        seenOther.add(code);
+        filteredOther.add(rate);
+      }
+    }
+
+    final List<Widget> listItems = [];
+
+    // Popüler Kurlar
+    for (final rate in filteredCommon) {
+      final displayRate = CurrencyUtils.convert(1.0, rate.currencyCode, userCurrency, rates);
+      listItems.add(
+        Padding(
+          padding: const EdgeInsets.only(bottom: 8),
+          child: CustomCard(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            child: Row(
+              children: [
+                Text(
+                  _getCurrencyEmoji(rate.currencyCode),
+                  style: const TextStyle(fontSize: 16),
+                ),
+                const SizedBox(width: 12),
+                Text(
+                  _getCurrencyName(rate.currencyCode),
+                  style: TextStyle(
+                    fontWeight: FontWeight.w800,
+                    fontSize: 14,
+                    color: AppColors.getTextPrimary(context),
+                  ),
+                ),
+                const Spacer(),
+                Text(
+                  "$userCurrency${displayRate.toStringAsFixed(displayRate < 1 ? 4 : 2)}",
+                  style: TextStyle(
+                    fontWeight: FontWeight.w900,
+                    fontSize: 16,
+                    color: activeColor,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+
+    // Diğer Kurlar (Eğer _showAllRates true ise)
+    if (_showAllRates) {
+      for (final rate in filteredOther) {
+        final displayRate = CurrencyUtils.convert(1.0, rate.currencyCode, userCurrency, rates);
+        listItems.add(
+          Padding(
+            padding: const EdgeInsets.only(bottom: 8),
+            child: CustomCard(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              child: Row(
+                children: [
+                  Text(
+                    _getCurrencyEmoji(rate.currencyCode),
+                    style: const TextStyle(fontSize: 16),
+                  ),
+                  const SizedBox(width: 12),
+                  Text(
+                    _getCurrencyName(rate.currencyCode),
+                    style: TextStyle(
+                      fontWeight: FontWeight.w800,
+                      fontSize: 14,
+                      color: AppColors.getTextPrimary(context),
+                    ),
+                  ),
+                  const Spacer(),
+                  Text(
+                    "$userCurrency${displayRate.toStringAsFixed(displayRate < 1 ? 4 : 2)}",
+                    style: TextStyle(
+                      fontWeight: FontWeight.w900,
+                      fontSize: 16,
+                      color: activeColor,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      }
+    }
+
+    // "Daha Fazla Göster" / "Daha Az Göster" butonu
+    if (filteredOther.isNotEmpty) {
+      listItems.add(
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 4),
+          child: ClickableAction(
+            onTap: () {
+              HapticFeedback.selectionClick();
+              setState(() {
+                _showAllRates = !_showAllRates;
+              });
+            },
+            borderRadius: BorderRadius.circular(12),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 16),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    _showAllRates ? "Daha Az Göster" : "Daha Fazla Göster",
+                    style: TextStyle(
+                      color: activeColor,
+                      fontSize: 13,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                  const SizedBox(width: 6),
+                  Icon(
+                    _showAllRates 
+                        ? Icons.keyboard_arrow_up_rounded 
+                        : Icons.keyboard_arrow_down_rounded,
+                    color: activeColor,
+                    size: 16,
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    return listItems;
   }
 
   String _normalizeSymbol(String symbol) {

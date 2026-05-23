@@ -1,4 +1,4 @@
-import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -11,7 +11,7 @@ import '../../core/services/custom_category_service.dart';
 import '../../core/providers/settings_provider.dart';
 import '../dashboard/dashboard_providers.dart';
 import '../../core/services/notification_service.dart';
-import '../auth/widgets/precision_background.dart';
+import '../auth/widgets/auth_background.dart';
 
 import 'widgets/transaction_vault_selector.dart';
 import 'widgets/transaction_currency_selector.dart';
@@ -22,11 +22,12 @@ import 'widgets/transaction_category_selector.dart';
 import 'widgets/transaction_period_selector.dart';
 import 'widgets/transaction_reminder_days_selector.dart';
 import 'widgets/transaction_reminder_time_selector.dart';
-import '../../shared/widgets/precision_toggle.dart';
-import '../../shared/widgets/precision_card.dart';
-import '../../shared/widgets/precision_input.dart';
-import '../../shared/widgets/precision_button.dart';
-import '../../shared/widgets/precision_sheet.dart';
+import '../../shared/widgets/custom_switch.dart';
+import '../../shared/widgets/custom_card.dart';
+import '../../shared/widgets/custom_text_field.dart';
+import '../../shared/widgets/custom_button.dart';
+import '../../shared/widgets/custom_bottom_sheet.dart';
+import '../../shared/widgets/glass_surface.dart';
 
 class AddTransactionScreen extends ConsumerStatefulWidget {
   final int? initialId;
@@ -112,7 +113,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
     _periodData = TransactionPeriodData(
       periodType: 0,
       selectedDay: 1,
-      selectedDateForRecurrence: DateTime.now(),
+      selectedDateForRecurrence: widget.initialRecurrenceDate ?? DateTime.now(),
       duration: 0,
     );
     _loadVaults();
@@ -215,6 +216,20 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
       if (widget.initialIsIncome != null) {
         _tabIndex = widget.initialIsIncome! ? 1 : 0;
       }
+      if (widget.initialAmount != null && widget.initialAmount! > 0) {
+        _amountController.text = widget.initialAmount!.toStringAsFixed(0);
+      }
+      if (widget.initialMinAmount != null && widget.initialMinAmount! > 0) {
+        _minController.text = widget.initialMinAmount!.toStringAsFixed(0);
+        _isFlexibleAmount = true;
+      }
+      if (widget.initialMaxAmount != null && widget.initialMaxAmount! > 0) {
+        _maxController.text = widget.initialMaxAmount!.toStringAsFixed(0);
+        _isFlexibleAmount = true;
+      }
+      if (widget.initialNote != null) {
+        _noteController.text = widget.initialNote!;
+      }
       if (widget.initialVaultIds != null) {
         _selectedVaultIds = List<int>.from(widget.initialVaultIds!);
       }
@@ -223,6 +238,46 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
       }
       if (widget.initialIsNotificationEnabled != null) {
         _isNotificationEnabled = widget.initialIsNotificationEnabled!;
+      }
+      if (widget.initialNotificationReminderDays != null) {
+        _notificationReminderDays = widget.initialNotificationReminderDays!;
+      }
+      if (widget.initialNotificationHour != null &&
+          widget.initialNotificationMinute != null) {
+        _notificationTime = TimeOfDay(
+          hour: widget.initialNotificationHour!,
+          minute: widget.initialNotificationMinute!,
+        );
+      }
+      if (widget.initialPeriodType != null && widget.initialPeriodType != 0) {
+        _periodData = TransactionPeriodData(
+          periodType: widget.initialPeriodType!,
+          selectedDay: widget.initialRecurrenceDay ?? 1,
+          selectedDateForRecurrence:
+              widget.initialRecurrenceDate ?? DateTime.now(),
+          duration: widget.initialRecurrenceDuration ?? 0,
+        );
+      }
+      if (widget.initialCategoryId != null) {
+        final categories = _getMergedCategories();
+        for (int i = 0; i < categories.length; i++) {
+          final cat = categories[i];
+          if (cat['id'] == widget.initialCategoryId) {
+            _selectedCategoryIndex = i;
+            _selectedSubModelIndex = -1;
+            break;
+          }
+          final subModels = cat['subModels'] as List?;
+          if (subModels != null) {
+            for (int j = 0; j < subModels.length; j++) {
+              if (subModels[j]['id'] == widget.initialCategoryId) {
+                _selectedCategoryIndex = i;
+                _selectedSubModelIndex = j;
+                break;
+              }
+            }
+          }
+        }
       }
     }
   }
@@ -260,7 +315,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
 
     IconData selectedIcon = parentIcon;
 
-    final result = await PrecisionSheet.show<Map<String, dynamic>>(
+    final result = await CustomBottomSheet.show<Map<String, dynamic>>(
       context: context,
       title: l10n.addCustomCategory,
       child: StatefulBuilder(
@@ -439,7 +494,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
               const SizedBox(height: 32),
 
               // Onay Butonu
-              PrecisionButton(
+              CustomButton(
                 label: l10n.ok,
                 onTap: () {
                   if (controller.text.trim().isNotEmpty) {
@@ -533,8 +588,9 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
         if (clean.contains(',')) {
           return clean.replaceAll('.', '').replaceAll(',', '.');
         } else {
-          if (RegExp(r'\.\d{3}$').hasMatch(clean))
+          if (RegExp(r'\.\d{3}$').hasMatch(clean)) {
             return clean.replaceAll('.', '');
+          }
           return clean;
         }
       }
@@ -565,16 +621,23 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
 
       final categories = _getMergedCategories();
       final cat = categories[_selectedCategoryIndex];
-      final String categoryId = _selectedSubModelIndex != -1
-          ? (cat['subModels'] as List)[_selectedSubModelIndex]['id'] as String
+      final subModel = _selectedSubModelIndex != -1
+          ? (cat['subModels'] as List)[_selectedSubModelIndex]
+          : null;
+      final String categoryId = subModel != null
+          ? subModel['id'] as String
           : cat['id'] as String;
+
+      final isCustom = subModel != null && subModel['isCustom'] == true;
+      final String? iconCodeStr = isCustom && subModel['icon'] is IconData
+          ? (subModel['icon'] as IconData).codePoint.toString()
+          : null;
 
       if (widget.initialId != null) {
         final old = await DatabaseService.getTransaction(widget.initialId!);
         if (old != null) {
-          final catName = _selectedSubModelIndex != -1
-              ? (cat['subModels'] as List)[_selectedSubModelIndex]['name']
-                    as String
+          final catName = subModel != null
+              ? subModel['name'] as String
               : cat['name'] as String;
 
           old.title = catName;
@@ -584,6 +647,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
           old.isIncome = _tabIndex == 1;
           old.vaultIds = _selectedVaultIds;
           old.categoryId = categoryId;
+          old.iconCode = iconCodeStr;
           old.periodType = _periodData.periodType;
           old.recurrenceDay = _periodData.selectedDay;
           old.recurrenceDate = _periodData.selectedDateForRecurrence;
@@ -598,6 +662,13 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
           }
 
           old.isNotificationEnabled = _isNotificationEnabled;
+          if (_isNotificationEnabled) {
+            old.hasNotification = true;
+          } else {
+            if (!old.hasNotification) {
+              old.hasNotification = false;
+            }
+          }
           old.notificationReminderDays = _notificationReminderDays;
           old.notificationHour = _notificationTime.hour;
           old.notificationMinute = _notificationTime.minute;
@@ -605,13 +676,11 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
           await DatabaseService.updateTransaction(old);
         }
       } else {
-        final catName = _selectedSubModelIndex != -1
-            ? (cat['subModels'] as List)[_selectedSubModelIndex]['name']
-                  as String
+        final catName = subModel != null
+            ? subModel['name'] as String
             : cat['name'] as String;
 
         DateTime initialDate = _periodData.selectedDateForRecurrence;
-
 
         final tx = TransactionRecord()
           ..title = catName
@@ -622,6 +691,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
           ..date = initialDate
           ..vaultIds = _selectedVaultIds
           ..categoryId = categoryId
+          ..iconCode = iconCodeStr
           ..periodType = _periodData.periodType
           ..recurrenceDay = _periodData.selectedDay
           ..recurrenceDate = _periodData.selectedDateForRecurrence
@@ -629,6 +699,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
           ..note = _noteController.text.isNotEmpty ? _noteController.text : null
           ..currency = _selectedCurrency
           ..isNotificationEnabled = _isNotificationEnabled
+          ..hasNotification = _isNotificationEnabled
           ..notificationReminderDays = _notificationReminderDays
           ..notificationHour = _notificationTime.hour
           ..notificationMinute = _notificationTime.minute;
@@ -716,7 +787,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
     return Stack(
       children: [
         const Positioned.fill(
-          child: PrecisionBackground(useSystemBackground: false),
+          child: AuthBackground(useSystemBackground: false),
         ),
         Scaffold(
           backgroundColor: Colors.transparent,
@@ -750,34 +821,16 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                   fit: StackFit.expand,
                   clipBehavior: Clip.none,
                   children: [
-                    // GPU-Friendly Blur Layer
+                    // Solid Background Layer: Glass surface with dynamic opacity
                     Positioned.fill(
-                      child: Opacity(
-                        opacity: revT,
-                        child: ClipRect(
-                          child: BackdropFilter(
-                            filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
-                            child: Container(
-                              decoration: BoxDecoration(
-                                color: AppColors.getBackground(
-                                  context,
-                                ).withValues(alpha: 0.15),
-                                border: Border(
-                                  bottom: BorderSide(
-                                    color:
-                                        (isDark ? Colors.white : Colors.black)
-                                            .withValues(
-                                              alpha: revT > 0.95
-                                                  ? (revT - 0.95) * 2
-                                                  : 0.0,
-                                            ),
-                                    width: 0.5,
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
+                      child: GlassSurface(
+                        borderRadius: 0,
+                        showShadow: false,
+                        opacityMultiplier: revT,
+                        borderColor: (isDark ? Colors.white : Colors.black).withValues(
+                          alpha: revT > 0.95 ? (revT - 0.95) * 2 : 0.0,
                         ),
+                        child: const SizedBox.expand(),
                       ),
                     ),
                     // Content Layer
@@ -832,41 +885,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                           Positioned(
                             top: safeTop + 4,
                             left: 8,
-                            child: Material(
-                              color: Colors.transparent,
-                              child: InkWell(
-                                borderRadius: BorderRadius.circular(50),
-                                onTap: () => Navigator.pop(context),
-                                child: Container(
-                                  padding: const EdgeInsets.all(10),
-                                  decoration: BoxDecoration(
-                                    color: isDark
-                                        ? Colors.black.withValues(alpha: 0.4)
-                                        : Colors.white.withValues(alpha: 0.8),
-                                    shape: BoxShape.circle,
-                                    border: Border.all(
-                                      color: activeColor.withValues(
-                                        alpha: 0.15,
-                                      ),
-                                    ),
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: Colors.black.withValues(
-                                          alpha: 0.1,
-                                        ),
-                                        blurRadius: 8,
-                                        offset: const Offset(0, 2),
-                                      ),
-                                    ],
-                                  ),
-                                  child: Icon(
-                                    Icons.arrow_back_ios_new_rounded,
-                                    size: 16,
-                                    color: AppColors.getTextPrimary(context),
-                                  ),
-                                ),
-                              ),
-                            ),
+                            child: _HeaderBackButton(activeColor: activeColor),
                           ),
                         ],
                       ),
@@ -906,7 +925,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                   padding: const EdgeInsets.symmetric(
                     horizontal: AppSizes.paddingMedium,
                   ),
-                  child: PrecisionCard(
+                  child: CustomCard(
                     scalingFactor: scalingFactor,
                     padding: const EdgeInsets.all(16),
                     child: Row(
@@ -917,7 +936,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                             Icon(
                               Icons.linear_scale_rounded,
                               size: 20,
-                              color: activeColor.withValues(alpha: 0.7),
+                              color: AppColors.getAccentDeep(context, activeColor).withValues(alpha: 0.7),
                             ),
                             const SizedBox(width: 12),
                             Text(
@@ -930,9 +949,9 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                             ),
                           ],
                         ),
-                        PrecisionToggle(
+                        CustomSwitch(
                           value: _isFlexibleAmount,
-                          activeColor: activeColor,
+                          activeColor: AppColors.getAccentDeep(context, activeColor),
                           activeIcon: Icons.pause_rounded,
                           inactiveIcon: Icons.stop_rounded,
                           scalingFactor: scalingFactor * 0.9,
@@ -970,7 +989,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                   padding: const EdgeInsets.symmetric(
                     horizontal: AppSizes.paddingMedium,
                   ),
-                  child: PrecisionCard(
+                  child: CustomCard(
                     scalingFactor: scalingFactor,
                     padding: const EdgeInsets.all(16),
                     child: Column(
@@ -993,7 +1012,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                             });
                           },
                         ),
-                        const SizedBox(height: 8),
+                        const SizedBox(height: 12),
                         TransactionCurrencySelector(
                           selectedCurrency: _selectedCurrency,
                           scalingFactor: scalingFactor,
@@ -1008,7 +1027,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                   padding: const EdgeInsets.symmetric(
                     horizontal: AppSizes.paddingMedium,
                   ),
-                  child: PrecisionCard(
+                  child: CustomCard(
                     scalingFactor: scalingFactor,
                     padding: const EdgeInsets.all(16),
                     child: TransactionPeriodSelector(
@@ -1026,7 +1045,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                   padding: const EdgeInsets.symmetric(
                     horizontal: AppSizes.paddingMedium,
                   ),
-                  child: PrecisionCard(
+                  child: CustomCard(
                     scalingFactor: scalingFactor,
                     padding: const EdgeInsets.all(16),
                     child: Column(
@@ -1037,7 +1056,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                             Icon(
                               Icons.notes_rounded,
                               size: 20,
-                              color: activeColor.withValues(alpha: 0.7),
+                              color: AppColors.getAccentDeep(context, activeColor).withValues(alpha: 0.7),
                             ),
                             const SizedBox(width: 12),
                             Text(
@@ -1054,7 +1073,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                           ],
                         ),
                         const SizedBox(height: 12),
-                        PrecisionInput(
+                        CustomTextField(
                           controller: _noteController,
                           hintText: 'İşleme dair not bırakın...',
                           icon: Icons.edit_note_rounded,
@@ -1068,7 +1087,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                   padding: const EdgeInsets.symmetric(
                     horizontal: AppSizes.paddingMedium,
                   ),
-                  child: PrecisionCard(
+                  child: CustomCard(
                     scalingFactor: scalingFactor,
                     padding: const EdgeInsets.all(16),
                     child: Column(
@@ -1081,7 +1100,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                                 Icon(
                                   Icons.notifications_active_rounded,
                                   size: 20,
-                                  color: activeColor.withValues(alpha: 0.7),
+                                  color: AppColors.getAccentDeep(context, activeColor).withValues(alpha: 0.7),
                                 ),
                                 const SizedBox(width: 12),
                                 Text(
@@ -1097,9 +1116,9 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                                 ),
                               ],
                             ),
-                            PrecisionToggle(
+                            CustomSwitch(
                               value: _isNotificationEnabled,
-                              activeColor: activeColor,
+                              activeColor: AppColors.getAccentDeep(context, activeColor),
                               activeIcon: Icons.notifications_active_rounded,
                               inactiveIcon: Icons.notifications_off_rounded,
                               scalingFactor: scalingFactor * 0.9,
@@ -1119,7 +1138,9 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                                   }
                                 }
                                 HapticFeedback.mediumImpact();
-                                setState(() => _isNotificationEnabled = val);
+                                  setState(() {
+                                    _isNotificationEnabled = val;
+                                  });
                               },
                             ),
                           ],
@@ -1217,7 +1238,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                   padding: const EdgeInsets.symmetric(
                     horizontal: AppSizes.paddingMedium,
                   ),
-                  child: PrecisionButton(
+                  child: CustomButton(
                     onTap: _saveTransaction,
                     label: l10n.save,
                     activeColor: activeColor,
@@ -1231,6 +1252,60 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
       ),
     ),
       ],
+    );
+  }
+}
+
+class _HeaderBackButton extends StatelessWidget {
+  final Color activeColor;
+
+  const _HeaderBackButton({required this.activeColor});
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    bool isPressed = false;
+
+    return StatefulBuilder(
+      builder: (context, setState) {
+        return GestureDetector(
+          onTapDown: (_) => setState(() => isPressed = true),
+          onTapUp: (_) => setState(() => isPressed = false),
+          onTapCancel: () => setState(() => isPressed = false),
+          onTap: () => Navigator.pop(context),
+          child: AnimatedScale(
+            scale: isPressed ? 0.95 : 1.0,
+            duration: const Duration(milliseconds: 100),
+            child: GlassSurface(
+              borderRadius: 999, // Tam dairesel geri butonu
+              padding: const EdgeInsets.all(10),
+              showShadow: true,
+              backgroundColor: isPressed
+                  ? (isDark
+                      ? AppColors.getThemeSurface(context, 2).withValues(alpha: 0.75)
+                      : Colors.grey[200]!.withValues(alpha: 0.85))
+                  : (isDark
+                      ? Colors.black.withValues(alpha: 0.35)
+                      : Colors.white.withValues(alpha: 0.65)),
+              borderColor: activeColor.withValues(alpha: isPressed ? 0.3 : 0.15),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: isPressed ? 0.03 : 0.08),
+                  blurRadius: isPressed ? 4 : 8,
+                  offset: Offset(0, isPressed ? 1 : 2),
+                ),
+              ],
+              child: Icon(
+                Icons.arrow_back_ios_new_rounded,
+                size: 16,
+                color: isPressed
+                    ? activeColor
+                    : AppColors.getTextPrimary(context).withValues(alpha: 0.8),
+              ),
+            ),
+          ),
+        );
+      },
     );
   }
 }

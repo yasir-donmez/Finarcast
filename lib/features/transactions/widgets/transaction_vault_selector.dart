@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../core/database/models/vault.dart';
-import '../../../shared/widgets/precision_picker_field.dart';
+import '../../../shared/widgets/picker_field.dart';
 
 class TransactionVaultSelector extends StatefulWidget {
   final List<Vault> vaults;
@@ -37,7 +37,7 @@ class _TransactionVaultSelectorState extends State<TransactionVaultSelector> {
     );
     if (currentIndex == -1) currentIndex = 0;
 
-    return PrecisionPickerField(
+    return PickerField(
       icon: Icons.account_balance_wallet_rounded,
       label: l10n.vault,
       items: vaultOptions.map((v) => v?.name ?? l10n.allLabel).toList(),

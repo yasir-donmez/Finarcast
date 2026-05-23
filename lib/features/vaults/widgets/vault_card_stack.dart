@@ -158,7 +158,7 @@ class _VaultCardStackState extends ConsumerState<VaultCardStack> {
               }
               
               final isCurrent = index == widget.currentIndex;
-              final cardOpacity = isCurrent ? 1.0 : (1 - widget.morphProgress * 3.5).clamp(0.0, 1.0);
+              final cardOpacity = isCurrent ? 1.0 : (1 - widget.morphProgress * 2.0).clamp(0.0, 1.0);
               
               // Seçili olmayan kartlar daha hızlı yanlara doğru kaysın (Depth Effect)
               final double slideOutOffset = (index - widget.currentIndex) * (widget.morphProgress * 450);
@@ -169,7 +169,7 @@ class _VaultCardStackState extends ConsumerState<VaultCardStack> {
                   child: Transform.translate(
                     offset: Offset(slideOutOffset, 0),
                     child: Transform.scale(
-                      scale: isCurrent ? value : value * (1 - widget.morphProgress * 0.2), // Küçük bir küçülme eklendi
+                      scale: isCurrent ? value : value * (1 - widget.morphProgress * 0.15), // Yumuşak küçülme
                       child: RepaintBoundary(
                         child: GestureDetector(
                           onTap: isCurrent ? () => widget.onVaultTap(vaultId) : null,

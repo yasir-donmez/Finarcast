@@ -1,0 +1,90 @@
+# Implementation Plan - Smart AI Transaction Inbox (Hızlı Harcama Sepeti)
+
+Bu plan, kullanıcıların günlük harcamalarını en az çaba ile (klavye ile hızlı yazma, sesle söyleme veya fiş fotoğrafı yükleme) uygulamaya aktarmasını sağlayan **"Hızlı Sepet" (Smart AI Inbox)** özelliğinin teknik tasarımını ve uygulanışını içerir. 
+
+Mevcut **Optimization (Analiz)** sekmesinde bulunan hedefler ve yapay zeka bütçe kısıntısı listesi yerine, bu yeni ve pratik gelen kutusu kurgusu konulacaktır. Eski kodlar/dosyalar kesinlikle silinmeyecektir, hepsi yedek olarak yerinde kalacaktır.
+
+---
+
+## Proposed Changes
+
+### 1. Database & State Layer (Taslak Yönetimi)
+Taslak harcamalar (drafts) veritabanında gerçek işlemleri etkilemeyen geçici bir tampon alanda tutulmalıdır. Kod üretimi (Isar build_runner) süreçlerinin yavaşlığı ve hata riskini önlemek için bu taslakları **SharedPreferences** üzerinde JSON dizisi olarak saklayacağız.
+
+#### [NEW] [draft_service.dart](file:///c:/Users/Yasir2.Prenses/Finarcast/lib/features/optimization/services/draft_service.dart)
+Taslak işlemlerin yerel hafızaya kaydedilmesi, okunması, silinmesi ve onaylanıp gerçek işleme dönüştürülmesini sağlayan servis.
+*   **Draft Model Yapısı:**
+    *   `id`: Benzersiz UUID dizesi.
+    *   `title`: AI tarafından tahmin edilen başlık (örn: "Starbucks").
+    *   `amount`: AI tarafından tahmin edilen tutar.
+    *   `categoryId`: AI tarafından eşleştirilen kategori kimliği (örn: `exp_dining_cafe`).
+    *   `date`: İşlem tarihi (varsayılan: bugün).
+    *   `isIncome`: Gelir mi, gider mi (varsayılan: false/gider).
+    *   `note`: Ek açıklama/not veya OCR'dan çıkan fiş kalemleri.
+    *   `reason`: Taslağın oluşma nedeni (örn: "Alışkanlık", "Hızlı Metin", "Fotoğraf Analizi").
+*   **Fonksiyonlar:**
+    *   `loadDrafts()`: SharedPreferences'tan taslak listesini getirir.
+    *   `saveDraft(DraftTransaction draft)`: Havuza yeni bir taslak ekler.
+    *   `deleteDraft(String id)`: Havuzdan taslağı siler (Yoksay - ✗).
+    *   `promoteToTransaction(String draftId, int vaultId)`: Taslağı gerçek bir işleme dönüştürür. `DatabaseService.addTransaction` fonksiyonunu çağırır ve ardından taslağı havuzdan siler.
+
+---
+
+### 2. AI & Parsing Layer (Akıllı Ayrıştırıcı)
+Kullanıcının girdiği serbest metin, ses transkripsiyonu veya fiş görsellerini Gemini API'sini kullanarak yapısal verilere dönüştüreceğiz.
+
+#### [NEW] [smart_parser_service.dart](file:///c:/Users/Yasir2.Prenses/Finarcast/lib/features/optimization/services/smart_parser_service.dart)
+Gemini 2.5 Flash API'sini kullanarak girdileri anlamlandıran servis.
+*   **Metin/Ses Ayrıştırma:**
+    *   Kullanıcı `"dün taksi 150 tl"` yazdığında AI'a bir prompt gönderilir.
+    *   Prompt içerisinde uygulamanın desteklediği tüm kategori kimlikleri (Category IDs) listelenir.
+    *   AI'dan JSON formatında `title`, `amount`, `categoryId`, `date`, `isIncome` dönmesi istenir.
+    *   İnternet bağlantısı olmaması durumuna karşı basit bir **Regex Fallback** algoritması geliştirilir.
+*   **Görsel (Fiş/OCR) Ayrıştırma:**
+    *   Gemini Vision desteği sayesinde, fotoğrafı çekilen fişin byte dizisi (`DataPart`) ile birlikte prompt gönderilir.
+    *   AI görselden işletme adını, toplam tutarı, tarihi ve kategoriyi çıkarıp JSON olarak döner. Fiş kalemlerini de not olarak ekler.
+*   **Alışkanlık Motoru (Habit Predictions):**
+    *   Mevcut gerçek harcamaları analiz eden basit bir kural motoru kurulur.
+    *   Örn: Kullanıcı her ayın 15'inde "Netflix" ödemişse veya haftada 3 kez sabah "Kahve" almışsa, takvim tetiklendiğinde havuzda hazır taslak kartları üretilir.
+
+---
+
+### 3. User Interface Layer (Hızlı Sepet Ekranı)
+Gelen kutusu konseptini premium cam (glassmorphism) ve neumorphic tasarımlarla, Tinder tarzı hızlı onay mekanizmasıyla inşa edeceğiz.
+
+#### [NEW] [smart_inbox_screen.dart](file:///c:/Users/Yasir2.Prenses/Finarcast/lib/features/optimization/smart_inbox_screen.dart)
+Yeni 3. sekme ekranı (Analiz sekmesinin yerine geçecek olan ekran).
+*   **Metin ve Multimodal Giriş Çubuğu:**
+    *   Görsel olarak premium cam tasarımlı metin kutusu.
+    *   Mikrofon ikonu (klavye ses diktesi yönlendirmesi veya yerleşik ses girdisi için).
+    *   Kamera ikonu (fiş fotoğrafı çekmek / galeriden fatura seçmek için).
+*   **Taslak Kartı Listesi:**
+    *   AI'ın tahmin ettiği ikon, başlık, miktar ve gerekçe bilgileri.
+    *   **Kasa Seçim Şeridi (Horizontal Vault Chips):** Kullanıcının aktif kasaları (`💵 Nakit`, `💳 Kredi Kartı` vb.) listelenir. AI'ın tahmin ettiği kasa varsayılan seçilidir.
+    *   **Onayla Butonu (✓):** Seçili kasaya işlemi kaydeder, kart sağa kayarak listeden uçar.
+    *   **Yoksay Butonu (✗):** Taslağı iptal eder, kart sola kayarak listeden uçar.
+    *   **Düzenle Butonu (✏️):** Mevcut detaylı işlem ekleme ekranını pre-populate (önceden doldurulmuş) olarak açar.
+*   **Pano Denetleyicisi (Clipboard Listener):**
+    *   Sayfa açıldığında panodaki (clipboard) metin taranır. Banka SMS veya harcama formatına uyuyorsa *"Panoda bir harcama bulundu, taslağa dönüştürülsün mü?"* uyarısı gösterilir.
+
+---
+
+### 4. Integration with Existing Components (Mevcut Bileşenlerin Güncellenmesi)
+
+#### [MODIFY] [add_transaction_screen.dart](file:///c:/Users/Yasir2.Prenses/Finarcast/lib/features/transactions/add_transaction_screen.dart)
+Mevcut detaylı işlem ekleme ekranı, yeni bir işlem oluştururken parametre olarak gönderilen verileri (başlık, miktar, kategori vb.) önceden alanlara dolduracak şekilde güncellenecektir.
+*   `_prefillIfEditing` metodunun `else` (Yeni kayıt modu) bloğuna; `initialAmount`, `initialMinAmount`, `initialMaxAmount`, `initialNote`, `initialCategoryId` vb. alanların pre-fill edilmesi eklenecektir.
+
+#### [MODIFY] [main_scaffold.dart](file:///c:/Users/Yasir2.Prenses/Finarcast/lib/features/dashboard/main_scaffold.dart)
+*   Alt menünün 3. sekmesinde `OptimizationScreen` yerine `SmartInboxScreen` çağrılacak. Eski sayfanın dosyalarına dokunulmayacak.
+
+---
+
+## Verification Plan
+
+### Manual Verification
+1.  **Hızlı Giriş Testi:** Ekranın üstündeki kutuya `"dün market 350"` yazıp Gönder'e tıklayacağız. AI'ın bunu dün tarihli, 350 TL tutarlı ve Market kategorisinde bir taslak kartına dönüştürdüğünü doğrulayacağız.
+2.  **Kasa Atama ve Onay:** Taslak kartında "Kredi Kartı" kasasını seçip yeşil onay butonuna basacağız. İşlemin havuzdan silindiğini ve Dashboard'daki kredi kartı bakiyesinin düştüğünü doğrulayacağız.
+3.  **Detaylandırma Köprüsü:** Taslak üzerindeki kalem butonuna tıklayacağız. Detaylı harcama ekleme ekranının AI verileriyle önceden doldurulmuş olarak açıldığını test edeceğiz.
+4.  **OCR / Görsel Analizi:** Gemini'a test amaçlı bir fiş görseli (mock veya gerçek) gönderip tutar ve kategori çıkarımını gözlemleyeceğiz.
+5.  **Pano Yakalama:** Bir banka harcama mesajını kopyalayıp uygulamayı açtığımızda panodan yakalama önerisinin geldiğini doğrulayacağız.
