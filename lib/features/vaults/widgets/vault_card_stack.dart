@@ -115,12 +115,13 @@ class _VaultCardStackState extends ConsumerState<VaultCardStack> {
           final globalCurrency = ref.watch(settingsProvider).currencySymbol;
           final rates = ref.watch(exchangeRatesProvider).value ?? [];
           final allVaults = ref.watch(allVaultsProvider);
+          final allTransactions = ref.watch(vaultTransactionsProvider);
           final vault = allVaults.where((v) => 'v_${v.id}' == vaultId).firstOrNull;
           final vaultCurrency = vault?.currency ?? 'AUTO';
           final targetCurrency = vaultCurrency == 'AUTO' ? globalCurrency : vaultCurrency;
 
-          final txs = vaultId == null ? widget.allTransactions : widget.allTransactions.where((t) => t.groupIds.contains(vaultId)).toList();
-          
+          final txs = vaultId == null ? allTransactions : allTransactions.where((t) => t.groupIds.contains(vaultId)).toList();
+
           // 1. Aylık Akış (Gelir/Gider İstatistikleri) - Sadece Arşivlenmemişler
           final activeTxs = txs.where((t) => !t.isArchived).toList();
           final now = DateTime.now();

@@ -6,6 +6,7 @@ import '../../../../core/theme/app_constants.dart';
 import '../../../../core/database/database_service.dart';
 import '../../../../core/database/models/vault.dart';
 import '../../../../core/database/models/transaction_record.dart';
+import '../../../../core/providers/db_providers.dart';
 
 import '../../../../shared/widgets/custom_card.dart';
 import '../../../../shared/widgets/custom_button.dart';
@@ -104,6 +105,8 @@ class _PrecisionDetailSheetState extends ConsumerState<DetailSheet> {
     
     HapticFeedback.mediumImpact();
     await _loadData();
+    // Provider'ları invalidate ederek bakiye ve UI güncellemelerini tetikle
+    ref.invalidate(transactionsStreamProvider);
   }
 
   Future<void> _toggleNotification(bool value) async {
@@ -418,8 +421,8 @@ class _PrecisionDetailSheetState extends ConsumerState<DetailSheet> {
                                       ),
                                       const SizedBox(width: 4),
                                       CustomAnimatedIcon(
-                                        activeIcon: Icons.check_circle_rounded,
-                                        inactiveIcon: Icons.add_circle_outline_rounded,
+                                        activeIcon: Icons.add_circle_outline_rounded,
+                                        inactiveIcon: Icons.remove_circle_outline_rounded,
                                         isActive: isAttached,
                                         size: 17 * sf,
                                         color: isAttached 

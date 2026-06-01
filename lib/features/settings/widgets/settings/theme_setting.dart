@@ -251,7 +251,7 @@ class _SkyPainter extends CustomPainter {
 
     if (t == 0.0) {
       // Aydınlık Mod (Statik çizim - SaveLayer performansı koruma)
-      _daySky(canvas, size, daySkyCenter);
+      _daySky(canvas, size, daySkyCenter, t);
       _clouds(canvas, size, 1.0);
     } else if (t == 2.0) {
       // Karanlık Mod (Statik çizim)
@@ -259,16 +259,17 @@ class _SkyPainter extends CustomPainter {
       _stars(canvas, size, 1.0);
     } else {
       // Geçiş Durumu (Sistem modu t=1.0 dahil)
+      
       // 1. Zemin Katmanı (Day Sky)
-      _daySky(canvas, size, daySkyCenter);
+      _daySky(canvas, size, daySkyCenter, t);
 
       // 2. Üst Gece Katmanı (Maske ile soldan sağa kayarak bindirilir)
       canvas.saveLayer(Offset.zero & size, Paint());
       _nightSky(canvas, size, nightSkyCenter);
 
-      // Maskeyi uyguluyoruz (t=1.0 iken tam ortadan böler)
-      final s0 = (0.45 - (t - 1.0) * 0.5).clamp(0.0, 1.0);
-      final s1 = (0.55 - (t - 1.0) * 0.5).clamp(0.0, 1.0);
+      // Maskeyi uyguluyoruz (t=1.0 iken tam ortadan böler, kenarlarda geç kalmayı ve sıçramayı önler)
+      final s0 = (0.5 - (t - 1.0) * 0.75).clamp(0.0, 1.0);
+      final s1 = (0.5 - (t - 1.0) * 0.75 + 0.12).clamp(0.0, 1.0);
       canvas.drawRect(
         Offset.zero & size,
         Paint()
@@ -340,17 +341,16 @@ class _SkyPainter extends CustomPainter {
   // ────── Bulutlar ──────
   void _clouds(Canvas canvas, Size size, double opacity) {
     if (opacity <= 0) return;
-    final front = Paint()..color = Colors.white.withValues(alpha: opacity);
 
     // Gündüz modu (Aydınlık) bulut pozisyonları (Sağ dikey duvarı sarar)
     final dayCenters = [
-      const Offset(42, 43),  // C1
-      const Offset(60, 39),  // C2
-      const Offset(78, 40),  // C3
-      const Offset(98, 32),  // C4
-      const Offset(112, 18), // C5
-      const Offset(104, 6),  // C6
-      const Offset(88, 4),   // C7
+      const Offset(48, 45),  // C1
+      const Offset(65, 41),  // C2
+      const Offset(83, 42),  // C3
+      const Offset(102, 34), // C4
+      const Offset(116, 20), // C5
+      const Offset(108, 4),  // C6
+      const Offset(92, 2),   // C7
     ];
 
     // Sistem/Hibrit modu bulut pozisyonları (Tamamen asimetrik ve düzensiz, sol ve sağ yarısı çok farklı)
@@ -401,55 +401,77 @@ class _SkyPainter extends CustomPainter {
       return Offset.lerp(whiteOffsets[i], hybridWhiteOffsets[i], factor)!;
     });
 
+    // Gökyüzü aydınlık/karanlık sınır çizgisi (Bezier sıvı sınır çizgisiyle eşleştirildi)
+    final splitX = 128.0 - t * 70.0;
+
     // Gölgelerin kaydırma vektörü
     final shadowOffset = Offset(-1.5 * (1.0 - 2.0 * factor), -1.0);
 
-    // Gökyüzü aydınlık/karanlık sınır çizgisi (Aydınlık modda splitX = size.width olur, yani hepsi aydınlık bulut olur)
-    final splitX = size.width * (1.0 - t / 2.0).clamp(0.0, 1.0);
+    // 1. ADIM: Tüm derin şeffaf arka bulutları (gölgeleri) birleştirerek çiziyoruz.
+    // Hibrit modda (t=1) gölgeler tamamen gizlenir. Aydınlık (t<1) ve Karanlık (t>1) geçişlerinde tüm bulut gölgeleri birlikte ve pürüzsüzce fade olur.
+    final backPath = Path();
 
-    // 1. ADIM: Tüm derin şeffaf arka bulutları (gölgeleri) çiziyoruz.
     for (int i = 0; i < dynamicCenters.length; i++) {
       final r = dayRadii[i] + factor * (hybridRadii[i] - dayRadii[i]);
-      final isDayCloud = dynamicCenters[i].dx <= splitX;
-
-      // Sol (Gündüz) ile Sağ (Gece) tarafları için gölgelerin ton farkı
-      final backPaint = Paint()
-        ..color = (isDayCloud 
-            ? const Color(0xFF90CAF9) // Gündüz açık mavi yumuşak gölgesi
-            : const Color(0xFF232B3C) // Gece koyu lacivert gizemli gölgesi
-          ).withValues(alpha: 0.35 * opacity);
-
-      canvas.drawCircle(
-        dynamicCenters[i] + shadowOffset,
-        r + 2.0,
-        backPaint,
-      );
+      final center = dynamicCenters[i] + shadowOffset;
+      final rect = Rect.fromCircle(center: center, radius: r + 2.0);
+      backPath.addOval(rect);
     }
 
-    // 2. ADIM: Ön beyaz bulutlar (Alt katmanda kalır)
+    if (t <= 1.0) {
+      final dayShadowOpacity = (1.0 - t).clamp(0.0, 1.0);
+      if (dayShadowOpacity > 0) {
+        final dayBackPaint = Paint()
+          ..color = const Color(0xFFBBDEFB).withValues(alpha: 0.60 * opacity * dayShadowOpacity)
+          ..style = PaintingStyle.fill;
+        canvas.drawPath(backPath, dayBackPaint);
+      }
+    } else {
+      final nightShadowOpacity = (t - 1.0).clamp(0.0, 1.0);
+      if (nightShadowOpacity > 0) {
+        final nightBackPaint = Paint()
+          ..color = const Color(0xFF4E5D78).withValues(alpha: 0.60 * opacity * nightShadowOpacity)
+          ..style = PaintingStyle.fill;
+        canvas.drawPath(backPath, nightBackPaint);
+      }
+    }
+
+    // 2. ADIM: Ön bulutlar (Alt katmanda kalır - Geçiş bölgesinde renkleri yumuşakça lerp ediyoruz)
     for (int i = 0; i < dynamicCenters.length; i++) {
       final r = dayRadii[i] + factor * (hybridRadii[i] - dayRadii[i]);
+      final center = dynamicCenters[i] + dynamicWhiteOffsets[i] * 0.65;
+
+      const halfWidth = 10.0;
+      final sFactor = (1.0 - (center.dx - (splitX - halfWidth)) / (2 * halfWidth)).clamp(0.0, 1.0);
+      final dayFactor = t <= 1.0 ? (1.0 + t * (sFactor - 1.0)) : (sFactor * (2.0 - t));
+      final baseColor = Color.lerp(const Color(0xFFECEFF1), Colors.white, dayFactor)!;
+
+      final cloudBasePaint = Paint()
+        ..color = baseColor.withValues(alpha: opacity);
+
       canvas.drawCircle(
-        dynamicCenters[i] + dynamicWhiteOffsets[i] * 0.65,
+        center,
         r,
-        front,
+        cloudBasePaint,
       );
     }
 
     // 3. ADIM: Üst katman şeffaf bulutlar (Beyaz bulutların her zaman önünde durur, derinlik ve yumuşak sis efekti verir!)
     for (int i = 0; i < dynamicCenters.length; i++) {
       final r = dayRadii[i] + factor * (hybridRadii[i] - dayRadii[i]);
-      final isDayCloud = dynamicCenters[i].dx <= splitX;
+      final center = dynamicCenters[i] + dynamicWhiteOffsets[i];
 
-      // Sol (Gündüz) ile Sağ (Gece) tarafları için şeffaf sislerin ton farkı
+      const halfWidth = 10.0;
+      final sFactor = (1.0 - (center.dx - (splitX - halfWidth)) / (2 * halfWidth)).clamp(0.0, 1.0);
+      final dayFactor = t <= 1.0 ? (1.0 + t * (sFactor - 1.0)) : (sFactor * (2.0 - t));
+      final overlayColor = Color.lerp(const Color(0xFF90A4AE), Colors.white, dayFactor)!;
+
+      // Ön bulutlar: Gündüz için beyaz, Gece için gri-lacivert tonlu
       final midPaint = Paint()
-        ..color = (isDayCloud 
-            ? const Color(0xFFBBDEFB) // Gündüz soft tatlı açık mavi sisi
-            : const Color(0xFF4E5D78) // Gece gizemli bulut lacivert/gri sisi
-          ).withValues(alpha: 0.55 * opacity);
+        ..color = overlayColor.withValues(alpha: 0.80 * opacity);
 
       canvas.drawCircle(
-        dynamicCenters[i] + dynamicWhiteOffsets[i],
+        center,
         r + 0.8,
         midPaint,
       );
@@ -459,10 +481,12 @@ class _SkyPainter extends CustomPainter {
   // ────── Yıldızlar (dört kollu sparkle) ──────
   void _stars(Canvas canvas, Size size, double opacity) {
     if (opacity <= 0) return;
-    final p = Paint()..color = Colors.white.withValues(alpha: 0.9 * opacity);
 
     // factor = 0.0 (t=2.0, Dark Mode), 1.0 (t=1.0, System Mode)
     final double factor = (2.0 - t).clamp(0.0, 1.0);
+
+    // Gökyüzü aydınlık/karanlık sınır çizgisi (Bezier sıvı sınır çizgisiyle eşleştirildi)
+    final splitX = 128.0 - t * 70.0;
 
     void drawStar(Offset c, double hybridX, double hybridY, double s) {
       // t=1.0 (System) iken x = hybridX, y = hybridY olur.
@@ -470,14 +494,38 @@ class _SkyPainter extends CustomPainter {
       final x = c.dx + factor * (hybridX - c.dx);
       final y = c.dy + factor * (hybridY - c.dy);
       final dynamicCenter = Offset(x, y);
-      _sparkle(canvas, dynamicCenter, s, p);
+
+      // Geçiş bölgesinde renk ve opaklığı yumuşakça lerp ediyoruz (Gündüz tarafında yıldızlar silinir)
+      const halfWidth = 8.0;
+      final sFactor = (1.0 - (dynamicCenter.dx - (splitX - halfWidth)) / (2 * halfWidth)).clamp(0.0, 1.0);
+      final dayFactor = t <= 1.0 ? (1.0 + t * (sFactor - 1.0)) : (sFactor * (2.0 - t));
+
+      final starColor = Colors.white;
+      final starOpacity = 0.9 * (1.0 - dayFactor) * opacity;
+
+      final starPaint = Paint()
+        ..color = starColor.withValues(alpha: starOpacity);
+
+      _sparkle(canvas, dynamicCenter, s, starPaint);
     }
 
     void drawDot(Offset c, double hybridX, double hybridY, double r) {
       final x = c.dx + factor * (hybridX - c.dx);
       final y = c.dy + factor * (hybridY - c.dy);
       final dynamicCenter = Offset(x, y);
-      canvas.drawCircle(dynamicCenter, r, p);
+
+      // Geçiş bölgesinde renk ve opaklığı yumuşakça lerp ediyoruz (Gündüz tarafında yıldızlar silinir)
+      const halfWidth = 8.0;
+      final sFactor = (1.0 - (dynamicCenter.dx - (splitX - halfWidth)) / (2 * halfWidth)).clamp(0.0, 1.0);
+      final dayFactor = t <= 1.0 ? (1.0 + t * (sFactor - 1.0)) : (sFactor * (2.0 - t));
+
+      final starColor = Colors.white;
+      final starOpacity = 0.9 * (1.0 - dayFactor) * opacity;
+
+      final starPaint = Paint()
+        ..color = starColor.withValues(alpha: starOpacity);
+
+      canvas.drawCircle(dynamicCenter, r, starPaint);
     }
 
     // Büyük / orta sparkle yıldızları (Gece modunda soldadır, sistem modunda tüm üst kenara yayılır ve yukarı çekilir)
@@ -512,9 +560,10 @@ class _SkyPainter extends CustomPainter {
     );
   }
 
-  // ────── Gündüz gökyüzü gradyanı (Açıktan Koyuya) ──────
-  void _daySky(Canvas canvas, Size size, Offset center) {
-    final ringColors = [
+  // ────── Gündüz gökyüzü gradyanı (Açıktan Koyuya + Gün Batımı Geçişi) ──────
+  void _daySky(Canvas canvas, Size size, Offset center, double t) {
+    // Normal mavi gökyüzü renkleri (t = 0.0 iken) - Dıştan içe (R8 -> R1)
+    final dayColors = [
       const Color(0xFF1565C0), // R8 (en dış - en koyu)
       const Color(0xFF1976D2), // R7
       const Color(0xFF1E88E5), // R6
@@ -524,16 +573,63 @@ class _SkyPainter extends CustomPainter {
       const Color(0xFF90CAF9), // R2
       const Color(0xFFBBDEFB), // R1 (en iç - en açık/güneş etrafı)
     ];
+
+    // Üst Yarım (Yukarı) Gün Batımı Renkleri (t = 1.0 iken) - Tozlu violet/lavanta tonları
+    final topSunsetColors = [
+      const Color(0xFF1B2E5C), // R8 (en dış)
+      const Color(0xFF2E335A), // R7
+      const Color(0xFF453E65), // R6
+      const Color(0xFF5C4B75), // R5
+      const Color(0xFF735C85), // R4
+      const Color(0xFF8B6F96), // R3
+      const Color(0xFFA082A3), // R2
+      const Color(0xFFBBA0BA), // R1 (en iç)
+    ];
+
+    // Alt Yarım (Aşağı) Gün Batımı Renkleri (t = 1.0 iken) - Sıcak terracotta/altın tonları
+    final bottomSunsetColors = [
+      const Color(0xFF6D4C41), // R8 (en dış)
+      const Color(0xFF8D6E63), // R7
+      const Color(0xFFA15C49), // R6
+      const Color(0xFFB36D56), // R5
+      const Color(0xFFC77F67), // R4
+      const Color(0xFFDA927A), // R3
+      const Color(0xFFEDA88E), // R2
+      const Color(0xFFFCD3A1), // R1 (en iç)
+    ];
+
+    final lerpFactor = t.clamp(0.0, 1.0);
     final ringRadii = [148.0, 130.0, 112.0, 94.0, 76.0, 58.0, 40.0, 22.0];
 
-    for (int i = 0; i < ringColors.length; i++) {
-      canvas.drawCircle(
-        center,
-        ringRadii[i],
-        Paint()
-          ..color = ringColors[i]
-          ..style = PaintingStyle.fill,
-      );
+    // Her halkayı dikey bir gradyanla çizerek renklerin üst/alt birleşim çizgisini pürüzsüz ve organik yapıyoruz
+    for (int i = 0; i < dayColors.length; i++) {
+      if (lerpFactor == 0.0) {
+        // Aydınlık modda (statik iken) gradyan derleme yükünden kaçınmak için düz renk çizimiyle performansı koruyoruz
+        canvas.drawCircle(
+          center,
+          ringRadii[i],
+          Paint()
+            ..color = dayColors[i]
+            ..style = PaintingStyle.fill,
+        );
+      } else {
+        final topColor = Color.lerp(dayColors[i], topSunsetColors[i], lerpFactor)!;
+        final bottomColor = Color.lerp(dayColors[i], bottomSunsetColors[i], lerpFactor)!;
+
+        final shader = LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [topColor, bottomColor],
+        ).createShader(Rect.fromLTWH(0, 0, size.width, size.height));
+
+        canvas.drawCircle(
+          center,
+          ringRadii[i],
+          Paint()
+            ..shader = shader
+            ..style = PaintingStyle.fill,
+        );
+      }
     }
   }
 
