@@ -1,0 +1,415 @@
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../../core/providers/settings_provider.dart';
+import '../../../../core/theme/app_constants.dart';
+import '../../../../core/services/subscription_service.dart';
+import '../../../home/home_providers.dart';
+import '../../../../shared/widgets/custom_dialog.dart';
+import '../../../subscription/widgets/pro_upgrade_sheet.dart';
+import '../settings_list_items.dart';
+
+class BackgroundSetting extends ConsumerWidget {
+  const BackgroundSetting({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final bgColorStyle = ref.watch(
+      settingsProvider.select((s) => s.bgColorStyle),
+    );
+    final accentColorValue = ref.watch(
+      settingsProvider.select((s) => s.accentColorValue),
+    );
+    final activeColor = SettingsListItems.getSettingColor(context, SettingType.background, ref.watch(rotaryColorProvider));
+    final subscription = ref.watch(subscriptionServiceProvider);
+    final isPro = subscription.isPro;
+
+    // Aktif tema renginin gradyan olup olmadığını kontrol et
+    final bgGradient = AppColors.getGradientColors(Color(accentColorValue));
+
+    return Padding(
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 44,
+                height: 44,
+                decoration: BoxDecoration(
+                  color: activeColor.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(14),
+                ),
+                child: Icon(Icons.style_outlined, size: 22, color: activeColor),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      "Stil",
+                      style: TextStyle(
+                        color: AppColors.getTextPrimary(context),
+                        fontSize: 16,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    if (!isPro) ...[
+                      const SizedBox(height: 2),
+                      const Text(
+                        "Premium",
+                        style: TextStyle(
+                          color: Colors.amber,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
+                    const SizedBox(height: 2),
+                    Text(
+                      "Kartların ve arka planın görünüm stilini seçin",
+                      style: TextStyle(
+                        color: AppColors.getTextSecondary(context).withValues(alpha: 0.5),
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 20),
+          Row(
+            children: [
+              // 1. Sade (Düz renkler, tema rengi sadece içerikleri etkiler)
+              BackgroundPreviewCard(
+                styleIndex: 2, // Sade
+                isSelected: bgColorStyle == 2,
+                accentColorValue: accentColorValue,
+                bgGradient: bgGradient,
+                isPremium: false,
+                isPro: isPro,
+                onTap: () {
+                  if (bgColorStyle == 2) return;
+                  HapticFeedback.lightImpact();
+                  ref.read(settingsProvider.notifier).setBgColorStyle(2);
+                },
+              ),
+
+              // 2. Renkli (Tema rengi kartlara ve arka plana yansır, katı)
+              BackgroundPreviewCard(
+                styleIndex: 1, // Renkli
+                isSelected: bgColorStyle == 1,
+                accentColorValue: accentColorValue,
+                bgGradient: bgGradient,
+                isPremium: true,
+                isPro: isPro,
+                onTap: () {
+                  if (!isPro) {
+                    HapticFeedback.heavyImpact();
+                    _showPremiumRequiredDialog(context);
+                    return;
+                  }
+                  if (bgColorStyle == 1) return;
+                  HapticFeedback.lightImpact();
+                  ref.read(settingsProvider.notifier).setBgColorStyle(1);
+                },
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showPremiumRequiredDialog(BuildContext context) {
+    showCustomDialog(
+      context: context,
+      accentColor: const Color(0xFFFFB300), // Altın rengi
+      title: "Premium Gerekli",
+      content: "Renkli görünüm stili sadece Premium üyelerin erişimine açıktır.",
+      actions: [
+        PrecisionDialogAction(
+          label: "Daha Sonra",
+          onTap: () => Navigator.pop(context),
+          isPrimary: false,
+        ),
+        PrecisionDialogAction(
+          label: "Premium'a Yükselt",
+          onTap: () {
+            Navigator.pop(context);
+            ProUpgradeSheet.show(context);
+          },
+          isPrimary: true,
+        ),
+      ],
+    );
+  }
+}
+
+class BackgroundPreviewCard extends StatelessWidget {
+  final int styleIndex;
+  final bool isSelected;
+  final int accentColorValue;
+  final List<Color>? bgGradient;
+  final VoidCallback onTap;
+  final bool isPremium;
+  final bool isPro;
+
+  const BackgroundPreviewCard({
+    super.key,
+    required this.styleIndex,
+    required this.isSelected,
+    required this.accentColorValue,
+    this.bgGradient,
+    required this.onTap,
+    this.isPremium = false,
+    this.isPro = true,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final primaryColor = Theme.of(context).colorScheme.primary;
+    final gradient = bgGradient;
+
+    // Yeni stil isimleri ve açıklamaları
+    final String label;
+    final String description;
+    if (styleIndex == 1) {
+      label = "Renkli";
+      description = "Uyumlu renkler";
+    } else {
+      label = "Sade";
+      description = "Düz tasarım";
+    }
+
+    final activeColor = accentColorValue == 0
+        ? primaryColor
+        : Color(accentColorValue);
+
+    Decoration previewDecoration;
+    Color mockCardBg;
+    Color mockCardBorder;
+    List<BoxShadow>? mockCardShadow;
+    Color mockAccentBarColor = activeColor;
+
+    if (styleIndex == 2) {
+      // ═══ SADE ═══
+      // Düz arka plan, düz kart. Tema rengi sadece içeriklere (bar) yansır.
+      final solidBg = isDark ? AppColors.darkBackground : AppColors.lightBackground;
+      previewDecoration = BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [solidBg, solidBg],
+        ),
+        borderRadius: BorderRadius.circular(16),
+      );
+      mockCardBg = isDark ? const Color(0xFF161720) : Colors.white;
+      mockCardBorder = isDark ? const Color(0xFF2A2B36) : const Color(0xFFE4E7EB);
+      mockCardShadow = !isDark ? [
+        BoxShadow(
+          color: Colors.black.withValues(alpha: 0.06),
+          blurRadius: 4,
+          offset: const Offset(0, 1),
+        )
+      ] : null;
+    } else {
+      // ═══ RENKLİ ═══
+      // Arka plan ve kartlar tema rengiyle uyumlu katı renkler.
+      final Color tintColor = gradient != null ? gradient.first : activeColor;
+      
+      final bgTinted = isDark
+          ? Color.lerp(AppColors.darkBackground, tintColor, 0.20)!
+          : Color.lerp(AppColors.lightBackground, tintColor, 0.10)!;
+      
+      if (gradient != null) {
+        previewDecoration = BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: gradient
+                .map((c) => isDark
+                    ? Color.lerp(AppColors.darkBackground, c, 0.22)!
+                    : Color.lerp(AppColors.lightBackground, c, 0.12)!)
+                .toList(),
+          ),
+          borderRadius: BorderRadius.circular(16),
+        );
+      } else {
+        previewDecoration = BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [bgTinted, bgTinted],
+          ),
+          borderRadius: BorderRadius.circular(16),
+        );
+      }
+ 
+      // Kart rengi: arka plandan biraz daha açık/koyu tonda, ama yine uyumlu
+      mockCardBg = isDark
+          ? Color.lerp(const Color(0xFF161720), tintColor, 0.12)!
+          : Color.lerp(Colors.white, tintColor, 0.06)!;
+      mockCardBorder = isDark
+          ? Color.lerp(const Color(0xFF2A2B36), tintColor, 0.15)!
+          : Color.lerp(const Color(0xFFE4E7EB), tintColor, 0.12)!;
+      mockCardShadow = null;
+    }
+
+    // Seçim border'ı üstten ekleniyor
+    final outerDecoration = (previewDecoration as BoxDecoration).copyWith(
+      border: Border.all(
+        color: isSelected
+            ? primaryColor
+            : AppColors.getTextSecondary(context).withValues(alpha: 0.1),
+        width: isSelected ? 2.5 : 1,
+      ),
+      boxShadow: [],
+    );
+
+    return GestureDetector(
+      onTap: onTap,
+      child: Padding(
+        padding: const EdgeInsets.only(right: 16),
+        child: Column(
+          children: [
+            // Önizleme Kutusu (Sadece bu kutu scale olacak)
+            AnimatedScale(
+              duration: const Duration(milliseconds: 300),
+              scale: isSelected ? 1.02 : 0.98,
+              curve: Curves.easeOutBack,
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 300),
+                curve: Curves.easeInOut,
+                width: 98,
+                height: 120,
+                decoration: outerDecoration,
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(14),
+                  child: Stack(
+                    children: [
+                      // Mock Kart
+                      Center(
+                        child: AnimatedContainer(
+                          duration: const Duration(milliseconds: 300),
+                          curve: Curves.easeInOut,
+                          width: 66,
+                          height: 48,
+                          decoration: BoxDecoration(
+                            color: mockCardBg,
+                            borderRadius: BorderRadius.circular(10),
+                            border: Border.all(
+                              color: mockCardBorder,
+                              width: 1,
+                            ),
+                            boxShadow: mockCardShadow,
+                          ),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              AnimatedContainer(
+                                duration: const Duration(milliseconds: 300),
+                                curve: Curves.easeInOut,
+                                width: 38,
+                                height: 6,
+                                decoration: BoxDecoration(
+                                  color: mockAccentBarColor.withValues(alpha: 0.8),
+                                  borderRadius: BorderRadius.circular(3),
+                                ),
+                              ),
+                              const SizedBox(height: 6),
+                              Container(
+                                width: 22,
+                                height: 4,
+                                decoration: BoxDecoration(
+                                  color: (isDark ? Colors.white : Colors.black)
+                                      .withValues(alpha: 0.3),
+                                  borderRadius: BorderRadius.circular(2),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+
+                      // Seçim İşareti
+                      Positioned(
+                        bottom: 6,
+                        right: 6,
+                        child: AnimatedScale(
+                          duration: const Duration(milliseconds: 300),
+                          curve: Curves.easeOutBack,
+                          scale: isSelected ? 1.0 : 0.0,
+                          child: Container(
+                            padding: const EdgeInsets.all(2),
+                            decoration: BoxDecoration(
+                              color: primaryColor,
+                              shape: BoxShape.circle,
+                            ),
+                            child: const Icon(
+                              Icons.check_rounded,
+                              color: Colors.white,
+                              size: 12,
+                            ),
+                          ),
+                        ),
+                      ),
+
+                      // Premium Kilit / Yıldız Simgesi
+                      if (isPremium && !isPro)
+                        Positioned(
+                          top: 6,
+                          right: 6,
+                          child: Container(
+                            padding: const EdgeInsets.all(2.5),
+                            decoration: const BoxDecoration(
+                              color: Color(0xFFFFB300), // Altın sarısı
+                              shape: BoxShape.circle,
+                            ),
+                            child: const Icon(
+                              Icons.star_rounded,
+                              color: Colors.white,
+                              size: 10,
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 8),
+            // Başlık
+            AnimatedDefaultTextStyle(
+              duration: const Duration(milliseconds: 200),
+              style: TextStyle(
+                fontFamily: Theme.of(context).textTheme.bodyLarge?.fontFamily,
+                fontSize: 13,
+                fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
+                color: isSelected
+                    ? AppColors.getTextPrimary(context)
+                    : AppColors.getTextSecondary(context).withValues(alpha: 0.6),
+              ),
+              child: Text(label),
+            ),
+            const SizedBox(height: 2),
+            // Alt açıklama
+            Text(
+              description,
+              style: TextStyle(
+                fontSize: 10,
+                fontWeight: FontWeight.w500,
+                color: AppColors.getTextSecondary(context).withValues(alpha: 0.5),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}

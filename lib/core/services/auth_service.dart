@@ -76,7 +76,7 @@ class AuthService {
   Future<bool> signInWithGoogle() async {
     return await _client.auth.signInWithOAuth(
       OAuthProvider.google,
-      // For mobile, you might need a redirectTo URL configured in Supabase
+      redirectTo: 'io.supabase.finarcast://login-callback',
     );
   }
 
@@ -85,9 +85,34 @@ class AuthService {
     await _client.auth.resetPasswordForEmail(email);
   }
 
+  /// Verify OTP for Password Recovery
+  Future<AuthResponse> verifyRecoveryOTP({
+    required String email,
+    required String token,
+  }) async {
+    return await _client.auth.verifyOTP(
+      type: OtpType.recovery,
+      email: email,
+      token: token,
+    );
+  }
+
   /// Sign Out
   Future<void> signOut() async {
     await _client.auth.signOut();
+  }
+
+  /// Delete User Account and all data
+  Future<void> deleteAccount() async {
+    await _client.rpc('delete_user_account');
+    await signOut();
+  }
+
+  /// Update current user password directly
+  Future<void> updatePassword(String newPassword) async {
+    await _client.auth.updateUser(
+      UserAttributes(password: newPassword),
+    );
   }
 }
 
@@ -98,3 +123,6 @@ final authServiceProvider = Provider<AuthService>((ref) => AuthService());
 final authStateProvider = StreamProvider<AuthState>((ref) {
   return ref.watch(authServiceProvider).authStateChanges;
 });
+
+/// Riverpod StateProvider for Guest Mode
+final guestModeProvider = StateProvider<bool>((ref) => false);

@@ -5,8 +5,9 @@ import '../../../core/theme/app_constants.dart';
 import '../../../core/services/notification_service.dart';
 import '../../../l10n/app_localizations.dart';
 import '../vaults_providers.dart';
-import '../../dashboard/dashboard_providers.dart';
+import '../../home/home_providers.dart';
 import '../../transactions/add_transaction_screen.dart';
+import '../../../core/utils/route_transitions.dart';
 import '../../../shared/widgets/solid_surface.dart';
 import '../../../core/utils/category_utils.dart';
 import '../../../core/providers/db_providers.dart';
@@ -155,52 +156,39 @@ class _InAppNotificationsSheetState extends ConsumerState<InAppNotificationsShee
     required String title,
     required String subtitle,
   }) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.symmetric(vertical: 40, horizontal: 16),
-      decoration: BoxDecoration(
-        color: (isDark ? Colors.white : Colors.black).withValues(alpha: 0.02),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: (isDark ? Colors.white : Colors.black).withValues(alpha: 0.05),
-        ),
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: activeColor.withValues(alpha: 0.1),
-              shape: BoxShape.circle,
-            ),
-            child: Icon(
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 40, horizontal: 24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
               Icons.notifications_off_rounded,
-              size: 28,
-              color: AppColors.getAccentDeep(context, activeColor).withValues(alpha: 0.7),
+              size: 48,
+              color: AppColors.getTextSecondary(context).withValues(alpha: 0.15),
             ),
-          ),
-          const SizedBox(height: 16),
-          Text(
-            title.toUpperCase(),
-            style: TextStyle(
-              fontSize: 13,
-              fontWeight: FontWeight.w900,
-              color: AppColors.getTextPrimary(context),
-              letterSpacing: 1.5,
+            const SizedBox(height: 12),
+            Text(
+              title.toUpperCase(),
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w900,
+                color: AppColors.getTextSecondary(context).withValues(alpha: 0.8),
+                letterSpacing: 1.2,
+              ),
             ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            subtitle,
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              fontSize: 12,
-              height: 1.4,
-              color: (isDark ? Colors.white : Colors.black).withValues(alpha: isDark ? 0.45 : 0.65),
+            const SizedBox(height: 6),
+            Text(
+              subtitle,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 11,
+                color: AppColors.getTextSecondary(context).withValues(alpha: 0.5),
+                height: 1.4,
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -324,8 +312,8 @@ class _InAppNotificationsSheetState extends ConsumerState<InAppNotificationsShee
 
     Navigator.push(
       context,
-      MaterialPageRoute(
-        builder: (context) => AddTransactionScreen(
+      SlideUpPageRoute(
+        child: AddTransactionScreen(
           initialId: tx.dbId,
           initialName: tx.name,
           initialAmount: tx.amount,

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/app_constants.dart';
-import '../../dashboard/dashboard_providers.dart';
+import '../../home/home_providers.dart';
 import '../../../shared/widgets/inset_container.dart';
 
 class SmartInboxEmptyState extends ConsumerStatefulWidget {
@@ -51,27 +51,13 @@ class _SmartInboxEmptyStateState extends ConsumerState<SmartInboxEmptyState> {
 
             // Kasalar sayfasıyla aynı sade ve şık yazı stili
             Text(
-              "SEPETİNİZ BOŞ",
+              Localizations.localeOf(context).languageCode == 'tr' ? 'GELEN KUTUNUZ BOŞ' : 'INBOX IS EMPTY',
               textAlign: TextAlign.center,
               style: TextStyle(
                 color: AppColors.getTextSecondary(context).withValues(alpha: isDark ? 0.4 : 0.7),
                 fontSize: 13,
                 fontWeight: FontWeight.w900,
                 letterSpacing: 2,
-              ),
-            ),
-            const SizedBox(height: 12),
-
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: Text(
-                'Günlük harcamalarınızı sesle yazmak, panodan yakalamak veya fiş fotoğrafı yüklemek için giriş alanını kullanabilirsiniz.\n\nİşlemleriniz kasalara onay verilmeden işlenmez.',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 12,
-                  color: AppColors.getTextFaint(context),
-                  height: 1.5,
-                ),
               ),
             ),
           ],

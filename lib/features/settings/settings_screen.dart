@@ -1,0 +1,927 @@
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../home/home_providers.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import '../../l10n/app_localizations.dart';
+import '../../core/services/auth_service.dart';
+import '../../core/services/subscription_service.dart';
+import '../../core/theme/app_constants.dart';
+import '../../shared/widgets/custom_bottom_sheet.dart';
+import '../../shared/widgets/custom_dialog.dart';
+import '../../shared/widgets/custom_card.dart';
+import '../../shared/widgets/clickable_action.dart';
+import '../../shared/widgets/custom_notification.dart';
+import '../../shared/widgets/custom_text_field.dart';
+import '../../shared/widgets/custom_button.dart';
+import 'widgets/settings/theme_setting.dart';
+import 'widgets/settings/color_theme_setting.dart';
+import 'widgets/settings/background_setting.dart';
+
+import 'widgets/etched_liquid_text.dart';
+import 'widgets/settings/subscription_setting.dart';
+import 'widgets/settings_list_items.dart';
+import '../../core/database/database_service.dart';
+import '../../core/providers/db_providers.dart';
+import '../../core/providers/settings_provider.dart';
+
+// Modular Settings
+import 'widgets/settings/language_setting.dart';
+import 'widgets/settings/currency_setting.dart';
+import 'widgets/settings/exchange_rate_setting.dart';
+import 'widgets/settings/notification_setting.dart';
+import 'widgets/settings/sync_setting.dart';
+import 'widgets/settings/retention_setting.dart';
+import 'widgets/settings/purge_setting.dart';
+import 'widgets/settings/reset_setting.dart';
+
+class SettingsScreen extends ConsumerStatefulWidget {
+  const SettingsScreen({super.key});
+
+  @override
+  ConsumerState<SettingsScreen> createState() => _SettingsScreenState();
+}
+
+class _SettingsScreenState extends ConsumerState<SettingsScreen> {
+  late ScrollController _scrollController;
+  final ValueNotifier<double> _scrollOffset = ValueNotifier<double>(0);
+  bool _isProfileExpanded = false;
+  final _preferencesKey = GlobalKey();
+  final _dataAiKey = GlobalKey();
+  final _supportKey = GlobalKey();
+
+  @override
+  void initState() {
+    super.initState();
+    _scrollController = ScrollController()
+      ..addListener(() {
+        _scrollOffset.value = _scrollController.offset;
+      });
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    _scrollOffset.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final activeColor = ref.watch(rotaryColorProvider);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    final authService = ref.watch(authServiceProvider);
+    final user = authService.currentUser;
+    final subscription = ref.watch(subscriptionServiceProvider);
+
+    return SafeArea(
+      bottom: false,
+      child: CustomScrollView(
+        controller: _scrollController,
+        physics: const BouncingScrollPhysics(),
+        slivers: [
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.only(top: 120, bottom: 40),
+              child: Center(
+                child: RepaintBoundary(
+                  child: ValueListenableBuilder<double>(
+                    valueListenable: _scrollOffset,
+                    builder: (context, offset, _) {
+                      return EtchedLiquidText(
+                        progress: (offset / 120).clamp(0.0, 1.0),
+                        activeColor: activeColor,
+                        text: l10n.settings,
+                        fontSize: 44,
+                      );
+                    },
+                  ),
+                ),
+              ),
+            ),
+          ),
+
+          SliverPadding(
+            padding: const EdgeInsets.symmetric(horizontal: AppSizes.paddingLarge),
+            sliver: SliverList(
+              delegate: SliverChildListDelegate([
+                const SizedBox(height: 20),
+                SettingsListItems.buildSectionTitle("Üyelik ve Hesap", activeColor),
+                const SizedBox(height: 12),
+                CustomCard(
+                  padding: EdgeInsets.zero,
+                  child: Column(
+                    children: [
+                      // Profile Header Row (Expandable for logged in user)
+                      () {
+                        if (user == null) {
+                          return ClickableAction(
+                            onTap: () async {
+                              final prefs = await SharedPreferences.getInstance();
+                              await prefs.setBool('Finarcast_is_guest_mode', false);
+                              ref.read(guestModeProvider.notifier).state = false;
+                            },
+                            child: Padding(
+                              padding: const EdgeInsets.all(16),
+                              child: Row(
+                                children: [
+                                  Container(
+                                    width: 44,
+                                    height: 44,
+                                    decoration: BoxDecoration(
+                                      color: activeColor.withValues(alpha: 0.1),
+                                      borderRadius: BorderRadius.circular(14),
+                                    ),
+                                    child: Icon(
+                                      Icons.account_circle_outlined,
+                                      size: 22,
+                                      color: activeColor,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 16),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          "Misafir Kullanıcı",
+                                          style: TextStyle(
+                                            color: AppColors.getTextPrimary(context),
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.w700,
+                                          ),
+                                        ),
+                                        const SizedBox(height: 2),
+                                        Text(
+                                          "Giriş yapmak veya kayıt olmak için dokunun",
+                                          style: TextStyle(
+                                            color: AppColors.getTextSecondary(context).withValues(alpha: 0.5),
+                                            fontSize: 12,
+                                            fontWeight: FontWeight.w600,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  Icon(
+                                    Icons.arrow_outward_rounded,
+                                    color: activeColor.withValues(alpha: 0.5),
+                                    size: 18,
+                                  ),
+                                ],
+                              ),
+                            ),
+                          );
+                        }
+
+                        // Logged In State
+                        final email = user.email ?? "";
+                        final metadata = user.userMetadata;
+                        final username = metadata?['username'] as String?;
+                        String displayNameVal = "";
+                        
+                        if (username != null && username.isNotEmpty) {
+                          displayNameVal = username[0].toUpperCase() + username.substring(1);
+                        } else if (email.isNotEmpty) {
+                          displayNameVal = email.split('@').first;
+                        } else {
+                          displayNameVal = "Kullanıcı";
+                        }
+
+                        return Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            // Profile Collapsible Header (Shows Username only)
+                            ClickableAction(
+                              onTap: () {
+                                HapticFeedback.selectionClick();
+                                setState(() {
+                                  _isProfileExpanded = !_isProfileExpanded;
+                                });
+                              },
+                              child: Padding(
+                                padding: const EdgeInsets.all(16),
+                                child: Row(
+                                  children: [
+                                    Container(
+                                      width: 44,
+                                      height: 44,
+                                      decoration: BoxDecoration(
+                                        color: activeColor.withValues(alpha: 0.1),
+                                        borderRadius: BorderRadius.circular(14),
+                                      ),
+                                      child: Icon(
+                                        Icons.account_circle_outlined,
+                                        size: 22,
+                                        color: activeColor,
+                                      ),
+                                    ),
+                                    const SizedBox(width: 16),
+                                    Expanded(
+                                      child: Row(
+                                        children: [
+                                          Text(
+                                            displayNameVal,
+                                            style: TextStyle(
+                                              fontSize: 16,
+                                              fontWeight: FontWeight.w700,
+                                              color: AppColors.getTextPrimary(context),
+                                            ),
+                                          ),
+                                          if (subscription.isPro) ...[
+                                            const SizedBox(width: 8),
+                                            Container(
+                                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                              decoration: BoxDecoration(
+                                                color: activeColor.withValues(alpha: 0.1),
+                                                borderRadius: BorderRadius.circular(10),
+                                                border: Border.all(
+                                                  color: activeColor.withValues(alpha: 0.15),
+                                                  width: 0.5,
+                                                ),
+                                              ),
+                                              child: Row(
+                                                mainAxisSize: MainAxisSize.min,
+                                                children: [
+                                                  Icon(
+                                                    Icons.stars_rounded,
+                                                    color: activeColor,
+                                                    size: 10,
+                                                  ),
+                                                  const SizedBox(width: 4),
+                                                  Text(
+                                                    "PREMIUM",
+                                                    style: TextStyle(
+                                                      color: activeColor,
+                                                      fontSize: 9,
+                                                      fontWeight: FontWeight.w900,
+                                                      letterSpacing: 0.5,
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                          ],
+                                        ],
+                                      ),
+                                    ),
+                                    AnimatedRotation(
+                                      turns: _isProfileExpanded ? 0.25 : 0.0,
+                                      duration: const Duration(milliseconds: 300),
+                                      curve: Curves.easeOutCubic,
+                                      child: Icon(
+                                        Icons.chevron_right_rounded,
+                                        color: AppColors.getTextSecondary(context).withValues(alpha: 0.3),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                            AnimatedSize(
+                              duration: const Duration(milliseconds: 300),
+                              curve: Curves.easeInOut,
+                              child: _isProfileExpanded
+                                  ? Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        SettingsListItems.buildDivider(isDark),
+                                        Padding(
+                                          padding: const EdgeInsets.fromLTRB(20, 16, 20, 16),
+                                          child: Column(
+                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                            children: [
+                                              // E-posta Detayı
+                                              Row(
+                                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                                children: [
+                                                  Text(
+                                                    "E-posta",
+                                                    style: TextStyle(
+                                                      fontSize: 14,
+                                                      fontWeight: FontWeight.w600,
+                                                      color: AppColors.getTextSecondary(context).withValues(alpha: 0.55),
+                                                    ),
+                                                  ),
+                                                  Text(
+                                                    email,
+                                                    style: TextStyle(
+                                                      fontSize: 14,
+                                                      fontWeight: FontWeight.w700,
+                                                      color: AppColors.getTextPrimary(context),
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                              const SizedBox(height: 18),
+                                              // Şifre Detayı (Tıklanabilir Şifre Sıfırlama)
+                                              ClickableAction(
+                                                onTap: () {
+                                                  _showPasswordResetDialog(context, email, authService, l10n);
+                                                },
+                                                borderRadius: BorderRadius.circular(8),
+                                                child: Padding(
+                                                  padding: const EdgeInsets.symmetric(vertical: 4),
+                                                  child: Row(
+                                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                                    children: [
+                                                      Text(
+                                                        "Şifre",
+                                                        style: TextStyle(
+                                                          fontSize: 14,
+                                                          fontWeight: FontWeight.w600,
+                                                          color: AppColors.getTextSecondary(context).withValues(alpha: 0.55),
+                                                        ),
+                                                      ),
+                                                      Row(
+                                                        mainAxisSize: MainAxisSize.min,
+                                                        children: [
+                                                          Text(
+                                                            "••••••••",
+                                                            style: TextStyle(
+                                                              fontSize: 14,
+                                                              fontWeight: FontWeight.w700,
+                                                              color: AppColors.getTextPrimary(context),
+                                                              letterSpacing: 1.5,
+                                                            ),
+                                                          ),
+                                                          const SizedBox(width: 8),
+                                                          Icon(
+                                                            Icons.arrow_outward_rounded,
+                                                            color: activeColor.withValues(alpha: 0.6),
+                                                            size: 14,
+                                                          ),
+                                                        ],
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ],
+                                    )
+                                  : const SizedBox.shrink(),
+                            ),
+                          ],
+                        );
+                      }(),
+
+                      SettingsListItems.buildDivider(isDark),
+                      const SubscriptionSetting(),
+                    ],
+                  ),
+                ),
+
+                const SizedBox(height: 50),
+                SettingsListItems.buildSectionTitle("Görünüm ve Stil", activeColor),
+                const SizedBox(height: 12),
+                CustomCard(
+                  padding: EdgeInsets.zero,
+                  child: Column(
+                    children: [
+                      const ThemeSetting(),
+                      SettingsListItems.buildDivider(isDark),
+                      const ColorThemeSetting(),
+                      SettingsListItems.buildDivider(isDark),
+                      const BackgroundSetting(),
+                    ],
+                  ),
+                ),
+
+                const SizedBox(height: 50),
+                SettingsListItems.buildSectionTitle(l10n.preferences, activeColor, key: _preferencesKey),
+                const SizedBox(height: 12),
+                CustomCard(
+                  padding: EdgeInsets.zero,
+                  child: Column(
+                    children: [
+                      const LanguageSetting(),
+                      SettingsListItems.buildDivider(isDark),
+                      const CurrencySetting(),
+                      SettingsListItems.buildDivider(isDark),
+                      const ExchangeRateSetting(),
+                      SettingsListItems.buildDivider(isDark),
+                      const NotificationSetting(),
+                    ],
+                  ),
+                ),
+
+                const SizedBox(height: 50),
+                SettingsListItems.buildSectionTitle("Veri ve Bulut", activeColor, key: _dataAiKey),
+                const SizedBox(height: 12),
+                CustomCard(
+                  padding: EdgeInsets.zero,
+                  child: Column(
+                    children: [
+                      const SyncSetting(),
+                      SettingsListItems.buildDivider(isDark),
+                      SettingsListItems.buildSetting(
+                        icon: Icons.cloud_upload_outlined,
+                        title: l10n.driveBackup,
+                        onTap: () => _showComingSoon(l10n.driveBackup, l10n),
+                        activeColor: SettingsListItems.getSettingColor(context, SettingType.backup, activeColor),
+                        context: context,
+                        isAction: true,
+                      ),
+                      SettingsListItems.buildDivider(isDark),
+                      SettingsListItems.buildSetting(
+                        icon: Icons.table_view_rounded,
+                        title: l10n.exportExcel,
+                        onTap: () => _showComingSoon(l10n.exportExcel, l10n),
+                        activeColor: SettingsListItems.getSettingColor(context, SettingType.export, activeColor),
+                        context: context,
+                        isAction: true,
+                      ),
+                      SettingsListItems.buildDivider(isDark),
+                      const RetentionSetting(),
+                      SettingsListItems.buildDivider(isDark),
+                      const PurgeSetting(),
+                      SettingsListItems.buildDivider(isDark),
+                      const ResetSetting(),
+                    ],
+                  ),
+                ),
+
+                const SizedBox(height: 50),
+                SettingsListItems.buildSectionTitle(l10n.support, activeColor, key: _supportKey),
+                const SizedBox(height: 12),
+                CustomCard(
+                  padding: EdgeInsets.zero,
+                  child: Column(
+                    children: [
+                      SettingsListItems.buildSetting(
+                        icon: Icons.support_agent_rounded,
+                        title: l10n.contact,
+                        onTap: _launchEmail,
+                        activeColor: SettingsListItems.getSettingColor(context, SettingType.contact, activeColor),
+                        context: context,
+                        isAction: true,
+                      ),
+                      SettingsListItems.buildDivider(isDark),
+                      SettingsListItems.buildSetting(
+                        icon: Icons.info_outline_rounded,
+                        title: l10n.about,
+                        trailing: "v1.0.0",
+                        onTap: () => _showAboutDialog(l10n),
+                        activeColor: SettingsListItems.getSettingColor(context, SettingType.about, activeColor),
+                        context: context,
+                      ),
+                    ],
+                  ),
+                ),
+
+                if (user != null) ...[
+                  const SizedBox(height: 50),
+                  SettingsListItems.buildSectionTitle("Oturum ve Güvenlik", activeColor),
+                  const SizedBox(height: 12),
+                  CustomCard(
+                    padding: EdgeInsets.zero,
+                    child: Column(
+                      children: [
+                        // Oturumu Kapat Row
+                        ClickableAction(
+                          onTap: () {
+                            showCustomDialog(
+                              context: context,
+                              accentColor: Colors.redAccent,
+                              title: "Çıkış Yap",
+                              content: "Oturumu kapatmak istediğinize emin misiniz?",
+                              actions: [
+                                                PrecisionDialogAction(
+                                  label: l10n.cancel,
+                                  onTap: () => Navigator.pop(context),
+                                  isPrimary: false,
+                                ),
+                                PrecisionDialogAction(
+                                  label: "Çıkış Yap",
+                                  onTap: () async {
+                                    Navigator.pop(context);
+                                    try {
+                                      await ref.read(subscriptionServiceProvider).logOut();
+                                      await ref.read(authServiceProvider).signOut();
+                                      
+                                      final prefs = await SharedPreferences.getInstance();
+                                      await prefs.setBool('Finarcast_is_guest_mode', false);
+                                      ref.read(guestModeProvider.notifier).state = false;
+                                      
+                                      await DatabaseService.clearAllData();
+                                      ref.invalidate(transactionsStreamProvider);
+                                      ref.invalidate(vaultsStreamProvider);
+                                      ref.invalidate(settingsProvider);
+                                      ref.invalidate(subscriptionServiceProvider);
+                                    } catch (e) {
+                                      if (context.mounted) {
+                                        CustomNotification.error(context, 'Hata oluştu: ${e.toString()}');
+                                      }
+                                    }
+                                  },
+                                  isPrimary: true,
+                                ),
+                              ],
+                            );
+                          },
+                          child: Padding(
+                            padding: const EdgeInsets.all(16),
+                            child: Row(
+                              children: [
+                                Container(
+                                  width: 44,
+                                  height: 44,
+                                  decoration: BoxDecoration(
+                                    color: Colors.redAccent.withValues(alpha: 0.1),
+                                    borderRadius: BorderRadius.circular(14),
+                                  ),
+                                  child: const Icon(
+                                    Icons.logout_rounded,
+                                    size: 22,
+                                    color: Colors.redAccent,
+                                  ),
+                                ),
+                                const SizedBox(width: 16),
+                                const Expanded(
+                                  child: Text(
+                                    "Oturumu Kapat",
+                                    style: TextStyle(
+                                      color: Colors.redAccent,
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w700,
+                                    ),
+                                  ),
+                                ),
+                                Icon(
+                                  Icons.arrow_outward_rounded,
+                                  color: Colors.redAccent.withValues(alpha: 0.5),
+                                  size: 18,
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                        SettingsListItems.buildDivider(isDark),
+                        // Hesabımı Kalıcı Olarak Sil Row
+                        ClickableAction(
+                          onTap: () {
+                            showCustomDialog(
+                              context: context,
+                              accentColor: Colors.redAccent,
+                              title: "Hesabımı Sil",
+                              content: "Hesabınızı ve buluttaki tüm verilerinizi kalıcı olarak silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.",
+                              actions: [
+                                PrecisionDialogAction(
+                                  label: l10n.cancel,
+                                  onTap: () => Navigator.pop(context),
+                                  isPrimary: false,
+                                ),
+                                PrecisionDialogAction(
+                                  label: "Hesabımı Sil",
+                                  onTap: () async {
+                                    Navigator.pop(context);
+                                    try {
+                                      await ref.read(subscriptionServiceProvider).logOut();
+                                      await ref.read(authServiceProvider).deleteAccount();
+                                      
+                                      final prefs = await SharedPreferences.getInstance();
+                                      await prefs.setBool('Finarcast_is_guest_mode', false);
+                                      ref.read(guestModeProvider.notifier).state = false;
+                                      
+                                      await DatabaseService.clearAllData();
+                                      ref.invalidate(transactionsStreamProvider);
+                                      ref.invalidate(vaultsStreamProvider);
+                                      ref.invalidate(settingsProvider);
+                                      ref.invalidate(subscriptionServiceProvider);
+                                      if (context.mounted) {
+                                        CustomNotification.success(context, 'Hesabınız ve tüm verileriniz başarıyla silindi.');
+                                      }
+                                    } catch (e) {
+                                      if (context.mounted) {
+                                        CustomNotification.error(context, 'Hata oluştu: ${e.toString()}');
+                                      }
+                                    }
+                                  },
+                                  isPrimary: true,
+                                ),
+                              ],
+                            );
+                          },
+                          child: Padding(
+                            padding: const EdgeInsets.all(16),
+                            child: Row(
+                              children: [
+                                Container(
+                                  width: 44,
+                                  height: 44,
+                                  decoration: BoxDecoration(
+                                    color: Colors.redAccent.withValues(alpha: 0.1),
+                                    borderRadius: BorderRadius.circular(14),
+                                  ),
+                                  child: const Icon(
+                                    Icons.delete_forever_rounded,
+                                    size: 22,
+                                    color: Colors.redAccent,
+                                  ),
+                                ),
+                                const SizedBox(width: 16),
+                                const Expanded(
+                                  child: Text(
+                                    "Hesabımı Kalıcı Olarak Sil",
+                                    style: TextStyle(
+                                      color: Colors.redAccent,
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w700,
+                                    ),
+                                  ),
+                                ),
+                                Icon(
+                                  Icons.arrow_outward_rounded,
+                                  color: Colors.redAccent.withValues(alpha: 0.5),
+                                  size: 18,
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+
+                const SizedBox(height: 120),
+              ]),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showPasswordResetDialog(
+    BuildContext context,
+    String email,
+    AuthService authService,
+    AppLocalizations l10n,
+  ) {
+    final oldPasswordController = TextEditingController();
+    final passwordController = TextEditingController();
+    final confirmPasswordController = TextEditingController();
+    bool obscureOldPassword = true;
+    bool obscurePassword = true;
+    bool obscureConfirmPassword = true;
+    String? oldPasswordError;
+    String? passwordError;
+    String? confirmPasswordError;
+    bool isLoading = false;
+
+    CustomBottomSheet.show(
+      context: context,
+      title: "Şifre Değiştir",
+      child: StatefulBuilder(
+        builder: (context, setSheetState) {
+          return Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              const SizedBox(height: 16),
+              Text(
+                "Mevcut şifrenizi doğrulayarak yeni bir şifre belirleyin. Şifreniz en az 6 karakter olmalıdır.",
+                style: TextStyle(
+                  color: AppColors.getTextSecondary(context).withValues(alpha: 0.7),
+                  fontSize: 14,
+                  height: 1.5,
+                ),
+              ),
+              const SizedBox(height: 24),
+
+              // Eski Şifre
+              CustomTextField(
+                controller: oldPasswordController,
+                hintText: "Mevcut Şifre",
+                icon: Icons.lock_open_rounded,
+                obscureText: obscureOldPassword,
+                errorText: oldPasswordError,
+                suffix: IconButton(
+                  padding: EdgeInsets.zero,
+                  constraints: const BoxConstraints(),
+                  icon: Icon(
+                    obscureOldPassword ? Icons.visibility_off_rounded : Icons.visibility_rounded,
+                    color: AppColors.getPrimary(context).withValues(alpha: 0.5),
+                    size: 20,
+                  ),
+                  onPressed: () {
+                    setSheetState(() => obscureOldPassword = !obscureOldPassword);
+                  },
+                ),
+              ),
+              const SizedBox(height: 16),
+              
+              // Yeni Şifre
+              CustomTextField(
+                controller: passwordController,
+                hintText: "Yeni Şifre",
+                icon: Icons.lock_rounded,
+                obscureText: obscurePassword,
+                errorText: passwordError,
+                suffix: IconButton(
+                  padding: EdgeInsets.zero,
+                  constraints: const BoxConstraints(),
+                  icon: Icon(
+                    obscurePassword ? Icons.visibility_off_rounded : Icons.visibility_rounded,
+                    color: AppColors.getPrimary(context).withValues(alpha: 0.5),
+                    size: 20,
+                  ),
+                  onPressed: () {
+                    setSheetState(() => obscurePassword = !obscurePassword);
+                  },
+                ),
+              ),
+              const SizedBox(height: 16),
+              
+              // Yeni Şifre Tekrar
+              CustomTextField(
+                controller: confirmPasswordController,
+                hintText: "Yeni Şifre Tekrar",
+                icon: Icons.security_rounded,
+                obscureText: obscureConfirmPassword,
+                errorText: confirmPasswordError,
+                suffix: IconButton(
+                  padding: EdgeInsets.zero,
+                  constraints: const BoxConstraints(),
+                  icon: Icon(
+                    obscureConfirmPassword ? Icons.visibility_off_rounded : Icons.visibility_rounded,
+                    color: AppColors.getPrimary(context).withValues(alpha: 0.5),
+                    size: 20,
+                  ),
+                  onPressed: () {
+                    setSheetState(() => obscureConfirmPassword = !obscureConfirmPassword);
+                  },
+                ),
+              ),
+              const SizedBox(height: 32),
+              
+              // Güncelle Butonu
+              CustomButton(
+                label: "Şifreyi Güncelle",
+                isLoading: isLoading,
+                onTap: () async {
+                  final oldPassword = oldPasswordController.text;
+                  final password = passwordController.text;
+                  final confirmPassword = confirmPasswordController.text;
+                  
+                  // Reset Errors
+                  setSheetState(() {
+                    oldPasswordError = null;
+                    passwordError = null;
+                    confirmPasswordError = null;
+                  });
+
+                  bool isValid = true;
+                  if (oldPassword.isEmpty) {
+                    setSheetState(() => oldPasswordError = "Mevcut şifrenizi girmeniz gerekir.");
+                    isValid = false;
+                  }
+                  
+                  if (password.isEmpty) {
+                    setSheetState(() => passwordError = "Şifre alanı boş bırakılamaz.");
+                    isValid = false;
+                  } else if (password.length < 6) {
+                    setSheetState(() => passwordError = "Şifre en az 6 karakter olmalıdır.");
+                    isValid = false;
+                  } else if (password == oldPassword) {
+                    setSheetState(() => passwordError = "Yeni şifreniz mevcut şifrenizden farklı olmalıdır.");
+                    isValid = false;
+                  }
+                  
+                  if (confirmPassword.isEmpty) {
+                    setSheetState(() => confirmPasswordError = "Şifre tekrarı boş bırakılamaz.");
+                    isValid = false;
+                  } else if (password != confirmPassword) {
+                    setSheetState(() => confirmPasswordError = "Şifreler eşleşmiyor.");
+                    isValid = false;
+                  }
+
+                  if (!isValid) return;
+
+                  setSheetState(() => isLoading = true);
+
+                  // 1) Mevcut şifreyi doğrulamak için sisteme tekrar giriş yapmayı dene
+                  try {
+                    await authService.signIn(email: email, password: oldPassword);
+                  } catch (e) {
+                    String oldPassErrorMsg = "Mevcut şifreniz hatalı.";
+                    if (e is AuthException) {
+                      final message = e.message.toLowerCase();
+                      if (e.code == 'rate_limit_exceeded' || message.contains('rate limit') || message.contains('too many requests')) {
+                        oldPassErrorMsg = "Çok fazla deneme yaptınız. Lütfen daha sonra tekrar deneyin.";
+                      }
+                    }
+                    setSheetState(() {
+                      isLoading = false;
+                      oldPasswordError = oldPassErrorMsg;
+                    });
+                    return;
+                  }
+
+                  // 2) Şifreyi güncelle
+                  try {
+                    await authService.updatePassword(password);
+                    if (context.mounted) {
+                      Navigator.pop(context); // Close bottom sheet
+                      CustomNotification.success(
+                        context,
+                        'Şifreniz başarıyla güncellendi.',
+                      );
+                    }
+                  } catch (e) {
+                    String updateErrorMsg = "Şifre güncellenemedi.";
+                    if (e is AuthException) {
+                      final message = e.message.toLowerCase();
+                      if (e.code == 'same_password' || message.contains('different from the old password') || message.contains('should be different')) {
+                        updateErrorMsg = "Yeni şifreniz mevcut şifrenizden farklı olmalıdır.";
+                      } else if (e.code == 'weak_password') {
+                        updateErrorMsg = "Yeni şifre çok zayıf.";
+                      } else {
+                        updateErrorMsg = e.message;
+                      }
+                    } else {
+                      updateErrorMsg = e.toString();
+                    }
+                    setSheetState(() {
+                      isLoading = false;
+                      passwordError = updateErrorMsg;
+                    });
+                  }
+                },
+              ),
+              const SizedBox(height: 24),
+            ],
+          );
+        },
+      ),
+    );
+  }
+
+  void _showAboutDialog(AppLocalizations l10n) {
+    CustomBottomSheet.show(
+      context: context,
+      title: 'Finarcast',
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const SizedBox(height: 24),
+          Text(
+            l10n.aboutFinarcast,
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              color: AppColors.getTextPrimary(context),
+              height: 1.6,
+              fontSize: 16,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+          const SizedBox(height: 32),
+          Text(
+            "v1.0.0 • Made with ❤️",
+            style: TextStyle(
+              color: AppColors.getTextSecondary(context).withValues(alpha: 0.5),
+              fontSize: 12,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 16),
+        ],
+      ),
+    );
+  }
+
+  void _showComingSoon(String feature, AppLocalizations l10n) {
+    showCustomDialog(
+      context: context,
+      title: l10n.comingSoon,
+      content: "$feature özelliği çok yakında sizlerle olacak.",
+      actions: [
+        PrecisionDialogAction(
+          label: l10n.ok,
+          onTap: () => Navigator.pop(context),
+        ),
+      ],
+    );
+  }
+
+  Future<void> _launchEmail() async {
+    final Uri emailLaunchUri = Uri(
+      scheme: 'mailto',
+      path: 'finarcast.support@gmail.com',
+      queryParameters: {
+        'subject': 'Finarcast Feedback',
+      },
+    );
+    if (await canLaunchUrl(emailLaunchUri)) {
+      await launchUrl(emailLaunchUri);
+    }
+  }
+}

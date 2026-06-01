@@ -64,7 +64,9 @@ class _VaultCardStackState extends ConsumerState<VaultCardStack> {
               duration: const Duration(milliseconds: 150), // Daha hızlı kilitlenme
               curve: Curves.easeOutQuart
             );
-            Future.microtask(() => widget.onVaultSelect(widget.deckItems[targetPage]));
+            if (targetPage >= 0 && targetPage < widget.deckItems.length) {
+              Future.microtask(() => widget.onVaultSelect(widget.deckItems[targetPage]));
+            }
           }
         }
       }
@@ -96,7 +98,9 @@ class _VaultCardStackState extends ConsumerState<VaultCardStack> {
           if (_lastTargetIndex != page) {
             _lastTargetIndex = page;
             HapticFeedback.selectionClick();
-            widget.onVaultSelect(widget.deckItems[page]);
+            if (page >= 0 && page < widget.deckItems.length) {
+              widget.onVaultSelect(widget.deckItems[page]);
+            }
           }
         }
         return true;
@@ -133,7 +137,19 @@ class _VaultCardStackState extends ConsumerState<VaultCardStack> {
 
           // 2. Toplam Bakiye (Geçmişten Bugüne Tüm Hareketler)
           // Bu Dashboard ile tutarlı olmalı. (Artık gerçekleşen tekrarlarla çarpılarak tam doğru bakiye veriliyor)
-          final balance = txs.fold<double>(0, (sum, t) {
+          final double initialBalanceVal;
+          if (vaultId == null) {
+            double sumVaults = 0;
+            for (final v in allVaults) {
+              final vCurrency = v.currency == 'AUTO' ? globalCurrency : v.currency;
+              sumVaults += CurrencyUtils.convert(v.balance, vCurrency, globalCurrency, rates);
+            }
+            initialBalanceVal = sumVaults;
+          } else {
+            initialBalanceVal = vault?.balance ?? 0.0;
+          }
+
+          final balance = txs.fold<double>(initialBalanceVal, (sum, t) {
             final amt = t.getConvertedAmount(targetCurrency, rates) * t.passedOccurrences;
             return t.isIncome ? sum + amt : sum - amt;
           });
@@ -181,7 +197,7 @@ class _VaultCardStackState extends ConsumerState<VaultCardStack> {
                             txs: txs,
                             activeColor: widget.activeColor,
                             l10n: widget.l10n,
-                            vaultName: index == 0 ? widget.l10n.mainVault : widget.groups[index - 1].name,
+                            vaultName: widget.groups[index].name,
                             currencySymbol: currencySymbol,
                             convertedBalance: convertedBalance,
                             convertedSymbol: globalCurrency,

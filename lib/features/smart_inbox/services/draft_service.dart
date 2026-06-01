@@ -165,6 +165,10 @@ class DraftService {
         finalNote = draft.note;
       }
 
+      // Varsayılan kasayı veritabanından al (Eğer belirtilmemişse)
+      final vaults = await DatabaseService.getAllVaults();
+      final finalVaultId = vaultId ?? vaults.firstOrNull?.id;
+
       // Gerçek işlem modelini oluştur
       final tx = TransactionRecord()
         ..title = categoryName
@@ -174,7 +178,7 @@ class DraftService {
         ..categoryId = draft.categoryId
         ..date = draft.date
         ..isIncome = draft.isIncome
-        ..vaultIds = vaultId != null ? [vaultId] : [] // null = Ana Kasa (boş vaultIds)
+        ..vaultIds = finalVaultId != null ? [finalVaultId] : []
         ..currency = draft.currency ?? currency
         ..note = finalNote
         ..isNotificationEnabled = draft.isNotificationEnabled

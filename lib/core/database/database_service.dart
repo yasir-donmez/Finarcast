@@ -9,6 +9,7 @@ import 'models/exchange_rate.dart';
 import 'models/custom_category.dart';
 import '../services/notification_service.dart';
 import '../services/sync_coordinator.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 /// Isar Veritabanı Servisi — Singleton
 class DatabaseService {
@@ -46,6 +47,9 @@ class DatabaseService {
 
       // Eski periodType değerlerini yeni düzenli yapıya göç ettir
       await _migratePeriodTypes();
+
+      // Yetim işlemleri temizle (hiçbir kasaya bağlı olmayanları sil)
+      await _cleanupOrphanTransactions();
     } catch (e, stack) {
       debugPrint('❌ [DatabaseService ERROR] Başlatma hatası: $e');
       debugPrint('📜 [DatabaseService ERROR] Stack Trace:\n$stack');
@@ -53,10 +57,57 @@ class DatabaseService {
     }
   }
 
-  /// İlk kullanımda varsayılan kasaları oluştur (Artık boş, kullanıcı grup oluşturunca eklenecek)
+  /// İlk kullanımda varsayılan kasaları oluştur
   static Future<void> _seedDefaultVaults() async {
-    // mock verileri sildik
+    final prefs = await SharedPreferences.getInstance();
+    final isSeeded = prefs.getBool('is_default_vault_seeded') ?? false;
+    if (isSeeded) return;
+
+    final count = await isar.vaults.count();
+    if (count == 0) {
+      final defaultSettings = createDefaultSettings();
+      
+      String vaultName = 'Wallet';
+      final lang = defaultSettings.languageCode;
+      if (lang == 'tr') {
+        vaultName = 'Cüzdan';
+      } else if (lang == 'de') {
+        vaultName = 'Brieftasche';
+      } else if (lang == 'fr') {
+        vaultName = 'Portefeuille';
+      } else if (lang == 'es') {
+        vaultName = 'Cartera';
+      } else if (lang == 'it') {
+        vaultName = 'Portafoglio';
+      } else if (lang == 'pt') {
+        vaultName = 'Carteira';
+      } else if (lang == 'zh') {
+        vaultName = '钱包';
+      } else if (lang == 'ja') {
+        vaultName = 'ウォレット';
+      } else if (lang == 'ko') {
+        vaultName = '지갑';
+      }
+
+      final defaultVault = Vault()
+        ..name = vaultName
+        ..currency = defaultSettings.currencySymbol
+        ..balance = 0.0
+        ..iconCode = 'account_balance_wallet_rounded'
+        ..isIncludedInTotal = true
+        ..showOnDashboard = true
+        ..syncStatus = 1;
+      await isar.writeTxn(() async {
+        await isar.vaults.put(defaultVault);
+      });
+      await prefs.setBool('is_default_vault_seeded', true);
+    } else {
+      await prefs.setBool('is_default_vault_seeded', true);
+    }
   }
+
+
+
 
   // =====================
   // TRANSACTION CRUD
@@ -256,20 +307,59 @@ class DatabaseService {
     if (vault == null) return;
 
     final settings = await getSettings();
-    final shouldTombstone =
-        settings.isSyncEnabled && vault.remoteId != null;
+    final isSyncEnabled = settings.isSyncEnabled;
 
-    if (shouldTombstone) {
-      vault.syncStatus = 2;
-      vault.updatedAt = DateTime.now();
-      await isar.writeTxn(() async {
-        await isar.vaults.put(vault);
-      });
-    } else {
-      await isar.writeTxn(() async {
-        await isar.vaults.delete(id);
-      });
+    // Fetch all active transactions associated with this vault
+    final transactions = await isar.transactionRecords
+        .filter()
+        .syncStatusLessThan(2)
+        .findAll();
+
+    final txsToDelete = <int>[];
+    final txsToTombstone = <TransactionRecord>[];
+
+    for (final tx in transactions) {
+      if (tx.vaultIds.contains(id)) {
+        final shouldTombstoneTx = isSyncEnabled && tx.remoteId != null;
+        if (shouldTombstoneTx) {
+          tx.syncStatus = 2;
+          tx.updatedAt = DateTime.now();
+          txsToTombstone.add(tx);
+        } else {
+          txsToDelete.add(tx.id);
+        }
+      }
     }
+
+    final shouldTombstoneVault = isSyncEnabled && vault.remoteId != null;
+
+    await isar.writeTxn(() async {
+      // Put/Delete transactions
+      if (txsToTombstone.isNotEmpty) {
+        await isar.transactionRecords.putAll(txsToTombstone);
+      }
+      if (txsToDelete.isNotEmpty) {
+        await isar.transactionRecords.deleteAll(txsToDelete);
+      }
+
+      // Put/Delete vault
+      if (shouldTombstoneVault) {
+        vault.syncStatus = 2;
+        vault.updatedAt = DateTime.now();
+        await isar.vaults.put(vault);
+      } else {
+        await isar.vaults.delete(id);
+      }
+    });
+
+    // Cancel notifications for deleted transactions
+    for (final tx in txsToTombstone) {
+      await NotificationService().cancelNotification(tx.id);
+    }
+    for (final txId in txsToDelete) {
+      await NotificationService().cancelNotification(txId);
+    }
+
     SyncCoordinator.scheduleSync();
   }
 
@@ -287,12 +377,83 @@ class DatabaseService {
   // APP SETTINGS
   // =====================
 
-  /// Ayarları getir (her zaman bir kayıt döner, yoksa varsayılanla oluşturur)
+  /// Cihazın dil ve bölge ayarlarına göre dinamik varsayılan ayar nesnesi üretir
+  static AppSettings createDefaultSettings() {
+    final locale = PlatformDispatcher.instance.locale;
+    final lang = locale.languageCode.toLowerCase();
+    final country = locale.countryCode?.toUpperCase();
+
+    String defaultLang = 'en';
+    String defaultCurrency = r'$';
+
+    if (lang == 'tr') {
+      defaultLang = 'tr';
+      defaultCurrency = '₺';
+    } else if (lang == 'de') {
+      defaultLang = 'de';
+      defaultCurrency = '€';
+    } else if (lang == 'fr') {
+      defaultLang = 'fr';
+      defaultCurrency = '€';
+    } else if (lang == 'it') {
+      defaultLang = 'it';
+      defaultCurrency = '€';
+    } else if (lang == 'es') {
+      defaultLang = 'es';
+      defaultCurrency = '€';
+    } else if (lang == 'pt') {
+      defaultLang = 'pt';
+      if (country == 'BR') {
+        defaultCurrency = r'R$';
+      } else {
+        defaultCurrency = '€';
+      }
+    } else if (lang == 'ja') {
+      defaultLang = 'ja';
+      defaultCurrency = '¥';
+    } else if (lang == 'zh') {
+      defaultLang = 'zh';
+      defaultCurrency = '元';
+    } else if (lang == 'ko') {
+      defaultLang = 'ko';
+      defaultCurrency = '₩';
+    } else {
+      // Dil İngilizce veya bilinmeyen ise ülke koduna göre ikincil kontrol
+      if (country == 'TR') {
+        defaultLang = 'tr';
+        defaultCurrency = '₺';
+      } else if (country == 'GB') {
+        defaultCurrency = '£';
+      } else if (country == 'DE' || country == 'FR' || country == 'IT' || country == 'ES' || country == 'NL' || country == 'BE' || country == 'AT') {
+        defaultCurrency = '€';
+      } else if (country == 'CH') {
+        defaultCurrency = 'Fr';
+      } else if (country == 'JP') {
+        defaultCurrency = '¥';
+      } else if (country == 'KR') {
+        defaultCurrency = '₩';
+      } else if (country == 'CN') {
+        defaultCurrency = '元';
+      } else if (country == 'BR') {
+        defaultCurrency = r'R$';
+      } else if (country == 'SA') {
+        defaultCurrency = 'SR';
+      } else if (country == 'KW') {
+        defaultCurrency = 'KD';
+      }
+    }
+
+    return AppSettings()
+      ..languageCode = defaultLang
+      ..currencySymbol = defaultCurrency
+      ..countryName = country;
+  }
+
   static Future<AppSettings> getSettings() async {
     final existing = await isar.appSettings.get(1);
     if (existing != null) return existing;
-    // İlk kullanım: varsayılan ayarları oluştur ve kaydet
-    final defaults = AppSettings();
+
+    final defaults = createDefaultSettings()..id = 1;
     await isar.writeTxn(() async => await isar.appSettings.put(defaults));
     return defaults;
   }
@@ -401,6 +562,47 @@ class DatabaseService {
       await isar.exchangeRates.clear();
       await isar.customCategorys.clear();
     });
+
+    // Sıfırlama sonrası SharedPreferences'taki kullanıcıya özel/geçici verileri de temizle
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove('is_default_vault_seeded');
+    await prefs.remove('ai_transaction_drafts');
+    await prefs.remove('last_sync_time');
+    await prefs.remove('last_checked_notifications_time');
+    await prefs.remove('Finarcast_last_ai_usage_timestamp');
+    await prefs.setBool('Finarcast_is_pro_user', false);
+
+    // Bugün veya geçmiş günlerdeki AI kullanım limit sayaçlarını temizle
+    final keys = prefs.getKeys();
+    for (final key in keys) {
+      if (key.startsWith('Finarcast_ai_usage_')) {
+        await prefs.remove(key);
+      }
+    }
+
+    // Varsayılan kasayı hemen yeniden oluştur
+    await _seedDefaultVaults();
+  }
+
+  /// Yetim işlemleri sil (hiçbir kasaya ait olmayanları veritabanından temizle)
+  static Future<void> _cleanupOrphanTransactions() async {
+    try {
+      final transactions = await isar.transactionRecords.where().findAll();
+      final orphanIds = <int>[];
+      for (final tx in transactions) {
+        if (tx.vaultIds.isEmpty) {
+          orphanIds.add(tx.id);
+        }
+      }
+      if (orphanIds.isNotEmpty) {
+        debugPrint('🧹 [DatabaseService] Yetim kalan ${orphanIds.length} işlem tespit edildi ve siliniyor...');
+        for (final id in orphanIds) {
+          await deleteTransaction(id);
+        }
+      }
+    } catch (e) {
+      debugPrint('⚠️ [DatabaseService] Yetim temizliği sırasında hata (yutuldu): $e');
+    }
   }
 
   /// Veritabanı dosyalarını diskten tamamen sil (bozulma durumunda kurtarma için)

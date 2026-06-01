@@ -10,9 +10,9 @@ import '../../../../core/database/models/transaction_record.dart';
 import '../../../../shared/widgets/custom_card.dart';
 import '../../../../shared/widgets/custom_button.dart';
 import '../../../../shared/widgets/custom_icon_button.dart';
-import '../../../../shared/widgets/custom_dialog.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../../shared/widgets/custom_switch.dart';
+import '../../../../shared/widgets/clickable_action.dart';
 import '../../../../shared/widgets/custom_animated_icon.dart';
 import '../vaults_providers.dart';
 
@@ -20,16 +20,12 @@ class DetailSheet extends ConsumerStatefulWidget {
   final TransactionUI transaction;
   final VoidCallback onEdit;
   final VoidCallback onDelete;
-  final VoidCallback? onRemoveFromVault;
-  final bool isInVault;
 
   const DetailSheet({
     super.key,
     required this.transaction,
     required this.onEdit,
     required this.onDelete,
-    this.onRemoveFromVault,
-    required this.isInVault,
   });
 
   @override
@@ -37,6 +33,7 @@ class DetailSheet extends ConsumerStatefulWidget {
 }
 
 class _PrecisionDetailSheetState extends ConsumerState<DetailSheet> {
+  List<Vault> _allVaults = [];
   List<Vault> _attachedVaults = [];
   TransactionRecord? _fullRecord;
   late bool _isNotificationEnabled;
@@ -58,15 +55,55 @@ class _PrecisionDetailSheetState extends ConsumerState<DetailSheet> {
 
   Future<void> _loadData() async {
     final allVaults = await DatabaseService.getAllVaults();
-    final ids = widget.transaction.groupIds.map((id) => int.tryParse(id.replaceFirst('v_', ''))).whereType<int>().toList();
     if (widget.transaction.dbId != null) {
       _fullRecord = await DatabaseService.getTransaction(widget.transaction.dbId!);
     }
+    final dbVaultIds = _fullRecord?.vaultIds;
+    final ids = (dbVaultIds != null && dbVaultIds.isNotEmpty)
+        ? dbVaultIds
+        : widget.transaction.groupIds.map((id) => int.tryParse(id.replaceFirst('v_', ''))).whereType<int>().toList();
+    
+    debugPrint('🔎 [DetailSheet] dbId: ${widget.transaction.dbId}');
+    debugPrint('🔎 [DetailSheet] widget groupIds: ${widget.transaction.groupIds}');
+    debugPrint('🔎 [DetailSheet] db record vaultIds: ${_fullRecord?.vaultIds}');
+    debugPrint('🔎 [DetailSheet] computed ids: $ids');
+    debugPrint('🔎 [DetailSheet] allVaults IDs: ${allVaults.map((v) => v.id).toList()}');
+    
     if (mounted) {
       setState(() {
+        _allVaults = allVaults;
         _attachedVaults = allVaults.where((v) => ids.contains(v.id)).toList();
+        debugPrint('🔎 [DetailSheet] attachedVaults IDs: ${_attachedVaults.map((v) => v.id).toList()}');
       });
     }
+  }
+
+  Future<void> _toggleVault(Vault vault) async {
+    if (widget.transaction.dbId == null) return;
+    
+    final record = await DatabaseService.getTransaction(widget.transaction.dbId!);
+    if (record == null) return;
+
+    final currentVaults = List<int>.from(record.vaultIds);
+    bool isCurrentlyAttached = currentVaults.contains(vault.id);
+
+    if (isCurrentlyAttached) {
+      if (currentVaults.length <= 1) {
+        // Arayüzden kasanın çıkarılmasını engelle, en az bir tane kalmalıdır.
+        HapticFeedback.vibrate();
+        return;
+      }
+      currentVaults.remove(vault.id);
+    } else {
+      currentVaults.add(vault.id);
+    }
+    
+    record.vaultIds = currentVaults;
+    record.updatedAt = DateTime.now();
+    await DatabaseService.updateTransaction(record);
+    
+    HapticFeedback.mediumImpact();
+    await _loadData();
   }
 
   Future<void> _toggleNotification(bool value) async {
@@ -166,17 +203,19 @@ class _PrecisionDetailSheetState extends ConsumerState<DetailSheet> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     _buildRangeValue(l10n.minimum, tx.minAmount!, tx.currency, sf, isDark),
-                    Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 16 * sf),
-                      child: FittedBox(
-                        fit: BoxFit.scaleDown,
-                        child: Text(
-                          '${tx.currency ?? "₺"}${_formatFull(tx.effectiveAmount, context)}',
-                          style: TextStyle(
-                            fontSize: 40 * sf,
-                            fontWeight: FontWeight.w900,
-                            color: tx.isIncome ? AppColors.getIncome(context) : AppColors.getExpense(context),
-                            letterSpacing: -1.5,
+                    Flexible(
+                      child: Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 16 * sf),
+                        child: FittedBox(
+                          fit: BoxFit.scaleDown,
+                          child: Text(
+                            '${tx.currency ?? "₺"}${_formatFull(tx.effectiveAmount, context)}',
+                            style: TextStyle(
+                              fontSize: 40 * sf,
+                              fontWeight: FontWeight.w900,
+                              color: tx.isIncome ? AppColors.getIncome(context) : AppColors.getExpense(context),
+                              letterSpacing: -1.5,
+                            ),
                           ),
                         ),
                       ),
@@ -301,65 +340,106 @@ class _PrecisionDetailSheetState extends ConsumerState<DetailSheet> {
         const SizedBox(height: 8),
 
         // 3. KASALAR
-        if (_attachedVaults.isNotEmpty) ...[
-          Text(l10n.vaults.toUpperCase(), style: TextStyle(fontSize: 9, fontWeight: FontWeight.w900, color: AppColors.getTextSecondary(context).withValues(alpha: isDark ? 0.6 : 0.85), letterSpacing: 1.5)),
-          const SizedBox(height: 4),
-          ..._attachedVaults.map((vault) => Padding(
-            padding: const EdgeInsets.only(bottom: 4),
-            child: CustomCard(
-              scalingFactor: sf,
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-              child: Row(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(4),
-                    decoration: BoxDecoration(color: AppColors.getPrimary(context).withValues(alpha: 0.1), borderRadius: BorderRadius.circular(6)),
-                    child: Icon(Icons.account_balance_wallet_rounded, size: 12, color: AppColors.getPrimary(context)),
-                  ),
-                  const SizedBox(width: 8),
-                  Text(vault.name, style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 12)),
-                  const Spacer(),
-                  CustomIconButton(
-                    onTap: () async {
-                      final confirm = await showCustomDialog<bool>(
-                        context: context,
-                        accentColor: AppColors.error,
-                        title: l10n.removeFromVault,
-                        content: l10n.removeFromVaultDesc,
-                        actions: [
-                          PrecisionDialogAction(
-                            label: l10n.cancel, 
-                            onTap: () => Navigator.pop(context, false), 
-                            isPrimary: false,
-                          ),
-                          PrecisionDialogAction(
-                            label: l10n.ok, 
-                            onTap: () => Navigator.pop(context, true), 
-                            isPrimary: true,
-                          ),
-                        ],
-                      );
-                      if (confirm == true) {
-                        final record = await DatabaseService.getTransaction(tx.dbId!);
-                        if (record != null) {
-                          record.vaultIds = List<int>.from(record.vaultIds)..remove(vault.id);
-                          await DatabaseService.updateTransaction(record);
-                          HapticFeedback.heavyImpact();
-                          _loadData();
-                        }
-                      }
-                    },
-                    icon: Icons.close_rounded,
-                    color: AppColors.error,
-                    backgroundColor: AppColors.error.withValues(alpha: 0.1),
-                    borderRadius: 8,
-                    size: 14,
-                    padding: 6,
-                  ),
-                ],
+        if (_allVaults.isNotEmpty) ...[
+          Align(
+            alignment: Alignment.centerLeft,
+            child: Text(
+              l10n.vaults.toUpperCase(),
+              style: TextStyle(
+                fontSize: 9 * sf,
+                fontWeight: FontWeight.w900,
+                color: AppColors.getTextSecondary(context).withValues(alpha: isDark ? 0.6 : 0.85),
+                letterSpacing: 1.5,
               ),
             ),
-          )),
+          ),
+          const SizedBox(height: 8),
+          LayoutBuilder(
+            builder: (context, constraints) {
+              final double itemWidth = (constraints.maxWidth - 16) / 3;
+              return Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: _allVaults.map((vault) {
+                  final isAttached = _attachedVaults.any((v) => v.id == vault.id);
+                  return SizedBox(
+                    width: itemWidth,
+                    height: 42 * sf,
+                    child: ClickableAction(
+                      onTap: () => _toggleVault(vault),
+                      borderRadius: BorderRadius.circular(16 * sf),
+                      child: CustomCard(
+                        scalingFactor: sf,
+                        padding: EdgeInsets.zero,
+                        backgroundColor: isAttached 
+                            ? AppColors.getPrimary(context).withValues(alpha: isDark ? 0.12 : 0.06)
+                            : null,
+                        borderColor: isAttached 
+                            ? AppColors.getPrimary(context).withValues(alpha: 0.4)
+                            : (isDark ? Colors.white.withValues(alpha: 0.08) : Colors.black.withValues(alpha: 0.06)),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(16 * sf),
+                          child: Stack(
+                            children: [
+                              // Arka Plan Filigran İkonu
+                              Positioned(
+                                right: -8 * sf,
+                                bottom: -10 * sf,
+                                child: Opacity(
+                                  opacity: isAttached 
+                                      ? (isDark ? 0.15 : 0.08) 
+                                      : (isDark ? 0.12 : 0.06),
+                                  child: Icon(
+                                    Icons.account_balance_wallet_rounded,
+                                    size: 54 * sf,
+                                    color: isAttached ? AppColors.getPrimary(context) : AppColors.getTextSecondary(context),
+                                  ),
+                                ),
+                              ),
+                              // Ön Plan İçeriği
+                              Positioned.fill(
+                                child: Padding(
+                                  padding: EdgeInsets.symmetric(horizontal: 10 * sf),
+                                  child: Row(
+                                    children: [
+                                      Expanded(
+                                        child: Text(
+                                          vault.name,
+                                          style: TextStyle(
+                                            fontSize: 11 * sf,
+                                            fontWeight: isAttached ? FontWeight.w800 : FontWeight.w600,
+                                            color: isAttached 
+                                                ? AppColors.getPrimary(context) 
+                                                : AppColors.getTextPrimary(context).withValues(alpha: 0.85),
+                                          ),
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                      ),
+                                      const SizedBox(width: 4),
+                                      CustomAnimatedIcon(
+                                        activeIcon: Icons.check_circle_rounded,
+                                        inactiveIcon: Icons.add_circle_outline_rounded,
+                                        isActive: isAttached,
+                                        size: 17 * sf,
+                                        color: isAttached 
+                                            ? AppColors.getPrimary(context) 
+                                            : AppColors.getTextSecondary(context).withValues(alpha: 0.35),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  );
+                }).toList(),
+              );
+            },
+          ),
         ],
 
         SizedBox(height: 12 * sf),

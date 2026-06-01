@@ -27,68 +27,58 @@ const AppSettingsSchema = CollectionSchema(
       name: r'bgColorStyle',
       type: IsarType.long,
     ),
-    r'bgPatternDensity': PropertySchema(
-      id: 2,
-      name: r'bgPatternDensity',
-      type: IsarType.long,
-    ),
     r'countryName': PropertySchema(
-      id: 3,
+      id: 2,
       name: r'countryName',
       type: IsarType.string,
     ),
     r'currencySymbol': PropertySchema(
-      id: 4,
+      id: 3,
       name: r'currencySymbol',
       type: IsarType.string,
     ),
     r'dataRetentionDays': PropertySchema(
-      id: 5,
+      id: 4,
       name: r'dataRetentionDays',
       type: IsarType.long,
     ),
-    r'isLocationEnabled': PropertySchema(
-      id: 6,
-      name: r'isLocationEnabled',
-      type: IsarType.bool,
-    ),
     r'isNotificationsEnabled': PropertySchema(
-      id: 7,
+      id: 5,
       name: r'isNotificationsEnabled',
       type: IsarType.bool,
     ),
     r'isSyncEnabled': PropertySchema(
-      id: 8,
+      id: 6,
       name: r'isSyncEnabled',
       type: IsarType.bool,
     ),
     r'languageCode': PropertySchema(
-      id: 9,
+      id: 7,
       name: r'languageCode',
       type: IsarType.string,
     ),
     r'permanentDeletionDays': PropertySchema(
-      id: 10,
+      id: 8,
       name: r'permanentDeletionDays',
       type: IsarType.long,
     ),
     r'remoteId': PropertySchema(
-      id: 11,
+      id: 9,
       name: r'remoteId',
       type: IsarType.string,
     ),
     r'syncStatus': PropertySchema(
-      id: 12,
+      id: 10,
       name: r'syncStatus',
       type: IsarType.long,
     ),
     r'themeModeIndex': PropertySchema(
-      id: 13,
+      id: 11,
       name: r'themeModeIndex',
       type: IsarType.long,
     ),
     r'updatedAt': PropertySchema(
-      id: 14,
+      id: 12,
       name: r'updatedAt',
       type: IsarType.dateTime,
     )
@@ -178,19 +168,17 @@ void _appSettingsSerialize(
 ) {
   writer.writeLong(offsets[0], object.accentColorValue);
   writer.writeLong(offsets[1], object.bgColorStyle);
-  writer.writeLong(offsets[2], object.bgPatternDensity);
-  writer.writeString(offsets[3], object.countryName);
-  writer.writeString(offsets[4], object.currencySymbol);
-  writer.writeLong(offsets[5], object.dataRetentionDays);
-  writer.writeBool(offsets[6], object.isLocationEnabled);
-  writer.writeBool(offsets[7], object.isNotificationsEnabled);
-  writer.writeBool(offsets[8], object.isSyncEnabled);
-  writer.writeString(offsets[9], object.languageCode);
-  writer.writeLong(offsets[10], object.permanentDeletionDays);
-  writer.writeString(offsets[11], object.remoteId);
-  writer.writeLong(offsets[12], object.syncStatus);
-  writer.writeLong(offsets[13], object.themeModeIndex);
-  writer.writeDateTime(offsets[14], object.updatedAt);
+  writer.writeString(offsets[2], object.countryName);
+  writer.writeString(offsets[3], object.currencySymbol);
+  writer.writeLong(offsets[4], object.dataRetentionDays);
+  writer.writeBool(offsets[5], object.isNotificationsEnabled);
+  writer.writeBool(offsets[6], object.isSyncEnabled);
+  writer.writeString(offsets[7], object.languageCode);
+  writer.writeLong(offsets[8], object.permanentDeletionDays);
+  writer.writeString(offsets[9], object.remoteId);
+  writer.writeLong(offsets[10], object.syncStatus);
+  writer.writeLong(offsets[11], object.themeModeIndex);
+  writer.writeDateTime(offsets[12], object.updatedAt);
 }
 
 AppSettings _appSettingsDeserialize(
@@ -202,20 +190,18 @@ AppSettings _appSettingsDeserialize(
   final object = AppSettings();
   object.accentColorValue = reader.readLong(offsets[0]);
   object.bgColorStyle = reader.readLong(offsets[1]);
-  object.bgPatternDensity = reader.readLong(offsets[2]);
-  object.countryName = reader.readStringOrNull(offsets[3]);
-  object.currencySymbol = reader.readString(offsets[4]);
-  object.dataRetentionDays = reader.readLong(offsets[5]);
+  object.countryName = reader.readStringOrNull(offsets[2]);
+  object.currencySymbol = reader.readString(offsets[3]);
+  object.dataRetentionDays = reader.readLong(offsets[4]);
   object.id = id;
-  object.isLocationEnabled = reader.readBool(offsets[6]);
-  object.isNotificationsEnabled = reader.readBool(offsets[7]);
-  object.isSyncEnabled = reader.readBool(offsets[8]);
-  object.languageCode = reader.readString(offsets[9]);
-  object.permanentDeletionDays = reader.readLong(offsets[10]);
-  object.remoteId = reader.readStringOrNull(offsets[11]);
-  object.syncStatus = reader.readLong(offsets[12]);
-  object.themeModeIndex = reader.readLong(offsets[13]);
-  object.updatedAt = reader.readDateTime(offsets[14]);
+  object.isNotificationsEnabled = reader.readBool(offsets[5]);
+  object.isSyncEnabled = reader.readBool(offsets[6]);
+  object.languageCode = reader.readString(offsets[7]);
+  object.permanentDeletionDays = reader.readLong(offsets[8]);
+  object.remoteId = reader.readStringOrNull(offsets[9]);
+  object.syncStatus = reader.readLong(offsets[10]);
+  object.themeModeIndex = reader.readLong(offsets[11]);
+  object.updatedAt = reader.readDateTime(offsets[12]);
   return object;
 }
 
@@ -231,30 +217,26 @@ P _appSettingsDeserializeProp<P>(
     case 1:
       return (reader.readLong(offset)) as P;
     case 2:
-      return (reader.readLong(offset)) as P;
-    case 3:
       return (reader.readStringOrNull(offset)) as P;
-    case 4:
+    case 3:
       return (reader.readString(offset)) as P;
-    case 5:
+    case 4:
       return (reader.readLong(offset)) as P;
+    case 5:
+      return (reader.readBool(offset)) as P;
     case 6:
       return (reader.readBool(offset)) as P;
     case 7:
-      return (reader.readBool(offset)) as P;
-    case 8:
-      return (reader.readBool(offset)) as P;
-    case 9:
       return (reader.readString(offset)) as P;
+    case 8:
+      return (reader.readLong(offset)) as P;
+    case 9:
+      return (reader.readStringOrNull(offset)) as P;
     case 10:
       return (reader.readLong(offset)) as P;
     case 11:
-      return (reader.readStringOrNull(offset)) as P;
+      return (reader.readLong(offset)) as P;
     case 12:
-      return (reader.readLong(offset)) as P;
-    case 13:
-      return (reader.readLong(offset)) as P;
-    case 14:
       return (reader.readDateTime(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -731,62 +713,6 @@ extension AppSettingsQueryFilter
   }
 
   QueryBuilder<AppSettings, AppSettings, QAfterFilterCondition>
-      bgPatternDensityEqualTo(int value) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'bgPatternDensity',
-        value: value,
-      ));
-    });
-  }
-
-  QueryBuilder<AppSettings, AppSettings, QAfterFilterCondition>
-      bgPatternDensityGreaterThan(
-    int value, {
-    bool include = false,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        include: include,
-        property: r'bgPatternDensity',
-        value: value,
-      ));
-    });
-  }
-
-  QueryBuilder<AppSettings, AppSettings, QAfterFilterCondition>
-      bgPatternDensityLessThan(
-    int value, {
-    bool include = false,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.lessThan(
-        include: include,
-        property: r'bgPatternDensity',
-        value: value,
-      ));
-    });
-  }
-
-  QueryBuilder<AppSettings, AppSettings, QAfterFilterCondition>
-      bgPatternDensityBetween(
-    int lower,
-    int upper, {
-    bool includeLower = true,
-    bool includeUpper = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.between(
-        property: r'bgPatternDensity',
-        lower: lower,
-        includeLower: includeLower,
-        upper: upper,
-        includeUpper: includeUpper,
-      ));
-    });
-  }
-
-  QueryBuilder<AppSettings, AppSettings, QAfterFilterCondition>
       countryNameIsNull() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(const FilterCondition.isNull(
@@ -1181,16 +1107,6 @@ extension AppSettingsQueryFilter
         includeLower: includeLower,
         upper: upper,
         includeUpper: includeUpper,
-      ));
-    });
-  }
-
-  QueryBuilder<AppSettings, AppSettings, QAfterFilterCondition>
-      isLocationEnabledEqualTo(bool value) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'isLocationEnabled',
-        value: value,
       ));
     });
   }
@@ -1764,20 +1680,6 @@ extension AppSettingsQuerySortBy
     });
   }
 
-  QueryBuilder<AppSettings, AppSettings, QAfterSortBy>
-      sortByBgPatternDensity() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'bgPatternDensity', Sort.asc);
-    });
-  }
-
-  QueryBuilder<AppSettings, AppSettings, QAfterSortBy>
-      sortByBgPatternDensityDesc() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'bgPatternDensity', Sort.desc);
-    });
-  }
-
   QueryBuilder<AppSettings, AppSettings, QAfterSortBy> sortByCountryName() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'countryName', Sort.asc);
@@ -1814,20 +1716,6 @@ extension AppSettingsQuerySortBy
       sortByDataRetentionDaysDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'dataRetentionDays', Sort.desc);
-    });
-  }
-
-  QueryBuilder<AppSettings, AppSettings, QAfterSortBy>
-      sortByIsLocationEnabled() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'isLocationEnabled', Sort.asc);
-    });
-  }
-
-  QueryBuilder<AppSettings, AppSettings, QAfterSortBy>
-      sortByIsLocationEnabledDesc() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'isLocationEnabled', Sort.desc);
     });
   }
 
@@ -1964,20 +1852,6 @@ extension AppSettingsQuerySortThenBy
     });
   }
 
-  QueryBuilder<AppSettings, AppSettings, QAfterSortBy>
-      thenByBgPatternDensity() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'bgPatternDensity', Sort.asc);
-    });
-  }
-
-  QueryBuilder<AppSettings, AppSettings, QAfterSortBy>
-      thenByBgPatternDensityDesc() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'bgPatternDensity', Sort.desc);
-    });
-  }
-
   QueryBuilder<AppSettings, AppSettings, QAfterSortBy> thenByCountryName() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'countryName', Sort.asc);
@@ -2026,20 +1900,6 @@ extension AppSettingsQuerySortThenBy
   QueryBuilder<AppSettings, AppSettings, QAfterSortBy> thenByIdDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'id', Sort.desc);
-    });
-  }
-
-  QueryBuilder<AppSettings, AppSettings, QAfterSortBy>
-      thenByIsLocationEnabled() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'isLocationEnabled', Sort.asc);
-    });
-  }
-
-  QueryBuilder<AppSettings, AppSettings, QAfterSortBy>
-      thenByIsLocationEnabledDesc() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'isLocationEnabled', Sort.desc);
     });
   }
 
@@ -2162,13 +2022,6 @@ extension AppSettingsQueryWhereDistinct
     });
   }
 
-  QueryBuilder<AppSettings, AppSettings, QDistinct>
-      distinctByBgPatternDensity() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addDistinctBy(r'bgPatternDensity');
-    });
-  }
-
   QueryBuilder<AppSettings, AppSettings, QDistinct> distinctByCountryName(
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
@@ -2188,13 +2041,6 @@ extension AppSettingsQueryWhereDistinct
       distinctByDataRetentionDays() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'dataRetentionDays');
-    });
-  }
-
-  QueryBuilder<AppSettings, AppSettings, QDistinct>
-      distinctByIsLocationEnabled() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addDistinctBy(r'isLocationEnabled');
     });
   }
 
@@ -2271,12 +2117,6 @@ extension AppSettingsQueryProperty
     });
   }
 
-  QueryBuilder<AppSettings, int, QQueryOperations> bgPatternDensityProperty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r'bgPatternDensity');
-    });
-  }
-
   QueryBuilder<AppSettings, String?, QQueryOperations> countryNameProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'countryName');
@@ -2292,13 +2132,6 @@ extension AppSettingsQueryProperty
   QueryBuilder<AppSettings, int, QQueryOperations> dataRetentionDaysProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'dataRetentionDays');
-    });
-  }
-
-  QueryBuilder<AppSettings, bool, QQueryOperations>
-      isLocationEnabledProperty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r'isLocationEnabled');
     });
   }
 

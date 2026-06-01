@@ -147,7 +147,7 @@ abstract class AppLocalizations {
   /// No description provided for @language.
   ///
   /// In tr, this message translates to:
-  /// **'Uygulama Dili'**
+  /// **'Dil'**
   String get language;
 
   /// No description provided for @aiNotifications.
@@ -165,7 +165,7 @@ abstract class AppLocalizations {
   /// No description provided for @dataRetention.
   ///
   /// In tr, this message translates to:
-  /// **'Veri Saklama Süresi'**
+  /// **'Veri Saklama'**
   String get dataRetention;
 
   /// No description provided for @dataRetentionDesc.
@@ -177,7 +177,7 @@ abstract class AppLocalizations {
   /// No description provided for @permanentDataDeletion.
   ///
   /// In tr, this message translates to:
-  /// **'Kalıcı Veri Silme Süresi'**
+  /// **'Kalıcı Silme'**
   String get permanentDataDeletion;
 
   /// No description provided for @permanentDataDeletionDesc.
@@ -225,13 +225,13 @@ abstract class AppLocalizations {
   /// No description provided for @driveBackup.
   ///
   /// In tr, this message translates to:
-  /// **'Google Drive Yedekleme'**
+  /// **'Drive Yedekleme'**
   String get driveBackup;
 
   /// No description provided for @exportExcel.
   ///
   /// In tr, this message translates to:
-  /// **'Verileri Excel\'e (CSV) Aktar'**
+  /// **'Excel\'e Aktar'**
   String get exportExcel;
 
   /// No description provided for @support.
@@ -243,13 +243,13 @@ abstract class AppLocalizations {
   /// No description provided for @contact.
   ///
   /// In tr, this message translates to:
-  /// **'Finarcast ile İletişim'**
+  /// **'İletişim'**
   String get contact;
 
   /// No description provided for @about.
   ///
   /// In tr, this message translates to:
-  /// **'Uygulama Hakkında'**
+  /// **'Hakkında'**
   String get about;
 
   /// No description provided for @aboutFinarcast.
@@ -579,7 +579,7 @@ abstract class AppLocalizations {
   /// No description provided for @themeMode.
   ///
   /// In tr, this message translates to:
-  /// **'Tema Modu'**
+  /// **'Tema'**
   String get themeMode;
 
   /// No description provided for @themeSystem.
@@ -603,7 +603,7 @@ abstract class AppLocalizations {
   /// No description provided for @colorTheme.
   ///
   /// In tr, this message translates to:
-  /// **'Renk Teması'**
+  /// **'Renk'**
   String get colorTheme;
 
   /// No description provided for @colorSystem.
@@ -1019,6 +1019,18 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'Diğer'**
   String get other;
+
+  /// No description provided for @balanceAdjustment.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bakiye Düzeltme'**
+  String get balanceAdjustment;
+
+  /// No description provided for @balanceAdjustmentNote.
+  ///
+  /// In tr, this message translates to:
+  /// **'Kasa bakiyesi {oldVal} değerinden {newVal} değerine eşitlendi.'**
+  String balanceAdjustmentNote(Object newVal, Object oldVal);
 
   /// No description provided for @salary.
   ///
@@ -2609,6 +2621,246 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'Kayıt başarılı! Lütfen e-postanıza gelen doğrulama kodunu girin.'**
   String get authRegistrationSuccess;
+
+  /// No description provided for @authVerificationCode.
+  ///
+  /// In tr, this message translates to:
+  /// **'Doğrulama Kodu'**
+  String get authVerificationCode;
+
+  /// No description provided for @authVerificationDesc.
+  ///
+  /// In tr, this message translates to:
+  /// **'Kayıt işlemini tamamlamak için {email} adresine gönderilen doğrulama kodunu girin.'**
+  String authVerificationDesc(String email);
+
+  /// No description provided for @authVerifyCode.
+  ///
+  /// In tr, this message translates to:
+  /// **'Kodu Doğrula'**
+  String get authVerifyCode;
+
+  /// No description provided for @authResendCodeCountdown.
+  ///
+  /// In tr, this message translates to:
+  /// **'Kodu Tekrar Gönder ({seconds} sn)'**
+  String authResendCodeCountdown(int seconds);
+
+  /// No description provided for @authResendCode.
+  ///
+  /// In tr, this message translates to:
+  /// **'Kodu Tekrar Gönder'**
+  String get authResendCode;
+
+  /// No description provided for @authGoBack.
+  ///
+  /// In tr, this message translates to:
+  /// **'Geri Dön'**
+  String get authGoBack;
+
+  /// No description provided for @authWelcome.
+  ///
+  /// In tr, this message translates to:
+  /// **'Hoş Geldiniz'**
+  String get authWelcome;
+
+  /// No description provided for @authLoginSubtitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Hesabınıza giriş yaparak finanslarınıza hükmedin.'**
+  String get authLoginSubtitle;
+
+  /// No description provided for @authEmail.
+  ///
+  /// In tr, this message translates to:
+  /// **'E-posta'**
+  String get authEmail;
+
+  /// No description provided for @authPassword.
+  ///
+  /// In tr, this message translates to:
+  /// **'Şifre'**
+  String get authPassword;
+
+  /// No description provided for @authForgotPassword.
+  ///
+  /// In tr, this message translates to:
+  /// **'Şifremi Unuttum'**
+  String get authForgotPassword;
+
+  /// No description provided for @authLogin.
+  ///
+  /// In tr, this message translates to:
+  /// **'Giriş Yap'**
+  String get authLogin;
+
+  /// No description provided for @authOr.
+  ///
+  /// In tr, this message translates to:
+  /// **'Veya'**
+  String get authOr;
+
+  /// No description provided for @authGoogleSignIn.
+  ///
+  /// In tr, this message translates to:
+  /// **'Google ile Devam Et'**
+  String get authGoogleSignIn;
+
+  /// No description provided for @authNewAccount.
+  ///
+  /// In tr, this message translates to:
+  /// **'Yeni Hesap'**
+  String get authNewAccount;
+
+  /// No description provided for @authRegisterSubtitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Finarcast dünyasına katılarak limitlerinizi belirleyin.'**
+  String get authRegisterSubtitle;
+
+  /// No description provided for @authUsername.
+  ///
+  /// In tr, this message translates to:
+  /// **'Kullanıcı Adı'**
+  String get authUsername;
+
+  /// No description provided for @authConfirmPassword.
+  ///
+  /// In tr, this message translates to:
+  /// **'Şifre Tekrar'**
+  String get authConfirmPassword;
+
+  /// No description provided for @authRegister.
+  ///
+  /// In tr, this message translates to:
+  /// **'Hemen Katıl'**
+  String get authRegister;
+
+  /// No description provided for @authNoAccount.
+  ///
+  /// In tr, this message translates to:
+  /// **'Hesabınız yok mu?'**
+  String get authNoAccount;
+
+  /// No description provided for @authAlreadyHaveAccount.
+  ///
+  /// In tr, this message translates to:
+  /// **'Zaten hesabınız var mı?'**
+  String get authAlreadyHaveAccount;
+
+  /// No description provided for @authRegisterAction.
+  ///
+  /// In tr, this message translates to:
+  /// **'Kayıt Ol'**
+  String get authRegisterAction;
+
+  /// No description provided for @authLoginAction.
+  ///
+  /// In tr, this message translates to:
+  /// **'Giriş Yap'**
+  String get authLoginAction;
+
+  /// No description provided for @authContinueAsGuest.
+  ///
+  /// In tr, this message translates to:
+  /// **'Misafir Olarak Devam Et'**
+  String get authContinueAsGuest;
+
+  /// No description provided for @authPasswordReset.
+  ///
+  /// In tr, this message translates to:
+  /// **'Şifre Sıfırlama'**
+  String get authPasswordReset;
+
+  /// No description provided for @authForgotPasswordDesc.
+  ///
+  /// In tr, this message translates to:
+  /// **'Şifrenizi sıfırlamak için e-posta adresinizi girin. Size 6 haneli geçici bir kod göndereceğiz.'**
+  String get authForgotPasswordDesc;
+
+  /// No description provided for @authSendCode.
+  ///
+  /// In tr, this message translates to:
+  /// **'Kod Gönder'**
+  String get authSendCode;
+
+  /// No description provided for @authBackToLogin.
+  ///
+  /// In tr, this message translates to:
+  /// **'Giriş Ekranına Dön'**
+  String get authBackToLogin;
+
+  /// No description provided for @authVerificationCodeTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Onay Kodu'**
+  String get authVerificationCodeTitle;
+
+  /// No description provided for @authForgotPasswordOtpDesc.
+  ///
+  /// In tr, this message translates to:
+  /// **'{email} adresine gönderilen 6 haneli doğrulama kodunu girin.'**
+  String authForgotPasswordOtpDesc(String email);
+
+  /// No description provided for @authChangeEmail.
+  ///
+  /// In tr, this message translates to:
+  /// **'E-posta Değiştir'**
+  String get authChangeEmail;
+
+  /// No description provided for @authNewPasswordTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Yeni Şifre'**
+  String get authNewPasswordTitle;
+
+  /// No description provided for @authNewPasswordDesc.
+  ///
+  /// In tr, this message translates to:
+  /// **'Hesabınız için en az 6 karakterli güvenli bir şifre belirleyin.'**
+  String get authNewPasswordDesc;
+
+  /// No description provided for @authNewPassword.
+  ///
+  /// In tr, this message translates to:
+  /// **'Yeni Şifre'**
+  String get authNewPassword;
+
+  /// No description provided for @authConfirmNewPassword.
+  ///
+  /// In tr, this message translates to:
+  /// **'Yeni Şifre Tekrar'**
+  String get authConfirmNewPassword;
+
+  /// No description provided for @authUpdatePassword.
+  ///
+  /// In tr, this message translates to:
+  /// **'Şifreyi Güncelle'**
+  String get authUpdatePassword;
+
+  /// No description provided for @authPasswordResetSuccess.
+  ///
+  /// In tr, this message translates to:
+  /// **'Şifreniz başarıyla sıfırlandı ve giriş yapıldı.'**
+  String get authPasswordResetSuccess;
+
+  /// No description provided for @authGoogleError.
+  ///
+  /// In tr, this message translates to:
+  /// **'Google Giriş Hatası'**
+  String get authGoogleError;
+
+  /// No description provided for @authPasswordDifferentError.
+  ///
+  /// In tr, this message translates to:
+  /// **'Yeni şifreniz mevcut şifrenizden farklı olmalıdır.'**
+  String get authPasswordDifferentError;
+
+  /// No description provided for @authUserNotFoundError.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu e-posta adresine kayıtlı bir kullanıcı bulunamadı.'**
+  String get authUserNotFoundError;
 }
 
 class _AppLocalizationsDelegate

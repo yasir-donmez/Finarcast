@@ -4,12 +4,12 @@
   "profile": "Profile",
   "memberPremium": "Finarcast Premium Member",
   "preferences": "PREFERENCES & APP",
-  "language": "App Language",
+  "language": "Language",
   "aiNotifications": "AI Assistant Alerts",
   "dataAndAiSettings": "DATA & AI SETTINGS",
-  "dataRetention": "Data Retention Period",
+  "dataRetention": "Data Retention",
   "dataRetentionDesc": "Expired transactions are archived.\nAI Persona only uses data within this period.",
-  "permanentDataDeletion": "Permanent Data Deletion Period",
+  "permanentDataDeletion": "Permanent Deletion",
   "permanentDataDeletionDesc": "After this period, transactions are permanently deleted from the database.\nThis action cannot be undone.",
   "oneMonth": "1 Month",
   "threeMonths": "3 Months",
@@ -17,11 +17,11 @@
   "oneYear": "1 Year",
   "infinite": "Forever",
   "dataManagement": "DATA MANAGEMENT",
-  "driveBackup": "Google Drive Backup",
-  "exportExcel": "Export Data to Excel (CSV)",
+  "driveBackup": "Drive Backup",
+  "exportExcel": "Export to Excel",
   "support": "SUPPORT",
-  "contact": "Contact Finarcast",
-  "about": "About App",
+  "contact": "Contact Us",
+  "about": "About",
   "aboutFinarcast": "Finarcast is your AI-powered financial assistant. It analyzes your expenses, helps you set savings goals, and optimizes your financial future.",
   "editProfile": "Edit Profile",
   "comingSoon": "This feature is coming soon!",
@@ -76,11 +76,11 @@
   "category": "Category",
   "transactionName": "Transaction Name",
   "frequency": "Frequency",
-  "themeMode": "Theme Mode",
+  "themeMode": "Theme",
   "themeSystem": "System",
   "themeLight": "Light",
   "themeDark": "Dark",
-  "colorTheme": "Color Theme",
+  "colorTheme": "Color",
   "colorSystem": "System",
   "market": "Market",
   "food": "Food",
@@ -150,6 +150,8 @@
   "personalDebt": "Personal Debt",
   "credit": "Credit/Debt",
   "other": "Other",
+  "balanceAdjustment": "Balance Adjustment",
+  "balanceAdjustmentNote": "Vault balance adjusted from {oldVal} to {newVal}.",
   "salary": "Salary",
   "mainSalary": "Main Salary",
   "bonus": "Bonus",
@@ -456,5 +458,67 @@
   "authRateLimitExceeded": "Too many requests sent. Email rate limit exceeded, please try again in a while.",
   "authOtpRequired": "Please enter the verification code (6 or 8 digits).",
   "authOtpSent": "A new verification code has been sent to your email.",
-  "authRegistrationSuccess": "Registration successful! Please enter the verification code sent to your email."
+  "authRegistrationSuccess": "Registration successful! Please enter the verification code sent to your email.",
+  "authVerificationCode": "Verification Code",
+  "authVerificationDesc": "Enter the verification code sent to {email} to complete registration.",
+  "@authVerificationDesc": {
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
+  "authVerifyCode": "Verify Code",
+  "authResendCodeCountdown": "Resend Code ({seconds}s)",
+  "@authResendCodeCountdown": {
+    "placeholders": {
+      "seconds": {
+        "type": "int"
+      }
+    }
+  },
+  "authResendCode": "Resend Code",
+  "authGoBack": "Go Back",
+  "authWelcome": "Welcome",
+  "authLoginSubtitle": "Take control of your finances by logging into your account.",
+  "authEmail": "Email",
+  "authPassword": "Password",
+  "authForgotPassword": "Forgot Password",
+  "authLogin": "Sign In",
+  "authOr": "Or",
+  "authGoogleSignIn": "Continue with Google",
+  "authNewAccount": "New Account",
+  "authRegisterSubtitle": "Join the Finarcast world and set your limits.",
+  "authUsername": "Username",
+  "authConfirmPassword": "Confirm Password",
+  "authRegister": "Join Now",
+  "authNoAccount": "Don't have an account?",
+  "authAlreadyHaveAccount": "Already have an account?",
+  "authRegisterAction": "Sign Up",
+  "authLoginAction": "Sign In",
+  "authContinueAsGuest": "Continue as Guest",
+  "authPasswordReset": "Reset Password",
+  "authForgotPasswordDesc": "Enter your email address to reset your password. We will send you a 6-digit verification code.",
+  "authSendCode": "Send Code",
+  "authBackToLogin": "Back to Login",
+  "authVerificationCodeTitle": "Verification Code",
+  "authForgotPasswordOtpDesc": "Enter the 6-digit verification code sent to {email}.",
+  "@authForgotPasswordOtpDesc": {
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
+  "authChangeEmail": "Change Email",
+  "authNewPasswordTitle": "New Password",
+  "authNewPasswordDesc": "Set a secure password of at least 6 characters for your account.",
+  "authNewPassword": "New Password",
+  "authConfirmNewPassword": "Confirm New Password",
+  "authUpdatePassword": "Update Password",
+  "authPasswordResetSuccess": "Your password has been successfully reset and you are signed in.",
+  "authGoogleError": "Google Sign-In Error",
+  "authPasswordDifferentError": "Your new password must be different from your current password.",
+  "authUserNotFoundError": "No user found registered with this email address."
 }
+

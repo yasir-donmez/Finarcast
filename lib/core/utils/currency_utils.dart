@@ -1,8 +1,10 @@
 import 'package:intl/intl.dart';
 import '../database/models/exchange_rate.dart';
+import '../theme/app_constants.dart';
 
 /// Para birimi ve tutar formatlama yardımları
 class CurrencyUtils {
+
   /// Tutar formatlama (Kısa gösterim)
   static String formatAmount(double val, {String? currencySymbol}) {
     if (val.abs() >= 1000000) {
@@ -19,7 +21,7 @@ class CurrencyUtils {
   /// Ondalık bakiye gösterimi (Dashboard ve Detaylar için)
   static String formatFullAmount(double val, {String? symbol, bool includeDecimals = true}) {
     // Para birimi kodunu belirle
-    final code = _symbolToCode(symbol ?? 'TRY');
+    final code = symbolToCode(symbol ?? 'TRY');
     
     // JPY ve KRW için ondalık basamak her zaman 0 olmalı
     int decimalDigits = includeDecimals ? 2 : 0;
@@ -43,47 +45,56 @@ class CurrencyUtils {
   /// Tutarı kurlara göre baz birime (TRY) veya başka bir birime çevirir
   static double convert(double amount, String from, String to, List<ExchangeRate> rates) {
     if (from == to) return amount;
-    
+
+    final fromCode = symbolToCode(from);
+    final toCode = symbolToCode(to);
+    if (fromCode == toCode) return amount;
+
+    // Küresel para birimi (non-TRY) var mı kontrol et (Dinamik Ons tespiti için)
+    bool isGlobalCode(String code) {
+      return code != 'TRY' &&
+             code != '₺' &&
+             code != 'AUTO' &&
+             code != 'GOLD' &&
+             code != 'G' &&
+             code != 'SILVER' &&
+             code != 'Ag';
+    }
+
+    final isGlobal = isGlobalCode(fromCode) || isGlobalCode(toCode);
+
     // 1. Tutar'ı TRY'ye (Baz birim) getir
     double tryAmount = amount;
-    if (from != 'TRY' && from != '₺' && from != 'AUTO') {
-      final fromCode = _symbolToCode(from);
+    if (fromCode != 'TRY') {
       final fromRate = rates.where((r) => r.currencyCode == fromCode).firstOrNull;
-      if (fromRate != null) {
-        tryAmount = amount * fromRate.rate;
+      if (fromRate != null && fromRate.rate > 0) {
+        double multiplier = fromRate.rate;
+        // Küresel kullanıcılar için altın/gümüşü ons biriminden grama (TRY tabanına) çevir
+        if (isGlobal && (fromCode == 'GOLD' || fromCode == 'SILVER')) {
+          multiplier *= 31.1034768;
+        }
+        tryAmount = amount * multiplier;
       }
     }
     
     // 2. TRY tutarını hedef birime çevir
-    if (to == 'TRY' || to == '₺' || to == 'AUTO') return tryAmount;
+    if (toCode == 'TRY') return tryAmount;
     
-    final toCode = _symbolToCode(to);
     final toRate = rates.where((r) => r.currencyCode == toCode).firstOrNull;
-    if (toRate != null) {
-      return tryAmount / toRate.rate;
+    if (toRate != null && toRate.rate > 0) {
+      double divisor = toRate.rate;
+      // Küresel kullanıcılar için altını/gümüşü gramdan (TRY tabanından) ons birimine çevir
+      if (isGlobal && (toCode == 'GOLD' || toCode == 'SILVER')) {
+        divisor *= 31.1034768;
+      }
+      return tryAmount / divisor;
     }
     
     return tryAmount;
   }
 
   /// Sembolleri API kodlarıyla eşleştirir
-  static String _symbolToCode(String symbol) {
-    switch (symbol) {
-      case r'$': return 'USD';
-      case '€': return 'EUR';
-      case '£': return 'GBP';
-      case '¥': return 'JPY';
-      case '₩': return 'KRW';
-      case '元': return 'CNY';
-      case r'R$': return 'BRL';
-      case 'Fr': return 'CHF';
-      case '₺': return 'TRY';
-      case 'G':
-      case 'ALTIN': return 'GOLD';
-      case 'Ag': return 'SILVER';
-      case 'SR': return 'SAR';
-      case 'KD': return 'KWD';
-      default: return symbol;
-    }
+  static String symbolToCode(String symbol) {
+    return AppCurrency.getCode(symbol);
   }
 }

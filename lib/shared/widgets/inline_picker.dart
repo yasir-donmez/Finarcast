@@ -25,18 +25,28 @@ class InlinePicker extends StatefulWidget {
 
 class _PrecisionInlinePickerState extends State<InlinePicker> {
   late FixedExtentScrollController _controller;
+  late int _selectedIndex;
+  int? _lastReportedIndex;
 
   @override
   void initState() {
     super.initState();
     _controller = FixedExtentScrollController(initialItem: widget.selectedIndex);
+    _selectedIndex = widget.selectedIndex;
+    _lastReportedIndex = widget.selectedIndex;
   }
 
   @override
   void didUpdateWidget(InlinePicker oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.selectedIndex != widget.selectedIndex) {
-      _controller.jumpToItem(widget.selectedIndex);
+      if (widget.selectedIndex != _lastReportedIndex) {
+        _controller.jumpToItem(widget.selectedIndex);
+        _lastReportedIndex = widget.selectedIndex;
+        setState(() {
+          _selectedIndex = widget.selectedIndex;
+        });
+      }
     }
   }
 
@@ -80,44 +90,57 @@ class _PrecisionInlinePickerState extends State<InlinePicker> {
             ),
           ),
           
-          ListWheelScrollView.useDelegate(
-            controller: _controller,
-            itemExtent: itemExtent,
-            physics: const FixedExtentScrollPhysics(),
-            perspective: 0.003,
-            diameterRatio: 1.8,
-            squeeze: 1.1,
-            overAndUnderCenterOpacity: 0.4,
-            useMagnifier: true,
-            magnification: 1.1,
-            onSelectedItemChanged: (index) {
-              if (index != widget.selectedIndex) {
-                HapticFeedback.lightImpact();
-                widget.onChanged(index);
+          NotificationListener<ScrollNotification>(
+            onNotification: (notification) {
+              if (notification is ScrollEndNotification && notification.depth == 0) {
+                if (_selectedIndex != widget.selectedIndex) {
+                  _lastReportedIndex = _selectedIndex;
+                  widget.onChanged(_selectedIndex);
+                }
               }
+              return false;
             },
-            childDelegate: ListWheelChildBuilderDelegate(
-              childCount: widget.items.length,
-              builder: (context, index) {
-                final isSelected = index == widget.selectedIndex;
-                final onSurface = Theme.of(context).colorScheme.onSurface;
-                
-                return Center(
-                  child: AnimatedDefaultTextStyle(
-                    duration: const Duration(milliseconds: 250),
-                    curve: Curves.easeOutCubic,
-                    style: TextStyle(
-                      fontSize: (isSelected ? 15 : 13) * widget.scalingFactor,
-                      fontWeight: isSelected ? FontWeight.w900 : FontWeight.w600,
-                      color: isSelected 
-                          ? activeColor 
-                          : onSurface.withValues(alpha: 0.3),
-                      letterSpacing: isSelected ? 0.2 : 0,
-                    ),
-                    child: Text(widget.items[index]),
-                  ),
-                );
+            child: ListWheelScrollView.useDelegate(
+              controller: _controller,
+              itemExtent: itemExtent,
+              physics: const FixedExtentScrollPhysics(),
+              perspective: 0.003,
+              diameterRatio: 1.8,
+              squeeze: 1.1,
+              overAndUnderCenterOpacity: 0.4,
+              useMagnifier: true,
+              magnification: 1.1,
+              onSelectedItemChanged: (index) {
+                if (index != _selectedIndex) {
+                  HapticFeedback.lightImpact();
+                  setState(() {
+                    _selectedIndex = index;
+                  });
+                }
               },
+              childDelegate: ListWheelChildBuilderDelegate(
+                childCount: widget.items.length,
+                builder: (context, index) {
+                  final isSelected = index == _selectedIndex;
+                  final onSurface = Theme.of(context).colorScheme.onSurface;
+                  
+                  return Center(
+                    child: AnimatedDefaultTextStyle(
+                      duration: const Duration(milliseconds: 250),
+                      curve: Curves.easeOutCubic,
+                      style: TextStyle(
+                        fontSize: (isSelected ? 15 : 13) * widget.scalingFactor,
+                        fontWeight: isSelected ? FontWeight.w900 : FontWeight.w600,
+                        color: isSelected 
+                            ? activeColor 
+                            : onSurface.withValues(alpha: 0.3),
+                        letterSpacing: isSelected ? 0.2 : 0,
+                      ),
+                      child: Text(widget.items[index]),
+                    ),
+                  );
+                },
+              ),
             ),
           ),
         ],

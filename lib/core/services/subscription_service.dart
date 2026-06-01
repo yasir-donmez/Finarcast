@@ -3,6 +3,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:purchases_flutter/purchases_flutter.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 enum SubscriptionTier { free, pro }
 
@@ -14,8 +16,8 @@ class SubscriptionService extends ChangeNotifier {
   static const String _isProKey = 'Finarcast_is_pro_user';
 
   // RevenueCat API Anahtarları (Buraya kendi anahtarlarınızı girmelisiniz)
-  static const String _appleApiKey = 'appl_YOUR_APPLE_API_KEY';
-  static const String _googleApiKey = 'goog_YOUR_GOOGLE_API_KEY';
+  static final String _appleApiKey = dotenv.get('REVENUECAT_APPLE_API_KEY', fallback: 'appl_YOUR_APPLE_API_KEY');
+  static final String _googleApiKey = dotenv.get('REVENUECAT_GOOGLE_API_KEY', fallback: 'goog_YOUR_GOOGLE_API_KEY');
 
   final SharedPreferences _prefs;
   bool _isInitializing = true;
@@ -38,6 +40,8 @@ class SubscriptionService extends ChangeNotifier {
       }
 
       PurchasesConfiguration? configuration;
+      final userId = Supabase.instance.client.auth.currentUser?.id;
+      
       if (Platform.isAndroid) {
         configuration = PurchasesConfiguration(_googleApiKey);
       } else if (Platform.isIOS) {
@@ -47,9 +51,16 @@ class SubscriptionService extends ChangeNotifier {
       if (configuration != null) {
         await Purchases.configure(configuration);
         
-        // Mevcut abonelik durumunu kontrol et
-        CustomerInfo customerInfo = await Purchases.getCustomerInfo();
-        _updateProStatus(customerInfo);
+        // Eğer kullanıcı giriş yapmışsa RevenueCat üzerinde de oturum açalım
+        if (userId != null) {
+          final logInResult = await Purchases.logIn(userId);
+          _updateProStatus(logInResult.customerInfo);
+          debugPrint('✅ [SubscriptionService] Startup: RevenueCat identified user: $userId');
+        } else {
+          // Mevcut abonelik durumunu kontrol et
+          CustomerInfo customerInfo = await Purchases.getCustomerInfo();
+          _updateProStatus(customerInfo);
+        }
         
         // Ürünleri (Offerings) çek
         _offerings = await Purchases.getOfferings();
@@ -66,8 +77,12 @@ class SubscriptionService extends ChangeNotifier {
 
   /// CustomerInfo'ya göre PRO durumunu güncelle
   void _updateProStatus(CustomerInfo customerInfo) {
-    // 'pro' burada RevenueCat dashboard'unda tanımladığınız "Entitlement ID" olmalıdır.
-    _isPro = customerInfo.entitlements.all['pro']?.isActive ?? false;
+    debugPrint('ℹ️ [SubscriptionService] Active Entitlements in RevenueCat: ${customerInfo.entitlements.all.keys.toList()}');
+    final entitlement = customerInfo.entitlements.all['premium'];
+    debugPrint('ℹ️ [SubscriptionService] "premium" Entitlement details: ${entitlement != null ? "Active: ${entitlement.isActive}" : "NOT FOUND IN DASHBOARD"}');
+
+    // 'premium' burada RevenueCat dashboard'unda tanımladığınız "Entitlement ID" olmalıdır.
+    _isPro = entitlement?.isActive ?? false;
     _prefs.setBool(_isProKey, _isPro);
     notifyListeners();
   }
@@ -94,6 +109,33 @@ class SubscriptionService extends ChangeNotifier {
     }
   }
 
+  /// Log in to RevenueCat with a specific User ID (e.g. Supabase User ID)
+  Future<void> logIn(String appUserId) async {
+    try {
+      final logInResult = await Purchases.logIn(appUserId);
+      _updateProStatus(logInResult.customerInfo);
+      debugPrint('✅ [SubscriptionService] RevenueCat identified user: $appUserId');
+    } catch (e) {
+      debugPrint('❌ [SubscriptionService] RevenueCat logIn error: $e');
+    }
+  }
+
+  /// Log out from RevenueCat (reverts to anonymous user ID)
+  Future<void> logOut() async {
+    try {
+      // Clear pro status locally first to prevent race conditions during logout/re-initialization
+      _isPro = false;
+      await _prefs.setBool(_isProKey, false);
+      notifyListeners();
+      
+      final customerInfo = await Purchases.logOut();
+      _updateProStatus(customerInfo);
+      debugPrint('✅ [SubscriptionService] RevenueCat logged out');
+    } catch (e) {
+      debugPrint('❌ [SubscriptionService] RevenueCat logOut error: $e');
+    }
+  }
+
   /// --- Manuel Pro Ayarlama (Test/Debug Amaçlı) ---
   Future<void> setProStatus(bool isPro) async {
     _isPro = isPro;
@@ -101,13 +143,46 @@ class SubscriptionService extends ChangeNotifier {
     notifyListeners();
   }
 
+  static const String _lastAiUsageKey = 'Finarcast_last_ai_usage_timestamp';
+
   // --- Özellik Bazlı Limitler ---
   int get maxVaults => _isPro ? 999 : 2;
-  int get dailyAiLimit => 9999; 
+  int get dailyAiLimit => _isPro ? 50 : 2;
   int get usedAiCount => _prefs.getInt('Finarcast_ai_usage_$_today') ?? 0;
+
+  int get aiCooldownMinutes => _isPro ? 0 : 60;
+
+  DateTime? get lastAiUsageTime {
+    final ms = _prefs.getInt(_lastAiUsageKey);
+    return ms != null ? DateTime.fromMillisecondsSinceEpoch(ms) : null;
+  }
+
+  int get remainingCooldownSeconds {
+    if (_isPro) return 0;
+    final lastTime = lastAiUsageTime;
+    if (lastTime == null) return 0;
+    final diff = DateTime.now().difference(lastTime);
+    final cooldownDuration = Duration(minutes: aiCooldownMinutes);
+    if (diff >= cooldownDuration) return 0;
+    return cooldownDuration.inSeconds - diff.inSeconds;
+  }
+
+  bool get isAiCooldownActive => remainingCooldownSeconds > 0;
+
+  String getFormattedRemainingCooldownTime() {
+    final totalSeconds = remainingCooldownSeconds;
+    if (totalSeconds <= 0) return '';
+    final minutes = totalSeconds ~/ 60;
+    final seconds = totalSeconds % 60;
+    if (minutes > 0) {
+      return '$minutes dakika $seconds saniye';
+    }
+    return '$seconds saniye';
+  }
 
   Future<void> incrementAiUsage() async {
     await _prefs.setInt('Finarcast_ai_usage_$_today', usedAiCount + 1);
+    await _prefs.setInt(_lastAiUsageKey, DateTime.now().millisecondsSinceEpoch);
     notifyListeners();
   }
 

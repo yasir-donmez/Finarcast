@@ -80,11 +80,11 @@ class _WaterDropPainter extends CustomPainter {
     final radius = size.width / 2;
     final t = wobbleValue * 2 * math.pi;
     
-    // 1. DIŞ GÖLGE (Daha yumuşak ve geniş)
+    // 1. DIŞ GÖLGE (Fiziksel, parlama yapmayan siyah gölge)
     final shadowPaint = Paint()
-      ..color = color.withValues(alpha: 0.12 * morphFactor)
-      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 12);
-    canvas.drawCircle(center.translate(8 * morphFactor, 10 * morphFactor), radius * morphFactor * 0.75, shadowPaint);
+      ..color = Colors.black.withValues(alpha: 0.25 * morphFactor)
+      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 6);
+    canvas.drawCircle(center.translate(0, 3 * morphFactor), radius * morphFactor * 0.95, shadowPaint);
 
     // 2. CAM KABUK (Thick Glass Shell - Fresnel Effect)
     final shellPaint = Paint()

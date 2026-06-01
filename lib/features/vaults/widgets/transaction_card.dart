@@ -37,28 +37,46 @@ class TransactionCard extends ConsumerWidget {
 
     String? periodLabel;
     if (tx.periodType != 0) {
-      switch (tx.periodType) {
-        case 1:
-          periodLabel = l10n.weekly;
-          break;
-        case 2:
-          periodLabel = l10n.monthly;
-          break;
-        case 3:
-          periodLabel = l10n.yearly;
-          break;
-        case 4:
-          periodLabel = l10n.every2Weeks;
-          break;
-        case 5:
-          periodLabel = l10n.every3Weeks;
-          break;
-        case 6:
-          periodLabel = l10n.every3Months;
-          break;
-        case 7:
-          periodLabel = l10n.every6Months;
-          break;
+      if (tx.periodType == 250) {
+        periodLabel = Localizations.localeOf(context).languageCode == 'tr' ? 'Hafta İçi' : 'Weekdays';
+      } else if (tx.periodType == 251) {
+        periodLabel = Localizations.localeOf(context).languageCode == 'tr' ? 'Hafta Sonu' : 'Weekends';
+      } else {
+        final unit = tx.periodType ~/ 100;
+        final interval = tx.periodType % 100;
+        
+        switch (unit) {
+          case 1:
+            periodLabel = interval == 1 
+                ? (Localizations.localeOf(context).languageCode == 'tr' ? 'Günlük' : 'Daily') 
+                : (Localizations.localeOf(context).languageCode == 'tr' ? '$interval Gün' : '$interval Days');
+            break;
+          case 2:
+            if (interval == 1) {
+              periodLabel = l10n.weekly;
+            } else if (interval == 2) {
+              periodLabel = l10n.every2Weeks;
+            } else if (interval == 3) {
+              periodLabel = l10n.every3Weeks;
+            } else {
+              periodLabel = Localizations.localeOf(context).languageCode == 'tr' ? '$interval Hafta' : '$interval Weeks';
+            }
+            break;
+          case 3:
+            if (interval == 1) {
+              periodLabel = l10n.monthly;
+            } else if (interval == 3) {
+              periodLabel = l10n.every3Months;
+            } else if (interval == 6) {
+              periodLabel = l10n.every6Months;
+            } else {
+              periodLabel = Localizations.localeOf(context).languageCode == 'tr' ? '$interval Ay' : '$interval Months';
+            }
+            break;
+          case 4:
+            periodLabel = interval == 1 ? l10n.yearly : (Localizations.localeOf(context).languageCode == 'tr' ? '$interval Yıl' : '$interval Years');
+            break;
+        }
       }
     }
 
@@ -310,8 +328,6 @@ void showTransactionActionMenu(
   required TransactionUI transaction,
   required VoidCallback onEdit,
   required VoidCallback onDelete,
-  VoidCallback? onRemoveFromVault,
-  required bool isInVault,
 }) {
   CustomBottomSheet.show(
     context: context,
@@ -320,8 +336,6 @@ void showTransactionActionMenu(
       transaction: transaction,
       onEdit: onEdit,
       onDelete: onDelete,
-      onRemoveFromVault: onRemoveFromVault,
-      isInVault: isInVault,
     ),
   );
 }

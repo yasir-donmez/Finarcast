@@ -1,4 +1,4 @@
-﻿import 'dart:async';
+import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/settings_provider.dart';
 import '../services/auth_service.dart';
 import '../services/sync_coordinator.dart';
+import '../services/currency_service.dart';
 
 class SyncBootstrap extends ConsumerStatefulWidget {
   const SyncBootstrap({super.key, required this.child});
@@ -35,6 +36,8 @@ class _SyncBootstrapState extends ConsumerState<SyncBootstrap>
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
       _trySync();
+      // Uygulama arka plandan geldiğinde döviz kurlarını güncelle
+      CurrencyService.updateRates();
     }
   }
 

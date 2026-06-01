@@ -44,22 +44,82 @@ class TransactionAmountInput extends StatelessWidget {
     );
   }
 
+  bool _isSymbolOnLeft(String symbol) {
+    return symbol == r'$' ||
+           symbol == '£' ||
+           symbol == '¥' ||
+           symbol == '₩' ||
+           symbol == '元' ||
+           symbol == r'R$';
+  }
+
   Widget _buildSingleAmountDisplay(BuildContext context) {
+    final activeColor = Theme.of(context).colorScheme.primary;
+    final symbolOnLeft = _isSymbolOnLeft(currency);
+
     return Container(
       key: const ValueKey('single_amount'),
       height: 100,
       alignment: Alignment.center,
       padding: const EdgeInsets.symmetric(horizontal: AppSizes.paddingLarge),
-      child: CustomTextField(
-        controller: amountController,
-        hintText: "0,00",
-        icon: Icons.attach_money_rounded,
-        keyboardType: const TextInputType.numberWithOptions(decimal: true),
-        inputFormatters: [_TRCurrencyFormatter()],
-        textAlign: TextAlign.center,
-        fontSize: 56,
-        suffixText: currency,
-        showBackground: false,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          // Left Side (Currency symbol if left-aligned, otherwise balanced spacer)
+          SizedBox(
+            width: 50,
+            child: symbolOnLeft
+                ? Align(
+                    alignment: Alignment.centerRight,
+                    child: Padding(
+                      padding: const EdgeInsets.only(right: 6.0),
+                      child: Text(
+                        currency,
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.w900,
+                          color: activeColor.withValues(alpha: 0.6),
+                        ),
+                      ),
+                    ),
+                  )
+                : const SizedBox.shrink(),
+          ),
+          
+          Expanded(
+            child: CustomTextField(
+              controller: amountController,
+              hintText: "0,00",
+              icon: Icons.attach_money_rounded,
+              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+              inputFormatters: [_TRCurrencyFormatter()],
+              textAlign: TextAlign.center,
+              fontSize: 56,
+              showBackground: false,
+            ),
+          ),
+          
+          // Right Side (Currency symbol if right-aligned, otherwise balanced spacer)
+          SizedBox(
+            width: 50,
+            child: !symbolOnLeft
+                ? Align(
+                    alignment: Alignment.centerLeft,
+                    child: Padding(
+                      padding: const EdgeInsets.only(left: 6.0),
+                      child: Text(
+                        currency,
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.w900,
+                          color: activeColor.withValues(alpha: 0.6),
+                        ),
+                      ),
+                    ),
+                  )
+                : const SizedBox.shrink(),
+          ),
+        ],
       ),
     );
   }
@@ -97,6 +157,9 @@ class TransactionAmountInput extends StatelessWidget {
     String label,
     TextEditingController controller,
   ) {
+    final activeColor = Theme.of(context).colorScheme.primary;
+    final symbolOnLeft = _isSymbolOnLeft(currency);
+
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -110,16 +173,64 @@ class TransactionAmountInput extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 4),
-        CustomTextField(
-          controller: controller,
-          hintText: "0,00",
-          icon: Icons.attach_money_rounded,
-          keyboardType: const TextInputType.numberWithOptions(decimal: true),
-          inputFormatters: [_TRCurrencyFormatter()],
-          textAlign: TextAlign.center,
-          fontSize: 24,
-          suffixText: currency,
-          showBackground: false,
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            // Left Side (Currency symbol if left-aligned, otherwise balanced spacer)
+            SizedBox(
+              width: 30,
+              child: symbolOnLeft
+                  ? Align(
+                      alignment: Alignment.centerRight,
+                      child: Padding(
+                        padding: const EdgeInsets.only(right: 3.0),
+                        child: Text(
+                          currency,
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w900,
+                            color: activeColor.withValues(alpha: 0.6),
+                          ),
+                        ),
+                      ),
+                    )
+                  : const SizedBox.shrink(),
+            ),
+            
+            Expanded(
+              child: CustomTextField(
+                controller: controller,
+                hintText: "0,00",
+                icon: Icons.attach_money_rounded,
+                keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                inputFormatters: [_TRCurrencyFormatter()],
+                textAlign: TextAlign.center,
+                fontSize: 24,
+                showBackground: false,
+              ),
+            ),
+            
+            // Right Side (Currency symbol if right-aligned, otherwise balanced spacer)
+            SizedBox(
+              width: 30,
+              child: !symbolOnLeft
+                  ? Align(
+                      alignment: Alignment.centerLeft,
+                      child: Padding(
+                        padding: const EdgeInsets.only(left: 3.0),
+                        child: Text(
+                          currency,
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w900,
+                            color: activeColor.withValues(alpha: 0.6),
+                          ),
+                        ),
+                      ),
+                    )
+                  : const SizedBox.shrink(),
+            ),
+          ],
         ),
       ],
     );

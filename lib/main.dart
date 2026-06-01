@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'l10n/app_localizations.dart';
-import 'features/dashboard/main_scaffold.dart';
-import 'features/auth/screens/auth_screen.dart';
+import 'features/home/main_scaffold.dart';
+import 'features/auth/auth_screen.dart';
 import 'core/database/database_service.dart';
 import 'core/theme/app_theme.dart';
 import 'core/theme/app_constants.dart';
@@ -18,6 +18,7 @@ import 'core/services/subscription_service.dart';
 import 'core/services/notification_service.dart';
 import 'core/widgets/sync_bootstrap.dart';
 import 'package:dynamic_color/dynamic_color.dart';
+import 'shared/widgets/custom_notification.dart';
 
 void main() async {
   try {
@@ -69,11 +70,14 @@ void main() async {
     final prefs = await SharedPreferences.getInstance();
     debugPrint('✅ [Finarcast] SharedPreferences hazır.');
 
+    final isGuest = prefs.getBool('Finarcast_is_guest_mode') ?? false;
+
     debugPrint('🏁 [Finarcast] runApp() çağrılıyor...');
     runApp(
       ProviderScope(
         overrides: [
           subscriptionServiceProvider.overrideWith((ref) => SubscriptionService(prefs)),
+          guestModeProvider.overrideWith((ref) => isGuest),
         ],
         child: const FinarcastApp(),
       ),
@@ -98,6 +102,19 @@ class FinarcastApp extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    // Listen to authentication state changes and identify/logout user in RevenueCat
+    ref.listen<AsyncValue<AuthState>>(authStateProvider, (previous, next) {
+      if (next.hasValue) {
+        final authState = next.value!;
+        final user = authState.session?.user;
+        if (user != null) {
+          ref.read(subscriptionServiceProvider).logIn(user.id);
+        } else {
+          ref.read(subscriptionServiceProvider).logOut();
+        }
+      }
+    });
+
     final settings = ref.watch(settingsProvider);
     final themeMode = _getThemeMode(settings.themeModeIndex);
 
@@ -120,11 +137,11 @@ class FinarcastApp extends ConsumerWidget {
           accentColor = Color(settings.accentColorValue);
         }
 
-        final theme = AppTheme.buildLightTheme(accentColor ?? lightDynamic?.primary ?? const Color(0xFF00E5FF));
-        final darkTheme = AppTheme.buildDarkTheme(accentColor ?? darkDynamic?.primary ?? const Color(0xFF00E5FF));
+        final theme = AppTheme.buildLightTheme(accentColor ?? lightDynamic?.primary ?? const Color(0xFF00BCD4));
+        final darkTheme = AppTheme.buildDarkTheme(accentColor ?? darkDynamic?.primary ?? const Color(0xFF00BCD4));
 
         // Dinamik rengi güncelle (Diğer bileşenlerin erişebilmesi için)
-        final dynamicColor = lightDynamic?.primary ?? const Color(0xFF00E5FF);
+        final dynamicColor = lightDynamic?.primary ?? const Color(0xFF00BCD4);
         WidgetsBinding.instance.addPostFrameCallback((_) {
           if (ref.read(dynamicColorProvider) != dynamicColor) {
             ref.read(dynamicColorProvider.notifier).state = dynamicColor;
@@ -161,10 +178,11 @@ class FinarcastApp extends ConsumerWidget {
             home: Consumer(
               builder: (context, ref, child) {
                 final authState = ref.watch(authStateProvider);
+                final isGuest = ref.watch(guestModeProvider);
                 
                 return authState.when(
                   data: (state) {
-                    if (state.session != null) {
+                    if (state.session != null || isGuest) {
                       return const SyncBootstrap(child: MainScaffold());
                     }
                     return const AuthScreen();
@@ -244,12 +262,7 @@ class _DatabaseCrashScreenState extends State<DatabaseCrashScreen> {
         setState(() {
           _isResetting = false;
         });
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Sıfırlama başarısız oldu: $e'),
-            backgroundColor: Colors.redAccent,
-          ),
-        );
+        CustomNotification.error(context, 'Sıfırlama başarısız oldu: $e');
       }
     }
   }

@@ -4,6 +4,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/app_constants.dart';
 import '../../../core/database/database_service.dart';
 import '../../../core/database/models/vault.dart';
+import '../../../core/providers/settings_provider.dart';
+import '../../../core/utils/currency_utils.dart';
+import '../../../core/services/currency_service.dart';
 import '../../../shared/widgets/custom_text_field.dart';
 import '../../../shared/widgets/custom_button.dart';
 import '../../auth/widgets/auth_wave.dart';
@@ -87,15 +90,12 @@ class _AddVaultSheetState extends ConsumerState<AddVaultSheet> with SingleTicker
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              SizedBox(
-                height: 50 * sf,
-                child: CustomTextField(
-                  controller: _nameController,
-                  hintText: l10n.vaultNameHint,
-                  icon: Icons.drive_file_rename_outline_rounded,
-                  autofocus: true,
-                  scalingFactor: sf,
-                ),
+              CustomTextField(
+                controller: _nameController,
+                hintText: l10n.vaultNameHint,
+                icon: Icons.drive_file_rename_outline_rounded,
+                autofocus: true,
+                scalingFactor: sf,
               ),
               
               SizedBox(height: 20 * sf),
@@ -152,25 +152,54 @@ class _AddVaultSheetState extends ConsumerState<AddVaultSheet> with SingleTicker
               ),
               
               SizedBox(height: 20 * sf),
-              SizedBox(
-                height: 50 * sf,
-                child: CustomTextField(
-                  controller: _balanceController,
-                  hintText: l10n.initialBalance,
-                  icon: Icons.payments_rounded,
-                  suffixText: _selectedCurrency == 'AUTO' ? '' : _selectedCurrency,
-                  keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                  inputFormatters: [
-                    FilteringTextInputFormatter.allow(RegExp(r'[0-9.,]')),
-                  ],
-                  scalingFactor: sf,
-                ),
+              CustomTextField(
+                controller: _balanceController,
+                hintText: l10n.initialBalance,
+                icon: Icons.payments_rounded,
+                suffixText: _selectedCurrency == 'AUTO' ? '' : _selectedCurrency,
+                keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                inputFormatters: [
+                  FilteringTextInputFormatter.allow(RegExp(r'[0-9.,]')),
+                ],
+                scalingFactor: sf,
               ),
               SizedBox(height: 24 * sf),
               CustomButton(
                 label: l10n.createVault,
                 onTap: () async {
                   if (_nameController.text.isNotEmpty) {
+                    final baseCurrency = ref.read(settingsProvider).currencySymbol;
+                    final targetCurrency = _selectedCurrency;
+
+                    if (targetCurrency != 'AUTO' && targetCurrency != baseCurrency) {
+                      var rates = await DatabaseService.getAllExchangeRates();
+                      final code = CurrencyUtils.symbolToCode(targetCurrency);
+                      var hasRate = rates.any((r) => r.currencyCode == code && r.rate > 0);
+
+                      if (!hasRate) {
+                        // Kurlar yok, otomatik çekmeyi dene
+                        final success = await CurrencyService.updateRates();
+                        if (success) {
+                          rates = await DatabaseService.getAllExchangeRates();
+                          hasRate = rates.any((r) => r.currencyCode == code && r.rate > 0);
+                        }
+                      }
+
+                      if (!hasRate) {
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text(
+                                "Döviz kurları yüklü değil. Farklı para biriminde kasa oluşturmak için lütfen internete bağlanıp kurları güncelleyin.",
+                              ),
+                              backgroundColor: Colors.redAccent,
+                            ),
+                          );
+                        }
+                        return;
+                      }
+                    }
+
                     final double? initialBalance = double.tryParse(_balanceController.text.replaceAll(',', '.'));
                     
                     final newVault = Vault()

@@ -53,7 +53,7 @@ class IntegratedVaultCard extends StatelessWidget {
     final double widthT = Curves.easeOutQuart.transform(morphProgress);
     
     final double cardWidth = lerpDouble(screenWidth * 0.70, screenWidth, widthT)!;
-    final double cardHeight = lerpDouble(270, 56, morphProgress)!;
+    final double cardHeight = lerpDouble(286, 56, morphProgress)!;
     
     // --- Glass Morphing Spread (2. Madde) ---
     final double decorationOpacity = 1.0 - Curves.easeOut.transform((morphProgress * 1.35).clamp(0.0, 1.0)); 
@@ -131,10 +131,10 @@ class IntegratedVaultCard extends StatelessWidget {
     // Her iki durumda da (esnek işlem olsun veya olmasın) üst ve alt iç boşlukları (paddings) %100 simetrik hale getiriyoruz.
     // hasFlexibleTx == true  => Üst: 25.0 px, Alt: 25.0 px (İçerideki boşlukları eşitlemek için)
     // hasFlexibleTx == false => Üst: 25.0 px, Alt: 25.0 px
-    final double titleExpandedTop = 25.0;
-    // Ana tutarın (42 px) üstündeki ve altındaki boşlukları kusursuz (tam 20.0 px) eşitlemek için matematiksel hizalama:
-    final double secondaryExpandedTop = 119.0;
-    final double balanceExpandedTop = 57.0; 
+    final double titleExpandedTop = 20.0;
+    // Ana tutarın (42 px) üstündeki ve altındaki boşlukları kusursuz eşitlemek için matematiksel hizalama:
+    final double secondaryExpandedTop = 148.0;
+    final double balanceExpandedTop = 56.0; 
     
     // --- Dar Mod (Compact) Pozisyonları ---
     final double titleCompactTop = (h - titleFontSize) / 2;
@@ -143,9 +143,10 @@ class IntegratedVaultCard extends StatelessWidget {
     final double titleTop = lerpDouble(titleExpandedTop, titleCompactTop, magneticT)!;
     final double balanceTop = lerpDouble(balanceExpandedTop, balanceCompactTop, magneticT)!;
     
-    final double statsOpacity = (1 - morphProgress * 3.0).clamp(0.0, 1.0); 
-    final double rangeOpacity = (1 - morphProgress * 5.0).clamp(0.0, 1.0); 
-    final double swapOpacity  = (1 - morphProgress * 8.0).clamp(0.0, 1.0); 
+    final double statsOpacity = (1 - morphProgress * 7.5).clamp(0.0, 1.0); 
+    final double rangeOpacity = (1 - morphProgress * 9.5).clamp(0.0, 1.0); 
+    final double swapOpacity  = (1 - morphProgress * 11.5).clamp(0.0, 1.0); 
+    final double approxOpacity = (1 - morphProgress * 6.0).clamp(0.0, 1.0); 
 
     // Yukarı kaçma efekti (Parallax)
     final double parallaxOffset = morphProgress * -80.0; 
@@ -211,20 +212,23 @@ class IntegratedVaultCard extends StatelessWidget {
         ),
         
         // === DÖNÜŞTÜRÜLMÜŞ BAKİYE ===
-        if (convertedBalance != null && statsOpacity > 0.01)
+        if (convertedBalance != null && approxOpacity > 0.01)
           Positioned(
             left: 0, right: 0,
-            top: balanceTop + balanceFontSize + 4,
-            child: Opacity(
-              opacity: statsOpacity,
-              child: Center(
-                child: Text(
-                  '≈ ${CurrencyUtils.formatFullAmount(convertedBalance!, symbol: convertedSymbol)}',
-                  style: TextStyle(
-                    fontSize: 11,
-                    fontWeight: FontWeight.w700,
-                    color: AppColors.getTextSecondary(context).withValues(alpha: 0.6),
-                    letterSpacing: 0.3,
+            top: balanceTop + balanceFontSize + 20,
+            child: Transform.translate(
+              offset: Offset(0, -parallaxOffset * 0.5), // Aşağı doğru hareket (Pozitif offset)
+              child: Opacity(
+                opacity: approxOpacity,
+                child: Center(
+                  child: Text(
+                    '≈ ${CurrencyUtils.formatFullAmount(convertedBalance!, symbol: convertedSymbol)}',
+                    style: TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.getTextSecondary(context).withValues(alpha: 0.6),
+                      letterSpacing: 0.3,
+                    ),
                   ),
                 ),
               ),
@@ -246,7 +250,10 @@ class IntegratedVaultCard extends StatelessWidget {
                     child: Row(
                       children: [
                         Expanded(child: _buildMiniStat(context, l10n.income, income, AppColors.getIncome(context))),
-                        Container(width: 1, height: 30, color: AppColors.getAccentDeep(context, activeColor).withValues(alpha: 0.15)),
+                        Opacity(
+                          opacity: rangeOpacity,
+                          child: Container(width: 1, height: 30, color: AppColors.getAccentDeep(context, activeColor).withValues(alpha: 0.15)),
+                        ),
                         Expanded(child: _buildMiniStat(context, l10n.expense, expense, AppColors.getExpense(context))),
                       ],
                     ),
@@ -278,19 +285,27 @@ class IntegratedVaultCard extends StatelessWidget {
                       ),
                     ),
 
-                  // Esnek işlem yoksa, alt kaydırma oku ile mini istatistikler arasına dikey boşluk ekleyerek mükemmel simetriyi tamamlıyoruz
-                  if (!hasFlexibleTx && swapOpacity > 0.01)
-                    const SizedBox(height: 76),
-
-                  if (swapOpacity > 0.01)
-                    Opacity(
-                      opacity: swapOpacity,
-                    child: Transform.translate(
-                        offset: Offset(0, parallaxOffset * 0.5), 
-                        child: Icon(Icons.swap_horiz_rounded, size: 20, color: AppColors.getTextSecondary(context)),
-                      ),
-                    ),
                 ],
+              ),
+            ),
+          ),
+
+        // === SWAP ARROW ===
+        if (swapOpacity > 0.01)
+          Positioned(
+            left: 0, right: 0,
+            bottom: 12,
+            child: Opacity(
+              opacity: swapOpacity,
+              child: Transform.translate(
+                offset: Offset(0, parallaxOffset * 0.5), 
+                child: Center(
+                  child: Icon(
+                    Icons.swap_horiz_rounded,
+                    size: 20,
+                    color: AppColors.getTextSecondary(context),
+                  ),
+                ),
               ),
             ),
           ),

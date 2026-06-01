@@ -41,6 +41,8 @@ class CustomCard extends ConsumerWidget {
       activeBorderColor = borderColor ?? AppColors.getThemeBorder(context, 1);
     }
 
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return GestureDetector(
       onTap: onTap,
       child: AnimatedContainer(
@@ -54,6 +56,15 @@ class CustomCard extends ConsumerWidget {
             color: activeBorderColor,
             width: 0.5,
           ),
+          boxShadow: (bgColorStyle == 1 && !isDark && backgroundColor == null)
+              ? [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.06),
+                    blurRadius: 12,
+                    offset: const Offset(0, 4),
+                  )
+                ]
+              : null,
         ),
         child: child,
       ),

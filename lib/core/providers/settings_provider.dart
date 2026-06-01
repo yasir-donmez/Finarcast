@@ -2,15 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:intl/intl.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../database/database_service.dart';
 import '../database/models/app_settings.dart';
 import '../services/notification_service.dart';
 import '../services/sync_coordinator.dart';
+import '../services/subscription_service.dart';
 
 extension AppSettingsCopy on AppSettings {
   AppSettings copyWith({
     int? themeModeIndex,
-    int? bgPatternDensity,
     int? bgColorStyle,
     int? accentColorValue,
     String? languageCode,
@@ -19,7 +20,6 @@ extension AppSettingsCopy on AppSettings {
     int? permanentDeletionDays,
     bool? isNotificationsEnabled,
     bool? isSyncEnabled,
-    bool? isLocationEnabled,
     String? countryName,
     String? remoteId,
     int? syncStatus,
@@ -27,7 +27,6 @@ extension AppSettingsCopy on AppSettings {
     return AppSettings()
       ..id = id
       ..themeModeIndex = themeModeIndex ?? this.themeModeIndex
-      ..bgPatternDensity = bgPatternDensity ?? this.bgPatternDensity
       ..bgColorStyle = bgColorStyle ?? this.bgColorStyle
       ..accentColorValue = accentColorValue ?? this.accentColorValue
       ..languageCode = languageCode ?? this.languageCode
@@ -38,7 +37,6 @@ extension AppSettingsCopy on AppSettings {
       ..isNotificationsEnabled =
           isNotificationsEnabled ?? this.isNotificationsEnabled
       ..isSyncEnabled = isSyncEnabled ?? this.isSyncEnabled
-      ..isLocationEnabled = isLocationEnabled ?? this.isLocationEnabled
       ..countryName = countryName ?? this.countryName
       ..remoteId = remoteId ?? this.remoteId
       ..syncStatus = syncStatus ?? this.syncStatus;
@@ -48,16 +46,70 @@ extension AppSettingsCopy on AppSettings {
 final rootRepaintBoundaryKey = GlobalKey();
 
 class SettingsNotifier extends StateNotifier<AppSettings> {
-  SettingsNotifier() : super(AppSettings()) {
+  final Ref _ref;
+
+  SettingsNotifier(this._ref) : super(AppSettings()) {
     _loadSettings();
+    _listenToSubscriptionChanges();
+  }
+
+  void _listenToSubscriptionChanges() {
+    _ref.listen<SubscriptionService>(subscriptionServiceProvider, (previous, next) {
+      if (previous == null || previous.isPro != next.isPro) {
+        if (!next.isPro) {
+          _resetPremiumSettings();
+        }
+      }
+    });
+  }
+
+  Future<void> _resetPremiumSettings() async {
+    bool needsSave = false;
+    var settings = state;
+
+    // Premium olmayan kullanıcılar için arkaplan stilini 'Sade' (2) yap
+    if (settings.bgColorStyle != 2) {
+      settings = settings.copyWith(bgColorStyle: 2);
+      needsSave = true;
+    }
+
+    // Premium olmayan kullanıcılar için vurgu rengini 'Kutup' (0xFF00BCD4) yap
+    if (settings.accentColorValue != 0xFF00BCD4) {
+      settings = settings.copyWith(accentColorValue: 0xFF00BCD4);
+      needsSave = true;
+    }
+
+    if (needsSave) {
+      await _save(settings);
+    }
   }
 
   Future<void> _loadSettings() async {
     var settings = await DatabaseService.getSettings();
-    if (settings.bgColorStyle == 0) {
+    final prefs = await SharedPreferences.getInstance();
+    final isPro = prefs.getBool('Finarcast_is_pro_user') ?? false;
+
+    bool needsSave = false;
+
+    // Premium olmayan kullanıcılar için arkaplan stilini 'Sade' (2) yap
+    if (!isPro && settings.bgColorStyle != 2) {
+      settings = settings.copyWith(bgColorStyle: 2);
+      needsSave = true;
+    } else if (settings.bgColorStyle == 0) {
       settings = settings.copyWith(bgColorStyle: 1);
+      needsSave = true;
+    }
+
+    // Premium olmayan kullanıcılar için vurgu rengini 'Kutup' (0xFF00BCD4) yap
+    if (!isPro && settings.accentColorValue != 0xFF00BCD4) {
+      settings = settings.copyWith(accentColorValue: 0xFF00BCD4);
+      needsSave = true;
+    }
+
+    if (needsSave) {
       await DatabaseService.saveSettings(settings);
     }
+
     state = settings;
     _updateIntl(state.languageCode);
   }
@@ -72,10 +124,7 @@ class SettingsNotifier extends StateNotifier<AppSettings> {
     await _save(state.copyWith(accentColorValue: colorValue));
   }
 
-  Future<void> setBgPatternDensity(int density) async {
-    if (state.bgPatternDensity == density) return;
-    await _save(state.copyWith(bgPatternDensity: density));
-  }
+
 
   Future<void> setBgColorStyle(int style) async {
     if (state.bgColorStyle == style) return;
@@ -163,10 +212,6 @@ class SettingsNotifier extends StateNotifier<AppSettings> {
     }
   }
 
-  Future<void> toggleLocation(bool value) async {
-    if (state.isLocationEnabled == value) return;
-    await _save(state.copyWith(isLocationEnabled: value));
-  }
 
   Future<void> toggleSync(bool value) async {
     if (state.isSyncEnabled == value) return;
@@ -197,9 +242,9 @@ class SettingsNotifier extends StateNotifier<AppSettings> {
 final settingsProvider = StateNotifierProvider<SettingsNotifier, AppSettings>((
   ref,
 ) {
-  return SettingsNotifier();
+  return SettingsNotifier(ref);
 });
 
 final dynamicColorProvider = StateProvider<Color>(
-  (ref) => const Color(0xFF00E5FF),
+  (ref) => const Color(0xFF00BCD4),
 );

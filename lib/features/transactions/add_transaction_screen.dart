@@ -9,8 +9,10 @@ import '../../core/database/models/transaction_record.dart';
 import '../../core/database/models/vault.dart';
 import '../../core/services/custom_category_service.dart';
 import '../../core/providers/settings_provider.dart';
-import '../dashboard/dashboard_providers.dart';
+import '../home/home_providers.dart';
 import '../../core/services/notification_service.dart';
+import '../../core/utils/currency_utils.dart';
+import '../../core/services/currency_service.dart';
 import '../auth/widgets/auth_background.dart';
 
 import 'widgets/transaction_vault_selector.dart';
@@ -28,6 +30,7 @@ import '../../shared/widgets/custom_text_field.dart';
 import '../../shared/widgets/custom_button.dart';
 import '../../shared/widgets/custom_bottom_sheet.dart';
 import '../../shared/widgets/glass_surface.dart';
+import '../../shared/widgets/custom_notification.dart';
 
 class AddTransactionScreen extends ConsumerStatefulWidget {
   final int? initialId;
@@ -284,7 +287,14 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
 
   Future<void> _loadVaults() async {
     final v = await DatabaseService.getAllVaults();
-    if (mounted) setState(() => _vaults = v);
+    if (mounted) {
+      setState(() {
+        _vaults = v;
+        if (_selectedVaultIds.isEmpty && widget.initialId == null && v.isNotEmpty) {
+          _selectedVaultIds = [v.first.id];
+        }
+      });
+    }
   }
 
   Future<void> _loadCustomCategories() async {
@@ -615,6 +625,49 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
         }
       }
 
+      // Doviz kuru kontrolü
+      final baseCurrency = ref.read(settingsProvider).currencySymbol;
+
+      // Yardımcı: Kur var mı kontrol et, yoksa otomatik çekmeyi dene
+      Future<bool> ensureRate(String currencySymbol) async {
+        final code = CurrencyUtils.symbolToCode(currencySymbol);
+        var rates = await DatabaseService.getAllExchangeRates();
+        var hasRate = rates.any((r) => r.currencyCode == code && r.rate > 0);
+        if (!hasRate) {
+          // Kurlar yok, otomatik çekmeyi dene
+          final success = await CurrencyService.updateRates();
+          if (success) {
+            rates = await DatabaseService.getAllExchangeRates();
+            hasRate = rates.any((r) => r.currencyCode == code && r.rate > 0);
+          }
+        }
+        return hasRate;
+      }
+
+      // 1. İşlemin kendi para birimi için kontrol
+      if (_selectedCurrency != baseCurrency) {
+        final hasRate = await ensureRate(_selectedCurrency);
+        if (!hasRate) {
+          _showValidationError('Döviz kurları yüklü değil. Farklı para biriminde işlem eklemek/güncellemek için lütfen internete bağlanıp kurları güncelleyin.');
+          return;
+        }
+      }
+
+      // 2. İşlemin eklendiği kasaların para birimi için kontrol
+      for (final vaultId in _selectedVaultIds) {
+        final vault = _vaults.where((v) => v.id == vaultId).firstOrNull;
+        if (vault != null) {
+          final vaultCurrency = vault.currency == 'AUTO' ? baseCurrency : vault.currency;
+          if (vaultCurrency != baseCurrency) {
+            final hasRate = await ensureRate(vaultCurrency);
+            if (!hasRate) {
+              _showValidationError('Seçili kasanın para birimi (${vault.currency}) için döviz kurları yüklü değil. Lütfen internete bağlanıp kurları güncelleyin.');
+              return;
+            }
+          }
+        }
+      }
+
       final finalAmount = _isFlexibleAmount ? 0.0 : amount;
       final finalMin = _isFlexibleAmount ? minAmount : null;
       final finalMax = _isFlexibleAmount ? maxAmount : null;
@@ -782,7 +835,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
     final activeCategories = _getMergedCategories();
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final activeColor = ref.watch(rotaryColorProvider);
-    final double safeTop = MediaQuery.of(context).padding.top;
+    final double safeTop = MediaQuery.of(context).viewPadding.top;
 
     return Stack(
       children: [
@@ -816,6 +869,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                 if (t.isNaN) t = 0.0;
 
                 final double revT = 1.0 - t;
+                final double buttonAnim = t;
 
                 return Stack(
                   fit: StackFit.expand,
@@ -882,11 +936,19 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                           ),
 
                           // Back Button
-                          Positioned(
-                            top: safeTop + 4,
-                            left: 8,
-                            child: _HeaderBackButton(activeColor: activeColor),
-                          ),
+                          if (buttonAnim > 0.01)
+                            Positioned(
+                              top: safeTop + 10,
+                              left: 20 - ((1.0 - t) * 80),
+                              child: Opacity(
+                                opacity: buttonAnim,
+                                child: Transform.scale(
+                                  scale: buttonAnim,
+                                  alignment: Alignment.centerLeft,
+                                  child: _HeaderBackButton(activeColor: activeColor),
+                                ),
+                              ),
+                            ),
                         ],
                       ),
                     ),
@@ -1127,12 +1189,9 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                                   final granted = await NotificationService()
                                       .requestPermissions();
                                   if (!granted && context.mounted) {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      const SnackBar(
-                                        content: Text(
-                                          'Bildirim izni verilmedi. Lütfen ayarlardan açın.',
-                                        ),
-                                      ),
+                                    CustomNotification.warning(
+                                      context,
+                                      'Bildirim izni verilmedi. Lütfen ayarlardan açın.',
                                     );
                                     return;
                                   }
@@ -1278,7 +1337,7 @@ class _HeaderBackButton extends StatelessWidget {
             duration: const Duration(milliseconds: 100),
             child: GlassSurface(
               borderRadius: 999, // Tam dairesel geri butonu
-              padding: const EdgeInsets.all(10),
+              padding: const EdgeInsets.all(13),
               showShadow: true,
               backgroundColor: isPressed
                   ? (isDark
@@ -1287,7 +1346,9 @@ class _HeaderBackButton extends StatelessWidget {
                   : (isDark
                       ? Colors.black.withValues(alpha: 0.35)
                       : Colors.white.withValues(alpha: 0.65)),
-              borderColor: activeColor.withValues(alpha: isPressed ? 0.3 : 0.15),
+              borderColor: isPressed
+                  ? activeColor.withValues(alpha: 0.3)
+                  : null,
               boxShadow: [
                 BoxShadow(
                   color: Colors.black.withValues(alpha: isPressed ? 0.03 : 0.08),
@@ -1297,7 +1358,7 @@ class _HeaderBackButton extends StatelessWidget {
               ],
               child: Icon(
                 Icons.arrow_back_ios_new_rounded,
-                size: 16,
+                size: 24,
                 color: isPressed
                     ? activeColor
                     : AppColors.getTextPrimary(context).withValues(alpha: 0.8),

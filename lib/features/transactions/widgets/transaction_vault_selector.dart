@@ -29,27 +29,23 @@ class _TransactionVaultSelectorState extends State<TransactionVaultSelector> {
     final onChanged = widget.onChanged;
 
     final l10n = AppLocalizations.of(context)!;
-    final List<Vault?> vaultOptions = [null, ...vaults];
+    final List<Vault> vaultOptions = vaults;
 
     // Mevcut seçimin indexini bul
     int currentIndex = vaultOptions.indexWhere(
-      (v) => selectedVaultIds.contains(v?.id),
+      (v) => selectedVaultIds.contains(v.id),
     );
     if (currentIndex == -1) currentIndex = 0;
 
     return PickerField(
       icon: Icons.account_balance_wallet_rounded,
       label: l10n.vault,
-      items: vaultOptions.map((v) => v?.name ?? l10n.allLabel).toList(),
+      items: vaultOptions.map((v) => v.name).toList(),
       selectedIndex: currentIndex,
       scalingFactor: widget.scalingFactor,
       onChanged: (index) {
         final vault = vaultOptions[index];
-        if (vault == null) {
-          onChanged([]);
-        } else {
-          onChanged([vault.id]);
-        }
+        onChanged([vault.id]);
       },
     );
   }

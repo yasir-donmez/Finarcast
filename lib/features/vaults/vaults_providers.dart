@@ -540,17 +540,7 @@ class TransactionGroupsHelper {
     final id = int.tryParse(groupId.replaceFirst('v_', ''));
     if (id == null) return;
 
-    // Önce bu gruptaki tüm işlemleri çıkar
-    final allTx = await DatabaseService.getAllTransactions();
-    for (final tx in allTx) {
-      if (tx.vaultIds.contains(id)) {
-        final updatedVaults = List<int>.from(tx.vaultIds)..remove(id);
-        tx.vaultIds = updatedVaults;
-        await DatabaseService.updateTransaction(tx);
-      }
-    }
-
-    // Kasayı (Grubu) sil
+    // Kasayı (ve içindeki tüm işlemleri) sil
     await DatabaseService.deleteVault(id);
   }
 }
@@ -566,12 +556,14 @@ final filteredVaultTransactionsProvider = Provider<List<TransactionUI>>((ref) {
   final allTransactions = ref.watch(vaultTransactionsProvider);
   final filter = ref.watch(transactionFilterProvider);
   final selectedVaultId = ref.watch(selectedVaultProvider);
+  final groups = ref.watch(transactionGroupsProvider);
+  final effectiveVaultId = selectedVaultId ?? (groups.isNotEmpty ? groups.first.id : null);
   final selectedPeriod = ref.watch(selectedPeriodProvider);
 
   // 1. Kasa Filtresi
-  var filtered = selectedVaultId == null
+  var filtered = effectiveVaultId == null
       ? allTransactions
-      : allTransactions.where((t) => t.groupIds.contains(selectedVaultId)).toList();
+      : allTransactions.where((t) => t.groupIds.contains(effectiveVaultId)).toList();
 
   // 2. Tip Filtresi (Gelir/Gider)
   filtered = filtered.where((t) {

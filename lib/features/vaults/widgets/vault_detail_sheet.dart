@@ -4,12 +4,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/app_constants.dart';
 import '../../../core/database/database_service.dart';
 import '../../../core/database/models/vault.dart';
+import '../../../core/database/models/transaction_record.dart';
 import '../../../core/providers/db_providers.dart';
 import '../../../core/providers/settings_provider.dart';
 import '../../../core/utils/currency_utils.dart';
 import '../../../core/utils/icon_utils.dart';
+import '../../../core/services/currency_service.dart';
 import '../../../core/database/models/exchange_rate.dart';
-import '../../../shared/widgets/custom_switch.dart';
 import '../../../shared/widgets/segmented_control.dart';
 import '../../../shared/widgets/custom_card.dart';
 import '../../../shared/widgets/custom_text_field.dart';
@@ -30,12 +31,13 @@ class VaultDetailSheet extends ConsumerStatefulWidget {
 
 class _VaultDetailSheetState extends ConsumerState<VaultDetailSheet> with SingleTickerProviderStateMixin {
   late TextEditingController _nameController;
+  late TextEditingController _balanceController;
   VaultDetailTab _activeTab = VaultDetailTab.transactions;
   
   String? _tempName;
   String? _tempCurrency;
-  Set<int>? _tempSelectedTxIds;
   bool _isInitialized = false;
+  double _initialCurrentBalance = 0.0;
 
   List<Map<String, String>> _getCurrencies(AppLocalizations l10n) {
     final List<Map<String, String>> items = [
@@ -64,15 +66,17 @@ class _VaultDetailSheetState extends ConsumerState<VaultDetailSheet> with Single
         _tempName = _nameController.text.trim();
       }
     });
+    _balanceController = TextEditingController();
   }
 
   @override
   void dispose() {
     _nameController.dispose();
+    _balanceController.dispose();
     super.dispose();
   }
 
-  Future<void> _saveChanges() async {
+  Future<void> _saveChanges(AppLocalizations l10n) async {
     if (widget.vaultId == null) return;
     
     final vaultDbId = int.tryParse(widget.vaultId!.replaceFirst('v_', ''));
@@ -86,31 +90,88 @@ class _VaultDetailSheetState extends ConsumerState<VaultDetailSheet> with Single
       vault.name = _tempName!;
       vaultChanged = true;
     }
+    
+    final globalCurrency = ref.read(settingsProvider).currencySymbol;
+    final rates = ref.read(exchangeRatesProvider).value ?? [];
+
     if (_tempCurrency != null && _tempCurrency != vault.currency) {
-      vault.currency = _tempCurrency!;
-      vaultChanged = true;
+      final baseCurrency = globalCurrency;
+      final targetCurrency = _tempCurrency!;
+      
+      if (targetCurrency != 'AUTO' && targetCurrency != baseCurrency) {
+        var rates = await DatabaseService.getAllExchangeRates();
+        final code = CurrencyUtils.symbolToCode(targetCurrency);
+        var hasRate = rates.any((r) => r.currencyCode == code && r.rate > 0);
+        
+        if (!hasRate) {
+          // Kurlar yok, otomatik çekmeyi dene
+          final success = await CurrencyService.updateRates();
+          if (success) {
+            rates = await DatabaseService.getAllExchangeRates();
+            hasRate = rates.any((r) => r.currencyCode == code && r.rate > 0);
+          }
+        }
+
+        if (!hasRate) {
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text(
+                  "Döviz kurları yüklü değil. Kasa para birimi değiştirilemedi. Lütfen internete bağlanıp kurları güncelleyin.",
+                ),
+                backgroundColor: Colors.redAccent,
+              ),
+            );
+          }
+          _tempCurrency = vault.currency;
+        } else {
+          vault.currency = targetCurrency;
+          vaultChanged = true;
+        }
+      } else {
+        vault.currency = targetCurrency;
+        vaultChanged = true;
+      }
     }
 
     if (vaultChanged) {
       await DatabaseService.updateVault(vault);
     }
 
-    if (_tempSelectedTxIds != null) {
-      final allTx = await DatabaseService.getAllTransactions();
-      for (final tx in allTx) {
-        final shouldBeInVault = _tempSelectedTxIds!.contains(tx.id);
-        final isInVault = tx.vaultIds.contains(vaultDbId);
+    // --- BAKIYE DUZELTME ISLEMI ---
+    final double? editedBalance = double.tryParse(_balanceController.text.replaceAll(',', '.'));
+    if (editedBalance != null) {
+      final tempCurrency = (_tempCurrency ?? vault.currency) == 'AUTO' ? globalCurrency : (_tempCurrency ?? vault.currency);
+      
+      final allTransactions = ref.read(vaultTransactionsProvider);
+      final displayTxs = allTransactions.where((t) => t.groupIds.contains(widget.vaultId!)).toList();
+      
+      final double initialBalanceVal = vault.balance;
+      final double currentBalanceVal = displayTxs.fold<double>(initialBalanceVal, (sum, t) {
+        final amt = t.getConvertedAmount(tempCurrency, rates) * t.passedOccurrences;
+        return t.isIncome ? sum + amt : sum - amt;
+      });
+
+      if ((editedBalance - currentBalanceVal).abs() > 0.005) {
+        final double difference = editedBalance - currentBalanceVal;
         
-        if (shouldBeInVault != isInVault) {
-          final newVaultIds = List<int>.from(tx.vaultIds);
-          if (shouldBeInVault) {
-            newVaultIds.add(vaultDbId);
-          } else {
-            newVaultIds.remove(vaultDbId);
-          }
-          tx.vaultIds = newVaultIds;
-          await DatabaseService.updateTransaction(tx);
-        }
+        final String oldBalanceStr = CurrencyUtils.formatFullAmount(currentBalanceVal, symbol: tempCurrency);
+        final String newBalanceStr = CurrencyUtils.formatFullAmount(editedBalance, symbol: tempCurrency);
+        
+        final tx = TransactionRecord()
+          ..title = l10n.balanceAdjustment
+          ..amount = difference.abs()
+          ..isIncome = difference > 0
+          ..date = DateTime.now()
+          ..vaultIds = [vault.id]
+          ..currency = tempCurrency
+          ..categoryId = difference > 0 ? 'inc_other_general' : 'exp_other_general'
+          ..iconCode = 'account_balance_wallet_rounded'
+          ..note = l10n.balanceAdjustmentNote(oldBalanceStr, newBalanceStr)
+          ..periodType = 0 // Tek Seferlik
+          ..showOnDashboard = true;
+
+        await DatabaseService.addTransaction(tx);
       }
     }
   }
@@ -143,23 +204,25 @@ class _VaultDetailSheetState extends ConsumerState<VaultDetailSheet> with Single
       final vaultDbId = int.tryParse(widget.vaultId!.replaceFirst('v_', ''));
       vault = allVaults.where((v) => v.id == vaultDbId).firstOrNull;
       
+      displayTxs = allTransactions.where((t) {
+        return t.groupIds.contains(widget.vaultId!);
+      }).toList();
+
       if (vault != null && !_isInitialized) {
         _tempName = vault.name;
         _tempCurrency = vault.currency;
         _nameController.text = _tempName!;
-        _tempSelectedTxIds = allTransactions
-            .where((t) => t.groupIds.contains(widget.vaultId!))
-            .map((t) => t.dbId!)
-            .toSet();
+        
+        final tempCurrency = _tempCurrency == 'AUTO' ? globalCurrency : _tempCurrency!;
+        final double initialBalanceVal = vault.balance;
+        _initialCurrentBalance = displayTxs.fold<double>(initialBalanceVal, (sum, t) {
+          final amt = t.getConvertedAmount(tempCurrency, rates) * t.passedOccurrences;
+          return t.isIncome ? sum + amt : sum - amt;
+        });
+        _balanceController.text = _initialCurrentBalance.toStringAsFixed(2).replaceAll(RegExp(r'\.00$'), '');
+        
         _isInitialized = true;
       }
-
-      displayTxs = allTransactions.where((t) {
-        if (_tempSelectedTxIds != null) {
-          return _tempSelectedTxIds!.contains(t.dbId);
-        }
-        return t.groupIds.contains(widget.vaultId!);
-      }).toList();
     }
 
     if (vault == null) return const SizedBox.shrink();
@@ -176,7 +239,7 @@ class _VaultDetailSheetState extends ConsumerState<VaultDetailSheet> with Single
     return PopScope(
       onPopInvokedWithResult: (didPop, result) async {
         if (didPop) {
-          await _saveChanges();
+          await _saveChanges(l10n);
         }
       },
       child: Column(
@@ -199,7 +262,7 @@ class _VaultDetailSheetState extends ConsumerState<VaultDetailSheet> with Single
               switchOutCurve: Curves.easeInCubic,
               child: _activeTab == VaultDetailTab.transactions
                 ? _buildMainView(context, vault, displayTxs, activeColor, isDark, isMainVault, displayCurrency, sf, rates, l10n)
-                : _buildManageView(context, vault, allTransactions, displayTxs, activeColor, isDark, sf, l10n),
+                : _buildManageView(context, vault, activeColor, isDark, sf, l10n),
             ),
           ),
         ],
@@ -594,9 +657,11 @@ class _VaultDetailSheetState extends ConsumerState<VaultDetailSheet> with Single
     );
   }
 
-  Widget _buildManageView(BuildContext context, Vault vault, List<TransactionUI> allTransactions, List<TransactionUI> vaultTransactions, Color activeColor, bool isDark, double sf, AppLocalizations l10n) {
-    final standaloneTransactions = allTransactions.where((t) => t.groupIds.isEmpty || (_tempSelectedTxIds?.contains(t.dbId) ?? false)).toList();
+  Widget _buildManageView(BuildContext context, Vault vault, Color activeColor, bool isDark, double sf, AppLocalizations l10n) {
     final currencies = _getCurrencies(l10n);
+
+    final allVaults = ref.watch(allVaultsProvider);
+    final bool isLastVault = allVaults.length <= 1;
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -618,13 +683,44 @@ class _VaultDetailSheetState extends ConsumerState<VaultDetailSheet> with Single
               const SizedBox(width: 12),
               CustomIconButton(
                 icon: Icons.delete_outline_rounded,
-                onTap: () => _confirmDeleteVault(context, vault),
-                color: AppColors.error,
-                backgroundColor: AppColors.error.withValues(alpha: 0.1),
+                onTap: isLastVault
+                    ? () {
+                        HapticFeedback.vibrate();
+                        showCustomDialog(
+                          context: context,
+                          accentColor: AppColors.error,
+                          title: "Kasa Silinemez",
+                          content: "Uygulamada en az bir aktif kasa bulunmalıdır. Bu kasayı silmek için önce yeni bir kasa oluşturmalısınız.",
+                          actions: [
+                            PrecisionDialogAction(
+                              label: "Tamam",
+                              onTap: () => Navigator.pop(context),
+                              isPrimary: true,
+                            ),
+                          ],
+                        );
+                      }
+                    : () => _confirmDeleteVault(context, vault),
+                color: isLastVault ? AppColors.getTextFaint(context) : AppColors.error,
+                backgroundColor: isLastVault
+                    ? AppColors.getTextFaint(context).withValues(alpha: 0.05)
+                    : AppColors.error.withValues(alpha: 0.1),
                 padding: 14,
                 borderRadius: 16,
               ),
             ],
+          ),
+          const SizedBox(height: 16),
+          CustomTextField(
+            controller: _balanceController,
+            hintText: l10n.currentBalance,
+            icon: Icons.payments_rounded,
+            suffixText: (_tempCurrency ?? vault.currency) == 'AUTO' ? '' : (_tempCurrency ?? vault.currency),
+            keyboardType: const TextInputType.numberWithOptions(decimal: true),
+            inputFormatters: [
+              FilteringTextInputFormatter.allow(RegExp(r'[0-9.,]')),
+            ],
+            scalingFactor: sf,
           ),
           const SizedBox(height: 20),
           Text(l10n.currency.toUpperCase(), style: TextStyle(fontSize: 10, fontWeight: FontWeight.w900, color: AppColors.getTextSecondary(context), letterSpacing: 1)),
@@ -654,54 +750,6 @@ class _VaultDetailSheetState extends ConsumerState<VaultDetailSheet> with Single
                   ),
                 );
               }).toList(),
-            ),
-          ),
-          const SizedBox(height: 32),
-          Text(l10n.manageTransactionsInVault, style: TextStyle(fontSize: 16 * sf, fontWeight: FontWeight.w900, letterSpacing: -0.5)),
-          const SizedBox(height: 12),
-          ConstrainedBox(
-            constraints: BoxConstraints(maxHeight: MediaQuery.of(context).size.height * 0.35 * sf),
-            child: ListView.separated(
-              shrinkWrap: true,
-              padding: EdgeInsets.symmetric(vertical: 8 * sf),
-              itemCount: standaloneTransactions.length,
-              separatorBuilder: (_, __) => SizedBox(height: 10 * sf),
-              itemBuilder: (context, index) {
-                final tx = standaloneTransactions[index];
-                final isSelected = _tempSelectedTxIds?.contains(tx.dbId) ?? false;
-                return CustomCard(
-                  scalingFactor: sf,
-                  child: Row(
-                    children: [
-                      Container(
-                        padding: EdgeInsets.all(8 * sf),
-                        decoration: BoxDecoration(color: AppColors.getAccentDeep(context, tx.color).withValues(alpha: 0.1), borderRadius: BorderRadius.circular(12 * sf)),
-                        child: Icon(tx.icon, color: AppColors.getAccentDeep(context, tx.color), size: 20 * sf),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(child: Text(tx.name, style: TextStyle(fontWeight: FontWeight.w700, fontSize: 14 * sf))),
-                      CustomSwitch(
-                        value: isSelected,
-                        activeColor: activeColor,
-                        activeIcon: Icons.check_rounded,
-                        inactiveIcon: Icons.add_rounded,
-                        scalingFactor: 0.75 * sf,
-                        onChanged: (val) {
-                          if (tx.dbId == null) return;
-                          HapticFeedback.selectionClick();
-                          setState(() {
-                            if (val) {
-                              _tempSelectedTxIds!.add(tx.dbId!);
-                            } else {
-                              _tempSelectedTxIds!.remove(tx.dbId!);
-                            }
-                          });
-                        },
-                      ),
-                    ],
-                  ),
-                );
-              },
             ),
           ),
           const SizedBox(height: 20),

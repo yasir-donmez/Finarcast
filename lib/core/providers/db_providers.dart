@@ -56,9 +56,19 @@ final totalExpenseProvider = Provider<double>((ref) {
       .fold<double>(0, (sum, t) => sum + t.getConvertedAmount(targetCurrency, rates));
 });
 
-/// Net bakiye (gelir - gider)
+/// Net bakiye (gelir - gider + kasaların ilk bakiyeleri)
 final netBalanceProvider = Provider<double>((ref) {
-  return ref.watch(totalIncomeProvider) - ref.watch(totalExpenseProvider);
+  final vaults = ref.watch(allVaultsProvider);
+  final rates = ref.watch(exchangeRatesProvider).value ?? [];
+  final targetCurrency = ref.watch(settingsProvider).currencySymbol;
+
+  double totalVaultsInitial = 0;
+  for (final v in vaults) {
+    final vCurrency = v.currency == 'AUTO' ? targetCurrency : v.currency;
+    totalVaultsInitial += CurrencyUtils.convert(v.balance, vCurrency, targetCurrency, rates);
+  }
+
+  return totalVaultsInitial + ref.watch(totalIncomeProvider) - ref.watch(totalExpenseProvider);
 });
 
 /// Net Min bakiye (Kötü senaryo - Sadece gerçekleşenler üzerinden)
@@ -66,8 +76,15 @@ final netMinBalanceProvider = Provider<double>((ref) {
   final now = DateTime.now();
   final rates = ref.watch(exchangeRatesProvider).value ?? [];
   final targetCurrency = ref.watch(settingsProvider).currencySymbol;
+  final vaults = ref.watch(allVaultsProvider);
+
+  double totalVaultsInitial = 0;
+  for (final v in vaults) {
+    final vCurrency = v.currency == 'AUTO' ? targetCurrency : v.currency;
+    totalVaultsInitial += CurrencyUtils.convert(v.balance, vCurrency, targetCurrency, rates);
+  }
   
-  return ref.watch(allTransactionsProvider)
+  final txsSum = ref.watch(allTransactionsProvider)
       .where((t) => t.date.isBefore(now) || t.date.isAtSameMomentAs(now))
       .fold<double>(0, (sum, t) {
     if (t.isIncome) {
@@ -78,6 +95,8 @@ final netMinBalanceProvider = Provider<double>((ref) {
       return sum - CurrencyUtils.convert(val, t.currency ?? '₺', targetCurrency, rates);
     }
   });
+
+  return totalVaultsInitial + txsSum;
 });
 
 /// Net Max bakiye (İyi senaryo - Sadece gerçekleşenler üzerinden)
@@ -85,8 +104,15 @@ final netMaxBalanceProvider = Provider<double>((ref) {
   final now = DateTime.now();
   final rates = ref.watch(exchangeRatesProvider).value ?? [];
   final targetCurrency = ref.watch(settingsProvider).currencySymbol;
+  final vaults = ref.watch(allVaultsProvider);
 
-  return ref.watch(allTransactionsProvider)
+  double totalVaultsInitial = 0;
+  for (final v in vaults) {
+    final vCurrency = v.currency == 'AUTO' ? targetCurrency : v.currency;
+    totalVaultsInitial += CurrencyUtils.convert(v.balance, vCurrency, targetCurrency, rates);
+  }
+
+  final txsSum = ref.watch(allTransactionsProvider)
       .where((t) => t.date.isBefore(now) || t.date.isAtSameMomentAs(now))
       .fold<double>(0, (sum, t) {
     if (t.isIncome) {
@@ -97,6 +123,8 @@ final netMaxBalanceProvider = Provider<double>((ref) {
       return sum - CurrencyUtils.convert(val, t.currency ?? '₺', targetCurrency, rates);
     }
   });
+
+  return totalVaultsInitial + txsSum;
 });
 
 /// === KASA PROVİDER'LARI ===

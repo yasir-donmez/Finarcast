@@ -2,24 +2,29 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import '../../core/theme/app_constants.dart';
 import '../../core/database/models/vault.dart';
 import '../../core/providers/db_providers.dart';
 import '../../core/providers/settings_provider.dart';
+import '../../core/services/subscription_service.dart';
 import '../../shared/widgets/custom_card.dart';
 import '../../shared/widgets/custom_notification.dart';
+import '../../shared/widgets/custom_dialog.dart';
 import '../transactions/add_transaction_screen.dart';
+import '../../core/utils/route_transitions.dart';
+import '../subscription/widgets/pro_upgrade_sheet.dart';
 import 'services/draft_service.dart';
 import 'services/smart_parser_service.dart';
 import '../auth/widgets/auth_background.dart';
-import '../vaults/widgets/header_delegate.dart';
 import '../../core/utils/category_utils.dart';
+import 'providers/smart_inbox_providers.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import '../../core/services/auth_service.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 // Modular Widgets
 import 'widgets/empty_state.dart';
 import 'widgets/smart_input_area.dart';
-import 'widgets/clipboard_banner.dart';
 import 'widgets/draft_card.dart';
 
 class SmartInboxScreen extends ConsumerStatefulWidget {
@@ -30,26 +35,17 @@ class SmartInboxScreen extends ConsumerStatefulWidget {
 }
 
 class _SmartInboxScreenState extends ConsumerState<SmartInboxScreen> with WidgetsBindingObserver {
-  List<DraftTransaction> _drafts = [];
   final TextEditingController _inputController = TextEditingController();
   final ImagePicker _imagePicker = ImagePicker();
   
-  bool _isLoading = false;
-  String _loadingMessage = '';
-  
   // Her bir taslak kartı için seçilen kasa ID'sini tutar (-1 = Ana Kasa)
   final Map<String, int> _selectedVaultIdForDraft = {};
-  
-  // Panodan otomatik yakalanan taslak harcama
-  DraftTransaction? _detectedClipboardDraft;
-  String? _rawClipboardText;
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
     _loadDrafts();
-    _checkClipboard();
   }
 
   @override
@@ -63,78 +59,102 @@ class _SmartInboxScreenState extends ConsumerState<SmartInboxScreen> with Widget
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
       _loadDrafts();
-      _checkClipboard();
     }
   }
 
   /// Taslakları yükle
   Future<void> _loadDrafts() async {
-    final list = await DraftService.getDrafts();
-    if (mounted) {
-      setState(() {
-        _drafts = list;
-      });
+    await ref.read(smartInboxDraftsProvider.notifier).loadDrafts();
+  }
+
+  void _showAiLimitDialog(BuildContext context, bool isPro) {
+    if (isPro) {
+      showCustomDialog(
+        context: context,
+        accentColor: const Color(0xFFFFB300), // Altın rengi
+        title: "Günlük Limit Aşıldı",
+        content: "Adil Kullanım Politikası (FUP) ve servis sağlayıcı kotaları gereği günlük yapay zeka analiz limitinize ulaştınız. Yarın tekrar kullanabilirsiniz.",
+        actions: [
+          PrecisionDialogAction(
+            label: "Kapat",
+            onTap: () => Navigator.pop(context),
+            isPrimary: true,
+          ),
+        ],
+      );
+    } else {
+      showCustomDialog(
+        context: context,
+        accentColor: const Color(0xFFFFB300), // Altın rengi
+        title: "Günlük Limit Aşıldı",
+        content: "Günlük ücretsiz analiz limitinize ulaştınız. Limitlerinizi genişletmek ve tüm premium özelliklere erişmek için yükseltin.",
+        actions: [
+          PrecisionDialogAction(
+            label: "Daha Sonra",
+            onTap: () => Navigator.pop(context),
+            isPrimary: false,
+          ),
+          PrecisionDialogAction(
+            label: "Genişletilmiş Erişime Geç",
+            onTap: () {
+              Navigator.pop(context);
+              ProUpgradeSheet.show(context);
+            },
+            isPrimary: true,
+          ),
+        ],
+      );
     }
   }
 
-  /// Pano (Clipboard) taraması
-  Future<void> _checkClipboard() async {
-    try {
-      final clipboardData = await Clipboard.getData(Clipboard.kTextPlain);
-      final text = clipboardData?.text;
-      if (text != null && text.isNotEmpty) {
-        final prefs = await SharedPreferences.getInstance();
-        final lastChecked = prefs.getString('last_checked_clipboard') ?? '';
-        if (text == lastChecked) return;
-
-        final parsed = await SmartParserService.checkAndParseClipboard(text);
-        if (parsed != null && parsed.amount > 0) {
-          if (mounted) {
-            setState(() {
-              _detectedClipboardDraft = parsed;
-              _rawClipboardText = text;
-            });
-          }
-        }
-      }
-    } catch (e) {
-      debugPrint('❌ Pano denetimi hatası: $e');
-    }
+  void _showCooldownDialog(BuildContext context, String remainingTime) {
+    showCustomDialog(
+      context: context,
+      accentColor: const Color(0xFFFFB300), // Altın rengi
+      title: "Bekleme Süresi Aktif",
+      content: "Ücretsiz planda yapay zeka analizleri arasında en az 1 saat beklemelisiniz.\n\nKalan süre: $remainingTime\n\nBeklemek istemiyor musunuz? Sınırsız analiz için şimdi PRO sürüme yükseltin!",
+      actions: [
+        PrecisionDialogAction(
+          label: "Daha Sonra",
+          onTap: () => Navigator.pop(context),
+          isPrimary: false,
+        ),
+        PrecisionDialogAction(
+          label: "Sınırsıza Yükselt",
+          onTap: () {
+            Navigator.pop(context);
+            ProUpgradeSheet.show(context);
+          },
+          isPrimary: true,
+        ),
+      ],
+    );
   }
 
-  /// Pano taslağını onaylama
-  Future<void> _approveClipboardDraft() async {
-    if (_detectedClipboardDraft == null || _rawClipboardText == null) return;
-    
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString('last_checked_clipboard', _rawClipboardText!);
-
-    await DraftService.addDraft(_detectedClipboardDraft!);
-    
-    setState(() {
-      _detectedClipboardDraft = null;
-      _rawClipboardText = null;
-    });
-    
-    await _loadDrafts();
-    
-    if (mounted) {
-      CustomNotification.success(context, 'Harcama sepetinize başarıyla eklendi!');
-    }
-    HapticFeedback.mediumImpact();
-  }
-
-  /// Pano taslağını yoksayma
-  Future<void> _rejectClipboardDraft() async {
-    if (_rawClipboardText == null) return;
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString('last_checked_clipboard', _rawClipboardText!);
-    
-    setState(() {
-      _detectedClipboardDraft = null;
-      _rawClipboardText = null;
-    });
-    HapticFeedback.lightImpact();
+  void _showLoginRequiredDialog(BuildContext context) {
+    showCustomDialog(
+      context: context,
+      accentColor: AppColors.primary,
+      title: "Giriş Yapılması Gerekiyor",
+      content: "Yapay zeka asistanını ve harcama sepetini kullanabilmek için ücretsiz bir Finarcast hesabı oluşturmanız veya giriş yapmanız gerekmektedir.",
+      actions: [
+        PrecisionDialogAction(
+          label: "İptal",
+          onTap: () => Navigator.pop(context),
+          isPrimary: false,
+        ),
+        PrecisionDialogAction(
+          label: "Giriş Yap / Üye Ol",
+          onTap: () async {
+            Navigator.pop(context);
+            final prefs = await SharedPreferences.getInstance();
+            await prefs.setBool('Finarcast_is_guest_mode', false);
+            ref.read(guestModeProvider.notifier).state = false;
+          },
+          isPrimary: true,
+        ),
+      ],
+    );
   }
 
   /// Metin ile işlem analiz et
@@ -142,19 +162,33 @@ class _SmartInboxScreenState extends ConsumerState<SmartInboxScreen> with Widget
     final text = _inputController.text.trim();
     if (text.isEmpty) return;
 
-    setState(() {
-      _isLoading = true;
-      _loadingMessage = 'Yapay zeka harcamanızı çözümlüyor...';
-    });
+    final currentUser = Supabase.instance.client.auth.currentUser;
+    if (currentUser == null) {
+      _showLoginRequiredDialog(context);
+      return;
+    }
+
+    final subService = ref.read(subscriptionServiceProvider);
+    if (subService.usedAiCount >= subService.dailyAiLimit) {
+      _showAiLimitDialog(context, subService.isPro);
+      return;
+    }
+
+    if (subService.isAiCooldownActive) {
+      _showCooldownDialog(context, subService.getFormattedRemainingCooldownTime());
+      return;
+    }
+
+    ref.read(smartInboxLoadingProvider.notifier).state = 'Yapay zeka harcamanızı çözümlüyor...';
 
     try {
       final draft = await SmartParserService.parseText(text);
-      await DraftService.addDraft(draft);
+      await ref.read(smartInboxDraftsProvider.notifier).addDraft(draft);
+      await ref.read(subscriptionServiceProvider).incrementAiUsage();
       _inputController.clear();
-      await _loadDrafts();
       
       if (mounted) {
-        CustomNotification.success(context, 'Taslak harcama sepete eklendi.');
+        CustomNotification.success(context, 'Taslak harcama gelen kutusuna eklendi.');
       }
       HapticFeedback.heavyImpact();
     } catch (e) {
@@ -163,24 +197,34 @@ class _SmartInboxScreenState extends ConsumerState<SmartInboxScreen> with Widget
         CustomNotification.error(context, errorMsg.isNotEmpty ? errorMsg : 'İşlem analiz edilirken bir hata oluştu.');
       }
     } finally {
-      if (mounted) {
-        setState(() {
-          _isLoading = false;
-        });
-      }
+      ref.read(smartInboxLoadingProvider.notifier).state = null;
     }
   }
 
   /// Fiş / Fatura okuma (OCR)
   Future<void> _pickAndParseReceipt(ImageSource source) async {
+    final currentUser = Supabase.instance.client.auth.currentUser;
+    if (currentUser == null) {
+      _showLoginRequiredDialog(context);
+      return;
+    }
+
+    final subService = ref.read(subscriptionServiceProvider);
+    if (subService.usedAiCount >= subService.dailyAiLimit) {
+      _showAiLimitDialog(context, subService.isPro);
+      return;
+    }
+
+    if (subService.isAiCooldownActive) {
+      _showCooldownDialog(context, subService.getFormattedRemainingCooldownTime());
+      return;
+    }
+
     try {
       final XFile? image = await _imagePicker.pickImage(source: source, imageQuality: 85);
       if (image == null) return;
 
-      setState(() {
-        _isLoading = true;
-        _loadingMessage = 'Fiş taranıyor, bilgiler çıkartılıyor...';
-      });
+      ref.read(smartInboxLoadingProvider.notifier).state = 'Fiş taranıyor, bilgiler çıkartılıyor...';
 
       final bytes = await image.readAsBytes();
       final extension = image.path.split('.').last.toLowerCase();
@@ -191,10 +235,29 @@ class _SmartInboxScreenState extends ConsumerState<SmartInboxScreen> with Widget
       final draft = await SmartParserService.parseReceiptImage(bytes, mimeType);
       
       if (draft != null) {
-        await DraftService.addDraft(draft);
-        await _loadDrafts();
+        if (draft.amount < 0) {
+          if (mounted) {
+            showCustomDialog(
+              context: context,
+              accentColor: AppColors.error,
+              title: "Fiş Okunamadı",
+              content: draft.note ?? "Yüklenen görselde herhangi bir fiş veya fatura bilgisi tespit edilemedi.",
+              actions: [
+                PrecisionDialogAction(
+                  label: "Kapat",
+                  onTap: () => Navigator.pop(context),
+                  isPrimary: true,
+                ),
+              ],
+            );
+          }
+          return;
+        }
+
+        await ref.read(smartInboxDraftsProvider.notifier).addDraft(draft);
+        await ref.read(subscriptionServiceProvider).incrementAiUsage();
         if (mounted) {
-          CustomNotification.success(context, 'Fiş verileri başarıyla sepetinize eklendi.');
+          CustomNotification.success(context, 'Fiş verileri başarıyla gelen kutusuna eklendi.');
         }
         HapticFeedback.heavyImpact();
       } else {
@@ -209,49 +272,35 @@ class _SmartInboxScreenState extends ConsumerState<SmartInboxScreen> with Widget
         CustomNotification.error(context, errorMsg.isNotEmpty ? errorMsg : 'Görsel yüklenirken bir hata oluştu.');
       }
     } finally {
-      if (mounted) {
-        setState(() {
-          _isLoading = false;
-        });
-      }
+      ref.read(smartInboxLoadingProvider.notifier).state = null;
     }
-  }
-
-  /// Mikrofon özelliği hakkında geri bildirim göster
-  void _showMicFeatureFeedback() {
-    CustomNotification.success(context, 'Ses kaydetme özelliği çok yakında!');
-    HapticFeedback.mediumImpact();
   }
 
   /// Taslağı sil
   Future<void> _deleteDraft(String id) async {
     setState(() {
-      _drafts.removeWhere((d) => d.id == id);
       _selectedVaultIdForDraft.remove(id);
     });
-    await DraftService.deleteDraft(id);
-    await _loadDrafts();
+    await ref.read(smartInboxDraftsProvider.notifier).deleteDraft(id);
     if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Taslak harcama silindi.'),
-          duration: Duration(seconds: 1),
-        ),
-      );
+      CustomNotification.info(context, 'Taslak harcama silindi.');
     }
     HapticFeedback.lightImpact();
   }
 
   /// Taslağı onaylayıp kasaya gönder
   Future<void> _approveDraft(String id) async {
-    final vaultId = _selectedVaultIdForDraft[id] ?? -1;
+    final drafts = ref.read(smartInboxDraftsProvider);
+    final vaults = ref.read(allVaultsProvider);
+    final defaultVaultId = vaults.isNotEmpty ? vaults.first.id : -1;
+    final vaultId = _selectedVaultIdForDraft[id] ?? defaultVaultId;
     final actualVaultId = vaultId == -1 ? null : vaultId;
 
     // Get category name for the draft
-    final draftIndex = _drafts.indexWhere((d) => d.id == id);
+    final draftIndex = drafts.indexWhere((d) => d.id == id);
     String categoryName = 'Diğer';
     if (draftIndex != -1) {
-      final draft = _drafts[draftIndex];
+      final draft = drafts[draftIndex];
       final customCategories = ref.read(customCategoriesProvider);
       categoryName = CategoryUtils.getCategoryName(
         categoryId: draft.categoryId,
@@ -262,19 +311,18 @@ class _SmartInboxScreenState extends ConsumerState<SmartInboxScreen> with Widget
     }
 
     setState(() {
-      _drafts.removeWhere((d) => d.id == id);
       _selectedVaultIdForDraft.remove(id);
     });
 
     final success = await DraftService.promoteToTransaction(id, actualVaultId, categoryName);
     if (success) {
-      await _loadDrafts();
+      await ref.read(smartInboxDraftsProvider.notifier).loadDrafts();
       if (mounted) {
         CustomNotification.success(context, 'İşlem kasaya başarıyla işlendi!');
       }
       HapticFeedback.heavyImpact();
     } else {
-      await _loadDrafts();
+      await ref.read(smartInboxDraftsProvider.notifier).loadDrafts();
       if (mounted) {
         CustomNotification.error(context, 'İşlem onaylanırken bir hata oluştu.');
       }
@@ -285,8 +333,8 @@ class _SmartInboxScreenState extends ConsumerState<SmartInboxScreen> with Widget
   void _navigateToDetailedAdd(DraftTransaction draft) {
     Navigator.push(
       context,
-      MaterialPageRoute(
-        builder: (context) => AddTransactionScreen(
+      SlideUpPageRoute(
+        child: AddTransactionScreen(
           initialName: draft.title,
           initialAmount: draft.amount,
           initialMinAmount: draft.minAmount,
@@ -307,23 +355,25 @@ class _SmartInboxScreenState extends ConsumerState<SmartInboxScreen> with Widget
               ? [_selectedVaultIdForDraft[draft.id]!] 
               : null,
           onSuccess: () {
-            DraftService.deleteDraft(draft.id);
+            ref.read(smartInboxDraftsProvider.notifier).deleteDraft(draft.id);
             Navigator.pop(context);
-            _loadDrafts();
           },
         ),
+        fullscreenDialog: true,
       ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
+    final drafts = ref.watch(smartInboxDraftsProvider);
     final vaults = ref.watch(allVaultsProvider);
+    final loadingMessage = ref.watch(smartInboxLoadingProvider);
     
-    // Taslaklar için varsayılan kasayı (-1 = Ana Kasa) ata veya AI tarafından çıkarılan kasa adıyla eşleştir
-    for (final draft in _drafts) {
+    // Taslaklar için varsayılan kasayı (İlk Kasa) ata veya AI tarafından çıkarılan kasa adıyla eşleştir
+    for (final draft in drafts) {
       if (!_selectedVaultIdForDraft.containsKey(draft.id)) {
-        int matchedId = -1; // Varsayılan: Ana Kasa
+        int matchedId = vaults.isNotEmpty ? vaults.first.id : -1; // Varsayılan: İlk Kasa
         if (draft.vaultName != null && draft.vaultName!.trim().isNotEmpty) {
           final cleanDraft = draft.vaultName!.toLowerCase()
               .replaceAll('kasa', '')
@@ -359,6 +409,14 @@ class _SmartInboxScreenState extends ConsumerState<SmartInboxScreen> with Widget
     }
 
     final currencySymbol = ref.watch(settingsProvider).currencySymbol;
+    final topPadding = MediaQuery.of(context).padding.top;
+
+    final listPadding = EdgeInsets.fromLTRB(
+      16,
+      topPadding + 140.0,
+      16,
+      32,
+    );
 
     return Stack(
       children: [
@@ -367,125 +425,92 @@ class _SmartInboxScreenState extends ConsumerState<SmartInboxScreen> with Widget
         ),
         Scaffold(
           backgroundColor: Colors.transparent,
-          resizeToAvoidBottomInset: _drafts.isNotEmpty || _detectedClipboardDraft != null,
-          appBar: AppBar(
-            backgroundColor: Colors.transparent,
-            elevation: 0,
-            title: const Text(
-              'SEPET',
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.w900,
-                letterSpacing: 1.2,
-              ),
-            ),
-            actions: [
-              Padding(
-                padding: const EdgeInsets.only(right: 16),
-                child: HeaderIconButton(
-                  icon: Icons.refresh_rounded,
-                  onTap: () {
-                    HapticFeedback.mediumImpact();
-                    _loadDrafts();
-                    _checkClipboard();
-                  },
+          resizeToAvoidBottomInset: false,
+          body: Stack(
+            children: [
+              // 1. ANA İÇERİK BÖLGESİ
+              Positioned.fill(
+                child: SafeArea(
+                  bottom: false,
+                  child: drafts.isEmpty
+                      ? const SmartInboxEmptyState()
+                      : _buildDraftsList(drafts, vaults, currencySymbol, listPadding),
                 ),
               ),
-            ],
-          ),
-          body: LayoutBuilder(
-            builder: (context, constraints) {
-              const barHeight = 74.0;
 
-              final listPadding = const EdgeInsets.fromLTRB(
-                16,
-                16 + barHeight,
-                16,
-                32,
-              );
+              // 2. STATİK GİRİŞ ALANI (Başlığın altında konumlanır)
+              Positioned(
+                top: topPadding + 74.0,
+                left: 0,
+                right: 0,
+                child: SmartInputArea(
+                  controller: _inputController,
+                  onCameraPressed: () => _pickAndParseReceipt(ImageSource.camera),
+                  onGalleryPressed: () => _pickAndParseReceipt(ImageSource.gallery),
+                  onSendPressed: _parseAndAddText,
+                ),
+              ),
 
-              return Stack(
-                children: [
-                  // 1. ANA İÇERİK BÖLGESİ
-                  Positioned.fill(
-                    child: SafeArea(
-                      bottom: false,
-                      child: _drafts.isEmpty && _detectedClipboardDraft == null
-                          ? const SmartInboxEmptyState()
-                          : _buildDraftsList(vaults, currencySymbol, listPadding),
-                    ),
+              // 3. ÖZEL BAŞLIK ALANI (Kasalar sayfasıyla birebir uyumlu)
+              Positioned(
+                left: 20,
+                top: topPadding + 10,
+                child: Text(
+                  Localizations.localeOf(context).languageCode == 'tr' ? 'Gelen Kutusu' : 'Inbox',
+                  style: const TextStyle(
+                    fontSize: 32,
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: -1.5,
                   ),
+                ),
+              ),
 
-                  // 2. STATİK GİRİŞ ALANI
-                  Positioned(
-                    top: 0,
-                    left: 0,
-                    right: 0,
-                    child: SmartInputArea(
-                      controller: _inputController,
-                      onCameraPressed: () => _pickAndParseReceipt(ImageSource.camera),
-                      onGalleryPressed: () => _pickAndParseReceipt(ImageSource.gallery),
-                      onMicPressed: _showMicFeatureFeedback,
-                      onSendPressed: _parseAndAddText,
-                    ),
-                  ),
-
-                  // 3. LOADING OVERLAY
-                  if (_isLoading)
-                    Positioned.fill(
-                      child: Container(
-                        color: Colors.black.withValues(alpha: 0.7),
-                        child: Center(
-                          child: Padding(
-                            padding: const EdgeInsets.all(32),
-                            child: CustomCard(
-                              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
-                              child: Column(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  const CircularProgressIndicator(),
-                                  const SizedBox(height: 24),
-                                  Text(
-                                    _loadingMessage,
-                                    textAlign: TextAlign.center,
-                                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
-                                  ),
-                                ],
+              // 3. LOADING OVERLAY
+              if (loadingMessage != null)
+                Positioned.fill(
+                  child: Container(
+                    color: Colors.black.withValues(alpha: 0.7),
+                    child: Center(
+                      child: Padding(
+                        padding: const EdgeInsets.all(32),
+                        child: CustomCard(
+                          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const CircularProgressIndicator(),
+                              const SizedBox(height: 24),
+                              Text(
+                                loadingMessage,
+                                textAlign: TextAlign.center,
+                                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
                               ),
-                            ),
+                            ],
                           ),
                         ),
                       ),
                     ),
-                ],
-              );
-            },
+                  ),
+                ),
+            ],
           ),
         ),
       ],
     );
   }
 
-  Widget _buildDraftsList(List<Vault> vaults, String currencySymbol, EdgeInsets padding) {
+  Widget _buildDraftsList(List<DraftTransaction> drafts, List<Vault> vaults, String currencySymbol, EdgeInsets padding) {
     return ListView(
       physics: const BouncingScrollPhysics(),
       padding: padding,
       children: [
-        // PANODAN YAKALANAN HARCAMA (Eğer varsa)
-        if (_detectedClipboardDraft != null)
-          ClipboardBanner(
-            draft: _detectedClipboardDraft!,
-            onApprove: _approveClipboardDraft,
-            onReject: _rejectClipboardDraft,
-          ),
-
-        if (_drafts.isNotEmpty) ...[
+        if (drafts.isNotEmpty) ...[
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 8),
             child: Row(
               children: [
                 Text(
-                  'ONAY BEKLEYEN İŞLEMLER (${_drafts.length})',
+                  'ONAY BEKLEYEN İŞLEMLER (${drafts.length})',
                   style: TextStyle(
                     fontSize: 11,
                     fontWeight: FontWeight.w900,
@@ -497,11 +522,10 @@ class _SmartInboxScreenState extends ConsumerState<SmartInboxScreen> with Widget
                 TextButton(
                   onPressed: () {
                     HapticFeedback.lightImpact();
+                    ref.read(smartInboxDraftsProvider.notifier).clearAllDrafts();
                     setState(() {
-                      _drafts.clear();
                       _selectedVaultIdForDraft.clear();
                     });
-                    DraftService.saveDrafts([]);
                   },
                   child: Text(
                     'Tümünü Temizle',
@@ -515,8 +539,9 @@ class _SmartInboxScreenState extends ConsumerState<SmartInboxScreen> with Widget
               ],
             ),
           ),
-          ..._drafts.map((draft) {
-            final selectedVaultId = _selectedVaultIdForDraft[draft.id] ?? -1;
+          ...drafts.map((draft) {
+            final defaultVaultId = vaults.isNotEmpty ? vaults.first.id : -1;
+            final selectedVaultId = _selectedVaultIdForDraft[draft.id] ?? defaultVaultId;
             return DismissibleDraftCard(
               draft: draft,
               vaults: vaults,
@@ -538,4 +563,3 @@ class _SmartInboxScreenState extends ConsumerState<SmartInboxScreen> with Widget
     );
   }
 }
-

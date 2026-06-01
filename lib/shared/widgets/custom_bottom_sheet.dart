@@ -41,6 +41,10 @@ class CustomBottomSheet extends ConsumerWidget {
       barrierColor: isDark 
           ? Colors.black.withValues(alpha: 0.5) 
           : Colors.black.withValues(alpha: 0.1), // Daha da şeffaf karartma
+      sheetAnimationStyle: AnimationStyle(
+        duration: const Duration(milliseconds: 280),
+        reverseDuration: const Duration(milliseconds: 200),
+      ),
       builder: (context) => CustomBottomSheet(
         title: title,
         actions: actions,
@@ -73,10 +77,8 @@ class CustomBottomSheet extends ConsumerWidget {
     }
     
     return PrecisionSheetScope(
-      child: AnimatedPadding(
+      child: Padding(
         padding: EdgeInsets.only(bottom: bottomPadding),
-        duration: const Duration(milliseconds: 300),
-        curve: Curves.easeOutCubic,
         child: Stack(
           alignment: Alignment.bottomCenter,
           children: [
@@ -171,7 +173,7 @@ class CustomBottomSheet extends ConsumerWidget {
             physics: const BouncingScrollPhysics(),
             child: TweenAnimationBuilder<double>(
               tween: Tween(begin: 0.98, end: 1.0),
-              duration: const Duration(milliseconds: 350),
+              duration: const Duration(milliseconds: 280),
               curve: Curves.easeOutCubic,
               builder: (context, value, child) {
                 return Transform.scale(

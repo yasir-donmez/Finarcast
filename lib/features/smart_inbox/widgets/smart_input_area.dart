@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'dart:ui';
+import 'dart:math';
 import '../../../core/theme/app_constants.dart';
 import '../../../shared/widgets/glass_surface.dart';
 
@@ -8,7 +9,6 @@ class SmartInputArea extends StatefulWidget {
   final TextEditingController controller;
   final VoidCallback onCameraPressed;
   final VoidCallback onGalleryPressed;
-  final VoidCallback onMicPressed;
   final VoidCallback onSendPressed;
 
   const SmartInputArea({
@@ -16,7 +16,6 @@ class SmartInputArea extends StatefulWidget {
     required this.controller,
     required this.onCameraPressed,
     required this.onGalleryPressed,
-    required this.onMicPressed,
     required this.onSendPressed,
   });
 
@@ -28,12 +27,11 @@ class _SmartInputAreaState extends State<SmartInputArea>
     with SingleTickerProviderStateMixin {
   static const _animDuration = Duration(milliseconds: 350);
   static const _curve = Curves.easeOutBack;
-  static const _reverseCurve = Curves.easeOutCubic;
+  static const _reverseCurve = Curves.easeInOutCubic;
 
   static const _sideGap = 8.0;
   static const _sendSize = 50.0;
   static const _barHeight = 50.0;
-  static const _sendInset = 4.0;
 
   late final AnimationController _anim;
   late final Animation<double> _t;
@@ -54,7 +52,16 @@ class _SmartInputAreaState extends State<SmartInputArea>
     );
     _hadText = _hasText;
     widget.controller.addListener(_onTextChanged);
-    if (_hasText) _anim.value = 1;
+    if (_hasText) {
+      _anim.value = 1;
+    }
+    
+    // Trigger haptic feedback when the send button finishes detaching (medium impact)
+    _anim.addStatusListener((status) {
+      if (status == AnimationStatus.completed) {
+        HapticFeedback.mediumImpact();
+      }
+    });
   }
 
   @override
@@ -160,10 +167,11 @@ class _SmartInputAreaState extends State<SmartInputArea>
             // Always separate at the left edge
             const cameraLeft = 0.0;
 
-            // Send horizontal position relative to the Stack
-            // When t = 0, send is at 4.0 (inside the capsule)
-            // When t = 1, send is at 0.0 (outside the capsule)
-            final sendRight = (1 - t) * _sendInset;
+            // Send horizontal position relative to the Stack.
+            // During separation, the button resists and is pulled to the left (14px tension) and snaps back.
+            // During merging, it has an extremely soft pull (6px tension) for a quiet docking feel.
+            final double rawTension = 4.0 * t * (1.0 - t);
+            final double sendRight = rawTension * (_hasText ? 14.0 : 6.0);
 
             // Vertical alignment: both buttons are centered vertically in the 50px tall bar.
             // Since buttons are 50px and bar is 50px, the top offset is 0.0.
@@ -172,8 +180,8 @@ class _SmartInputAreaState extends State<SmartInputArea>
             final double stretchFactor = (4.0 * t * (1.0 - t)).clamp(0.0, 1.0);
             final double buttonWidth = buttonSize + 22.0 * stretchFactor;
 
-            // When expanded, total stack height is 218px.
-            final currentStackHeight = _isMenuExpanded ? 218.0 : _barHeight;
+            // When expanded, total stack height is 162px.
+            final currentStackHeight = _isMenuExpanded ? 162.0 : _barHeight;
 
             return SizedBox(
               height: currentStackHeight,
@@ -230,12 +238,6 @@ class _SmartInputAreaState extends State<SmartInputArea>
                         });
                         widget.onGalleryPressed();
                       },
-                      onMicPressed: () {
-                        setState(() {
-                          _isMenuExpanded = false;
-                        });
-                        widget.onMicPressed();
-                      },
                     ),
                   ),
 
@@ -247,6 +249,7 @@ class _SmartInputAreaState extends State<SmartInputArea>
                       isDark: isDark,
                       enabled: _hasText,
                       t: t,
+                      width: buttonWidth,
                       onTap: _hasText ? widget.onSendPressed : null,
                     ),
                   ),
@@ -266,7 +269,6 @@ class _ExpandingMenuButton extends StatefulWidget {
   final VoidCallback onTapToggle;
   final VoidCallback onCameraPressed;
   final VoidCallback onGalleryPressed;
-  final VoidCallback onMicPressed;
 
   const _ExpandingMenuButton({
     required this.isDark,
@@ -274,7 +276,6 @@ class _ExpandingMenuButton extends StatefulWidget {
     required this.onTapToggle,
     required this.onCameraPressed,
     required this.onGalleryPressed,
-    required this.onMicPressed,
   });
 
   @override
@@ -285,9 +286,9 @@ class _ExpandingMenuButtonState extends State<_ExpandingMenuButton>
     with SingleTickerProviderStateMixin {
   late final AnimationController _controller;
   late final Animation<double> _heightFactor;
+  late final Animation<double> _rotationAnim;
   late final Animation<double> _cameraAnim;
   late final Animation<double> _galleryAnim;
-  late final Animation<double> _micAnim;
 
   bool _isMainPressed = false;
 
@@ -303,12 +304,15 @@ class _ExpandingMenuButtonState extends State<_ExpandingMenuButton>
     super.initState();
     _controller = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 250),
+      duration: const Duration(milliseconds: 350),
     );
     _heightFactor = CurvedAnimation(
       parent: _controller,
-      curve: Curves.easeOutCubic,
+      curve: Curves.easeOutBack,
+      reverseCurve: Curves.easeInOutCubic,
     );
+
+    _rotationAnim = Tween<double>(begin: 0.0, end: 0.125).animate(_heightFactor);
 
     _cameraAnim = CurvedAnimation(
       parent: _controller,
@@ -318,10 +322,12 @@ class _ExpandingMenuButtonState extends State<_ExpandingMenuButton>
       parent: _controller,
       curve: const Interval(0.3, 0.8, curve: Curves.easeOut),
     );
-    _micAnim = CurvedAnimation(
-      parent: _controller,
-      curve: const Interval(0.5, 1.0, curve: Curves.easeOut),
-    );
+
+    _controller.addStatusListener((status) {
+      if (status == AnimationStatus.completed) {
+        HapticFeedback.mediumImpact();
+      }
+    });
 
     if (widget.isExpanded) {
       _controller.value = 1.0;
@@ -351,7 +357,7 @@ class _ExpandingMenuButtonState extends State<_ExpandingMenuButton>
     return AnimatedBuilder(
       animation: _heightFactor,
       builder: (context, _) {
-        final height = 50.0 + _heightFactor.value * (218.0 - 50.0);
+        final height = 50.0 + _heightFactor.value * (162.0 - 50.0);
 
         final contentStack = Stack(
           clipBehavior: Clip.hardEdge,
@@ -361,7 +367,7 @@ class _ExpandingMenuButtonState extends State<_ExpandingMenuButton>
               top: 58,
               left: 0,
               right: 0,
-              height: 46,
+              height: 44,
               child: _MenuOptionItem(
                 icon: Icons.camera_alt_rounded,
                 tooltip: 'Kamera',
@@ -373,10 +379,10 @@ class _ExpandingMenuButtonState extends State<_ExpandingMenuButton>
 
             // 2. Gallery Option Button
             Positioned(
-              top: 114,
+              top: 110,
               left: 0,
               right: 0,
-              height: 46,
+              height: 44,
               child: _MenuOptionItem(
                 icon: Icons.photo_library_rounded,
                 tooltip: 'Galeri',
@@ -386,27 +392,12 @@ class _ExpandingMenuButtonState extends State<_ExpandingMenuButton>
               ),
             ),
 
-            // 3. Microphone Option Button
-            Positioned(
-              top: 170,
-              left: 0,
-              right: 0,
-              height: 46,
-              child: _MenuOptionItem(
-                icon: Icons.mic_rounded,
-                tooltip: 'Mikrofon',
-                onTap: widget.onMicPressed,
-                animation: _micAnim,
-                isDark: widget.isDark,
-              ),
-            ),
-
             // 4. Main Toggle Button (at the top)
             Positioned(
               top: 0,
               left: 0,
               right: 0,
-              height: 48,
+              height: 50,
               child: GestureDetector(
                 behavior: HitTestBehavior.opaque,
                 onTapDown: (_) {
@@ -419,10 +410,8 @@ class _ExpandingMenuButtonState extends State<_ExpandingMenuButton>
                 child: Container(
                   color: Colors.transparent, // Ensures full hit testing
                   child: Center(
-                    child: AnimatedRotation(
-                      turns: widget.isExpanded ? 0.125 : 0.0, // 45 degrees
-                      duration: const Duration(milliseconds: 250),
-                      curve: Curves.easeOutBack,
+                    child: RotationTransition(
+                      turns: _rotationAnim,
                       child: Icon(
                         Icons.add_rounded,
                         size: 24,
@@ -537,8 +526,8 @@ class _MenuOptionItemState extends State<_MenuOptionItem> {
                 onTap: widget.onTap,
                 child: AnimatedContainer(
                   duration: const Duration(milliseconds: 100),
-                  width: 46,
-                  height: 46,
+                  width: 44,
+                  height: 44,
                   decoration: BoxDecoration(
                     color: bg,
                     shape: BoxShape.circle,
@@ -562,12 +551,14 @@ class _SendCircleButton extends StatefulWidget {
   final bool isDark;
   final bool enabled;
   final double t;
+  final double width;
   final VoidCallback? onTap;
 
   const _SendCircleButton({
     required this.isDark,
     required this.enabled,
     required this.t,
+    required this.width,
     required this.onTap,
   });
 
@@ -589,24 +580,10 @@ class _SendCircleButtonState extends State<_SendCircleButton> {
   Widget build(BuildContext context) {
     final t = widget.t;
     final enabled = widget.enabled;
+    final isDark = widget.isDark;
+    final width = widget.width;
 
-    final double stretchFactor = (4.0 * t * (1.0 - t)).clamp(0.0, 1.0);
-    final double buttonWidth = 50.0 + 22.0 * stretchFactor;
-
-    final double targetOpacity = widget.isDark ? 0.65 : 0.75;
-    double bgOpacity;
-    if (t < 0.25) {
-      bgOpacity = (t / 0.25) * targetOpacity;
-    } else {
-      bgOpacity = targetOpacity;
-    }
-
-    final double borderOpacity = t < 0.85 ? 0.0 : (t - 0.85) / 0.15;
-
-    final pressedBg = widget.isDark
-        ? AppColors.getThemeSurface(context, 2).withValues(alpha: 0.75 * bgOpacity)
-        : Colors.grey[200]!.withValues(alpha: 0.85 * bgOpacity);
-
+    // Calculate icon color based on enabled state, pressed state, and t transition
     final iconIdle = AppColors.getTextFaint(context).withValues(alpha: 0.5);
     final iconActive = _isPressed && enabled
         ? AppColors.getPrimary(context)
@@ -614,45 +591,66 @@ class _SendCircleButtonState extends State<_SendCircleButton> {
     final targetIconColor = enabled ? iconActive : iconIdle;
     final iconColor = Color.lerp(iconIdle, targetIconColor, t) ?? iconIdle;
 
-    final double buttonScale = 0.85 + 0.15 * t;
-
-    return GestureDetector(
-      behavior: HitTestBehavior.opaque,
-      onTapDown: (_) {
-        if (enabled) {
-          HapticFeedback.lightImpact();
-          setState(() => _isPressed = true);
-        }
-      },
-      onTapUp: (_) => _safeSetState(() => _isPressed = false),
-      onTapCancel: () => _safeSetState(() => _isPressed = false),
-      onTap: enabled ? widget.onTap : null,
-      child: Transform.scale(
-        scale: buttonScale * (_isPressed && enabled ? 0.94 : 1.0),
+    return AnimatedScale(
+      scale: (_isPressed && enabled) ? 0.94 : 1.0,
+      duration: const Duration(milliseconds: 100),
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTapDown: (_) {
+          if (enabled) {
+            HapticFeedback.lightImpact();
+            setState(() => _isPressed = true);
+          }
+        },
+        onTapUp: (_) => _safeSetState(() => _isPressed = false),
+        onTapCancel: () => _safeSetState(() => _isPressed = false),
+        onTap: enabled ? widget.onTap : null,
         child: SizedBox(
-          width: buttonWidth,
+          width: width,
           height: 50.0,
           child: Stack(
             children: [
-              if (_isPressed && enabled && t > 0.85)
-                Positioned.fill(
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: pressedBg,
-                      borderRadius: BorderRadius.circular(25.0),
-                      border: Border.all(
-                        color: widget.isDark
-                            ? Colors.white.withValues(alpha: 0.25 * borderOpacity)
-                            : Colors.black.withValues(alpha: 0.15 * borderOpacity),
-                        width: 1.0,
+              // 1. Separate Glass Background (Drawn only when t >= 0.99 for smooth press scaling)
+              Positioned.fill(
+                child: Opacity(
+                  opacity: (t >= 0.99) ? 1.0 : 0.0,
+                  child: GlassSurface(
+                    borderRadius: 25,
+                    blurSigma: 28.0,
+                    showShadow: true,
+                    backgroundColor: _isPressed && enabled
+                        ? (isDark
+                            ? AppColors.getThemeSurface(context, 2).withValues(alpha: 0.75)
+                            : Colors.grey[200]!.withValues(alpha: 0.85))
+                        : (isDark
+                            ? Colors.black.withValues(alpha: 0.55)
+                            : Colors.white.withValues(alpha: 0.8)),
+                    borderColor: _isPressed && enabled
+                        ? (isDark
+                            ? Colors.white.withValues(alpha: 0.25)
+                            : Colors.black.withValues(alpha: 0.15))
+                        : (isDark
+                            ? Colors.white.withValues(alpha: 0.15)
+                            : Colors.black.withValues(alpha: 0.08)),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.08),
+                        blurRadius: 8,
+                        offset: const Offset(0, 2),
                       ),
-                    ),
+                    ],
+                    child: const SizedBox.expand(),
                   ),
                 ),
-              Positioned.fill(
+              ),
+              // 2. Icon (Always visible, color transition handled by iconColor, positioned to the right side of the stretch)
+              Positioned(
+                right: 0,
+                width: 50.0,
+                height: 50.0,
                 child: Center(
                   child: Padding(
-                    padding: const EdgeInsets.only(left: 1.5),
+                    padding: const EdgeInsets.only(left: 2.0),
                     child: Icon(
                       Icons.send_rounded,
                       size: 20,
@@ -708,42 +706,74 @@ class CombinedGlassBackground extends StatelessWidget {
         final W = constraints.maxWidth;
         const H = 50.0;
 
-        final path = Path();
+        final Path path;
         final capsuleRightEdge = W - capsuleRight;
-        final buttonLeftEdge = W - sendRight - buttonWidth;
-        final buttonRightEdge = W - sendRight;
 
-        if (clampedT > 0.01 && buttonLeftEdge < capsuleRightEdge) {
-          // Overlapping state: draw a single combined capsule path (no inner borders)
-          final combinedRRect = RRect.fromLTRBR(
-            capsuleLeft,
+        final capsuleRRect = RRect.fromLTRBR(
+          capsuleLeft,
+          0.0,
+          capsuleRightEdge.clamp(capsuleLeft, W),
+          H,
+          const Radius.circular(25.0),
+        );
+
+        if (t < 0.99) {
+          final buttonLeftEdge = W - sendRight - buttonWidth;
+          final buttonRRect = RRect.fromLTRBR(
+            buttonLeftEdge.clamp(0.0, W),
             0.0,
-            buttonRightEdge,
+            (W - sendRight).clamp(0.0, W),
             H,
             const Radius.circular(25.0),
           );
-          path.addRRect(combinedRRect);
-        } else {
-          // Separated state: draw two distinct capsule/circle paths
-          final capsuleRRect = RRect.fromLTRBR(
-            capsuleLeft,
-            0.0,
-            capsuleRightEdge.clamp(capsuleLeft, W),
-            H,
-            const Radius.circular(25.0),
-          );
-          path.addRRect(capsuleRRect);
 
-          if (clampedT > 0.01) {
-            final sendRRect = RRect.fromLTRBR(
-              buttonLeftEdge,
-              0.0,
-              buttonRightEdge,
-              H,
-              const Radius.circular(25.0),
-            );
-            path.addRRect(sendRRect);
+          final c1 = Offset(capsuleRightEdge - 25.0, 25.0);
+          final c2 = Offset(buttonLeftEdge + 25.0, 25.0);
+
+          final double d = c2.dx - c1.dx;
+          if (d <= 0.0) {
+            path = Path()..addRRect(capsuleRRect);
+          } else {
+            final capsulePath = Path()..addRRect(capsuleRRect);
+            final buttonPath = Path()..addRRect(buttonRRect);
+
+            // Calculate the perfect gooey metaball path between the capsule cap (c1) and the button (c2)
+            final double ratio = (d / 58.0).clamp(0.0, 1.0);
+            final double angle = (pi / 2) - (pi / 2 - 0.38) * ratio;
+
+            final double cosA = cos(angle);
+            final double sinA = sin(angle);
+
+            // Tangent connection points on C1 and C2
+            final Offset p1 = Offset(c1.dx + 25.0 * cosA, c1.dy - 25.0 * sinA);
+            final Offset p4 = Offset(c1.dx + 25.0 * cosA, c1.dy + 25.0 * sinA);
+
+            final Offset p2 = Offset(c2.dx - 25.0 * cosA, c2.dy - 25.0 * sinA);
+            final Offset p3 = Offset(c2.dx - 25.0 * cosA, c2.dy + 25.0 * sinA);
+
+            // Control points distance based on fluid dynamic spacing.
+            // Using a scale that doesn't drop to 0 ensures smooth tangent curves at all distances.
+            final double scale = 0.5 - 0.2 * ratio;
+            final double cpDist = max(0.0, (p2.dx - p1.dx) * scale);
+
+            final Offset cp1 = Offset(p1.dx + cpDist * sinA, p1.dy + cpDist * cosA);
+            final Offset cp2 = Offset(p2.dx - cpDist * sinA, p2.dy + cpDist * cosA);
+
+            final Offset cp3 = Offset(p3.dx - cpDist * sinA, p3.dy - cpDist * cosA);
+            final Offset cp4 = Offset(p4.dx + cpDist * sinA, p4.dy - cpDist * cosA);
+
+            final Path bridgePath = Path();
+            bridgePath.moveTo(p1.dx, p1.dy);
+            bridgePath.cubicTo(cp1.dx, cp1.dy, cp2.dx, cp2.dy, p2.dx, p2.dy);
+            bridgePath.lineTo(p3.dx, p3.dy);
+            bridgePath.cubicTo(cp3.dx, cp3.dy, cp4.dx, cp4.dy, p4.dx, p4.dy);
+            bridgePath.close();
+
+            final union1 = Path.combine(PathOperation.union, capsulePath, buttonPath);
+            path = Path.combine(PathOperation.union, union1, bridgePath);
           }
+        } else {
+          path = Path()..addRRect(capsuleRRect);
         }
 
         return _buildCombined(path, normalBg, borderColor, shadowColor);

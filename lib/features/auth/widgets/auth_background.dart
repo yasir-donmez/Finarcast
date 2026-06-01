@@ -42,7 +42,7 @@ class _PrecisionBackgroundState extends ConsumerState<AuthBackground> {
       baseDecoration = BoxDecoration(
         color: AppColors.getThemeBackground(context, 2),
       );
-    } else if (bgColorStyle == 1) {
+    } else {
       // ════ RENKLİ ════
       if (bgGradient != null) {
         baseDecoration = BoxDecoration(
@@ -51,7 +51,7 @@ class _PrecisionBackgroundState extends ConsumerState<AuthBackground> {
             end: Alignment.bottomRight,
             colors: bgGradient
                 .map((c) => isDark 
-                    ? Color.lerp(baseColor, c, 0.22)! 
+                    ? Color.lerp(const Color(0xFF07080A), c, 0.08)! 
                     : Color.lerp(baseColor, c, 0.12)!)
                 .toList(),
           ),
@@ -59,25 +59,6 @@ class _PrecisionBackgroundState extends ConsumerState<AuthBackground> {
       } else {
         baseDecoration = BoxDecoration(
           color: AppColors.getThemeBackground(context, 1),
-        );
-      }
-    } else {
-      // ════ CAM ════
-      if (bgGradient != null) {
-        baseDecoration = BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: bgGradient
-                .map((c) => isDark 
-                    ? Color.lerp(Colors.black, c, 0.40)! 
-                    : Color.lerp(baseColor, c, 0.16)!)
-                .toList(),
-          ),
-        );
-      } else {
-        baseDecoration = BoxDecoration(
-          color: AppColors.getThemeBackground(context, 0),
         );
       }
     }

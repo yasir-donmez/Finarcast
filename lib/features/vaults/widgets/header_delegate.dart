@@ -37,7 +37,7 @@ class TrueMorphDeckHeaderDelegate extends SliverPersistentHeaderDelegate {
 
   // --- Tasarım Sistemi Sabitleri ---
   static const double kCompactCardHeight = 56.0;
-  static const double kExpandedCardHeight = 270.0;
+  static const double kExpandedCardHeight = 286.0;
   static const double kHeaderBottomBuffer = 20.0; // Pinned haldeyken alttaki nefes payı
   
   @override
@@ -45,8 +45,10 @@ class TrueMorphDeckHeaderDelegate extends SliverPersistentHeaderDelegate {
     final topPadding = MediaQuery.of(context).padding.top;
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final progress = (shrinkOffset / (maxExtent - minExtent)).clamp(0.0, 1.0);
-    final deckItems = [null, ...groups.map((g) => g.id)];
-    final currentIndex = deckItems.indexOf(selectedVaultId);
+    final deckItems = groups.map((g) => g.id).toList();
+    final currentIndex = deckItems.isEmpty
+        ? 0
+        : deckItems.indexOf(selectedVaultId ?? '').clamp(0, deckItems.length - 1);
 
     final bgAlpha = Curves.easeOutQuad.transform((progress * 1.6).clamp(0.0, 1.0));
     final iconOpacity = (1 - progress * 1.8).clamp(0.0, 1.0);
@@ -101,7 +103,18 @@ class TrueMorphDeckHeaderDelegate extends SliverPersistentHeaderDelegate {
                     top: topPadding + 10,
                     child: Opacity(
                       opacity: iconOpacity,
-                      child: Text(l10n.vaults, style: const TextStyle(fontSize: 32, fontWeight: FontWeight.w900, letterSpacing: -1.5)),
+                      child: Transform.scale(
+                        scale: iconOpacity,
+                        alignment: Alignment.centerLeft,
+                        child: Text(
+                          l10n.vaults,
+                          style: const TextStyle(
+                            fontSize: 32,
+                            fontWeight: FontWeight.w900,
+                            letterSpacing: -1.5,
+                          ),
+                        ),
+                      ),
                     ),
                   ),
 
@@ -111,40 +124,44 @@ class TrueMorphDeckHeaderDelegate extends SliverPersistentHeaderDelegate {
                     top: topPadding + 10,
                     child: Opacity(
                       opacity: iconOpacity,
-                      child: Row(
-                        children: [
-                          Stack(
-                            clipBehavior: Clip.none,
-                            children: [
-                              HeaderIconButton(
-                                icon: Icons.notifications_none_rounded,
-                                onTap: onShowNotifications,
-                              ),
-                              if (unseenNotificationsCount > 0)
-                                Positioned(
-                                  right: 2,
-                                  top: 2,
-                                  child: Container(
-                                    width: 8,
-                                    height: 8,
-                                    decoration: BoxDecoration(
-                                      color: AppColors.error,
-                                      shape: BoxShape.circle,
-                                      boxShadow: [
-                                        BoxShadow(
-                                          color: AppColors.error.withValues(alpha: 0.5),
-                                          blurRadius: 4,
-                                          spreadRadius: 1,
-                                        ),
-                                      ],
+                      child: Transform.scale(
+                        scale: iconOpacity,
+                        alignment: Alignment.centerRight,
+                        child: Row(
+                          children: [
+                            Stack(
+                              clipBehavior: Clip.none,
+                              children: [
+                                HeaderIconButton(
+                                  icon: Icons.notifications_none_rounded,
+                                  onTap: onShowNotifications,
+                                ),
+                                if (unseenNotificationsCount > 0)
+                                  Positioned(
+                                    right: 6,
+                                    top: 6,
+                                    child: Container(
+                                      width: 8,
+                                      height: 8,
+                                      decoration: BoxDecoration(
+                                        color: AppColors.error,
+                                        shape: BoxShape.circle,
+                                        boxShadow: [
+                                          BoxShadow(
+                                            color: AppColors.error.withValues(alpha: 0.5),
+                                            blurRadius: 4,
+                                            spreadRadius: 1,
+                                          ),
+                                        ],
+                                      ),
                                     ),
                                   ),
-                                ),
-                            ],
-                          ),
-                          const SizedBox(width: 8),
-                          HeaderIconButton(icon: Icons.add_rounded, onTap: onAddVault),
-                        ],
+                              ],
+                            ),
+                            const SizedBox(width: 8),
+                            HeaderIconButton(icon: Icons.add_rounded, onTap: onAddVault),
+                          ],
+                        ),
                       ),
                     ),
                   ),
@@ -195,7 +212,7 @@ class HeaderIconButton extends StatelessWidget {
             duration: const Duration(milliseconds: 100),
             child: GlassSurface(
               borderRadius: 999, // Tam dairesel buton
-              padding: const EdgeInsets.all(10),
+              padding: const EdgeInsets.all(13),
               showShadow: true,
               backgroundColor: isPressed
                   ? (isDark
@@ -204,7 +221,9 @@ class HeaderIconButton extends StatelessWidget {
                   : (isDark
                       ? Colors.black.withValues(alpha: 0.35)
                       : Colors.white.withValues(alpha: 0.65)),
-              borderColor: (activeColor ?? AppColors.getPrimary(context)).withValues(alpha: isPressed ? 0.3 : 0.15),
+              borderColor: isPressed
+                  ? (activeColor ?? AppColors.getPrimary(context)).withValues(alpha: 0.3)
+                  : null,
               boxShadow: [
                 BoxShadow(
                   color: Colors.black.withValues(alpha: isPressed ? 0.03 : 0.08),
@@ -214,7 +233,7 @@ class HeaderIconButton extends StatelessWidget {
               ],
               child: Icon(
                 icon, 
-                size: 20, 
+                size: 24, 
                 color: isPressed
                     ? (activeColor ?? AppColors.getPrimary(context))
                     : AppColors.getTextPrimary(context).withValues(alpha: 0.8),

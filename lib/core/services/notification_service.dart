@@ -342,10 +342,10 @@ class NotificationService {
 
   DateTimeComponents? _getMatchComponents(int periodType) {
     switch (periodType) {
-      case 8: return DateTimeComponents.time; // Her gün aynı saatte
-      case 1: return DateTimeComponents.dayOfWeekAndTime; // Her hafta aynı gün/saat
-      case 2: return DateTimeComponents.dayOfMonthAndTime; // Her ay aynı gün/saat
-      case 3: return DateTimeComponents.dateAndTime; // Her yıl aynı tarih/saat
+      case 101: return DateTimeComponents.time; // Her gün aynı saatte
+      case 201: return DateTimeComponents.dayOfWeekAndTime; // Her hafta aynı gün/saat
+      case 301: return DateTimeComponents.dayOfMonthAndTime; // Her ay aynı gün/saat
+      case 401: return DateTimeComponents.dateAndTime; // Her yıl aynı tarih/saat
       default: return null;
     }
   }

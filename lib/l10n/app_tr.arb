@@ -4,12 +4,12 @@
   "profile": "Profil",
   "memberPremium": "Finarcast Premium Üyelik",
   "preferences": "TERCİHLER & UYGULAMA",
-  "language": "Uygulama Dili",
+  "language": "Dil",
   "aiNotifications": "AI Asistan Uyarıları",
   "dataAndAiSettings": "VERİ & AI AYARLARI",
-  "dataRetention": "Veri Saklama Süresi",
+  "dataRetention": "Veri Saklama",
   "dataRetentionDesc": "Süresi dolan işlemler arşivlenir.\nAI Persona yalnızca bu süredeki verileri kullanır.",
-  "permanentDataDeletion": "Kalıcı Veri Silme Süresi",
+  "permanentDataDeletion": "Kalıcı Silme",
   "permanentDataDeletionDesc": "Bu süreden sonra işlemler veritabanından kalıcı olarak silinir.\nBu işlem geri alınamaz.",
   "oneMonth": "1 Ay",
   "threeMonths": "3 Ay",
@@ -17,11 +17,11 @@
   "oneYear": "1 Yıl",
   "infinite": "Sonsuz",
   "dataManagement": "VERİ YÖNETİMİ",
-  "driveBackup": "Google Drive Yedekleme",
-  "exportExcel": "Verileri Excel'e (CSV) Aktar",
+  "driveBackup": "Drive Yedekleme",
+  "exportExcel": "Excel'e Aktar",
   "support": "DESTEK",
-  "contact": "Finarcast ile İletişim",
-  "about": "Uygulama Hakkında",
+  "contact": "İletişim",
+  "about": "Hakkında",
   "aboutFinarcast": "Finarcast, AI destekli finansal asistanınızdır. Harcamalarınızı analiz eder, tasarruf hedefleri belirlemenize yardımcı olur ve finansal geleceğinizi optimize eder.",
   "editProfile": "Profil Düzenleme",
   "comingSoon": "Bu özellik yakında gelecek!",
@@ -76,11 +76,11 @@
   "category": "Kategori",
   "transactionName": "İşlem Adı",
   "frequency": "Sıklık",
-  "themeMode": "Tema Modu",
+  "themeMode": "Tema",
   "themeSystem": "Sistem",
   "themeLight": "Aydınlık",
   "themeDark": "Karanlık",
-  "colorTheme": "Renk Teması",
+  "colorTheme": "Renk",
   "colorSystem": "Sistem",
   "market": "Market",
   "food": "Gıda",
@@ -150,6 +150,8 @@
   "personalDebt": "Kişisel Borç",
   "credit": "Kredi/Borç",
   "other": "Diğer",
+  "balanceAdjustment": "Bakiye Düzeltme",
+  "balanceAdjustmentNote": "Kasa bakiyesi {oldVal} değerinden {newVal} değerine eşitlendi.",
   "salary": "Maaş",
   "mainSalary": "Ana Maaş",
   "bonus": "Prim/Bonus",
@@ -456,5 +458,67 @@
   "authRateLimitExceeded": "Çok fazla istek gönderildi. E-posta limitini aştınız, lütfen bir süre bekleyip tekrar deneyin.",
   "authOtpRequired": "Lütfen gelen doğrulama kodunu (6 veya 8 haneli) girin.",
   "authOtpSent": "Yeni doğrulama kodu e-postanıza gönderildi.",
-  "authRegistrationSuccess": "Kayıt başarılı! Lütfen e-postanıza gelen doğrulama kodunu girin."
+  "authRegistrationSuccess": "Kayıt başarılı! Lütfen e-postanıza gelen doğrulama kodunu girin.",
+  "authVerificationCode": "Doğrulama Kodu",
+  "authVerificationDesc": "Kayıt işlemini tamamlamak için {email} adresine gönderilen doğrulama kodunu girin.",
+  "@authVerificationDesc": {
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
+  "authVerifyCode": "Kodu Doğrula",
+  "authResendCodeCountdown": "Kodu Tekrar Gönder ({seconds} sn)",
+  "@authResendCodeCountdown": {
+    "placeholders": {
+      "seconds": {
+        "type": "int"
+      }
+    }
+  },
+  "authResendCode": "Kodu Tekrar Gönder",
+  "authGoBack": "Geri Dön",
+  "authWelcome": "Hoş Geldiniz",
+  "authLoginSubtitle": "Hesabınıza giriş yaparak finanslarınıza hükmedin.",
+  "authEmail": "E-posta",
+  "authPassword": "Şifre",
+  "authForgotPassword": "Şifremi Unuttum",
+  "authLogin": "Giriş Yap",
+  "authOr": "Veya",
+  "authGoogleSignIn": "Google ile Devam Et",
+  "authNewAccount": "Yeni Hesap",
+  "authRegisterSubtitle": "Finarcast dünyasına katılarak limitlerinizi belirleyin.",
+  "authUsername": "Kullanıcı Adı",
+  "authConfirmPassword": "Şifre Tekrar",
+  "authRegister": "Hemen Katıl",
+  "authNoAccount": "Hesabınız yok mu?",
+  "authAlreadyHaveAccount": "Zaten hesabınız var mı?",
+  "authRegisterAction": "Kayıt Ol",
+  "authLoginAction": "Giriş Yap",
+  "authContinueAsGuest": "Misafir Olarak Devam Et",
+  "authPasswordReset": "Şifre Sıfırlama",
+  "authForgotPasswordDesc": "Şifrenizi sıfırlamak için e-posta adresinizi girin. Size 6 haneli geçici bir kod göndereceğiz.",
+  "authSendCode": "Kod Gönder",
+  "authBackToLogin": "Giriş Ekranına Dön",
+  "authVerificationCodeTitle": "Onay Kodu",
+  "authForgotPasswordOtpDesc": "{email} adresine gönderilen 6 haneli doğrulama kodunu girin.",
+  "@authForgotPasswordOtpDesc": {
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
+  "authChangeEmail": "E-posta Değiştir",
+  "authNewPasswordTitle": "Yeni Şifre",
+  "authNewPasswordDesc": "Hesabınız için en az 6 karakterli güvenli bir şifre belirleyin.",
+  "authNewPassword": "Yeni Şifre",
+  "authConfirmNewPassword": "Yeni Şifre Tekrar",
+  "authUpdatePassword": "Şifreyi Güncelle",
+  "authPasswordResetSuccess": "Şifreniz başarıyla sıfırlandı ve giriş yapıldı.",
+  "authGoogleError": "Google Giriş Hatası",
+  "authPasswordDifferentError": "Yeni şifreniz mevcut şifrenizden farklı olmalıdır.",
+  "authUserNotFoundError": "Bu e-posta adresine kayıtlı bir kullanıcı bulunamadı."
 }
+

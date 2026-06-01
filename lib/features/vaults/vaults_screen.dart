@@ -10,15 +10,18 @@ import '../../shared/widgets/inset_container.dart';
 import 'vaults_providers.dart';
 import 'widgets/transaction_card.dart';
 import '../transactions/add_transaction_screen.dart';
+import '../../core/utils/route_transitions.dart';
 import '../../core/utils/category_utils.dart';
 import '../../core/providers/db_providers.dart';
+import '../../core/services/subscription_service.dart';
+import '../subscription/widgets/pro_upgrade_sheet.dart';
 
 import 'widgets/add_vault_sheet.dart';
 import 'widgets/vault_detail_sheet.dart';
 import 'widgets/detail_sheet.dart';
 import 'widgets/in_app_notifications_sheet.dart';
-import '../dashboard/dashboard_providers.dart';
-import '../dashboard/dashboard_scroll_provider.dart';
+import '../home/home_providers.dart';
+import '../home/home_scroll_provider.dart';
 import 'widgets/header_delegate.dart';
 import 'widgets/filter_chip.dart';
 import 'widgets/vault_snap_scroll_physics.dart';
@@ -64,20 +67,21 @@ class _VaultsScreenState extends ConsumerState<VaultsScreen> {
     final scalingFactor = (screenHeight / 812.0).clamp(0.85, 1.0);
     final topPadding = MediaQuery.of(context).padding.top;
 
-    final scrollController = ref.watch(dashboardScrollProvider);
+    final scrollController = ref.watch(homeScrollProvider);
     final bottomPadding = MediaQuery.of(context).padding.bottom;
     final screenWidth = MediaQuery.of(context).size.width;
 
     // Sabit boşluklar (Gap A = Gap B = 32px, Gap C = Gap D = 16px)
     const double gapAB = 32.0;  // Başlık↔Kasa ve Kasa↔Filtre arası
     const double gapCD = 16.0;  // Filtre↔Kartlar ve Kartlar↔Navbar arası
+    const double gapCardToFilters = 16.0; // Kasa↔Filtre arası kısılan boşluk
     const double titleBarH = 42.0;
-    const double cardH = 270.0;
+    const double cardH = 286.0;
     const double filtersH = 72.0;
     const double navbarH = 80.0;
 
     // Üst alan: statusBar + başlık + gapA + kasa + gapB + filtreler + gapC
-    final topArea = topPadding + titleBarH + gapAB + cardH + gapAB + filtersH + gapCD;
+    final topArea = topPadding + titleBarH + gapAB + cardH + gapCardToFilters + filtersH + gapCD;
     // Alt alan: navbar + safeArea + gapD
     final bottomArea = navbarH + bottomPadding + gapCD;
     // Kalan alan 2 satır kart + 12px arası boşluk için
@@ -103,7 +107,7 @@ class _VaultsScreenState extends ConsumerState<VaultsScreen> {
             ),
             slivers: [
               _buildHeader(groups, allTransactions, selectedVaultId, activeColor, unseenNotificationsCount, gapAB, l10n, context),
-              _buildFilters(filter, selectedPeriod, activeColor, scalingFactor, gapAB, l10n, context),
+              _buildFilters(filter, selectedPeriod, activeColor, scalingFactor, gapCardToFilters, l10n, context),
               
               if (filteredTransactions.isEmpty)
                 _buildEmptyState(activeColor, isDark, l10n)
@@ -382,8 +386,6 @@ class _VaultsScreenState extends ConsumerState<VaultsScreen> {
         ? '$parentName / $categoryName' 
         : categoryName;
 
-    final selectedVaultId = ref.read(selectedVaultProvider);
-
     CustomBottomSheet.show(
       context: context,
       title: fullTitle,
@@ -391,13 +393,15 @@ class _VaultsScreenState extends ConsumerState<VaultsScreen> {
         transaction: tx,
         onEdit: () {
           final selectedVaultId = ref.read(selectedVaultProvider);
+          final groups = ref.read(transactionGroupsProvider);
+          final effectiveVaultId = selectedVaultId ?? (groups.isNotEmpty ? groups.first.id : null);
           final currentVaultIds = tx.groupIds
               .map((vId) => int.parse(vId.replaceFirst('v_', '')))
               .toList();
           
           // Eğer bir kasa seçili ise ve işlem bu kasada değilse, düzenleme ekranına bu kasayı da seçili gönder
-          if (selectedVaultId != null) {
-            final vId = int.tryParse(selectedVaultId.replaceFirst('v_', ''));
+          if (effectiveVaultId != null) {
+            final vId = int.tryParse(effectiveVaultId.replaceFirst('v_', ''));
             if (vId != null && !currentVaultIds.contains(vId)) {
               currentVaultIds.add(vId);
             }
@@ -405,8 +409,8 @@ class _VaultsScreenState extends ConsumerState<VaultsScreen> {
 
           Navigator.push(
             context,
-            MaterialPageRoute(
-              builder: (context) => AddTransactionScreen(
+            SlideUpPageRoute(
+              child: AddTransactionScreen(
                 initialId: tx.dbId,
                 initialName: tx.name,
                 initialAmount: tx.amount,
@@ -455,18 +459,6 @@ class _VaultsScreenState extends ConsumerState<VaultsScreen> {
             if (context.mounted) Navigator.pop(context); // Close the detail sheet
           }
         },
-        onRemoveFromVault: selectedVaultId != null ? () async {
-          final record = await DatabaseService.getTransaction(tx.dbId!);
-          if (record != null) {
-            final vId = int.tryParse(selectedVaultId.replaceFirst('v_', ''));
-            if (vId != null) {
-              record.vaultIds = List<int>.from(record.vaultIds)..remove(vId);
-              await DatabaseService.updateTransaction(record);
-              HapticFeedback.mediumImpact();
-            }
-          }
-        } : null,
-        isInVault: tx.groupIds.isNotEmpty,
       ),
     );
   }
@@ -475,6 +467,35 @@ class _VaultsScreenState extends ConsumerState<VaultsScreen> {
 
   void _showAddVaultSheet(BuildContext context) {
     HapticFeedback.heavyImpact();
+
+    final vaults = ref.read(vaultsStreamProvider).valueOrNull ?? [];
+    final subService = ref.read(subscriptionServiceProvider);
+    
+    if (!subService.isPro && vaults.length >= subService.maxVaults) {
+      showCustomDialog(
+        context: context,
+        accentColor: const Color(0xFFFFB300), // Altın rengi
+        title: "Premium Gerekli",
+        content: "Ücretsiz planda en fazla ${subService.maxVaults} kasa oluşturabilirsiniz. Sınırsız kasa oluşturmak ve tüm premium özelliklere erişmek için yükseltin.",
+        actions: [
+          PrecisionDialogAction(
+            label: "Daha Sonra",
+            onTap: () => Navigator.pop(context),
+            isPrimary: false,
+          ),
+          PrecisionDialogAction(
+            label: "Premium'a Yükselt",
+            onTap: () {
+              Navigator.pop(context);
+              ProUpgradeSheet.show(context);
+            },
+            isPrimary: true,
+          ),
+        ],
+      );
+      return;
+    }
+
     CustomBottomSheet.show(
       context: context,
       title: AppLocalizations.of(context)!.addNewVault,

@@ -24,7 +24,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get preferences => '偏好与应用';
 
   @override
-  String get language => '应用语言';
+  String get language => '语言';
 
   @override
   String get aiNotifications => 'AI 助手警报';
@@ -63,19 +63,19 @@ class AppLocalizationsZh extends AppLocalizations {
   String get dataManagement => '数据管理';
 
   @override
-  String get driveBackup => 'Google Drive 备份';
+  String get driveBackup => 'Drive 备份';
 
   @override
-  String get exportExcel => '导出数据为 Excel (CSV)';
+  String get exportExcel => '导出到 Excel';
 
   @override
   String get support => '支持';
 
   @override
-  String get contact => '联系 Finarcast';
+  String get contact => '联系我们';
 
   @override
-  String get about => '关于应用';
+  String get about => '关于';
 
   @override
   String get aboutFinarcast =>
@@ -241,7 +241,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get frequency => '频率';
 
   @override
-  String get themeMode => '主题模式';
+  String get themeMode => '主题';
 
   @override
   String get themeSystem => '系统默认';
@@ -253,7 +253,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get themeDark => '深色模式';
 
   @override
-  String get colorTheme => 'Renk Teması';
+  String get colorTheme => 'Renk';
 
   @override
   String get colorSystem => 'Sistem';
@@ -461,6 +461,14 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get other => '其他';
+
+  @override
+  String get balanceAdjustment => 'Bakiye Düzeltme';
+
+  @override
+  String balanceAdjustmentNote(Object newVal, Object oldVal) {
+    return 'Kasa bakiyesi $oldVal değerinden $newVal değerine eşitlendi.';
+  }
 
   @override
   String get salary => '工资';
@@ -1330,4 +1338,137 @@ class AppLocalizationsZh extends AppLocalizations {
   @override
   String get authRegistrationSuccess =>
       'Kayıt başarılı! Lütfen e-postanıza gelen doğrulama kodunu girin.';
+
+  @override
+  String get authVerificationCode => 'Doğrulama Kodu';
+
+  @override
+  String authVerificationDesc(String email) {
+    return 'Kayıt işlemini tamamlamak için $email adresine gönderilen doğrulama kodunu girin.';
+  }
+
+  @override
+  String get authVerifyCode => 'Kodu Doğrula';
+
+  @override
+  String authResendCodeCountdown(int seconds) {
+    return 'Kodu Tekrar Gönder ($seconds sn)';
+  }
+
+  @override
+  String get authResendCode => 'Kodu Tekrar Gönder';
+
+  @override
+  String get authGoBack => 'Geri Dön';
+
+  @override
+  String get authWelcome => 'Hoş Geldiniz';
+
+  @override
+  String get authLoginSubtitle =>
+      'Hesabınıza giriş yaparak finanslarınıza hükmedin.';
+
+  @override
+  String get authEmail => 'E-posta';
+
+  @override
+  String get authPassword => 'Şifre';
+
+  @override
+  String get authForgotPassword => 'Şifremi Unuttum';
+
+  @override
+  String get authLogin => 'Giriş Yap';
+
+  @override
+  String get authOr => 'Veya';
+
+  @override
+  String get authGoogleSignIn => 'Google ile Devam Et';
+
+  @override
+  String get authNewAccount => 'Yeni Hesap';
+
+  @override
+  String get authRegisterSubtitle =>
+      'Finarcast dünyasına katılarak limitlerinizi belirleyin.';
+
+  @override
+  String get authUsername => 'Kullanıcı Adı';
+
+  @override
+  String get authConfirmPassword => 'Şifre Tekrar';
+
+  @override
+  String get authRegister => 'Hemen Katıl';
+
+  @override
+  String get authNoAccount => 'Hesabınız yok mu?';
+
+  @override
+  String get authAlreadyHaveAccount => 'Zaten hesabınız var mı?';
+
+  @override
+  String get authRegisterAction => 'Kayıt Ol';
+
+  @override
+  String get authLoginAction => 'Giriş Yap';
+
+  @override
+  String get authContinueAsGuest => 'Misafir Olarak Devam Et';
+
+  @override
+  String get authPasswordReset => 'Şifre Sıfırlama';
+
+  @override
+  String get authForgotPasswordDesc =>
+      'Şifrenizi sıfırlamak için e-posta adresinizi girin. Size 6 haneli geçici bir kod göndereceğiz.';
+
+  @override
+  String get authSendCode => 'Kod Gönder';
+
+  @override
+  String get authBackToLogin => 'Giriş Ekranına Dön';
+
+  @override
+  String get authVerificationCodeTitle => 'Onay Kodu';
+
+  @override
+  String authForgotPasswordOtpDesc(String email) {
+    return '$email adresine gönderilen 6 haneli doğrulama kodunu girin.';
+  }
+
+  @override
+  String get authChangeEmail => 'E-posta Değiştir';
+
+  @override
+  String get authNewPasswordTitle => 'Yeni Şifre';
+
+  @override
+  String get authNewPasswordDesc =>
+      'Hesabınız için en az 6 karakterli güvenli bir şifre belirleyin.';
+
+  @override
+  String get authNewPassword => 'Yeni Şifre';
+
+  @override
+  String get authConfirmNewPassword => 'Yeni Şifre Tekrar';
+
+  @override
+  String get authUpdatePassword => 'Şifreyi Güncelle';
+
+  @override
+  String get authPasswordResetSuccess =>
+      'Şifreniz başarıyla sıfırlandı ve giriş yapıldı.';
+
+  @override
+  String get authGoogleError => 'Google Giriş Hatası';
+
+  @override
+  String get authPasswordDifferentError =>
+      'Yeni şifreniz mevcut şifrenizden farklı olmalıdır.';
+
+  @override
+  String get authUserNotFoundError =>
+      'Bu e-posta adresine kayıtlı bir kullanıcı bulunamadı.';
 }

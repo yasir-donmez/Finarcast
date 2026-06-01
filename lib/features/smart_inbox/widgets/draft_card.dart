@@ -8,6 +8,7 @@ import '../../../core/database/models/vault.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../transactions/widgets/transaction_category_data.dart';
 import '../../../shared/widgets/inline_picker.dart';
+import '../../../shared/widgets/custom_card.dart';
 import '../services/draft_service.dart';
 
 
@@ -44,6 +45,8 @@ class _DismissibleDraftCardState extends State<DismissibleDraftCard>
   late AnimationController _animController;
   late Animation<double> _animation;
   bool _dismissed = false;
+  bool _hasTriggeredStartHaptic = false;
+  bool _hasTriggeredThresholdHaptic = false;
 
   // %20 genişliği aşarsa dismiss olur
   static const double _dismissThreshold = 0.20;
@@ -73,12 +76,32 @@ class _DismissibleDraftCardState extends State<DismissibleDraftCard>
 
   void _onDragStart(DragStartDetails details) {
     _animController.stop();
+    _hasTriggeredStartHaptic = false;
+    _hasTriggeredThresholdHaptic = false;
   }
 
   void _onDragUpdate(DragUpdateDetails details) {
     setState(() {
       _dragExtent += details.primaryDelta!;
     });
+
+    final width = context.size?.width ?? 300;
+    final ratio = _dragExtent.abs() / width;
+
+    // Trigger light haptic when swipe first reveals the background
+    if (!_hasTriggeredStartHaptic && _dragExtent.abs() > 8) {
+      _hasTriggeredStartHaptic = true;
+      HapticFeedback.lightImpact();
+    }
+
+    // Trigger medium haptic when threshold is crossed (feedback for full transformation/action active)
+    if (!_hasTriggeredThresholdHaptic && ratio >= _dismissThreshold) {
+      _hasTriggeredThresholdHaptic = true;
+      HapticFeedback.mediumImpact();
+    } else if (_hasTriggeredThresholdHaptic && ratio < _dismissThreshold) {
+      // Reset if user drags back below threshold
+      _hasTriggeredThresholdHaptic = false;
+    }
   }
 
   void _onDragEnd(DragEndDetails details) {
@@ -178,9 +201,6 @@ class _DismissibleDraftCardState extends State<DismissibleDraftCard>
     final color = isLeftToRight
         ? const Color(0xFF10B981)
         : const Color(0xFFEF4444);
-    final icon = isLeftToRight
-        ? Icons.check_circle_rounded
-        : Icons.delete_rounded;
     final alignment = isLeftToRight
         ? Alignment.centerLeft
         : Alignment.centerRight;
@@ -190,6 +210,11 @@ class _DismissibleDraftCardState extends State<DismissibleDraftCard>
     // İlk %25 çekmede dönme tamamlanır, sonra ikon düz kalır
     final rotationProgress = (progress / 0.25).clamp(0.0, 1.0);
     final angle = (1.0 - rotationProgress) * (math.pi / 2) * rotationSign;
+
+    // Slide in from outer edges towards center
+    final slideSign = isLeftToRight ? -1.0 : 1.0;
+    final slideProgress = (progress / 0.25).clamp(0.0, 1.0);
+    final xOffset = 30.0 * (1.0 - slideProgress) * slideSign;
 
     return Container(
       margin: const EdgeInsets.only(bottom: 10),
@@ -209,16 +234,19 @@ class _DismissibleDraftCardState extends State<DismissibleDraftCard>
           child: Align(
             alignment: alignment,
             child: Transform(
-              transform: Matrix4.identity()
+              transform: Matrix4.translationValues(xOffset, 0.0, 0.0)
                 ..setEntry(3, 2, 0.004) // Perspektif derinliği
                 ..rotateY(angle),
               alignment: Alignment.center,
-              child: Opacity(
-                opacity: rotationProgress,
-                child: Icon(
-                  icon,
-                  color: color.withValues(alpha: 0.5 + progress * 0.5),
-                  size: 28,
+              child: AnimatedScale(
+                scale: progress >= 0.20 ? 1.15 : 1.0,
+                duration: const Duration(milliseconds: 250),
+                curve: Curves.easeOutCubic,
+                child: Opacity(
+                  opacity: rotationProgress,
+                  child: isLeftToRight
+                      ? AnimatedCheckIcon(progress: progress, color: color)
+                      : AnimatedTrashIcon(progress: progress, color: color),
                 ),
               ),
             ),
@@ -280,85 +308,60 @@ class _DismissibleDraftCardState extends State<DismissibleDraftCard>
       return widget.draft.note;
     }();
 
-    final List<String> vaultNames = [
-      AppLocalizations.of(context)!.mainVault,
-      ...widget.vaults.map((v) => v.name),
-    ];
+    final List<String> vaultNames = widget.vaults.map((v) => v.name).toList();
     
     int selectedIndex = 0;
-    if (widget.selectedVaultId != -1) {
+    if (widget.vaults.isNotEmpty) {
       final index = widget.vaults.indexWhere((v) => v.id == widget.selectedVaultId);
       if (index != -1) {
-        selectedIndex = index + 1;
+        selectedIndex = index;
       }
     }
 
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final baseSurfaceColor = AppColors.getThemeSurface(context, 1);
-    
-    // Premium yumuşak gradyan (gelir/gider tipine göre köşede hafif bir renk ışıltısı verir)
-    // Color.lerp ile tamamen opaque (katı) renk üretiyoruz — arka plan sızmaz
     final typeColor = widget.draft.isIncome
         ? AppColors.getIncome(context)
         : AppColors.getExpense(context);
-    final tintedColor = Color.lerp(baseSurfaceColor, typeColor, isDark ? 0.06 : 0.08)!;
-    
-    final cardGradient = LinearGradient(
-      begin: Alignment.topLeft,
-      end: Alignment.bottomRight,
-      colors: [
-        baseSurfaceColor,
-        baseSurfaceColor,
-        tintedColor,
-      ],
-    );
-    
-    final activeBorderColor = Color.lerp(
-      AppColors.getThemeBorder(context, 1),
-      typeColor,
-      isDark ? 0.15 : 0.20,
-    )!;
 
-    return Container(
-      margin: const EdgeInsets.only(bottom: 10),
-      decoration: BoxDecoration(
-        gradient: cardGradient,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: activeBorderColor,
-          width: 0.8,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: isDark ? 0.12 : 0.03),
-            blurRadius: 8,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      clipBehavior: Clip.antiAlias,
-      child: Stack(
-        children: [
-          // 1. Arka Plan Watermark (Filigran) İkonu
-          Positioned(
-            right: -12,
-            bottom: -12,
-            child: IgnorePointer(
-              child: Transform.rotate(
-                angle: -math.pi / 7, // ~25 derece eğim
-                child: Icon(
-                  catIcon,
-                  size: 85,
-                  color: catColor.withValues(alpha: isDark ? 0.05 : 0.06),
-                ),
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 10),
+      child: CustomCard(
+        padding: EdgeInsets.zero,
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(16),
+          child: Container(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                stops: const [0.0, 0.45],
+                colors: [
+                  typeColor.withValues(alpha: isDark ? 0.14 : 0.18),
+                  Colors.transparent,
+                ],
               ),
             ),
-          ),
-          
-          // 2. Kart İçeriği
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-            child: Column(
+            child: Stack(
+              children: [
+                // 1. Arka Plan Watermark (Filigran) İkonu
+                Positioned(
+                  right: -10,
+                  bottom: -10,
+                  child: IgnorePointer(
+                    child: Transform.rotate(
+                      angle: -math.pi / 7, // ~25 derece eğim
+                      child: Icon(
+                        catIcon,
+                        size: 80,
+                        color: catColor.withValues(alpha: isDark ? 0.04 : 0.05),
+                      ),
+                    ),
+                  ),
+                ),
+                // 2. Kart İçeriği
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                  child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -368,12 +371,23 @@ class _DismissibleDraftCardState extends State<DismissibleDraftCard>
                   children: [
                     // Sol Sütun: Sadece Kategori İkonu
                     Container(
-                      padding: const EdgeInsets.all(7),
+                      padding: const EdgeInsets.all(8),
                       decoration: BoxDecoration(
-                        color: catColor.withValues(alpha: 0.12),
+                        gradient: LinearGradient(
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                          colors: [
+                            catColor.withValues(alpha: isDark ? 0.22 : 0.26),
+                            catColor.withValues(alpha: isDark ? 0.05 : 0.07),
+                          ],
+                        ),
                         borderRadius: BorderRadius.circular(10),
+                        border: Border.all(
+                          color: catColor.withValues(alpha: isDark ? 0.25 : 0.35),
+                          width: 0.8,
+                        ),
                       ),
-                      child: Icon(catIcon, color: catColor, size: 20),
+                      child: Icon(catIcon, color: catColor, size: 18),
                     ),
                     const SizedBox(width: 10),
                     
@@ -449,10 +463,8 @@ class _DismissibleDraftCardState extends State<DismissibleDraftCard>
                         items: vaultNames,
                         selectedIndex: selectedIndex,
                         onChanged: (index) {
-                          if (index == 0) {
-                            widget.onVaultSelected(-1);
-                          } else {
-                            widget.onVaultSelected(widget.vaults[index - 1].id);
+                          if (index >= 0 && index < widget.vaults.length) {
+                            widget.onVaultSelected(widget.vaults[index].id);
                           }
                         },
                         width: 125,
@@ -516,7 +528,220 @@ class _DismissibleDraftCardState extends State<DismissibleDraftCard>
           ),
         ],
       ),
+    ),
+  ),
+),
     );
+  }
+}
+
+// ==========================================
+// CUSTOM ANIMATED ICONS FOR SWIPE ACTIONS
+// ==========================================
+
+/// Animasyonlu Çöp Kutusu İkonu (Kapak yukarı kalkar ve döner)
+class AnimatedTrashIcon extends StatelessWidget {
+  final double progress;
+  final Color color;
+  const AnimatedTrashIcon({super.key, required this.progress, required this.color});
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: 26,
+      height: 28,
+      child: CustomPaint(
+        painter: _TrashIconPainter(
+          progress: progress,
+          color: color,
+        ),
+      ),
+    );
+  }
+}
+
+class _TrashIconPainter extends CustomPainter {
+  final double progress;
+  final Color color;
+
+  _TrashIconPainter({
+    required this.progress,
+    required this.color,
+  });
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = color
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 2.0
+      ..strokeCap = StrokeCap.round;
+
+    // Lid lifts up (starts immediately on swipe)
+    final lidLift = (progress * -18).clamp(-8.0, 0.0);
+    // Lid rotates/tilts (goes from 0 to -0.35 radians)
+    final lidRotation = (progress * -0.8).clamp(-0.35, 0.0);
+
+    // 1. Draw Bin Body (Tapered trapezoid - enlarged and proportional)
+    final centerX = size.width / 2;
+    final centerY = size.height / 2;
+
+    final bodyTopY = centerY - 2;
+    final bodyBottomY = centerY + 11;
+    final bodyTopHalfWidth = 8.0;
+    final bodyBottomHalfWidth = 6.0;
+
+    final bodyPath = Path()
+      ..moveTo(centerX - bodyTopHalfWidth, bodyTopY)
+      ..lineTo(centerX - bodyBottomHalfWidth, bodyBottomY)
+      ..lineTo(centerX + bodyBottomHalfWidth, bodyBottomY)
+      ..lineTo(centerX + bodyTopHalfWidth, bodyTopY)
+      ..close();
+
+    final bodyPaint = Paint()
+      ..color = color
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 2.0
+      ..strokeJoin = StrokeJoin.round
+      ..strokeCap = StrokeCap.round;
+    canvas.drawPath(bodyPath, bodyPaint);
+
+    // Draw 2 vertical stripes inside the body (slanted to match the taper)
+    final stripeY1 = bodyTopY + 3.0;
+    final stripeY2 = bodyBottomY - 3.0;
+    canvas.drawLine(
+      Offset(centerX - 3.0, stripeY1),
+      Offset(centerX - 2.5, stripeY2),
+      paint..strokeWidth = 1.8,
+    );
+    canvas.drawLine(
+      Offset(centerX + 3.0, stripeY1),
+      Offset(centerX + 2.5, stripeY2),
+      paint..strokeWidth = 1.8,
+    );
+
+    // 2. Draw Lid (with lift and rotate - aligned with the wider body)
+    canvas.save();
+    
+    // Rotate around the left hinge of the lid
+    final hingeX = centerX - 10.0;
+    final hingeY = centerY - 4.0 + lidLift;
+    canvas.translate(hingeX, hingeY);
+    canvas.rotate(lidRotation);
+    canvas.translate(-hingeX, -hingeY);
+
+    final lidY = centerY - 4.0 + lidLift;
+
+    // Draw lid line
+    canvas.drawLine(
+      Offset(centerX - 10.0, lidY),
+      Offset(centerX + 10.0, lidY),
+      paint..strokeWidth = 2.0,
+    );
+
+    // Draw lid handle
+    final handlePath = Path()
+      ..moveTo(centerX - 3.5, lidY)
+      ..lineTo(centerX - 3.5, lidY - 3.5)
+      ..lineTo(centerX + 3.5, lidY - 3.5)
+      ..lineTo(centerX + 3.5, lidY);
+    
+    canvas.drawPath(handlePath, paint..strokeWidth = 1.8);
+
+    canvas.restore();
+  }
+
+  @override
+  bool shouldRepaint(_TrashIconPainter oldDelegate) {
+    return oldDelegate.progress != progress || oldDelegate.color != color;
+  }
+}
+
+/// Animasyonlu Onaylama İkonu (Çizgi kendini soldan sağa çizer)
+class AnimatedCheckIcon extends StatelessWidget {
+  final double progress;
+  final Color color;
+  const AnimatedCheckIcon({super.key, required this.progress, required this.color});
+
+  @override
+  Widget build(BuildContext context) {
+    // Check işareti çizim ilerlemesi (%5 ile %25 kaydırma arasında çizim tamamlanır)
+    final checkProgress = ((progress - 0.05) / 0.20).clamp(0.0, 1.0);
+
+    return SizedBox(
+      width: 28,
+      height: 28,
+      child: CustomPaint(
+        painter: _CheckIconPainter(
+          checkProgress: checkProgress,
+          color: color,
+        ),
+      ),
+    );
+  }
+}
+
+class _CheckIconPainter extends CustomPainter {
+  final double checkProgress;
+  final Color color;
+
+  _CheckIconPainter({
+    required this.checkProgress,
+    required this.color,
+  });
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final center = Offset(size.width / 2, size.height / 2);
+    final radius = size.width / 2 - 1.5;
+
+    // Hafif renkli arka plan dairesi
+    final bgPaint = Paint()
+      ..color = color.withValues(alpha: 0.12)
+      ..style = PaintingStyle.fill;
+    canvas.drawCircle(center, radius, bgPaint);
+
+    // Dış daire çizgisi
+    final outlinePaint = Paint()
+      ..color = color
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 2.0;
+    canvas.drawCircle(center, radius, outlinePaint);
+
+    if (checkProgress > 0) {
+      final path = Path();
+      final start = Offset(size.width * 0.28, size.height * 0.5);
+      final turn = Offset(size.width * 0.45, size.height * 0.68);
+      final end = Offset(size.width * 0.72, size.height * 0.35);
+
+      final checkPaint = Paint()
+        ..color = color
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 2.5
+        ..strokeCap = StrokeCap.round
+        ..strokeJoin = StrokeJoin.round;
+
+      if (checkProgress < 0.4) {
+        // İlk çizgi çiziliyor (soldan köşeye)
+        final t = checkProgress / 0.4;
+        final p = Offset.lerp(start, turn, t)!;
+        path.moveTo(start.dx, start.dy);
+        path.lineTo(p.dx, p.dy);
+      } else {
+        // İlk çizgi tamam, ikinci çizgi çiziliyor (köşeden yukarı)
+        final t = (checkProgress - 0.4) / 0.6;
+        final p = Offset.lerp(turn, end, t)!;
+        path.moveTo(start.dx, start.dy);
+        path.lineTo(turn.dx, turn.dy);
+        path.lineTo(p.dx, p.dy);
+      }
+      canvas.drawPath(path, checkPaint);
+    }
+  }
+
+  @override
+  bool shouldRepaint(_CheckIconPainter oldDelegate) {
+    return oldDelegate.checkProgress != checkProgress || oldDelegate.color != color;
   }
 }
 

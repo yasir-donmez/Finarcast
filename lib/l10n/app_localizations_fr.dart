@@ -24,7 +24,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get preferences => 'PRÉFÉRENCES & APPLICATION';
 
   @override
-  String get language => 'Langue de l\'App';
+  String get language => 'Langue';
 
   @override
   String get aiNotifications => 'Alertes de l\'Assistant IA';
@@ -40,7 +40,7 @@ class AppLocalizationsFr extends AppLocalizations {
       'Les transactions expirées sont archivées.\nL\'IA n\'utilise que les données de cette période.';
 
   @override
-  String get permanentDataDeletion => 'Kalıcı Veri Silme Süresi';
+  String get permanentDataDeletion => 'Kalıcı Silme';
 
   @override
   String get permanentDataDeletionDesc =>
@@ -65,16 +65,16 @@ class AppLocalizationsFr extends AppLocalizations {
   String get dataManagement => 'GESTION DES DONNÉES';
 
   @override
-  String get driveBackup => 'Sauvegarde Google Drive';
+  String get driveBackup => 'Sauvegarde Drive';
 
   @override
-  String get exportExcel => 'Exporter en Excel (CSV)';
+  String get exportExcel => 'Exporter en Excel';
 
   @override
   String get support => 'SUPPORT';
 
   @override
-  String get contact => 'Contacter Finarcast';
+  String get contact => 'Contact';
 
   @override
   String get about => 'À Propos';
@@ -244,7 +244,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get frequency => 'Fréquence';
 
   @override
-  String get themeMode => 'Mode de Thème';
+  String get themeMode => 'Thème';
 
   @override
   String get themeSystem => 'Système';
@@ -256,7 +256,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get themeDark => 'Sombre';
 
   @override
-  String get colorTheme => 'Renk Teması';
+  String get colorTheme => 'Renk';
 
   @override
   String get colorSystem => 'Sistem';
@@ -464,6 +464,14 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get other => 'Autre';
+
+  @override
+  String get balanceAdjustment => 'Bakiye Düzeltme';
+
+  @override
+  String balanceAdjustmentNote(Object newVal, Object oldVal) {
+    return 'Kasa bakiyesi $oldVal değerinden $newVal değerine eşitlendi.';
+  }
 
   @override
   String get salary => 'Salaire';
@@ -1350,4 +1358,137 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get authRegistrationSuccess =>
       'Kayıt başarılı! Lütfen e-postanıza gelen doğrulama kodunu girin.';
+
+  @override
+  String get authVerificationCode => 'Doğrulama Kodu';
+
+  @override
+  String authVerificationDesc(String email) {
+    return 'Kayıt işlemini tamamlamak için $email adresine gönderilen doğrulama kodunu girin.';
+  }
+
+  @override
+  String get authVerifyCode => 'Kodu Doğrula';
+
+  @override
+  String authResendCodeCountdown(int seconds) {
+    return 'Kodu Tekrar Gönder ($seconds sn)';
+  }
+
+  @override
+  String get authResendCode => 'Kodu Tekrar Gönder';
+
+  @override
+  String get authGoBack => 'Geri Dön';
+
+  @override
+  String get authWelcome => 'Hoş Geldiniz';
+
+  @override
+  String get authLoginSubtitle =>
+      'Hesabınıza giriş yaparak finanslarınıza hükmedin.';
+
+  @override
+  String get authEmail => 'E-posta';
+
+  @override
+  String get authPassword => 'Şifre';
+
+  @override
+  String get authForgotPassword => 'Şifremi Unuttum';
+
+  @override
+  String get authLogin => 'Giriş Yap';
+
+  @override
+  String get authOr => 'Veya';
+
+  @override
+  String get authGoogleSignIn => 'Google ile Devam Et';
+
+  @override
+  String get authNewAccount => 'Yeni Hesap';
+
+  @override
+  String get authRegisterSubtitle =>
+      'Finarcast dünyasına katılarak limitlerinizi belirleyin.';
+
+  @override
+  String get authUsername => 'Kullanıcı Adı';
+
+  @override
+  String get authConfirmPassword => 'Şifre Tekrar';
+
+  @override
+  String get authRegister => 'Hemen Katıl';
+
+  @override
+  String get authNoAccount => 'Hesabınız yok mu?';
+
+  @override
+  String get authAlreadyHaveAccount => 'Zaten hesabınız var mı?';
+
+  @override
+  String get authRegisterAction => 'Kayıt Ol';
+
+  @override
+  String get authLoginAction => 'Giriş Yap';
+
+  @override
+  String get authContinueAsGuest => 'Misafir Olarak Devam Et';
+
+  @override
+  String get authPasswordReset => 'Şifre Sıfırlama';
+
+  @override
+  String get authForgotPasswordDesc =>
+      'Şifrenizi sıfırlamak için e-posta adresinizi girin. Size 6 haneli geçici bir kod göndereceğiz.';
+
+  @override
+  String get authSendCode => 'Kod Gönder';
+
+  @override
+  String get authBackToLogin => 'Giriş Ekranına Dön';
+
+  @override
+  String get authVerificationCodeTitle => 'Onay Kodu';
+
+  @override
+  String authForgotPasswordOtpDesc(String email) {
+    return '$email adresine gönderilen 6 haneli doğrulama kodunu girin.';
+  }
+
+  @override
+  String get authChangeEmail => 'E-posta Değiştir';
+
+  @override
+  String get authNewPasswordTitle => 'Yeni Şifre';
+
+  @override
+  String get authNewPasswordDesc =>
+      'Hesabınız için en az 6 karakterli güvenli bir şifre belirleyin.';
+
+  @override
+  String get authNewPassword => 'Yeni Şifre';
+
+  @override
+  String get authConfirmNewPassword => 'Yeni Şifre Tekrar';
+
+  @override
+  String get authUpdatePassword => 'Şifreyi Güncelle';
+
+  @override
+  String get authPasswordResetSuccess =>
+      'Şifreniz başarıyla sıfırlandı ve giriş yapıldı.';
+
+  @override
+  String get authGoogleError => 'Google Giriş Hatası';
+
+  @override
+  String get authPasswordDifferentError =>
+      'Yeni şifreniz mevcut şifrenizden farklı olmalıdır.';
+
+  @override
+  String get authUserNotFoundError =>
+      'Bu e-posta adresine kayıtlı bir kullanıcı bulunamadı.';
 }

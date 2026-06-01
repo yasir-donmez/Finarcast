@@ -127,6 +127,23 @@ class PrecisionDialogAction {
   });
 }
 
+class _CustomDialogRoute<T> extends RawDialogRoute<T> {
+  final Duration customReverseTransitionDuration;
+
+  _CustomDialogRoute({
+    required super.pageBuilder,
+    super.barrierDismissible = true,
+    super.barrierColor = const Color(0x80000000),
+    super.barrierLabel,
+    required super.transitionDuration,
+    required this.customReverseTransitionDuration,
+    super.transitionBuilder,
+  });
+
+  @override
+  Duration get reverseTransitionDuration => customReverseTransitionDuration;
+}
+
 Future<T?> showCustomDialog<T>({
   required BuildContext context,
   required String title,
@@ -134,28 +151,33 @@ Future<T?> showCustomDialog<T>({
   required List<PrecisionDialogAction> actions,
   Color? accentColor,
 }) {
-  return showGeneralDialog<T>(
-    context: context,
-    pageBuilder: (context, animation, secondaryAnimation) => const SizedBox.shrink(),
-    barrierDismissible: true,
-    barrierLabel: "CustomDialog",
-    barrierColor: Colors.black.withValues(alpha: 0.5),
-    transitionDuration: const Duration(milliseconds: 300),
-    transitionBuilder: (context, animation, secondaryAnimation, child) {
-      return FadeTransition(
-        opacity: animation,
-        child: ScaleTransition(
-          scale: Tween<double>(begin: 0.9, end: 1.0).animate(
-            CurvedAnimation(parent: animation, curve: Curves.easeOutBack),
+  return Navigator.of(context).push<T>(
+    _CustomDialogRoute<T>(
+      pageBuilder: (context, animation, secondaryAnimation) => const SizedBox.shrink(),
+      barrierDismissible: true,
+      barrierLabel: "CustomDialog",
+      barrierColor: Colors.black.withValues(alpha: 0.5),
+      transitionDuration: const Duration(milliseconds: 300),
+      customReverseTransitionDuration: const Duration(milliseconds: 200),
+      transitionBuilder: (context, animation, secondaryAnimation, child) {
+        final curve = animation.status == AnimationStatus.reverse
+            ? Curves.easeInCubic
+            : Curves.easeOutBack;
+        return FadeTransition(
+          opacity: animation,
+          child: ScaleTransition(
+            scale: Tween<double>(begin: 0.9, end: 1.0).animate(
+              CurvedAnimation(parent: animation, curve: curve),
+            ),
+            child: CustomDialog(
+              title: title,
+              content: content,
+              actions: actions,
+              accentColor: accentColor,
+            ),
           ),
-          child: CustomDialog(
-            title: title,
-            content: content,
-            actions: actions,
-            accentColor: accentColor,
-          ),
-        ),
-      );
-    },
+        );
+      },
+    ),
   );
 }

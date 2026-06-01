@@ -29,36 +29,22 @@ class AppColors {
   static Color getThemeSecondary(Color primaryColor) {
     final value = primaryColor.toARGB32() & 0xFFFFFFFF;
     switch (value) {
-      // --- Basit Renkler (Simple Colors) ---
-      case 0xFF2979FF: // Ocean Blue
-        return const Color(0xFF1565C0);
-      case 0xFF00C853: // Emerald Green
-        return const Color(0xFF003300);
-      case 0xFFD50000: // Crimson Red
-        return const Color(0xFFFF5252);
-      case 0xFFFF8F00: // Amber/Orange
-        return const Color(0xFFFFE082);
-      case 0xFF8E24AA: // Deep Purple
-        return const Color(0xFFE1BEE7);
-      case 0xFFE91E63: // Pink
-        return const Color(0xFFF8BBD0);
-      case 0xFF00BCD4: // Cyan
-        return const Color(0xFFB2EBF2);
-      case 0xFF607D8B: // Blue Grey
-        return const Color(0xFFCFD8DC);
-
-      // --- Canlı Renkler (Gradients) ---
-      case 0xFFF50057: // Sunset
-        return const Color(0xFFF5576C);
-      case 0xFF8A2387: // Aurora
-        return const Color(0xFF4A00E0);
-      case 0xFF2193B0: // Deep Ocean
-        return const Color(0xFF000851);
-      case 0xFF11998E: // Emerald
-        return const Color(0xFF96C93D);
-      case 0xFF6A11CB: // Royal
-        return const Color(0xFF2575FC);
-
+      case 0xFF00BCD4: // Kutup Mavisi (Polar Cyan)
+        return const Color(0xFF006064);
+      case 0xFF2EC4B6: // Nordik Nane (Nordic Sage)
+        return const Color(0xFF0F4C5C);
+      case 0xFFE5989B: // Pembe Altın (Rose Gold)
+        return const Color(0xFF6D597A);
+      case 0xFF8F94FB: // Eflatun Gece (Mystic Lavender)
+        return const Color(0xFF4E54C8);
+      case 0xFFF4A261: // Sahra Kehribarı (Sahara Amber)
+        return const Color(0xFFE76F51);
+      case 0xFF00B4D8: // Kraliyet Mavisi (Royal Blue)
+        return const Color(0xFF03045E);
+      case 0xFFFF4D6D: // Bordo Şarap (Burgundy Wine)
+        return const Color(0xFF800F2F);
+      case 0xFFADB5BD: // Platin Gri (Platinum Grey)
+        return const Color(0xFF212529);
       default:
         // Sistem/Varsayılan veya diğer renkler için dinamik lerp fallback
         return Color.lerp(primaryColor, Colors.white, 0.35)!;
@@ -70,7 +56,7 @@ class AppColors {
   static Color getInfo(BuildContext context) => getAccentDeep(context, const Color(0xFF29B6F6));
   static Color getIncome(BuildContext context) => getAccentDeep(context, const Color(0xFF00E676));
   static Color getExpense(BuildContext context) => getAccentDeep(context, const Color(0xFFFF5252));
-
+ 
   static Color getTextPrimary(BuildContext context) => Theme.of(context).colorScheme.onSurface;
   static Color getTextSecondary(BuildContext context) => Theme.of(context).brightness == Brightness.dark ? darkTextSecondary : lightTextSecondary;
   
@@ -79,26 +65,32 @@ class AppColors {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return (isDark ? Colors.white : Colors.black).withValues(alpha: 0.35);
   }
-
+ 
   static Color getBackground(BuildContext context) => Theme.of(context).brightness == Brightness.dark ? darkBackground : lightBackground;
   static Color getLightShadow(BuildContext context) => Theme.of(context).brightness == Brightness.dark ? darkLightShadow : lightLightShadow;
   static Color getDarkShadow(BuildContext context) => Theme.of(context).brightness == Brightness.dark ? darkDarkShadow : lightDarkShadow;
   static Color getInnerSurface(BuildContext context) => Theme.of(context).brightness == Brightness.dark ? darkInnerSurface : lightInnerSurface;
-
+ 
   // Background gradient colors lookup
   static List<Color>? getGradientColors(Color accentColor) {
     final value = accentColor.toARGB32() & 0xFFFFFFFF; // Make sure it's 32-bit int comparison
     switch (value) {
-      case 0xFFF50057:
-        return const [Color(0xFFF093FB), Color(0xFFF5576C)];
-      case 0xFF8A2387:
-        return const [Color(0xFF8E2DE2), Color(0xFF4A00E0)];
-      case 0xFF2193B0:
-        return const [Color(0xFF1CB5E0), Color(0xFF000851)];
-      case 0xFF11998E:
-        return const [Color(0xFF00B09B), Color(0xFF96C93D)];
-      case 0xFF6A11CB:
-        return const [Color(0xFF6A11CB), Color(0xFF2575FC)];
+      case 0xFF00BCD4: // Kutup Mavisi
+        return const [Color(0xFF00BCD4), Color(0xFF006064)];
+      case 0xFF2EC4B6: // Nordik Nane
+        return const [Color(0xFF2EC4B6), Color(0xFF0F4C5C)];
+      case 0xFFE5989B: // Pembe Altın
+        return const [Color(0xFFE5989B), Color(0xFF6D597A)];
+      case 0xFF8F94FB: // Eflatun Gece
+        return const [Color(0xFF8F94FB), Color(0xFF4E54C8)];
+      case 0xFFF4A261: // Sahra Kehribarı
+        return const [Color(0xFFF4A261), Color(0xFFE76F51)];
+      case 0xFF00B4D8: // Kraliyet Mavisi
+        return const [Color(0xFF00B4D8), Color(0xFF03045E)];
+      case 0xFFFF4D6D: // Bordo Şarap
+        return const [Color(0xFFFF4D6D), Color(0xFF800F2F)];
+      case 0xFFADB5BD: // Platin Gri
+        return const [Color(0xFFADB5BD), Color(0xFF212529)];
       default:
         return null;
     }
@@ -117,8 +109,8 @@ class AppColors {
     } else {
       // ═══ RENKLİ ═══ (Varsayılan)
       return isDark
-          ? Color.lerp(darkBackground, tint, 0.20)!
-          : Color.lerp(lightBackground, tint, 0.10)!;
+          ? Color.lerp(const Color(0xFF07080A), tint, 0.08)!
+          : Color.lerp(const Color(0xFFE9ECF0), tint, 0.12)!;
     }
   }
 
@@ -139,11 +131,12 @@ class AppColors {
     } else {
       // ═══ RENKLİ ═══ (Varsayılan)
       if (isDark) {
-        final base = isInsideSheet ? darkInnerSurface : const Color(0xFF161720);
-        return Color.lerp(base, tint, isInsideSheet ? 0.16 : 0.12)!;
+        final base = isInsideSheet ? darkInnerSurface : const Color(0xFF161722);
+        return Color.lerp(base, tint, isInsideSheet ? 0.20 : 0.16)!;
       } else {
-        final base = isInsideSheet ? lightInnerSurface : Colors.white;
-        return Color.lerp(base, tint, isInsideSheet ? 0.08 : 0.06)!;
+        return isInsideSheet
+            ? Color.lerp(lightInnerSurface, tint, 0.08)!
+            : Colors.white;
       }
     }
   }
@@ -161,8 +154,8 @@ class AppColors {
     } else {
       // ═══ RENKLİ ═══ (Varsayılan)
       return isDark
-          ? Color.lerp(const Color(0xFF2A2B36), tint, 0.15)!
-          : Color.lerp(const Color(0xFFE4E7EB), tint, 0.12)!;
+          ? Color.lerp(const Color(0xFF2E303E), tint, 0.22)!
+          : Color.lerp(const Color(0xFFD8DCE3), tint, 0.15)!;
     }
   }
 
@@ -194,7 +187,7 @@ class AppColors {
   static const Color staticSecondary = secondary;
 
   // --- Accents ---
-  static const Color primary = Color(0xFF00E5FF);
+  static const Color primary = Color(0xFF00BCD4);
   static const Color secondary = Color(0xFFB388FF);
   static const Color error = Color(0xFFFF5252);
   static const Color success = Color(0xFF00E676);
@@ -239,6 +232,7 @@ class AppCurrency {
     r'R$': 'BRL',
     'Fr': 'CHF',
     'G': 'GOLD',
+    'ALTIN': 'GOLD',
     'Ag': 'SILVER',
     'SR': 'SAR',
     'KD': 'KWD',

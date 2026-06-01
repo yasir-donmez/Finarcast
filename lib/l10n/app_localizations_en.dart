@@ -24,7 +24,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get preferences => 'PREFERENCES & APP';
 
   @override
-  String get language => 'App Language';
+  String get language => 'Language';
 
   @override
   String get aiNotifications => 'AI Assistant Alerts';
@@ -33,14 +33,14 @@ class AppLocalizationsEn extends AppLocalizations {
   String get dataAndAiSettings => 'DATA & AI SETTINGS';
 
   @override
-  String get dataRetention => 'Data Retention Period';
+  String get dataRetention => 'Data Retention';
 
   @override
   String get dataRetentionDesc =>
       'Expired transactions are archived.\nAI Persona only uses data within this period.';
 
   @override
-  String get permanentDataDeletion => 'Permanent Data Deletion Period';
+  String get permanentDataDeletion => 'Permanent Deletion';
 
   @override
   String get permanentDataDeletionDesc =>
@@ -65,19 +65,19 @@ class AppLocalizationsEn extends AppLocalizations {
   String get dataManagement => 'DATA MANAGEMENT';
 
   @override
-  String get driveBackup => 'Google Drive Backup';
+  String get driveBackup => 'Drive Backup';
 
   @override
-  String get exportExcel => 'Export Data to Excel (CSV)';
+  String get exportExcel => 'Export to Excel';
 
   @override
   String get support => 'SUPPORT';
 
   @override
-  String get contact => 'Contact Finarcast';
+  String get contact => 'Contact Us';
 
   @override
-  String get about => 'About App';
+  String get about => 'About';
 
   @override
   String get aboutFinarcast =>
@@ -243,7 +243,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get frequency => 'Frequency';
 
   @override
-  String get themeMode => 'Theme Mode';
+  String get themeMode => 'Theme';
 
   @override
   String get themeSystem => 'System';
@@ -255,7 +255,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get themeDark => 'Dark';
 
   @override
-  String get colorTheme => 'Color Theme';
+  String get colorTheme => 'Color';
 
   @override
   String get colorSystem => 'System';
@@ -463,6 +463,14 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get other => 'Other';
+
+  @override
+  String get balanceAdjustment => 'Balance Adjustment';
+
+  @override
+  String balanceAdjustmentNote(Object newVal, Object oldVal) {
+    return 'Vault balance adjusted from $oldVal to $newVal.';
+  }
 
   @override
   String get salary => 'Salary';
@@ -1350,4 +1358,137 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get authRegistrationSuccess =>
       'Registration successful! Please enter the verification code sent to your email.';
+
+  @override
+  String get authVerificationCode => 'Verification Code';
+
+  @override
+  String authVerificationDesc(String email) {
+    return 'Enter the verification code sent to $email to complete registration.';
+  }
+
+  @override
+  String get authVerifyCode => 'Verify Code';
+
+  @override
+  String authResendCodeCountdown(int seconds) {
+    return 'Resend Code (${seconds}s)';
+  }
+
+  @override
+  String get authResendCode => 'Resend Code';
+
+  @override
+  String get authGoBack => 'Go Back';
+
+  @override
+  String get authWelcome => 'Welcome';
+
+  @override
+  String get authLoginSubtitle =>
+      'Take control of your finances by logging into your account.';
+
+  @override
+  String get authEmail => 'Email';
+
+  @override
+  String get authPassword => 'Password';
+
+  @override
+  String get authForgotPassword => 'Forgot Password';
+
+  @override
+  String get authLogin => 'Sign In';
+
+  @override
+  String get authOr => 'Or';
+
+  @override
+  String get authGoogleSignIn => 'Continue with Google';
+
+  @override
+  String get authNewAccount => 'New Account';
+
+  @override
+  String get authRegisterSubtitle =>
+      'Join the Finarcast world and set your limits.';
+
+  @override
+  String get authUsername => 'Username';
+
+  @override
+  String get authConfirmPassword => 'Confirm Password';
+
+  @override
+  String get authRegister => 'Join Now';
+
+  @override
+  String get authNoAccount => 'Don\'t have an account?';
+
+  @override
+  String get authAlreadyHaveAccount => 'Already have an account?';
+
+  @override
+  String get authRegisterAction => 'Sign Up';
+
+  @override
+  String get authLoginAction => 'Sign In';
+
+  @override
+  String get authContinueAsGuest => 'Continue as Guest';
+
+  @override
+  String get authPasswordReset => 'Reset Password';
+
+  @override
+  String get authForgotPasswordDesc =>
+      'Enter your email address to reset your password. We will send you a 6-digit verification code.';
+
+  @override
+  String get authSendCode => 'Send Code';
+
+  @override
+  String get authBackToLogin => 'Back to Login';
+
+  @override
+  String get authVerificationCodeTitle => 'Verification Code';
+
+  @override
+  String authForgotPasswordOtpDesc(String email) {
+    return 'Enter the 6-digit verification code sent to $email.';
+  }
+
+  @override
+  String get authChangeEmail => 'Change Email';
+
+  @override
+  String get authNewPasswordTitle => 'New Password';
+
+  @override
+  String get authNewPasswordDesc =>
+      'Set a secure password of at least 6 characters for your account.';
+
+  @override
+  String get authNewPassword => 'New Password';
+
+  @override
+  String get authConfirmNewPassword => 'Confirm New Password';
+
+  @override
+  String get authUpdatePassword => 'Update Password';
+
+  @override
+  String get authPasswordResetSuccess =>
+      'Your password has been successfully reset and you are signed in.';
+
+  @override
+  String get authGoogleError => 'Google Sign-In Error';
+
+  @override
+  String get authPasswordDifferentError =>
+      'Your new password must be different from your current password.';
+
+  @override
+  String get authUserNotFoundError =>
+      'No user found registered with this email address.';
 }

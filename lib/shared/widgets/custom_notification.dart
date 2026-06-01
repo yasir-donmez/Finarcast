@@ -12,7 +12,6 @@ enum PrecisionNotificationType {
 
 class CustomNotification {
   static OverlayEntry? _currentOverlay;
-  static Timer? _timer;
 
   static void show(
     BuildContext context, {
@@ -20,9 +19,9 @@ class CustomNotification {
     PrecisionNotificationType type = PrecisionNotificationType.info,
     Duration duration = const Duration(seconds: 3),
   }) {
-    _timer?.cancel();
-    _currentOverlay?.remove();
+    final oldOverlay = _currentOverlay;
     _currentOverlay = null;
+    oldOverlay?.remove();
 
     final overlayState = Overlay.of(context);
     
@@ -30,20 +29,16 @@ class CustomNotification {
       builder: (context) => _NotificationWidget(
         message: message,
         type: type,
+        duration: duration,
         onDismiss: () {
-          _currentOverlay?.remove();
+          final temp = _currentOverlay;
           _currentOverlay = null;
-          _timer?.cancel();
+          temp?.remove();
         },
       ),
     );
 
     overlayState.insert(_currentOverlay!);
-
-    _timer = Timer(duration, () {
-      _currentOverlay?.remove();
-      _currentOverlay = null;
-    });
   }
 
   static void success(BuildContext context, String message) {
@@ -66,11 +61,13 @@ class CustomNotification {
 class _NotificationWidget extends StatefulWidget {
   final String message;
   final PrecisionNotificationType type;
+  final Duration duration;
   final VoidCallback onDismiss;
 
   const _NotificationWidget({
     required this.message,
     required this.type,
+    required this.duration,
     required this.onDismiss,
   });
 
@@ -82,13 +79,15 @@ class _NotificationWidgetState extends State<_NotificationWidget> with SingleTic
   late AnimationController _controller;
   late Animation<Offset> _offsetAnimation;
   late Animation<double> _opacityAnimation;
+  Timer? _dismissTimer;
+  bool _isDismissing = false;
 
   @override
   void initState() {
     super.initState();
     _controller = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 600),
+      duration: const Duration(milliseconds: 400),
     );
 
     _offsetAnimation = Tween<Offset>(
@@ -96,7 +95,8 @@ class _NotificationWidgetState extends State<_NotificationWidget> with SingleTic
       end: Offset.zero,
     ).animate(CurvedAnimation(
       parent: _controller,
-      curve: Curves.easeOutQuart,
+      curve: Curves.easeOutCubic,
+      reverseCurve: Curves.easeInCubic,
     ));
 
     _opacityAnimation = Tween<double>(
@@ -105,20 +105,34 @@ class _NotificationWidgetState extends State<_NotificationWidget> with SingleTic
     ).animate(CurvedAnimation(
       parent: _controller,
       curve: const Interval(0.0, 0.5, curve: Curves.easeIn),
+      reverseCurve: const Interval(0.5, 1.0, curve: Curves.easeOut),
     ));
 
     _controller.forward();
+
+    _dismissTimer = Timer(widget.duration, () {
+      _dismiss();
+    });
+  }
+
+  void _dismiss() {
+    if (_isDismissing) return;
+    _isDismissing = true;
+    _dismissTimer?.cancel();
+    _controller.reverse().then((_) {
+      widget.onDismiss();
+    });
   }
 
   @override
   void dispose() {
+    _dismissTimer?.cancel();
     _controller.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    
     Color iconColor;
     IconData iconData;
 
@@ -154,10 +168,10 @@ class _NotificationWidgetState extends State<_NotificationWidget> with SingleTic
           child: FadeTransition(
             opacity: _opacityAnimation,
             child: GestureDetector(
-              onTap: widget.onDismiss,
+              onTap: _dismiss,
               onVerticalDragEnd: (details) {
                 if (details.primaryVelocity! < 0) {
-                  widget.onDismiss();
+                  _dismiss();
                 }
               },
               child: GlassSurface(
@@ -193,14 +207,6 @@ class _NotificationWidgetState extends State<_NotificationWidget> with SingleTic
                           letterSpacing: -0.2,
                         ),
                       ),
-                    ),
-                    IconButton(
-                      icon: Icon(
-                        Icons.close_rounded,
-                        color: AppColors.getTextSecondary(context).withValues(alpha: 0.5),
-                        size: 18,
-                      ),
-                      onPressed: widget.onDismiss,
                     ),
                   ],
                 ),
