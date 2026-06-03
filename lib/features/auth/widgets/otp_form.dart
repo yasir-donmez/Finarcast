@@ -85,7 +85,14 @@ class OtpForm extends StatelessWidget {
               // 6 Stylized Cards UI
               GestureDetector(
                 onTap: () {
-                  otpFocusNode.requestFocus();
+                  if (otpFocusNode.hasFocus) {
+                    otpFocusNode.unfocus();
+                    WidgetsBinding.instance.addPostFrameCallback((_) {
+                      otpFocusNode.requestFocus();
+                    });
+                  } else {
+                    otpFocusNode.requestFocus();
+                  }
                 },
                 child: FittedBox(
                   fit: BoxFit.scaleDown,

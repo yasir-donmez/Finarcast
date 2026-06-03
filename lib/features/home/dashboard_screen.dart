@@ -10,14 +10,14 @@ import 'widgets/home_widget_manager_sheet.dart';
 import '../../shared/widgets/custom_bottom_sheet.dart';
 import '../../l10n/app_localizations.dart';
 
-class HomeScreen extends ConsumerStatefulWidget {
-  const HomeScreen({super.key});
+class DashboardScreen extends ConsumerStatefulWidget {
+  const DashboardScreen({super.key});
 
   @override
-  ConsumerState<HomeScreen> createState() => _HomeScreenState();
+  ConsumerState<DashboardScreen> createState() => _DashboardScreenState();
 }
 
-class _HomeScreenState extends ConsumerState<HomeScreen> {
+class _DashboardScreenState extends ConsumerState<DashboardScreen> {
   @override
   Widget build(BuildContext context) {
     final totalBalance = ref.watch(displayBalanceProvider);

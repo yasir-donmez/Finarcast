@@ -4,12 +4,12 @@ import '../../shared/widgets/glass_surface.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../l10n/app_localizations.dart';
 import '../../core/theme/app_constants.dart';
-import '../transactions/add_transaction_screen.dart';
-import 'home_screen.dart';
+import '../transactions/transaction_builder_screen.dart';
+import 'dashboard_screen.dart';
 import 'home_providers.dart';
 import '../vaults/vaults_screen.dart';
 import '../vaults/vaults_providers.dart';
-import '../smart_inbox/smart_inbox_screen.dart';
+import '../smart_inbox/smart_scan_screen.dart';
 import '../settings/settings_screen.dart';
 
 import '../../core/services/subscription_service.dart';
@@ -46,9 +46,9 @@ class _MainScaffoldState extends ConsumerState<MainScaffold> with TickerProvider
   late final List<GlobalKey> _pageKeys = List.generate(4, (_) => GlobalKey());
 
   late final List<Widget> _pages = [
-    HomeScreen(key: _pageKeys[0]),
+    DashboardScreen(key: _pageKeys[0]),
     VaultsScreen(key: _pageKeys[1]),
-    SmartInboxScreen(key: _pageKeys[2]),
+    SmartScanScreen(key: _pageKeys[2]),
     SettingsScreen(key: _pageKeys[3]),
   ];
 
@@ -268,7 +268,7 @@ class _MainScaffoldState extends ConsumerState<MainScaffold> with TickerProvider
     Navigator.push(
       context,
       SlideUpPageRoute(
-        child: AddTransactionScreen(
+        child: TransactionBuilderScreen(
           initialVaultIds: vaultIds,
         ),
         fullscreenDialog: true,

@@ -603,6 +603,7 @@ class _TransactionPeriodSelectorState extends State<TransactionPeriodSelector> {
 
 
   void _showFullDatePicker(AppLocalizations l10n) {
+    FocusManager.instance.primaryFocus?.unfocus();
     int tempDay = _selectedDateForRecurrence.day;
     int tempMonth = _selectedDateForRecurrence.month;
     int tempYear = _selectedDateForRecurrence.year;

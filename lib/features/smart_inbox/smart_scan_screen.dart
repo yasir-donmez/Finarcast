@@ -10,7 +10,7 @@ import '../../core/services/subscription_service.dart';
 import '../../shared/widgets/custom_card.dart';
 import '../../shared/widgets/custom_notification.dart';
 import '../../shared/widgets/custom_dialog.dart';
-import '../transactions/add_transaction_screen.dart';
+import '../transactions/transaction_builder_screen.dart';
 import '../../core/utils/route_transitions.dart';
 import '../subscription/widgets/pro_upgrade_sheet.dart';
 import 'services/draft_service.dart';
@@ -28,14 +28,14 @@ import 'widgets/smart_input_area.dart';
 import 'widgets/draft_card.dart';
 import '../vaults/widgets/staggered_entry_anim.dart';
 
-class SmartInboxScreen extends ConsumerStatefulWidget {
-  const SmartInboxScreen({super.key});
+class SmartScanScreen extends ConsumerStatefulWidget {
+  const SmartScanScreen({super.key});
 
   @override
-  ConsumerState<SmartInboxScreen> createState() => _SmartInboxScreenState();
+  ConsumerState<SmartScanScreen> createState() => _SmartScanScreenState();
 }
 
-class _SmartInboxScreenState extends ConsumerState<SmartInboxScreen> with WidgetsBindingObserver {
+class _SmartScanScreenState extends ConsumerState<SmartScanScreen> with WidgetsBindingObserver {
   final TextEditingController _inputController = TextEditingController();
   final ImagePicker _imagePicker = ImagePicker();
   
@@ -301,7 +301,7 @@ class _SmartInboxScreenState extends ConsumerState<SmartInboxScreen> with Widget
     Navigator.push(
       context,
       SlideUpPageRoute(
-        child: AddTransactionScreen(
+        child: TransactionBuilderScreen(
           initialName: draft.title,
           initialAmount: draft.amount,
           initialMinAmount: draft.minAmount,
@@ -423,7 +423,7 @@ class _SmartInboxScreenState extends ConsumerState<SmartInboxScreen> with Widget
                 left: 20,
                 top: topPadding + 10,
                 child: Text(
-                  Localizations.localeOf(context).languageCode == 'tr' ? 'Gelen Kutusu' : 'Inbox',
+                  Localizations.localeOf(context).languageCode == 'tr' ? 'Smart Scan' : 'Smart Scan',
                   style: const TextStyle(
                     fontSize: 32,
                     fontWeight: FontWeight.w900,

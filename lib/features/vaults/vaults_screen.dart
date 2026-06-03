@@ -9,7 +9,7 @@ import '../../shared/widgets/custom_dialog.dart';
 import '../../shared/widgets/inset_container.dart';
 import 'vaults_providers.dart';
 import 'widgets/transaction_card.dart';
-import '../transactions/add_transaction_screen.dart';
+import '../transactions/transaction_builder_screen.dart';
 import '../../core/utils/route_transitions.dart';
 import '../../core/utils/category_utils.dart';
 import '../../core/providers/db_providers.dart';
@@ -485,7 +485,7 @@ class _VaultsScreenState extends ConsumerState<VaultsScreen> {
           Navigator.push(
             context,
             SlideUpPageRoute(
-              child: AddTransactionScreen(
+              child: TransactionBuilderScreen(
                 initialId: tx.dbId,
                 initialName: tx.name,
                 initialAmount: tx.amount,

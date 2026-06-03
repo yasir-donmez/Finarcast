@@ -105,7 +105,7 @@ class AppLocalizationsTr extends AppLocalizations {
   String get error => 'Hata';
 
   @override
-  String get home => 'Ana Sayfa';
+  String get home => 'Panel';
 
   @override
   String get vaults => 'Kasalar';
@@ -144,7 +144,7 @@ class AppLocalizationsTr extends AppLocalizations {
   String get analyze => 'Analiz Et';
 
   @override
-  String get addTransaction => 'İşlem Ekle';
+  String get addTransaction => 'Yeni İşlem';
 
   @override
   String get income => 'Gelir';

@@ -33,7 +33,7 @@ import '../../shared/widgets/glass_surface.dart';
 import '../../shared/widgets/custom_notification.dart';
 import '../../shared/widgets/custom_dialog.dart';
 
-class AddTransactionScreen extends ConsumerStatefulWidget {
+class TransactionBuilderScreen extends ConsumerStatefulWidget {
   final int? initialId;
   final String? initialName;
   final double? initialAmount;
@@ -57,7 +57,7 @@ class AddTransactionScreen extends ConsumerStatefulWidget {
 
   final VoidCallback? onSuccess;
 
-  const AddTransactionScreen({
+  const TransactionBuilderScreen({
     super.key,
     this.initialId,
     this.initialName,
@@ -81,11 +81,11 @@ class AddTransactionScreen extends ConsumerStatefulWidget {
   });
 
   @override
-  ConsumerState<AddTransactionScreen> createState() =>
-      _AddTransactionScreenState();
+  ConsumerState<TransactionBuilderScreen> createState() =>
+      _TransactionBuilderScreenState();
 }
 
-class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
+class _TransactionBuilderScreenState extends ConsumerState<TransactionBuilderScreen> {
   int _tabIndex = 0;
   List<Vault> _vaults = [];
   List<int> _selectedVaultIds = [];
@@ -123,11 +123,6 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
     _loadVaults();
     _loadCustomCategories();
     _selectedCurrency = ref.read(settingsProvider).currencySymbol;
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!_isFlexibleAmount && mounted) {
-        _amountFocusNode.requestFocus();
-      }
-    });
   }
 
   @override
@@ -1025,7 +1020,6 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                             FocusManager.instance.primaryFocus?.unfocus();
                             setState(() {
                               _isFlexibleAmount = val;
-                              if (!val) _amountFocusNode.requestFocus();
                             });
                           },
                         ),

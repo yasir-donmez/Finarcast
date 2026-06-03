@@ -7,7 +7,7 @@ import '../../../core/services/notification_service.dart';
 import '../../../l10n/app_localizations.dart';
 import '../vaults_providers.dart';
 import '../../home/home_providers.dart';
-import '../../transactions/add_transaction_screen.dart';
+import '../../transactions/transaction_builder_screen.dart';
 import '../../../core/utils/route_transitions.dart';
 import '../../../shared/widgets/custom_card.dart';
 import '../../../shared/widgets/clickable_action.dart';
@@ -479,7 +479,7 @@ class _InAppNotificationsSheetState extends ConsumerState<InAppNotificationsShee
           Navigator.push(
             context,
             SlideUpPageRoute(
-              child: AddTransactionScreen(
+              child: TransactionBuilderScreen(
                 initialId: tx.dbId,
                 initialName: tx.name,
                 initialAmount: tx.amount,

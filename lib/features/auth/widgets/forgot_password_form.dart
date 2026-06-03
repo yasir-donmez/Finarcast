@@ -152,7 +152,14 @@ class ForgotPasswordForm extends StatelessWidget {
                 ),
                 GestureDetector(
                   onTap: () {
-                    otpFocusNode.requestFocus();
+                    if (otpFocusNode.hasFocus) {
+                      otpFocusNode.unfocus();
+                      WidgetsBinding.instance.addPostFrameCallback((_) {
+                        otpFocusNode.requestFocus();
+                      });
+                    } else {
+                      otpFocusNode.requestFocus();
+                    }
                   },
                   child: FittedBox(
                     fit: BoxFit.scaleDown,

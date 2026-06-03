@@ -303,7 +303,7 @@ abstract class AppLocalizations {
   /// No description provided for @home.
   ///
   /// In tr, this message translates to:
-  /// **'Ana Sayfa'**
+  /// **'Panel'**
   String get home;
 
   /// No description provided for @vaults.
@@ -381,7 +381,7 @@ abstract class AppLocalizations {
   /// No description provided for @addTransaction.
   ///
   /// In tr, this message translates to:
-  /// **'İşlem Ekle'**
+  /// **'Yeni İşlem'**
   String get addTransaction;
 
   /// No description provided for @income.
