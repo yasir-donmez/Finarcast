@@ -6,7 +6,9 @@ import '../../../l10n/app_localizations.dart';
 import '../../../core/theme/app_constants.dart';
 import '../../../core/utils/currency_utils.dart';
 import '../../../shared/widgets/solid_surface.dart';
+import '../../../shared/widgets/custom_dialog.dart';
 import '../vaults_providers.dart';
+
 
 class IntegratedVaultCard extends StatelessWidget {
   final String? vaultId;
@@ -97,6 +99,7 @@ class IntegratedVaultCard extends StatelessWidget {
   Widget _buildMorphContent(BuildContext context, bool isDark, double h, double effectiveWidth) {
     final screenWidth = MediaQuery.of(context).size.width;
     final hasFlexibleTx = txs.any((t) => t.minAmount != null || t.maxAmount != null);
+    final isTr = Localizations.localeOf(context).languageCode == 'tr';
     
     // Animasyon progressleri
     final double contentT = Curves.easeInOutCubic.transform(morphProgress);
@@ -249,12 +252,26 @@ class IntegratedVaultCard extends StatelessWidget {
                     opacity: statsOpacity,
                     child: Row(
                       children: [
-                        Expanded(child: _buildMiniStat(context, l10n.income, income, AppColors.getIncome(context))),
+                        Expanded(
+                          child: _buildMiniStat(
+                            context,
+                            isTr ? "GELİR / AY" : "${l10n.income.toUpperCase()} / MO",
+                            income,
+                            AppColors.getIncome(context),
+                          ),
+                        ),
                         Opacity(
                           opacity: rangeOpacity,
                           child: Container(width: 1, height: 30, color: AppColors.getAccentDeep(context, activeColor).withValues(alpha: 0.15)),
                         ),
-                        Expanded(child: _buildMiniStat(context, l10n.expense, expense, AppColors.getExpense(context))),
+                        Expanded(
+                          child: _buildMiniStat(
+                            context,
+                            isTr ? "GİDER / AY" : "${l10n.expense.toUpperCase()} / MO",
+                            expense,
+                            AppColors.getExpense(context),
+                          ),
+                        ),
                       ],
                     ),
                   ),
@@ -309,34 +326,81 @@ class IntegratedVaultCard extends StatelessWidget {
               ),
             ),
           ),
+
+        // === INFO BUTTON ===
+        if (statsOpacity > 0.01)
+          Positioned(
+            top: 10,
+            right: 0,
+            child: Opacity(
+              opacity: statsOpacity,
+              child: IconButton(
+                icon: Icon(
+                  Icons.info_outline_rounded,
+                  size: 18,
+                  color: AppColors.getTextSecondary(context).withValues(alpha: 0.5),
+                ),
+                onPressed: () {
+                  final isTr = Localizations.localeOf(context).languageCode == 'tr';
+                  showCustomDialog(
+                    context: context,
+                    title: isTr ? "Kasa Rehberi" : "Vault Guide",
+                    content: isTr
+                        ? "📊 Karttaki Veriler Ne Anlama Geliyor?\n\n"
+                          "• Kasa Bakiyesi (Wallet): Kasadaki tüm zamanların kümülatif net bakiyesidir. Kasa başlangıç bakiyesi ve geçmişten bugüne gerçekleşen tüm gelir/gider hareketlerinin toplamıdır.\n\n"
+                          "• Gelir (Bu Ay): Sadece içinde bulunulan cari ay için tahmin edilen toplam geliri gösterir.\n\n"
+                          "• Gider (Bu Ay): Sadece içinde bulunulan cari ay için tahmin edilen toplam gideri gösterir.\n\n"
+                          "💡 Önemli Not:\n"
+                          "Kasa Bakiyesi kümülatif (tüm zamanlar) olduğundan, o ayki Gelir ve Gider farkından farklı çıkması tamamen normaldir."
+                        : "📊 What Do These Numbers Mean?\n\n"
+                          "• Vault Balance (Wallet): The cumulative net balance of the vault of all-time. It is the sum of the initial vault balance and all transactions recorded since inception.\n\n"
+                          "• Income (This Month): The total estimated income for the current calendar month.\n\n"
+                          "• Expense (This Month): The total estimated expense for the current calendar month.\n\n"
+                          "💡 Important Note:\n"
+                          "Since the main balance is cumulative (all-time), it is normal for it to differ from the net difference of this month's income and expense.",
+                    actions: [
+                      PrecisionDialogAction(
+                        label: isTr ? "Anladım" : "Got it",
+                        onTap: () => Navigator.pop(context),
+                        isPrimary: true,
+                      ),
+                    ],
+                  );
+                },
+              ),
+            ),
+          ),
       ],
     );
   }
 
   Widget _buildMiniStat(BuildContext context, String label, double amount, Color color) {
-    return Column(
-      children: [
-        FittedBox(
-          fit: BoxFit.scaleDown,
-          child: Text(
-            label.toUpperCase(), 
-            style: TextStyle(
-              fontSize: 9, 
-              fontWeight: FontWeight.w900, 
-              color: AppColors.getTextSecondary(context), 
-              letterSpacing: 1,
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 10.0),
+      child: Column(
+        children: [
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Text(
+              label.toUpperCase(), 
+              style: TextStyle(
+                fontSize: 9, 
+                fontWeight: FontWeight.w900, 
+                color: AppColors.getTextSecondary(context), 
+                letterSpacing: 1,
+              ),
             ),
           ),
-        ),
-        const SizedBox(height: 4),
-        FittedBox(
-          fit: BoxFit.scaleDown,
-          child: Text(
-            CurrencyUtils.formatAmount(amount, currencySymbol: currencySymbol), 
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.w900, color: color),
+          const SizedBox(height: 4),
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Text(
+              CurrencyUtils.formatFullAmount(amount, symbol: currencySymbol), 
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.w900, color: color),
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 

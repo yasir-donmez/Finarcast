@@ -10,6 +10,7 @@ import 'models/custom_category.dart';
 import '../services/notification_service.dart';
 import '../services/sync_coordinator.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:uuid/uuid.dart';
 
 /// Isar Veritabanı Servisi — Singleton
 class DatabaseService {
@@ -90,6 +91,7 @@ class DatabaseService {
       }
 
       final defaultVault = Vault()
+        ..remoteId = const Uuid().v4()
         ..name = vaultName
         ..currency = defaultSettings.currencySymbol
         ..balance = 0.0
@@ -132,8 +134,8 @@ class DatabaseService {
     return oldType;
   }
 
-  /// Yeni işlem ekle
   static Future<int> addTransaction(TransactionRecord tx) async {
+    tx.remoteId ??= const Uuid().v4();
     tx.periodType = migrateSinglePeriodType(tx.periodType);
     tx.updatedAt = DateTime.now();
     tx.syncStatus = 1; // Pending
@@ -265,8 +267,8 @@ class DatabaseService {
     return await isar.vaults.get(id);
   }
 
-  /// Kasa ekle
   static Future<int> addVault(Vault vault) async {
+    vault.remoteId ??= const Uuid().v4();
     vault.updatedAt = DateTime.now();
     vault.syncStatus = 1; // Pending
     final id = await isar.writeTxn(() async {

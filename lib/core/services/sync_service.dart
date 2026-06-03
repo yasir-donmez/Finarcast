@@ -353,6 +353,11 @@ class SyncService {
         'data_retention_days': settings.dataRetentionDays,
         'is_ai_notifications_enabled': settings.isNotificationsEnabled,
         'is_sync_enabled': settings.isSyncEnabled,
+        'bg_color_style': settings.bgColorStyle,
+        'accent_color_value': settings.accentColorValue,
+        'currency_symbol': settings.currencySymbol,
+        'permanent_deletion_days': settings.permanentDeletionDays,
+        'country_name': settings.countryName,
         'updated_at': settings.updatedAt.toUtc().toIso8601String(),
       };
 
@@ -544,6 +549,16 @@ class SyncService {
           remote['is_ai_notifications_enabled'] ?? settings.isNotificationsEnabled;
       settings.isSyncEnabled =
           remote['is_sync_enabled'] ?? settings.isSyncEnabled;
+      settings.bgColorStyle =
+          remote['bg_color_style'] ?? settings.bgColorStyle;
+      settings.accentColorValue =
+          remote['accent_color_value'] ?? settings.accentColorValue;
+      settings.currencySymbol =
+          remote['currency_symbol'] ?? settings.currencySymbol;
+      settings.permanentDeletionDays =
+          remote['permanent_deletion_days'] ?? settings.permanentDeletionDays;
+      settings.countryName =
+          remote['country_name'] ?? settings.countryName;
       if (remoteUpdated != null) settings.updatedAt = remoteUpdated;
       settings.syncStatus = 0;
 
@@ -646,6 +661,15 @@ class SyncService {
       'currency': tx.currency,
       'show_on_dashboard': tx.showOnDashboard,
       'dashboard_order': tx.dashboardOrder,
+      'remaining_installments': tx.remainingInstallments,
+      'recurrence_day': tx.recurrenceDay,
+      'recurrence_date': tx.recurrenceDate?.toUtc().toIso8601String(),
+      'recurrence_duration': tx.recurrenceDuration,
+      'is_notification_enabled': tx.isNotificationEnabled,
+      'has_notification': tx.hasNotification,
+      'notification_reminder_days': tx.notificationReminderDays,
+      'notification_hour': tx.notificationHour,
+      'notification_minute': tx.notificationMinute,
       'updated_at': tx.updatedAt.toUtc().toIso8601String(),
     };
   }
@@ -668,6 +692,18 @@ class SyncService {
     tx.showOnDashboard =
         raw['show_on_dashboard'] ?? tx.showOnDashboard;
     tx.dashboardOrder = raw['dashboard_order'] ?? tx.dashboardOrder;
+    tx.remainingInstallments = raw['remaining_installments'];
+    tx.recurrenceDay = raw['recurrence_day'];
+    final recDateStr = raw['recurrence_date']?.toString();
+    if (recDateStr != null) {
+      tx.recurrenceDate = DateTime.tryParse(recDateStr)?.toLocal();
+    }
+    tx.recurrenceDuration = raw['recurrence_duration'];
+    tx.isNotificationEnabled = raw['is_notification_enabled'] ?? false;
+    tx.hasNotification = raw['has_notification'] ?? false;
+    tx.notificationReminderDays = raw['notification_reminder_days'] ?? 0;
+    tx.notificationHour = raw['notification_hour'] ?? 9;
+    tx.notificationMinute = raw['notification_minute'] ?? 0;
 
     final dateStr = raw['date']?.toString();
     if (dateStr != null) {

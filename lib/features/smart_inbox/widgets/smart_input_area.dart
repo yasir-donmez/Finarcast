@@ -441,8 +441,8 @@ class _ExpandingMenuButtonState extends State<_ExpandingMenuButton>
                     ? AppColors.getThemeSurface(context, 2).withValues(alpha: 0.75)
                     : Colors.grey[200]!.withValues(alpha: 0.85))
                 : (widget.isDark
-                    ? Colors.black.withValues(alpha: 0.55)
-                    : Colors.white.withValues(alpha: 0.8)),
+                    ? Colors.black.withValues(alpha: 0.65)
+                    : Colors.white.withValues(alpha: 0.75)),
             borderColor: _isMainPressed
                 ? (widget.isDark
                     ? Colors.white.withValues(alpha: 0.25)
@@ -452,9 +452,9 @@ class _ExpandingMenuButtonState extends State<_ExpandingMenuButton>
                     : Colors.black.withValues(alpha: 0.08)),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withValues(alpha: 0.08),
-                blurRadius: 8,
-                offset: const Offset(0, 2),
+                color: Colors.black.withValues(alpha: widget.isDark ? 0.35 : 0.06),
+                blurRadius: 30,
+                offset: const Offset(0, 5),
               ),
             ],
             child: contentStack,
@@ -623,8 +623,8 @@ class _SendCircleButtonState extends State<_SendCircleButton> {
                             ? AppColors.getThemeSurface(context, 2).withValues(alpha: 0.75)
                             : Colors.grey[200]!.withValues(alpha: 0.85))
                         : (isDark
-                            ? Colors.black.withValues(alpha: 0.55)
-                            : Colors.white.withValues(alpha: 0.8)),
+                            ? Colors.black.withValues(alpha: 0.65)
+                            : Colors.white.withValues(alpha: 0.75)),
                     borderColor: _isPressed && enabled
                         ? (isDark
                             ? Colors.white.withValues(alpha: 0.25)
@@ -634,9 +634,9 @@ class _SendCircleButtonState extends State<_SendCircleButton> {
                             : Colors.black.withValues(alpha: 0.08)),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.08),
-                        blurRadius: 8,
-                        offset: const Offset(0, 2),
+                        color: Colors.black.withValues(alpha: isDark ? 0.35 : 0.06),
+                        blurRadius: 30,
+                        offset: const Offset(0, 5),
                       ),
                     ],
                     child: const SizedBox.expand(),

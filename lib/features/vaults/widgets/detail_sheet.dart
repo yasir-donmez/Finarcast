@@ -584,16 +584,12 @@ class _PrecisionDetailSheetState extends ConsumerState<DetailSheet> {
           child: Icon(icon, size: 16, color: effectiveColor),
         ),
         const SizedBox(width: 12),
-        Expanded(
-          child: Text(
-            label, 
-            style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.getTextSecondary(context)),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-          )
+        Text(
+          label, 
+          style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.getTextSecondary(context)),
         ),
         const SizedBox(width: 8),
-        Flexible(
+        Expanded(
           child: Text(
             value, 
             style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w800),

@@ -17,6 +17,7 @@ import '../../../../shared/widgets/custom_notification.dart';
 import '../../../home/home_providers.dart';
 import '../settings_list_items.dart';
 import '../../../subscription/widgets/pro_upgrade_sheet.dart';
+import '../../../../l10n/app_localizations.dart';
 
 final _syncExpandedProvider = StateProvider.autoDispose<bool>((ref) => false);
 
@@ -47,9 +48,10 @@ class _SyncSettingState extends ConsumerState<SyncSetting> {
   }
 
   String _formatLastSyncTime(String? isoString) {
-    if (isoString == null) return "Henüz eşitleme yapılmadı";
+    final l10n = AppLocalizations.of(context)!;
+    if (isoString == null) return l10n.noSyncYet;
     final dateTime = DateTime.tryParse(isoString)?.toLocal();
-    if (dateTime == null) return "Henüz eşitleme yapılmadı";
+    if (dateTime == null) return l10n.noSyncYet;
 
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
@@ -59,9 +61,9 @@ class _SyncSettingState extends ConsumerState<SyncSetting> {
     final timeStr = DateFormat('HH:mm').format(dateTime);
 
     if (syncDay == today) {
-      return "Bugün $timeStr";
+      return l10n.syncToday(timeStr);
     } else if (syncDay == yesterday) {
-      return "Dün $timeStr";
+      return l10n.syncYesterday(timeStr);
     } else {
       return "${DateFormat('dd.MM.yyyy').format(dateTime)} $timeStr";
     }
@@ -75,6 +77,7 @@ class _SyncSettingState extends ConsumerState<SyncSetting> {
     final isExpanded = ref.watch(_syncExpandedProvider);
     final subscription = ref.watch(subscriptionServiceProvider);
     final isPro = subscription.isPro;
+    final l10n = AppLocalizations.of(context)!;
 
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -112,7 +115,7 @@ class _SyncSettingState extends ConsumerState<SyncSetting> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        "Bulut Eşitleme",
+                        l10n.cloudSync,
                         style: TextStyle(
                           color: AppColors.getTextPrimary(context),
                           fontSize: 16,
@@ -133,8 +136,8 @@ class _SyncSettingState extends ConsumerState<SyncSetting> {
                           !isPro
                               ? "Premium"
                               : (!isLoggedIn
-                                  ? "Giriş gerekli"
-                                  : (isSyncEnabled ? "Aktif" : "Kapalı")),
+                                  ? l10n.loginRequiredLabel
+                                  : (isSyncEnabled ? l10n.active : l10n.disabled)),
                           key: ValueKey('$isPro-$isLoggedIn-$isSyncEnabled'),
                           style: TextStyle(
                             color: !isPro 
@@ -153,11 +156,11 @@ class _SyncSettingState extends ConsumerState<SyncSetting> {
                   onChanged: (val) async {
                     HapticFeedback.mediumImpact();
                     if (!isPro) {
-                      _showPremiumRequiredDialog(context);
+                      _showPremiumRequiredDialog(context, l10n);
                       return;
                     }
                     if (!isLoggedIn) {
-                      _showLoginRequiredDialog(context, activeColor);
+                      _showLoginRequiredDialog(context, activeColor, l10n);
                       return;
                     }
                     await ref.read(settingsProvider.notifier).toggleSync(val);
@@ -197,7 +200,7 @@ class _SyncSettingState extends ConsumerState<SyncSetting> {
                                   Icon(Icons.sync_outlined, size: 16, color: activeColor),
                                   const SizedBox(width: 8),
                                   Text(
-                                    "Senkronizasyon Durumu",
+                                    l10n.syncStatus,
                                     style: TextStyle(
                                       color: AppColors.getTextPrimary(context),
                                       fontSize: 14,
@@ -208,7 +211,7 @@ class _SyncSettingState extends ConsumerState<SyncSetting> {
                               ),
                               const SizedBox(height: 8),
                               Text(
-                                "Son Eşitleme: ${_formatLastSyncTime(_lastSyncTime)}",
+                                l10n.lastSyncLabel(_formatLastSyncTime(_lastSyncTime)),
                                 style: TextStyle(
                                   color: AppColors.getTextSecondary(context),
                                   fontSize: 13,
@@ -217,7 +220,7 @@ class _SyncSettingState extends ConsumerState<SyncSetting> {
                               ),
                               const SizedBox(height: 4),
                               Text(
-                                "Verileriniz arka planda otomatik olarak buluta yedeklenmektedir.",
+                                l10n.syncBackgroundDesc,
                                 style: TextStyle(
                                   color: AppColors.getTextSecondary(context).withValues(alpha: 0.6),
                                   fontSize: 12,
@@ -227,8 +230,7 @@ class _SyncSettingState extends ConsumerState<SyncSetting> {
                               ),
                             ] else ...[
                               Text(
-                                "Verileriniz Supabase bulut altyapısı ile anlık olarak yedeklenir. "
-                                "Uygulamayı silseniz bile hesabınıza giriş yaparak verilerinizi geri getirebilirsiniz.",
+                                l10n.syncCloudDesc,
                                 style: TextStyle(
                                   color: AppColors.getTextSecondary(context),
                                   fontSize: 13,
@@ -242,7 +244,7 @@ class _SyncSettingState extends ConsumerState<SyncSetting> {
                       if (isPro && isLoggedIn && isSyncEnabled) ...[
                         const SizedBox(height: 16),
                         CustomButton(
-                          label: _isSyncing ? "VERİLER EŞİTLENİYOR..." : "ŞİMDİ SENKRONİZE ET",
+                          label: _isSyncing ? l10n.syncing : l10n.syncNow,
                           height: 48,
                           fontSize: 13,
                           onTap: () async {
@@ -257,10 +259,10 @@ class _SyncSettingState extends ConsumerState<SyncSetting> {
                               if (success && result != null && result.isFullySuccessful) {
                                 CustomNotification.success(context, result.summary);
                               } else if (result != null && result.hasPartialErrors) {
-                                CustomNotification.success(context, "Kısmi başarı: ${result.summary}");
+                                CustomNotification.success(context, l10n.syncPartialSuccess(result.summary));
                               } else {
-                                final errorDetail = SyncCoordinator.lastError ?? "Lütfen internetinizi veya giriş bilgilerinizi kontrol edin.";
-                                CustomNotification.error(context, "Eşitleme başarısız oldu. $errorDetail");
+                                final errorDetail = SyncCoordinator.lastError ?? l10n.syncConnectionError;
+                                CustomNotification.error(context, l10n.syncFailed(errorDetail));
                               }
                             }
                           },
@@ -276,20 +278,20 @@ class _SyncSettingState extends ConsumerState<SyncSetting> {
     );
   }
 
-  void _showLoginRequiredDialog(BuildContext context, Color activeColor) {
+  void _showLoginRequiredDialog(BuildContext context, Color activeColor, AppLocalizations l10n) {
     showCustomDialog(
       context: context,
       accentColor: activeColor,
-      title: "Giriş Gerekli",
-      content: "Bulut senkronizasyonunu aktifleştirerek verilerinizi yedeklemek için giriş yapmanız gerekmektedir.",
+      title: l10n.loginRequiredTitle,
+      content: l10n.loginRequiredSyncDesc,
       actions: [
         PrecisionDialogAction(
-          label: "İptal",
+          label: l10n.cancel,
           onTap: () => Navigator.pop(context),
           isPrimary: false,
         ),
         PrecisionDialogAction(
-          label: "Giriş Yap",
+          label: l10n.authLogin,
           onTap: () async {
             Navigator.pop(context);
             final prefs = await SharedPreferences.getInstance();
@@ -302,20 +304,20 @@ class _SyncSettingState extends ConsumerState<SyncSetting> {
     );
   }
 
-  void _showPremiumRequiredDialog(BuildContext context) {
+  void _showPremiumRequiredDialog(BuildContext context, AppLocalizations l10n) {
     showCustomDialog(
       context: context,
       accentColor: const Color(0xFFFFB300), // Altın rengi
-      title: "Premium Gerekli",
-      content: "Bulut Eşitleme özelliği Supabase yedekleme altyapısını kullanır ve sadece Premium üyelerin erişimine açıktır.",
+      title: l10n.premiumRequired,
+      content: l10n.premiumSyncDesc,
       actions: [
         PrecisionDialogAction(
-          label: "Daha Sonra",
+          label: l10n.later,
           onTap: () => Navigator.pop(context),
           isPrimary: false,
         ),
         PrecisionDialogAction(
-          label: "Premium'a Yükselt",
+          label: l10n.upgradeToPro,
           onTap: () {
             Navigator.pop(context);
             ProUpgradeSheet.show(context);

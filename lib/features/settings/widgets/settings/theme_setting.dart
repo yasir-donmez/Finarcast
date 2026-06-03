@@ -1,4 +1,5 @@
 import 'dart:math' as math;
+import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -118,6 +119,7 @@ class _CelestialSwitcherState extends ConsumerState<CelestialSwitcher>
     HapticFeedback.heavyImpact();
     widget.onChanged((widget.currentIndex + 1) % 3);
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -407,32 +409,59 @@ class _SkyPainter extends CustomPainter {
     // Gölgelerin kaydırma vektörü
     final shadowOffset = Offset(-1.5 * (1.0 - 2.0 * factor), -1.0);
 
-    // 1. ADIM: Tüm derin şeffaf arka bulutları (gölgeleri) birleştirerek çiziyoruz.
-    // Hibrit modda (t=1) gölgeler tamamen gizlenir. Aydınlık (t<1) ve Karanlık (t>1) geçişlerinde tüm bulut gölgeleri birlikte ve pürüzsüzce fade olur.
-    final backPath = Path();
-
-    for (int i = 0; i < dynamicCenters.length; i++) {
-      final r = dayRadii[i] + factor * (hybridRadii[i] - dayRadii[i]);
-      final center = dynamicCenters[i] + shadowOffset;
-      final rect = Rect.fromCircle(center: center, radius: r + 2.0);
-      backPath.addOval(rect);
-    }
-
+    // 1. ADIM: Tüm derin şeffaf arka bulutları (gölgeleri) çiziyoruz.
+    // Bulutların birbirlerinin içini göstermemesi (üst üste binip koyulaşma çizgileri oluşturmaması) için tüm bulutları tek bir Path'e ekleyip tek seferde çiziyoruz.
+    // Geçiş sınırındaki (splitX) yumuşak sönümlenmeyi ise Paint'e verdiğimiz LinearGradient shader ile sağlıyoruz.
     if (t <= 1.0) {
       final dayShadowOpacity = (1.0 - t).clamp(0.0, 1.0);
       if (dayShadowOpacity > 0) {
+        final dayShadowPath = Path();
+        for (int i = 0; i < dynamicCenters.length; i++) {
+          final r = dayRadii[i] + factor * (hybridRadii[i] - dayRadii[i]);
+          final center = dynamicCenters[i] + shadowOffset;
+          final rect = Rect.fromCircle(center: center, radius: r + 2.0);
+          dayShadowPath.addOval(rect);
+        }
+
+        final shadowColor = const Color(0xFFBBDEFB);
         final dayBackPaint = Paint()
-          ..color = const Color(0xFFBBDEFB).withValues(alpha: 0.60 * opacity * dayShadowOpacity)
+          ..color = shadowColor.withValues(alpha: 0.60 * opacity * dayShadowOpacity)
           ..style = PaintingStyle.fill;
-        canvas.drawPath(backPath, dayBackPaint);
+
+        canvas.drawPath(dayShadowPath, dayBackPaint);
       }
     } else {
       final nightShadowOpacity = (t - 1.0).clamp(0.0, 1.0);
       if (nightShadowOpacity > 0) {
-        final nightBackPaint = Paint()
-          ..color = const Color(0xFF4E5D78).withValues(alpha: 0.60 * opacity * nightShadowOpacity)
-          ..style = PaintingStyle.fill;
-        canvas.drawPath(backPath, nightBackPaint);
+        final nightShadowPath = Path();
+        for (int i = 0; i < dynamicCenters.length; i++) {
+          final r = dayRadii[i] + factor * (hybridRadii[i] - dayRadii[i]);
+          final center = dynamicCenters[i] + shadowOffset;
+          final rect = Rect.fromCircle(center: center, radius: r + 2.0);
+          nightShadowPath.addOval(rect);
+        }
+
+        final startX = (splitX - 3.0).clamp(0.0, size.width);
+        final endX = (splitX + 3.0).clamp(0.0, size.width);
+        final shadowColor = const Color(0xFF4E5D78);
+
+        final nightBackPaint = Paint()..style = PaintingStyle.fill;
+
+        if (startX == endX) {
+          nightBackPaint.color = shadowColor.withValues(alpha: 0.60 * opacity * nightShadowOpacity);
+        } else {
+          nightBackPaint.shader = ui.Gradient.linear(
+            Offset(startX, 0),
+            Offset(endX, 0),
+            [
+              shadowColor.withValues(alpha: 0.0),
+              shadowColor.withValues(alpha: 0.60 * opacity * nightShadowOpacity),
+            ],
+            [0.0, 1.0],
+          );
+        }
+
+        canvas.drawPath(nightShadowPath, nightBackPaint);
       }
     }
 
@@ -441,7 +470,7 @@ class _SkyPainter extends CustomPainter {
       final r = dayRadii[i] + factor * (hybridRadii[i] - dayRadii[i]);
       final center = dynamicCenters[i] + dynamicWhiteOffsets[i] * 0.65;
 
-      const halfWidth = 10.0;
+      const halfWidth = 3.0;
       final sFactor = (1.0 - (center.dx - (splitX - halfWidth)) / (2 * halfWidth)).clamp(0.0, 1.0);
       final dayFactor = t <= 1.0 ? (1.0 + t * (sFactor - 1.0)) : (sFactor * (2.0 - t));
       final baseColor = Color.lerp(const Color(0xFFECEFF1), Colors.white, dayFactor)!;
@@ -461,7 +490,7 @@ class _SkyPainter extends CustomPainter {
       final r = dayRadii[i] + factor * (hybridRadii[i] - dayRadii[i]);
       final center = dynamicCenters[i] + dynamicWhiteOffsets[i];
 
-      const halfWidth = 10.0;
+      const halfWidth = 3.0;
       final sFactor = (1.0 - (center.dx - (splitX - halfWidth)) / (2 * halfWidth)).clamp(0.0, 1.0);
       final dayFactor = t <= 1.0 ? (1.0 + t * (sFactor - 1.0)) : (sFactor * (2.0 - t));
       final overlayColor = Color.lerp(const Color(0xFF90A4AE), Colors.white, dayFactor)!;

@@ -35,7 +35,9 @@ class _TransactionCurrencySelectorState extends State<TransactionCurrencySelecto
       selectedIndex: currentIndex,
       scalingFactor: widget.scalingFactor,
       onChanged: (index) {
-        widget.onChanged(_options[index]);
+        if (index >= 0 && index < _options.length) {
+          widget.onChanged(_options[index]);
+        }
       },
     );
   }

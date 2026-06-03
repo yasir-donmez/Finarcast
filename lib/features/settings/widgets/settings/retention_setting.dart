@@ -137,8 +137,7 @@ class RetentionSetting extends ConsumerWidget {
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: Text(
-                          "Bu süre sonunda işlemleriniz ana listeden gizlenerek arşive taşınır. "
-                          "Arşivlenen veriler bakiyenizi etkilemez ve Dashboard'u temiz tutar.",
+                          l10n.dataRetentionDetail,
                           style: TextStyle(
                             color: AppColors.getTextSecondary(context),
                             fontSize: 13,
@@ -150,7 +149,7 @@ class RetentionSetting extends ConsumerWidget {
                       Row(
                         children: [
                           Text(
-                            "Saklama Süresi:",
+                            l10n.retentionPeriodLabel,
                             style: TextStyle(
                               color: AppColors.getTextPrimary(context),
                               fontSize: 14,
@@ -175,7 +174,7 @@ class RetentionSetting extends ConsumerWidget {
                                     behavior: HitTestBehavior.opaque,
                                     onTap: () {
                                       HapticFeedback.heavyImpact();
-                                      _showPremiumRequiredDialog(context);
+                                      _showPremiumRequiredDialog(context, l10n);
                                     },
                                   ),
                                 ),
@@ -192,20 +191,20 @@ class RetentionSetting extends ConsumerWidget {
     );
   }
 
-  void _showPremiumRequiredDialog(BuildContext context) {
+  void _showPremiumRequiredDialog(BuildContext context, AppLocalizations l10n) {
     showCustomDialog(
       context: context,
       accentColor: const Color(0xFFFFB300), // Altın rengi
-      title: "Premium Gerekli",
-      content: "Veri saklama, arşivleme ve otomatik temizleme kuralları sadece Premium üyelerin erişimine açıktır.",
+      title: l10n.premiumRequired,
+      content: l10n.premiumRetentionDesc,
       actions: [
         PrecisionDialogAction(
-          label: "Daha Sonra",
+          label: l10n.later,
           onTap: () => Navigator.pop(context),
           isPrimary: false,
         ),
         PrecisionDialogAction(
-          label: "Premium'a Yükselt",
+          label: l10n.upgradeToPro,
           onTap: () {
             Navigator.pop(context);
             ProUpgradeSheet.show(context);

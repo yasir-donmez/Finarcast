@@ -8,12 +8,14 @@ import '../../../home/home_providers.dart';
 import '../../../../shared/widgets/custom_dialog.dart';
 import '../../../subscription/widgets/pro_upgrade_sheet.dart';
 import '../settings_list_items.dart';
+import '../../../../l10n/app_localizations.dart';
 
 class BackgroundSetting extends ConsumerWidget {
   const BackgroundSetting({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
     final bgColorStyle = ref.watch(
       settingsProvider.select((s) => s.bgColorStyle),
     );
@@ -49,7 +51,7 @@ class BackgroundSetting extends ConsumerWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      "Stil",
+                      l10n.styleLabel,
                       style: TextStyle(
                         color: AppColors.getTextPrimary(context),
                         fontSize: 16,
@@ -69,7 +71,7 @@ class BackgroundSetting extends ConsumerWidget {
                     ],
                     const SizedBox(height: 2),
                     Text(
-                      "Kartların ve arka planın görünüm stilini seçin",
+                      l10n.styleDesc,
                       style: TextStyle(
                         color: AppColors.getTextSecondary(context).withValues(alpha: 0.5),
                         fontSize: 12,
@@ -110,7 +112,7 @@ class BackgroundSetting extends ConsumerWidget {
                 onTap: () {
                   if (!isPro) {
                     HapticFeedback.heavyImpact();
-                    _showPremiumRequiredDialog(context);
+                    _showPremiumRequiredDialog(context, l10n);
                     return;
                   }
                   if (bgColorStyle == 1) return;
@@ -125,20 +127,20 @@ class BackgroundSetting extends ConsumerWidget {
     );
   }
 
-  void _showPremiumRequiredDialog(BuildContext context) {
+  void _showPremiumRequiredDialog(BuildContext context, AppLocalizations l10n) {
     showCustomDialog(
       context: context,
       accentColor: const Color(0xFFFFB300), // Altın rengi
-      title: "Premium Gerekli",
-      content: "Renkli görünüm stili sadece Premium üyelerin erişimine açıktır.",
+      title: l10n.premiumRequired,
+      content: l10n.premiumStyleDesc,
       actions: [
         PrecisionDialogAction(
-          label: "Daha Sonra",
+          label: l10n.later,
           onTap: () => Navigator.pop(context),
           isPrimary: false,
         ),
         PrecisionDialogAction(
-          label: "Premium'a Yükselt",
+          label: l10n.upgradeToPro,
           onTap: () {
             Navigator.pop(context);
             ProUpgradeSheet.show(context);
@@ -177,14 +179,15 @@ class BackgroundPreviewCard extends StatelessWidget {
     final gradient = bgGradient;
 
     // Yeni stil isimleri ve açıklamaları
+    final l10n = AppLocalizations.of(context)!;
     final String label;
     final String description;
     if (styleIndex == 1) {
-      label = "Renkli";
-      description = "Uyumlu renkler";
+      label = l10n.styleColor;
+      description = l10n.styleColorDesc;
     } else {
-      label = "Sade";
-      description = "Düz tasarım";
+      label = l10n.styleSimple;
+      description = l10n.styleSimpleDesc;
     }
 
     final activeColor = accentColorValue == 0

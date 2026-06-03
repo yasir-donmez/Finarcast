@@ -79,6 +79,20 @@ class SettingsNotifier extends StateNotifier<AppSettings> {
       needsSave = true;
     }
 
+    // Premium olmayan kullanıcılar için saklama/silme ve eşitleme ayarlarını sıfırla
+    if (settings.dataRetentionDays != -1) {
+      settings = settings.copyWith(dataRetentionDays: -1);
+      needsSave = true;
+    }
+    if (settings.permanentDeletionDays != -1) {
+      settings = settings.copyWith(permanentDeletionDays: -1);
+      needsSave = true;
+    }
+    if (settings.isSyncEnabled) {
+      settings = settings.copyWith(isSyncEnabled: false);
+      needsSave = true;
+    }
+
     if (needsSave) {
       await _save(settings);
     }
@@ -104,6 +118,22 @@ class SettingsNotifier extends StateNotifier<AppSettings> {
     if (!isPro && settings.accentColorValue != 0xFF00BCD4) {
       settings = settings.copyWith(accentColorValue: 0xFF00BCD4);
       needsSave = true;
+    }
+
+    // Premium olmayan kullanıcılar için saklama/silme ve eşitleme ayarlarını sıfırla
+    if (!isPro) {
+      if (settings.dataRetentionDays != -1) {
+        settings = settings.copyWith(dataRetentionDays: -1);
+        needsSave = true;
+      }
+      if (settings.permanentDeletionDays != -1) {
+        settings = settings.copyWith(permanentDeletionDays: -1);
+        needsSave = true;
+      }
+      if (settings.isSyncEnabled) {
+        settings = settings.copyWith(isSyncEnabled: false);
+        needsSave = true;
+      }
     }
 
     if (needsSave) {

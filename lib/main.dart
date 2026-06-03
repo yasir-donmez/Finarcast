@@ -169,9 +169,14 @@ class FinarcastApp extends ConsumerWidget {
               final isSystemDark = brightness == Brightness.dark;
               final isDark = themeMode == ThemeMode.dark || (themeMode == ThemeMode.system && isSystemDark);
               
-              return Material(
+              return AnimatedContainer(
+                duration: const Duration(milliseconds: 250),
+                curve: Curves.easeInOut,
                 color: isDark ? AppColors.darkBackground : AppColors.lightBackground,
-                child: child,
+                child: Material(
+                  color: Colors.transparent,
+                  child: child,
+                ),
               );
             },
       
@@ -240,7 +245,7 @@ class _DatabaseCrashScreenState extends State<DatabaseCrashScreen> {
       await DatabaseService.deleteDatabaseFiles();
       debugPrint('✅ [DatabaseCrashScreen] Veritabanı dosyaları silindi. Yeniden başlatılıyor...');
       
-      // Tekrar başlatma adımları
+      // Tekrar başlatma adımlarıüs
       await DatabaseService.init();
       await DataRetentionService.archiveExpiredTransactions();
       await initializeDateFormatting('tr_TR', null);

@@ -16,31 +16,33 @@ class ResetSetting extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context)!;
+    final activeColor = SettingsListItems.getSettingColor(context, SettingType.reset, ref.watch(rotaryColorProvider));
 
     return SettingsListItems.buildSetting(
       icon: Icons.delete_forever_outlined,
-      title: "Sıfırla",
-      onTap: () => _showResetDialog(context, l10n, ref),
-      activeColor: SettingsListItems.getSettingColor(context, SettingType.reset, ref.watch(rotaryColorProvider)),
+      title: l10n.reset,
+      onTap: () => _showResetDialog(context, l10n, ref, activeColor),
+      activeColor: activeColor,
       context: context,
       isAction: true,
       isDestructive: true,
     );
   }
 
-  void _showResetDialog(BuildContext context, AppLocalizations l10n, WidgetRef ref) {
+  void _showResetDialog(BuildContext context, AppLocalizations l10n, WidgetRef ref, Color activeColor) {
     showCustomDialog(
       context: context,
-      title: "Verileri Sıfırla?",
-      content: "Tüm finansal verileriniz ve ayarlarınız kalıcı olarak silinecek. Bu işlem geri alınamaz.",
+      accentColor: activeColor,
+      title: l10n.resetDataTitle,
+      content: l10n.resetDataDesc,
       actions: [
         PrecisionDialogAction(
-          label: "İptal",
+          label: l10n.cancel,
           onTap: () => Navigator.pop(context),
           isPrimary: false,
         ),
         PrecisionDialogAction(
-          label: "Hepsini Sil",
+          label: l10n.deleteAll,
           onTap: () async {
             HapticFeedback.vibrate();
             
@@ -54,7 +56,7 @@ class ResetSetting extends ConsumerWidget {
             
             if (context.mounted) {
               Navigator.pop(context);
-              CustomNotification.success(context, "Tüm veriler ve ayarlar başarıyla sıfırlandı.");
+              CustomNotification.success(context, l10n.resetSuccess);
             }
           },
         ),

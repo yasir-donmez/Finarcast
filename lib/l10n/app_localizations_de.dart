@@ -1346,8 +1346,7 @@ class AppLocalizationsDe extends AppLocalizations {
       'Çok fazla istek gönderildi. E-posta limitini aştınız, lütfen bir süre bekleyip tekrar deneyin.';
 
   @override
-  String get authOtpRequired =>
-      'Lütfen gelen doğrulama kodunu (6 veya 8 haneli) girin.';
+  String get authOtpRequired => 'Lütfen gelen 6 haneli doğrulama kodunu girin.';
 
   @override
   String get authOtpSent => 'Yeni doğrulama kodu e-postanıza gönderildi.';
@@ -1488,4 +1487,357 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String get authUserNotFoundError =>
       'Bu e-posta adresine kayıtlı bir kullanıcı bulunamadı.';
+
+  @override
+  String get dataRetentionDetail =>
+      'Bu süre sonunda işlemleriniz ana listeden gizlenerek arşive taşınır. Arşivlenen veriler bakiyenizi etkilemez ve Dashboard\'u temiz tutar.';
+
+  @override
+  String get retentionPeriodLabel => 'Saklama Süresi:';
+
+  @override
+  String get premiumRequired => 'Premium Gerekli';
+
+  @override
+  String get premiumRetentionDesc =>
+      'Veri saklama, arşivleme ve otomatik temizleme kuralları sadece Premium üyelerin erişimine açıktır.';
+
+  @override
+  String get later => 'Daha Sonra';
+
+  @override
+  String get permanentDeletionDetail =>
+      'Dikkat: Bu süre sonunda verileriniz cihazınızdan tamamen silinir ve bir daha geri getirilemez.';
+
+  @override
+  String get purgePeriodLabel => 'Temizleme Süresi:';
+
+  @override
+  String get cloudSync => 'Bulut Eşitleme';
+
+  @override
+  String get loginRequiredLabel => 'Giriş gerekli';
+
+  @override
+  String syncToday(String time) {
+    return 'Bugün $time';
+  }
+
+  @override
+  String syncYesterday(String time) {
+    return 'Dün $time';
+  }
+
+  @override
+  String get noSyncYet => 'Henüz eşitleme yapılmadı';
+
+  @override
+  String get syncStatus => 'Senkronizasyon Durumu';
+
+  @override
+  String lastSyncLabel(String time) {
+    return 'Son Eşitleme: $time';
+  }
+
+  @override
+  String get syncBackgroundDesc =>
+      'Verileriniz arka planda otomatik olarak buluta yedeklenmektedir.';
+
+  @override
+  String get syncCloudDesc =>
+      'Verileriniz Supabase bulut altyapısı ile anlık olarak yedeklenir. Uygulamayı silseniz bile hesabınıza giriş yaparak verilerinizi geri getirebilirsiniz.';
+
+  @override
+  String get syncNow => 'ŞİMDİ SENKRONİZE ET';
+
+  @override
+  String get syncing => 'VERİLER EŞİTLENİYOR...';
+
+  @override
+  String syncPartialSuccess(String summary) {
+    return 'Kısmi başarı: $summary';
+  }
+
+  @override
+  String syncFailed(String error) {
+    return 'Eşitleme başarısız oldu. $error';
+  }
+
+  @override
+  String get syncConnectionError =>
+      'Lütfen internetinizi veya giriş bilgilerinizi kontrol edin.';
+
+  @override
+  String get loginRequiredTitle => 'Giriş Gerekli';
+
+  @override
+  String get loginRequiredSyncDesc =>
+      'Bulut senkronizasyonunu aktifleştirerek verilerinizi yedeklemek için giriş yapmanız gerekmektedir.';
+
+  @override
+  String get premiumSyncDesc =>
+      'Bulut Eşitleme özelliği Supabase yedekleme altyapısını kullanır ve sadece Premium üyelerin erişimine açıktır.';
+
+  @override
+  String get showOnPhone => 'Telefonda Göster';
+
+  @override
+  String get appOnly => 'Sadece Uygulama İçi';
+
+  @override
+  String get notificationDesc =>
+      'Hatırlatıcıların sadece uygulama içinde mi saklanacağını yoksa telefonunuzun bildirim panelinde de gösterilip gösterilmeyeceğini belirler. Kapalıyken hatırlatıcılar sessizce uygulama içinde kalır.';
+
+  @override
+  String get selectMainCurrency => 'Ana uygulama birimini seçin.';
+
+  @override
+  String get currencyDesc =>
+      'Bu birim tüm uygulama genelinde (Dashboard, Kasalar ve İstatistikler) ana para birimi olarak kullanılır. Tüm varlıklarınız bu birime göre hesaplanır.';
+
+  @override
+  String get changeCurrency => 'Birimi Değiştir';
+
+  @override
+  String get exchangeRateNotFoundError =>
+      'Seçilen para birimi için döviz kuru bulunamadı. Lütfen internet bağlantınızı kontrol edip tekrar deneyin.';
+
+  @override
+  String get exchangeRatesDownloadFailed =>
+      'Döviz kurları indirilemedi. İnternet bağlantınızı kontrol edin.';
+
+  @override
+  String get exchangeRatesCheckError =>
+      'Kurlar kontrol edilirken hata oluştu. Lütfen tekrar deneyin.';
+
+  @override
+  String get exchangeRates => 'Döviz Kurları';
+
+  @override
+  String get baseUnitLira => 'Baz Birim: Türk Lirası';
+
+  @override
+  String baseUnitLabel(String currency) {
+    return 'Baz Birim: $currency';
+  }
+
+  @override
+  String lastSyncShort(String time) {
+    return 'SON: $time';
+  }
+
+  @override
+  String get updateRatesNow => 'KURLARI ŞİMDİ GÜNCELLE';
+
+  @override
+  String get updatingRates => 'GÜNCELLENİYOR...';
+
+  @override
+  String get exchangeRatesUpdated => 'Kurlar başarıyla güncellendi.';
+
+  @override
+  String get exchangeRatesUpdateFailed =>
+      'Güncelleme başarısız. İnternet bağlantınızı kontrol edin.';
+
+  @override
+  String get showLess => 'Daha Az Göster';
+
+  @override
+  String get showMore => 'Daha Fazla Göster';
+
+  @override
+  String get styleLabel => 'Stil';
+
+  @override
+  String get styleDesc => 'Kartların ve arka planın görünüm stilini seçin';
+
+  @override
+  String get styleColor => 'Renkli';
+
+  @override
+  String get styleColorDesc => 'Uyumlu renkler';
+
+  @override
+  String get styleSimple => 'Sade';
+
+  @override
+  String get styleSimpleDesc => 'Düz tasarım';
+
+  @override
+  String get premiumStyleDesc =>
+      'Renkli görünüm stili sadece Premium üyelerin erişimine açıktır.';
+
+  @override
+  String get premiumColorDesc =>
+      'Özel renk temaları ve gelişmiş gradyanlar sadece Premium üyelerin erişimine açıktır.';
+
+  @override
+  String get paletteArctic => 'Kutup';
+
+  @override
+  String get paletteMint => 'Nane';
+
+  @override
+  String get paletteRose => 'Rose';
+
+  @override
+  String get paletteLavender => 'Lavanta';
+
+  @override
+  String get paletteSahara => 'Sahra';
+
+  @override
+  String get paletteSapphire => 'Safir';
+
+  @override
+  String get paletteBurgundy => 'Bordo';
+
+  @override
+  String get palettePlatinum => 'Platin';
+
+  @override
+  String get yearlyDiscount => 'Yıllık (-%33)';
+
+  @override
+  String get comparisonTitle => 'KARŞILAŞTIRMA';
+
+  @override
+  String get limitVaults => 'Kasa Sayısı';
+
+  @override
+  String get limitAiAnalysis => 'AI İşlem Asistanı';
+
+  @override
+  String get limitCloudSync => 'Bulut Eşitleme';
+
+  @override
+  String get limitDataRetention => 'Veri Saklama & Silme';
+
+  @override
+  String get limitCustomThemes => 'Özel Temalar';
+
+  @override
+  String get limitAdFree => 'Reklamsız Deneyim';
+
+  @override
+  String get limitVaultsFree => '2 Kasa';
+
+  @override
+  String get limitVaultsPro => 'Sınırsız';
+
+  @override
+  String get basicAnalysis => 'Standart';
+
+  @override
+  String get advancedAnalysis => 'Genişletilmiş';
+
+  @override
+  String get limitDataRetentionPro => 'Özelleştirilebilir';
+
+  @override
+  String get cancelSubscriptionTest => 'Aboneliği İptal Et (Test)';
+
+  @override
+  String get yearlyAccess => 'Yıllık Erişim';
+
+  @override
+  String get monthlyAccess => 'Aylık Erişim';
+
+  @override
+  String get yearlyPriceDetail => 'Ayda ₺99\'ye gelir';
+
+  @override
+  String get monthlyPriceDetail => 'Her ay yenilenir';
+
+  @override
+  String get loginRequiredPurchaseDesc =>
+      'Satın alma işlemini tamamlamak için lütfen giriş yapın veya ücretsiz bir hesap oluşturun.';
+
+  @override
+  String get loginOrRegister => 'Giriş Yap / Üye Ol';
+
+  @override
+  String get privilegesActive => 'Ayrıcalıklar aktif';
+
+  @override
+  String get tapToUnlock => 'Sınırları kaldırmak için dokunun';
+
+  @override
+  String get sectionMembershipAccount => 'Üyelik ve Hesap';
+
+  @override
+  String get sectionAppearanceStyle => 'Görünüm ve Stil';
+
+  @override
+  String get sectionDataCloud => 'Veri ve Bulut';
+
+  @override
+  String get sectionSessionSecurity => 'Oturum ve Güvenlik';
+
+  @override
+  String get guestUser => 'Misafir Kullanıcı';
+
+  @override
+  String get tapToLogin => 'Giriş yapmak veya kayıt olmak için dokunun';
+
+  @override
+  String get changePassword => 'Şifre Değiştir';
+
+  @override
+  String get changePasswordDesc =>
+      'Mevcut şifrenizi doğrulayarak yeni bir şifre belirleyin. Şifreniz en az 6 karakter olmalıdır.';
+
+  @override
+  String get currentPasswordHint => 'Mevcut Şifre';
+
+  @override
+  String get newPasswordHint => 'Yeni Şifre';
+
+  @override
+  String get confirmNewPasswordHint => 'Yeni Şifre Tekrar';
+
+  @override
+  String get currentPasswordRequired => 'Mevcut şifrenizi girmeniz gerekir.';
+
+  @override
+  String get updatePassword => 'Şifreyi Güncelle';
+
+  @override
+  String get signOut => 'Çıkış Yap';
+
+  @override
+  String get logout => 'Oturumu Kapat';
+
+  @override
+  String get logoutConfirm => 'Oturumu kapatmak istediğinize emin misiniz?';
+
+  @override
+  String get deleteAccount => 'Hesabımı Sil';
+
+  @override
+  String get deleteAccountPermanently => 'Hesabımı Kalıcı Olarak Sil';
+
+  @override
+  String get deleteAccountConfirmDesc =>
+      'Hesabınızı ve buluttaki tüm verilerinizi kalıcı olarak silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.';
+
+  @override
+  String get reset => 'Sıfırla';
+
+  @override
+  String get resetDataTitle => 'Verileri Sıfırla?';
+
+  @override
+  String get resetDataDesc =>
+      'Tüm finansal verileriniz ve ayarlarınız kalıcı olarak silinecek. Bu işlem geri alınamaz.';
+
+  @override
+  String get deleteAll => 'Hepsini Sil';
+
+  @override
+  String get resetSuccess => 'Tüm veriler ve ayarlar başarıyla sıfırlandı.';
+
+  @override
+  String get supportEmailCopied =>
+      'E-posta uygulaması açılamadı. Destek adresi (finarcast.support@gmail.com) kopyalandı.';
 }

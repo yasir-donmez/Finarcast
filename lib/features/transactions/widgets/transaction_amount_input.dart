@@ -89,6 +89,7 @@ class TransactionAmountInput extends StatelessWidget {
           Expanded(
             child: CustomTextField(
               controller: amountController,
+              focusNode: amountFocusNode,
               hintText: "0,00",
               icon: Icons.attach_money_rounded,
               keyboardType: const TextInputType.numberWithOptions(decimal: true),

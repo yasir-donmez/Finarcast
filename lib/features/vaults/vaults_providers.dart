@@ -370,7 +370,7 @@ class TransactionUI {
       recurrenceDate: record.recurrenceDate,
       recurrenceDuration: record.recurrenceDuration,
       showOnDashboard: record.showOnDashboard,
-      dashboardLayoutType: record.dashboardLayoutType,
+      dashboardLayoutType: 4,
       isArchived: record.isArchived,
       groupIds: record.vaultIds.map((vId) => 'v_$vId').toList(),
       isNotificationEnabled: record.isNotificationEnabled,
@@ -548,8 +548,13 @@ class TransactionGroupsHelper {
 /// Seçili kasa (null = Ana Kasa / Tümü)
 final selectedVaultProvider = StateProvider<String?>((ref) => null);
 
-/// Seçili periyot (null = Tümü, 0: Tek Seferlik, 1: Haftalık, 2: Aylık, 3: Yıllık)
-final selectedPeriodProvider = StateProvider<int?>((ref) => null);
+/// Seçili zaman aralığı
+enum VaultTimeRange { allTime, thisWeek, thisMonth, thisYear }
+final selectedTimeRangeProvider = StateProvider<VaultTimeRange>((ref) => VaultTimeRange.allTime);
+
+/// Seçili ödeme türü
+enum PaymentTypeFilter { all, oneTime, recurring }
+final paymentTypeFilterProvider = StateProvider<PaymentTypeFilter>((ref) => PaymentTypeFilter.all);
 
 /// Seçili filtrelemelere göre işlemleri getiren provider
 final filteredVaultTransactionsProvider = Provider<List<TransactionUI>>((ref) {
@@ -558,7 +563,8 @@ final filteredVaultTransactionsProvider = Provider<List<TransactionUI>>((ref) {
   final selectedVaultId = ref.watch(selectedVaultProvider);
   final groups = ref.watch(transactionGroupsProvider);
   final effectiveVaultId = selectedVaultId ?? (groups.isNotEmpty ? groups.first.id : null);
-  final selectedPeriod = ref.watch(selectedPeriodProvider);
+  final timeRange = ref.watch(selectedTimeRangeProvider);
+  final paymentTypeFilter = ref.watch(paymentTypeFilterProvider);
 
   // 1. Kasa Filtresi
   var filtered = effectiveVaultId == null
@@ -572,10 +578,34 @@ final filteredVaultTransactionsProvider = Provider<List<TransactionUI>>((ref) {
     return true;
   }).toList();
 
-  // 3. Periyot Filtresi
-  if (selectedPeriod != null) {
-    filtered = filtered.where((t) => t.periodType == selectedPeriod).toList();
-  }
+  // 3. Ödeme Türü Filtresi (Tek Seferlik vs Tekrarlı)
+  filtered = filtered.where((t) {
+    if (paymentTypeFilter == PaymentTypeFilter.oneTime) return t.periodType == 0;
+    if (paymentTypeFilter == PaymentTypeFilter.recurring) return t.periodType != 0;
+    return true;
+  }).toList();
+
+  // 4. Zaman Aralığı Filtresi
+  final now = DateTime.now();
+  filtered = filtered.where((t) {
+    switch (timeRange) {
+      case VaultTimeRange.thisWeek:
+        final monday = now.subtract(Duration(days: now.weekday - 1));
+        final startOfWeek = DateTime(monday.year, monday.month, monday.day);
+        return !t.date.isBefore(startOfWeek);
+        
+      case VaultTimeRange.thisMonth:
+        final startOfMonth = DateTime(now.year, now.month, 1);
+        return !t.date.isBefore(startOfMonth);
+        
+      case VaultTimeRange.thisYear:
+        final startOfYear = DateTime(now.year, 1, 1);
+        return !t.date.isBefore(startOfYear);
+        
+      case VaultTimeRange.allTime:
+        return true;
+    }
+  }).toList();
 
   return filtered;
 });

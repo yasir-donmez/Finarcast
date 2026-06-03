@@ -110,7 +110,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             sliver: SliverList(
               delegate: SliverChildListDelegate([
                 const SizedBox(height: 20),
-                SettingsListItems.buildSectionTitle("Üyelik ve Hesap", activeColor),
+                SettingsListItems.buildSectionTitle(l10n.sectionMembershipAccount, activeColor),
                 const SizedBox(height: 12),
                 CustomCard(
                   padding: EdgeInsets.zero,
@@ -148,7 +148,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                                       crossAxisAlignment: CrossAxisAlignment.start,
                                       children: [
                                         Text(
-                                          "Misafir Kullanıcı",
+                                          l10n.guestUser,
                                           style: TextStyle(
                                             color: AppColors.getTextPrimary(context),
                                             fontSize: 16,
@@ -157,7 +157,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                                         ),
                                         const SizedBox(height: 2),
                                         Text(
-                                          "Giriş yapmak veya kayıt olmak için dokunun",
+                                          l10n.tapToLogin,
                                           style: TextStyle(
                                             color: AppColors.getTextSecondary(context).withValues(alpha: 0.5),
                                             fontSize: 12,
@@ -379,7 +379,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 ),
 
                 const SizedBox(height: 50),
-                SettingsListItems.buildSectionTitle("Görünüm ve Stil", activeColor),
+                SettingsListItems.buildSectionTitle(l10n.sectionAppearanceStyle, activeColor),
                 const SizedBox(height: 12),
                 CustomCard(
                   padding: EdgeInsets.zero,
@@ -413,7 +413,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 ),
 
                 const SizedBox(height: 50),
-                SettingsListItems.buildSectionTitle("Veri ve Bulut", activeColor, key: _dataAiKey),
+                SettingsListItems.buildSectionTitle(l10n.sectionDataCloud, activeColor, key: _dataAiKey),
                 const SizedBox(height: 12),
                 CustomCard(
                   padding: EdgeInsets.zero,
@@ -478,7 +478,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
 
                 if (user != null) ...[
                   const SizedBox(height: 50),
-                  SettingsListItems.buildSectionTitle("Oturum ve Güvenlik", activeColor),
+                  SettingsListItems.buildSectionTitle(l10n.sectionSessionSecurity, activeColor),
                   const SizedBox(height: 12),
                   CustomCard(
                     padding: EdgeInsets.zero,
@@ -490,8 +490,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                             showCustomDialog(
                               context: context,
                               accentColor: Colors.redAccent,
-                              title: "Çıkış Yap",
-                              content: "Oturumu kapatmak istediğinize emin misiniz?",
+                              title: l10n.logout,
+                              content: l10n.logoutConfirm,
                               actions: [
                                                 PrecisionDialogAction(
                                   label: l10n.cancel,
@@ -499,23 +499,30 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                                   isPrimary: false,
                                 ),
                                 PrecisionDialogAction(
-                                  label: "Çıkış Yap",
+                                  label: l10n.logout,
                                   onTap: () async {
                                     Navigator.pop(context);
                                     try {
+                                      // 1. Önce abonelikten çık
                                       await ref.read(subscriptionServiceProvider).logOut();
-                                      await ref.read(authServiceProvider).signOut();
                                       
+                                      // 2. Veritabanını temizle
+                                      await DatabaseService.clearAllData();
+                                      
+                                      // 3. Tercihleri ve durumları sıfırla
                                       final prefs = await SharedPreferences.getInstance();
                                       await prefs.setBool('Finarcast_is_guest_mode', false);
-                                      ref.read(guestModeProvider.notifier).state = false;
                                       
-                                      await DatabaseService.clearAllData();
+                                      ref.read(guestModeProvider.notifier).state = false;
                                       ref.invalidate(transactionsStreamProvider);
                                       ref.invalidate(vaultsStreamProvider);
                                       ref.invalidate(settingsProvider);
                                       ref.invalidate(subscriptionServiceProvider);
+
+                                      // 4. En son oturumu kapat (bu işlem UI'ı değiştirecektir)
+                                      await ref.read(authServiceProvider).signOut();
                                     } catch (e) {
+                                      debugPrint("Çıkış yaparken hata: $e");
                                       if (context.mounted) {
                                         CustomNotification.error(context, 'Hata oluştu: ${e.toString()}');
                                       }
@@ -544,10 +551,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                                   ),
                                 ),
                                 const SizedBox(width: 16),
-                                const Expanded(
+                                Expanded(
                                   child: Text(
-                                    "Oturumu Kapat",
-                                    style: TextStyle(
+                                    l10n.logout,
+                                    style: const TextStyle(
                                       color: Colors.redAccent,
                                       fontSize: 16,
                                       fontWeight: FontWeight.w700,
@@ -570,8 +577,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                             showCustomDialog(
                               context: context,
                               accentColor: Colors.redAccent,
-                              title: "Hesabımı Sil",
-                              content: "Hesabınızı ve buluttaki tüm verilerinizi kalıcı olarak silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.",
+                              title: l10n.deleteAccount,
+                              content: l10n.deleteAccountConfirmDesc,
                               actions: [
                                 PrecisionDialogAction(
                                   label: l10n.cancel,
@@ -579,26 +586,34 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                                   isPrimary: false,
                                 ),
                                 PrecisionDialogAction(
-                                  label: "Hesabımı Sil",
+                                  label: l10n.deleteAccount,
                                   onTap: () async {
                                     Navigator.pop(context);
                                     try {
+                                      // 1. Önce abonelikten çık
                                       await ref.read(subscriptionServiceProvider).logOut();
-                                      await ref.read(authServiceProvider).deleteAccount();
                                       
+                                      // 2. Veritabanını temizle
+                                      await DatabaseService.clearAllData();
+                                      
+                                      // 3. Tercihleri ve durumları sıfırla
                                       final prefs = await SharedPreferences.getInstance();
                                       await prefs.setBool('Finarcast_is_guest_mode', false);
-                                      ref.read(guestModeProvider.notifier).state = false;
                                       
-                                      await DatabaseService.clearAllData();
+                                      ref.read(guestModeProvider.notifier).state = false;
                                       ref.invalidate(transactionsStreamProvider);
                                       ref.invalidate(vaultsStreamProvider);
                                       ref.invalidate(settingsProvider);
                                       ref.invalidate(subscriptionServiceProvider);
+
+                                      // 4. Hesabı ve oturumu sil (bu işlem UI'ı değiştirecektir)
+                                      await ref.read(authServiceProvider).deleteAccount();
+                                      
                                       if (context.mounted) {
-                                        CustomNotification.success(context, 'Hesabınız ve tüm verileriniz başarıyla silindi.');
+                                        CustomNotification.success(context, l10n.done);
                                       }
                                     } catch (e) {
+                                      debugPrint("Hesap silinirken hata: $e");
                                       if (context.mounted) {
                                         CustomNotification.error(context, 'Hata oluştu: ${e.toString()}');
                                       }
@@ -627,10 +642,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                                   ),
                                 ),
                                 const SizedBox(width: 16),
-                                const Expanded(
+                                Expanded(
                                   child: Text(
-                                    "Hesabımı Kalıcı Olarak Sil",
-                                    style: TextStyle(
+                                    l10n.deleteAccountPermanently,
+                                    style: const TextStyle(
                                       color: Colors.redAccent,
                                       fontSize: 16,
                                       fontWeight: FontWeight.w700,
@@ -679,7 +694,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
 
     CustomBottomSheet.show(
       context: context,
-      title: "Şifre Değiştir",
+      title: l10n.changePassword,
       child: StatefulBuilder(
         builder: (context, setSheetState) {
           return Column(
@@ -688,7 +703,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             children: [
               const SizedBox(height: 16),
               Text(
-                "Mevcut şifrenizi doğrulayarak yeni bir şifre belirleyin. Şifreniz en az 6 karakter olmalıdır.",
+                l10n.changePasswordDesc,
                 style: TextStyle(
                   color: AppColors.getTextSecondary(context).withValues(alpha: 0.7),
                   fontSize: 14,
@@ -700,7 +715,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               // Eski Şifre
               CustomTextField(
                 controller: oldPasswordController,
-                hintText: "Mevcut Şifre",
+                hintText: l10n.currentPasswordHint,
                 icon: Icons.lock_open_rounded,
                 obscureText: obscureOldPassword,
                 errorText: oldPasswordError,
@@ -722,7 +737,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               // Yeni Şifre
               CustomTextField(
                 controller: passwordController,
-                hintText: "Yeni Şifre",
+                hintText: l10n.newPasswordHint,
                 icon: Icons.lock_rounded,
                 obscureText: obscurePassword,
                 errorText: passwordError,
@@ -744,7 +759,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               // Yeni Şifre Tekrar
               CustomTextField(
                 controller: confirmPasswordController,
-                hintText: "Yeni Şifre Tekrar",
+                hintText: l10n.confirmNewPasswordHint,
                 icon: Icons.security_rounded,
                 obscureText: obscureConfirmPassword,
                 errorText: confirmPasswordError,
@@ -765,7 +780,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               
               // Güncelle Butonu
               CustomButton(
-                label: "Şifreyi Güncelle",
+                label: l10n.updatePassword,
                 isLoading: isLoading,
                 onTap: () async {
                   final oldPassword = oldPasswordController.text;
@@ -781,26 +796,26 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
 
                   bool isValid = true;
                   if (oldPassword.isEmpty) {
-                    setSheetState(() => oldPasswordError = "Mevcut şifrenizi girmeniz gerekir.");
+                    setSheetState(() => oldPasswordError = l10n.currentPasswordRequired);
                     isValid = false;
                   }
                   
                   if (password.isEmpty) {
-                    setSheetState(() => passwordError = "Şifre alanı boş bırakılamaz.");
+                    setSheetState(() => passwordError = l10n.authPasswordRequired);
                     isValid = false;
                   } else if (password.length < 6) {
-                    setSheetState(() => passwordError = "Şifre en az 6 karakter olmalıdır.");
+                    setSheetState(() => passwordError = l10n.authPasswordTooShort);
                     isValid = false;
                   } else if (password == oldPassword) {
-                    setSheetState(() => passwordError = "Yeni şifreniz mevcut şifrenizden farklı olmalıdır.");
+                    setSheetState(() => passwordError = l10n.authPasswordDifferentError);
                     isValid = false;
                   }
                   
                   if (confirmPassword.isEmpty) {
-                    setSheetState(() => confirmPasswordError = "Şifre tekrarı boş bırakılamaz.");
+                    setSheetState(() => confirmPasswordError = l10n.authConfirmPasswordRequired);
                     isValid = false;
                   } else if (password != confirmPassword) {
-                    setSheetState(() => confirmPasswordError = "Şifreler eşleşmiyor.");
+                    setSheetState(() => confirmPasswordError = l10n.authPasswordsDoNotMatch);
                     isValid = false;
                   }
 
@@ -812,11 +827,11 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   try {
                     await authService.signIn(email: email, password: oldPassword);
                   } catch (e) {
-                    String oldPassErrorMsg = "Mevcut şifreniz hatalı.";
+                    String oldPassErrorMsg = l10n.authInvalidCredentials;
                     if (e is AuthException) {
                       final message = e.message.toLowerCase();
                       if (e.code == 'rate_limit_exceeded' || message.contains('rate limit') || message.contains('too many requests')) {
-                        oldPassErrorMsg = "Çok fazla deneme yaptınız. Lütfen daha sonra tekrar deneyin.";
+                        oldPassErrorMsg = l10n.authRateLimitExceeded;
                       }
                     }
                     setSheetState(() {
@@ -833,17 +848,17 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       Navigator.pop(context); // Close bottom sheet
                       CustomNotification.success(
                         context,
-                        'Şifreniz başarıyla güncellendi.',
+                        l10n.done,
                       );
                     }
                   } catch (e) {
-                    String updateErrorMsg = "Şifre güncellenemedi.";
+                    String updateErrorMsg = l10n.error;
                     if (e is AuthException) {
                       final message = e.message.toLowerCase();
                       if (e.code == 'same_password' || message.contains('different from the old password') || message.contains('should be different')) {
-                        updateErrorMsg = "Yeni şifreniz mevcut şifrenizden farklı olmalıdır.";
+                        updateErrorMsg = l10n.authPasswordDifferentError;
                       } else if (e.code == 'weak_password') {
-                        updateErrorMsg = "Yeni şifre çok zayıf.";
+                        updateErrorMsg = l10n.authWeakPassword;
                       } else {
                         updateErrorMsg = e.message;
                       }
@@ -920,8 +935,22 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         'subject': 'Finarcast Feedback',
       },
     );
-    if (await canLaunchUrl(emailLaunchUri)) {
-      await launchUrl(emailLaunchUri);
+    try {
+      if (await canLaunchUrl(emailLaunchUri)) {
+        await launchUrl(emailLaunchUri);
+      } else {
+        await Clipboard.setData(const ClipboardData(text: 'finarcast.support@gmail.com'));
+        if (mounted) {
+          final l10n = AppLocalizations.of(context)!;
+          CustomNotification.info(context, l10n.supportEmailCopied);
+        }
+      }
+    } catch (_) {
+      await Clipboard.setData(const ClipboardData(text: 'finarcast.support@gmail.com'));
+      if (mounted) {
+        final l10n = AppLocalizations.of(context)!;
+        CustomNotification.info(context, l10n.supportEmailCopied);
+      }
     }
   }
 }

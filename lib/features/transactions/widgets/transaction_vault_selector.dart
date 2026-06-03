@@ -44,8 +44,10 @@ class _TransactionVaultSelectorState extends State<TransactionVaultSelector> {
       selectedIndex: currentIndex,
       scalingFactor: widget.scalingFactor,
       onChanged: (index) {
-        final vault = vaultOptions[index];
-        onChanged([vault.id]);
+        if (index >= 0 && index < vaultOptions.length) {
+          final vault = vaultOptions[index];
+          onChanged([vault.id]);
+        }
       },
     );
   }

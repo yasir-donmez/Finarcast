@@ -9,22 +9,31 @@ class SmartParserService {
   static bool get isAvailable => true;
 
   static Exception _handleException(Object e) {
-    final errorStr = e.toString().toLowerCase();
+    final errorStr = e.toString();
+    final lowerErrorStr = errorStr.toLowerCase();
     
-    if (errorStr.contains('quota') || errorStr.contains('limit') || errorStr.contains('rate') || errorStr.contains('429')) {
+    // Server-side yetkilendirme veya kotalar (Edge Function'dan gelen)
+    if (lowerErrorStr.contains('rate limit exceeded') || lowerErrorStr.contains('upgrade your plan')) {
+      return Exception('Günlük Yapay Zeka analiz limitinizi doldurdunuz. Lütfen Premium plana yükseltin veya yarın tekrar deneyin.');
+    }
+    if (lowerErrorStr.contains('unauthorized')) {
+      return Exception('Yetkisiz erişim. Lütfen tekrar giriş yapın.');
+    }
+    
+    if (lowerErrorStr.contains('quota') || lowerErrorStr.contains('limit') || lowerErrorStr.contains('rate') || lowerErrorStr.contains('429')) {
       return Exception('Yapay Zeka kullanım limitiniz (kota) doldu. Lütfen biraz bekleyip tekrar deneyin.');
     }
-    if (errorStr.contains('high demand') || errorStr.contains('503') || errorStr.contains('unavailable') || errorStr.contains('busy')) {
+    if (lowerErrorStr.contains('high demand') || lowerErrorStr.contains('503') || lowerErrorStr.contains('unavailable') || lowerErrorStr.contains('busy')) {
       return Exception('Yapay Zeka sunucusu şu an çok yoğun. Lütfen birkaç saniye sonra tekrar deneyin.');
     }
-    if (errorStr.contains('api key') || errorStr.contains('key bulunamadı') || errorStr.contains('key not found') || errorStr.contains('api_key')) {
+    if (lowerErrorStr.contains('api key') || lowerErrorStr.contains('key bulunamadı') || lowerErrorStr.contains('key not found') || lowerErrorStr.contains('api_key')) {
       return Exception('Yapay Zeka API Anahtarı geçersiz veya bulunamadı. Lütfen ayarlarınızı kontrol edin.');
     }
-    if (errorStr.contains('timeout') || errorStr.contains('zaman aşımı')) {
+    if (lowerErrorStr.contains('timeout') || lowerErrorStr.contains('zaman aşımı')) {
       return Exception('İstek zaman aşımına uğradı. Lütfen internet bağlantınızı kontrol edip tekrar deneyin.');
     }
     
-    return Exception('Yapay Zeka analizi başarısız oldu: ${e.toString().replaceAll('Exception: ', '')}');
+    return Exception('Yapay Zeka analizi başarısız oldu: ${errorStr.replaceAll('Exception: ', '')}');
   }
 
   /// Serbest metni veya ses transkripsiyonunu analiz eder

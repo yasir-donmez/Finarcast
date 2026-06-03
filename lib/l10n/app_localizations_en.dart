@@ -37,7 +37,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get dataRetentionDesc =>
-      'Expired transactions are archived.\nAI Persona only uses data within this period.';
+      'Expired transactions are archived.\nAI Assistant only uses data within this period.';
 
   @override
   String get permanentDataDeletion => 'Permanent Deletion';
@@ -1348,8 +1348,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'Too many requests sent. Email rate limit exceeded, please try again in a while.';
 
   @override
-  String get authOtpRequired =>
-      'Please enter the verification code (6 or 8 digits).';
+  String get authOtpRequired => 'Please enter the 6-digit verification code.';
 
   @override
   String get authOtpSent =>
@@ -1491,4 +1490,358 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get authUserNotFoundError =>
       'No user found registered with this email address.';
+
+  @override
+  String get dataRetentionDetail =>
+      'After this period, your transactions are hidden from the main list and moved to the archive. Archived data does not affect your balance and keeps the Dashboard clean.';
+
+  @override
+  String get retentionPeriodLabel => 'Retention Period:';
+
+  @override
+  String get premiumRequired => 'Premium Required';
+
+  @override
+  String get premiumRetentionDesc =>
+      'Data retention, archiving, and automatic deletion rules are only available for Premium members.';
+
+  @override
+  String get later => 'Later';
+
+  @override
+  String get permanentDeletionDetail =>
+      'Warning: After this period, your data will be completely deleted from your device and cannot be recovered.';
+
+  @override
+  String get purgePeriodLabel => 'Deletion Period:';
+
+  @override
+  String get cloudSync => 'Cloud Sync';
+
+  @override
+  String get loginRequiredLabel => 'Login required';
+
+  @override
+  String syncToday(String time) {
+    return 'Today at $time';
+  }
+
+  @override
+  String syncYesterday(String time) {
+    return 'Yesterday at $time';
+  }
+
+  @override
+  String get noSyncYet => 'No sync performed yet';
+
+  @override
+  String get syncStatus => 'Sync Status';
+
+  @override
+  String lastSyncLabel(String time) {
+    return 'Last Sync: $time';
+  }
+
+  @override
+  String get syncBackgroundDesc =>
+      'Your data is automatically backed up to the cloud in the background.';
+
+  @override
+  String get syncCloudDesc =>
+      'Your data is backed up instantly using Supabase cloud infrastructure. Even if you delete the app, you can restore your data by logging in.';
+
+  @override
+  String get syncNow => 'SYNC NOW';
+
+  @override
+  String get syncing => 'SYNCING DATA...';
+
+  @override
+  String syncPartialSuccess(String summary) {
+    return 'Partial success: $summary';
+  }
+
+  @override
+  String syncFailed(String error) {
+    return 'Sync failed. $error';
+  }
+
+  @override
+  String get syncConnectionError =>
+      'Please check your internet connection or login details.';
+
+  @override
+  String get loginRequiredTitle => 'Login Required';
+
+  @override
+  String get loginRequiredSyncDesc =>
+      'You must log in to back up your data by enabling cloud sync.';
+
+  @override
+  String get premiumSyncDesc =>
+      'Cloud Sync feature uses Supabase backup infrastructure and is only available for Premium members.';
+
+  @override
+  String get showOnPhone => 'Show on Phone';
+
+  @override
+  String get appOnly => 'App Only';
+
+  @override
+  String get notificationDesc =>
+      'Determines whether reminders are only kept within the app or also shown in your phone\'s notification panel. When turned off, reminders remain silently in the app.';
+
+  @override
+  String get selectMainCurrency => 'Select main application currency.';
+
+  @override
+  String get currencyDesc =>
+      'This currency is used as the primary currency throughout the app (Dashboard, Vaults, and Statistics). All your assets are calculated based on this currency.';
+
+  @override
+  String get changeCurrency => 'Change Currency';
+
+  @override
+  String get exchangeRateNotFoundError =>
+      'No exchange rate found for the selected currency. Please check your internet connection and try again.';
+
+  @override
+  String get exchangeRatesDownloadFailed =>
+      'Could not download exchange rates. Check your internet connection.';
+
+  @override
+  String get exchangeRatesCheckError =>
+      'An error occurred while checking rates. Please try again.';
+
+  @override
+  String get exchangeRates => 'Exchange Rates';
+
+  @override
+  String get baseUnitLira => 'Base Unit: Turkish Lira';
+
+  @override
+  String baseUnitLabel(String currency) {
+    return 'Base Unit: $currency';
+  }
+
+  @override
+  String lastSyncShort(String time) {
+    return 'LAST: $time';
+  }
+
+  @override
+  String get updateRatesNow => 'UPDATE RATES NOW';
+
+  @override
+  String get updatingRates => 'UPDATING...';
+
+  @override
+  String get exchangeRatesUpdated => 'Exchange rates updated successfully.';
+
+  @override
+  String get exchangeRatesUpdateFailed =>
+      'Update failed. Check your internet connection.';
+
+  @override
+  String get showLess => 'Show Less';
+
+  @override
+  String get showMore => 'Show More';
+
+  @override
+  String get styleLabel => 'Style';
+
+  @override
+  String get styleDesc => 'Select visual style of cards and background';
+
+  @override
+  String get styleColor => 'Colored';
+
+  @override
+  String get styleColorDesc => 'Harmonious colors';
+
+  @override
+  String get styleSimple => 'Simple';
+
+  @override
+  String get styleSimpleDesc => 'Flat design';
+
+  @override
+  String get premiumStyleDesc =>
+      'Colored style is only available for Premium members.';
+
+  @override
+  String get premiumColorDesc =>
+      'Custom color themes and advanced gradients are only available for Premium members.';
+
+  @override
+  String get paletteArctic => 'Arctic';
+
+  @override
+  String get paletteMint => 'Mint';
+
+  @override
+  String get paletteRose => 'Rose';
+
+  @override
+  String get paletteLavender => 'Lavender';
+
+  @override
+  String get paletteSahara => 'Sahara';
+
+  @override
+  String get paletteSapphire => 'Sapphire';
+
+  @override
+  String get paletteBurgundy => 'Burgundy';
+
+  @override
+  String get palettePlatinum => 'Platinum';
+
+  @override
+  String get yearlyDiscount => 'Yearly (-33%)';
+
+  @override
+  String get comparisonTitle => 'COMPARISON';
+
+  @override
+  String get limitVaults => 'Vault Limit';
+
+  @override
+  String get limitAiAnalysis => 'AI Transaction Assistant';
+
+  @override
+  String get limitCloudSync => 'Cloud Sync';
+
+  @override
+  String get limitDataRetention => 'Data Retention & Purge';
+
+  @override
+  String get limitCustomThemes => 'Custom Themes';
+
+  @override
+  String get limitAdFree => 'Ad-Free Experience';
+
+  @override
+  String get limitVaultsFree => '2 Vaults';
+
+  @override
+  String get limitVaultsPro => 'Unlimited';
+
+  @override
+  String get basicAnalysis => 'Standard';
+
+  @override
+  String get advancedAnalysis => 'Extended';
+
+  @override
+  String get limitDataRetentionPro => 'Customizable';
+
+  @override
+  String get cancelSubscriptionTest => 'Cancel Subscription (Test)';
+
+  @override
+  String get yearlyAccess => 'Yearly Access';
+
+  @override
+  String get monthlyAccess => 'Monthly Access';
+
+  @override
+  String get yearlyPriceDetail => 'Costs ₺99/month';
+
+  @override
+  String get monthlyPriceDetail => 'Renews monthly';
+
+  @override
+  String get loginRequiredPurchaseDesc =>
+      'Please log in or create a free account to complete the purchase.';
+
+  @override
+  String get loginOrRegister => 'Log In / Register';
+
+  @override
+  String get privilegesActive => 'Privileges active';
+
+  @override
+  String get tapToUnlock => 'Tap to unlock limits';
+
+  @override
+  String get sectionMembershipAccount => 'Membership & Account';
+
+  @override
+  String get sectionAppearanceStyle => 'Appearance & Style';
+
+  @override
+  String get sectionDataCloud => 'Data & Cloud';
+
+  @override
+  String get sectionSessionSecurity => 'Session & Security';
+
+  @override
+  String get guestUser => 'Guest User';
+
+  @override
+  String get tapToLogin => 'Tap to log in or register';
+
+  @override
+  String get changePassword => 'Change Password';
+
+  @override
+  String get changePasswordDesc =>
+      'Confirm your current password to set a new password. Your password must be at least 6 characters.';
+
+  @override
+  String get currentPasswordHint => 'Current Password';
+
+  @override
+  String get newPasswordHint => 'New Password';
+
+  @override
+  String get confirmNewPasswordHint => 'Confirm New Password';
+
+  @override
+  String get currentPasswordRequired => 'You must enter your current password.';
+
+  @override
+  String get updatePassword => 'Update Password';
+
+  @override
+  String get signOut => 'Sign Out';
+
+  @override
+  String get logout => 'Log Out';
+
+  @override
+  String get logoutConfirm => 'Are you sure you want to log out?';
+
+  @override
+  String get deleteAccount => 'Delete Account';
+
+  @override
+  String get deleteAccountPermanently => 'Permanently Delete Account';
+
+  @override
+  String get deleteAccountConfirmDesc =>
+      'Are you sure you want to permanently delete your account and all data in the cloud? This action cannot be undone.';
+
+  @override
+  String get reset => 'Reset';
+
+  @override
+  String get resetDataTitle => 'Reset Data?';
+
+  @override
+  String get resetDataDesc =>
+      'All your financial data and settings will be permanently deleted. This action cannot be undone.';
+
+  @override
+  String get deleteAll => 'Delete All';
+
+  @override
+  String get resetSuccess =>
+      'All data and settings have been successfully reset.';
+
+  @override
+  String get supportEmailCopied =>
+      'Could not open email client. Support email (finarcast.support@gmail.com) was copied.';
 }

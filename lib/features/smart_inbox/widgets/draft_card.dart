@@ -216,13 +216,25 @@ class _DismissibleDraftCardState extends State<DismissibleDraftCard>
     final slideProgress = (progress / 0.25).clamp(0.0, 1.0);
     final xOffset = 30.0 * (1.0 - slideProgress) * slideSign;
 
-    return Container(
+    final bool isThresholdReached = progress >= 0.20;
+    
+    final Color bgColor = isThresholdReached
+        ? color.withValues(alpha: 0.20)
+        : Colors.transparent;
+        
+    final Color borderColor = isThresholdReached
+        ? color.withValues(alpha: 0.40)
+        : Colors.transparent;
+
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 150),
+      curve: Curves.easeOutCubic,
       margin: const EdgeInsets.only(bottom: 10),
       decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.08 + progress * 0.12),
+        color: bgColor,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: color.withValues(alpha: 0.15 + progress * 0.25),
+          color: borderColor,
           width: 1.0,
         ),
       ),
@@ -291,9 +303,49 @@ class _DismissibleDraftCardState extends State<DismissibleDraftCard>
     }
 
     final String finalCatName = parentCatName ?? 'Diğer';
-    final String displayCategoryHeader = subCatName != null
-        ? '$finalCatName • $subCatName'
-        : finalCatName;
+    final categoryAccentColor = AppColors.getAccentDeep(context, catColor);
+    final Widget categoryHeaderWidget;
+    if (subCatName != null) {
+      categoryHeaderWidget = Text.rich(
+        TextSpan(
+          children: [
+            TextSpan(text: finalCatName),
+            TextSpan(
+              text: ' / ',
+              style: TextStyle(
+                color: AppColors.getTextSecondary(context).withValues(alpha: 0.5),
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+            TextSpan(
+              text: subCatName,
+              style: TextStyle(
+                color: categoryAccentColor,
+                fontWeight: FontWeight.w900,
+              ),
+            ),
+          ],
+        ),
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+        style: TextStyle(
+          fontWeight: FontWeight.w900,
+          fontSize: 13,
+          color: AppColors.getTextPrimary(context),
+        ),
+      );
+    } else {
+      categoryHeaderWidget = Text(
+        finalCatName,
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+        style: TextStyle(
+          fontWeight: FontWeight.w900,
+          fontSize: 13,
+          color: AppColors.getTextPrimary(context),
+        ),
+      );
+    }
 
     final String? cardNote = () {
       if (widget.draft.title.isNotEmpty &&
@@ -398,15 +450,7 @@ class _DismissibleDraftCardState extends State<DismissibleDraftCard>
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           // Kategori Adı (Market • Gıda)
-                          Text(
-                            displayCategoryHeader,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(
-                              fontWeight: FontWeight.w900,
-                              fontSize: 13,
-                            ),
-                          ),
+                          categoryHeaderWidget,
                           const SizedBox(height: 3),
                           // Kısaltılmış İşlem Notu (cardNote)
                           if (cardNote != null && cardNote.isNotEmpty)

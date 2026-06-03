@@ -75,6 +75,7 @@ class _SubscriptionSettingState extends ConsumerState<SubscriptionSetting> {
   }
 
   Widget _buildExpandedContent(BuildContext context, Color activeColor, SubscriptionService subscription, bool isDark) {
+    final l10n = AppLocalizations.of(context)!;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -87,7 +88,7 @@ class _SubscriptionSettingState extends ConsumerState<SubscriptionSetting> {
             children: [
               if (!subscription.isPro) ...[
                 SegmentedControl(
-                  tabs: const ["Aylık", "Yıllık (-%33)"],
+                  tabs: [l10n.monthly, l10n.yearlyDiscount],
                   selectedIndex: _selectedPeriod == SubscriptionPeriod.monthly ? 0 : 1,
                   onTabChanged: (index) {
                     setState(() {
@@ -98,14 +99,14 @@ class _SubscriptionSettingState extends ConsumerState<SubscriptionSetting> {
                   scalingFactor: 0.9,
                 ),
                 const SizedBox(height: 12),
-                _buildPremiumCheckoutCard(context, activeColor, subscription),
+                _buildPremiumCheckoutCard(context, activeColor, subscription, l10n),
                 const SizedBox(height: 24),
               ],
               
               Padding(
                 padding: const EdgeInsets.only(left: 4),
                 child: Text(
-                  "KARŞILAŞTIRMA",
+                  l10n.comparisonTitle,
                   style: TextStyle(
                     fontSize: 9,
                     fontWeight: FontWeight.w900,
@@ -118,18 +119,18 @@ class _SubscriptionSettingState extends ConsumerState<SubscriptionSetting> {
               
               _buildComparisonHeader(context),
               const SizedBox(height: 8),
-              _buildComparisonRow(context, "Kasa Sınırı", "2 Kasa", "Sınırsız", activeColor),
-              _buildComparisonRow(context, "Yapay Zeka Analizi", "Dar Kapsam", "Geniş Kapsam", activeColor),
-              _buildComparisonRow(context, "Bulut Eşitleme", "-", "Evet", activeColor),
-              _buildComparisonRow(context, "Veri Saklama & Silme", "-", "Evet", activeColor),
-              _buildComparisonRow(context, "Özel Temalar", "-", "Evet", activeColor),
-              _buildComparisonRow(context, "Reklamsız Deneyim", "-", "Evet", activeColor),
+              _buildComparisonRow(context, l10n.limitVaults, l10n.limitVaultsFree, l10n.limitVaultsPro, activeColor),
+              _buildComparisonRow(context, l10n.limitAiAnalysis, l10n.basicAnalysis, l10n.advancedAnalysis, activeColor),
+              _buildComparisonRow(context, l10n.limitCloudSync, "-", l10n.yes, activeColor),
+              _buildComparisonRow(context, l10n.limitDataRetention, "-", l10n.limitDataRetentionPro, activeColor),
+              _buildComparisonRow(context, l10n.limitCustomThemes, "-", l10n.yes, activeColor),
+              _buildComparisonRow(context, l10n.limitAdFree, "-", l10n.yes, activeColor),
               
               if (subscription.isPro) ...[
                 const SizedBox(height: 24),
                 Center(
                   child: CustomButton(
-                    label: "Aboneliği İptal Et (Test)",
+                    label: l10n.cancelSubscriptionTest,
                     onTap: () async => await ref.read(subscriptionServiceProvider).setProStatus(false),
                     isPrimary: false,
                     height: 40,
@@ -151,8 +152,9 @@ class _SubscriptionSettingState extends ConsumerState<SubscriptionSetting> {
       padding: const EdgeInsets.symmetric(horizontal: 4),
       child: Row(
         children: [
-          const Expanded(flex: 2, child: SizedBox()),
+          const Expanded(flex: 4, child: SizedBox()),
           Expanded(
+            flex: 3,
             child: Text(
               "FREE",
               textAlign: TextAlign.center,
@@ -160,6 +162,7 @@ class _SubscriptionSettingState extends ConsumerState<SubscriptionSetting> {
             ),
           ),
           Expanded(
+            flex: 3,
             child: Text(
               "PREMIUM",
               textAlign: TextAlign.center,
@@ -173,11 +176,11 @@ class _SubscriptionSettingState extends ConsumerState<SubscriptionSetting> {
 
   Widget _buildComparisonRow(BuildContext context, String feature, String free, String pro, Color activeColor) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
+      padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 4),
       child: Row(
         children: [
           Expanded(
-            flex: 2,
+            flex: 4,
             child: Text(
               feature,
               maxLines: 2,
@@ -186,6 +189,7 @@ class _SubscriptionSettingState extends ConsumerState<SubscriptionSetting> {
             ),
           ),
           Expanded(
+            flex: 3,
             child: Center(
               child: FittedBox(
                 fit: BoxFit.scaleDown,
@@ -198,6 +202,7 @@ class _SubscriptionSettingState extends ConsumerState<SubscriptionSetting> {
             ),
           ),
           Expanded(
+            flex: 3,
             child: Center(
               child: FittedBox(
                 fit: BoxFit.scaleDown,
@@ -214,7 +219,7 @@ class _SubscriptionSettingState extends ConsumerState<SubscriptionSetting> {
     );
   }
 
-  Widget _buildPremiumCheckoutCard(BuildContext context, Color activeColor, SubscriptionService subscription) {
+  Widget _buildPremiumCheckoutCard(BuildContext context, Color activeColor, SubscriptionService subscription, AppLocalizations l10n) {
     final isYearly = _selectedPeriod == SubscriptionPeriod.yearly;
     return Container(
       padding: const EdgeInsets.all(16),
@@ -232,11 +237,11 @@ class _SubscriptionSettingState extends ConsumerState<SubscriptionSetting> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    isYearly ? "Yıllık Erişim" : "Aylık Erişim",
+                    isYearly ? l10n.yearlyAccess : l10n.monthlyAccess,
                     style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700),
                   ),
                   Text(
-                    isYearly ? "Ayda ₺99'ye gelir" : "Her ay yenilenir",
+                    isYearly ? l10n.yearlyPriceDetail : l10n.monthlyPriceDetail,
                     style: TextStyle(fontSize: 11, color: AppColors.getTextSecondary(context).withValues(alpha: 0.6)),
                   ),
                 ],
@@ -263,23 +268,23 @@ class _SubscriptionSettingState extends ConsumerState<SubscriptionSetting> {
           ),
           const SizedBox(height: 16),
           CustomButton(
-            label: "PREMIUM'A YÜKSELT",
+            label: l10n.upgradeToPro,
             onTap: () {
               final currentUser = Supabase.instance.client.auth.currentUser;
               if (currentUser == null) {
                 showCustomDialog(
                   context: context,
                   accentColor: activeColor,
-                  title: "Giriş Yapılması Gerekiyor",
-                  content: "Satın alma işlemini tamamlamak için lütfen giriş yapın veya ücretsiz bir hesap oluşturun.",
+                  title: l10n.loginRequiredTitle,
+                  content: l10n.loginRequiredPurchaseDesc,
                   actions: [
                     PrecisionDialogAction(
-                      label: "İptal",
+                      label: l10n.cancel,
                       onTap: () => Navigator.pop(context),
                       isPrimary: false,
                     ),
                     PrecisionDialogAction(
-                      label: "Giriş Yap / Üye Ol",
+                      label: l10n.loginOrRegister,
                       onTap: () async {
                         Navigator.pop(context);
                         final prefs = await SharedPreferences.getInstance();
@@ -353,7 +358,7 @@ class _SubscriptionSettingState extends ConsumerState<SubscriptionSetting> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    isPro ? "Premium" : "Ücretsiz",
+                    isPro ? "Premium" : l10n.freePlan,
                     style: TextStyle(
                       color: AppColors.getTextPrimary(context),
                       fontSize: 16,
@@ -362,7 +367,7 @@ class _SubscriptionSettingState extends ConsumerState<SubscriptionSetting> {
                   ),
                   const SizedBox(height: 2),
                   Text(
-                    isPro ? "Ayrıcalıklar aktif" : "Sınırları kaldırmak için dokunun",
+                    isPro ? l10n.privilegesActive : l10n.tapToUnlock,
                     style: TextStyle(
                       color: AppColors.getTextSecondary(context).withValues(alpha: 0.5),
                       fontSize: 11,

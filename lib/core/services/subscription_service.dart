@@ -25,6 +25,7 @@ class SubscriptionService extends ChangeNotifier {
   Offerings? _offerings;
 
   SubscriptionService(this._prefs) {
+    _isPro = _prefs.getBool(_isProKey) ?? false;
     _initRevenueCat();
   }
 
@@ -147,10 +148,9 @@ class SubscriptionService extends ChangeNotifier {
 
   // --- Özellik Bazlı Limitler ---
   int get maxVaults => _isPro ? 999 : 2;
-  int get dailyAiLimit => _isPro ? 50 : 2;
+  int get dailyAiLimit => _isPro ? 50 : 5;
   int get usedAiCount => _prefs.getInt('Finarcast_ai_usage_$_today') ?? 0;
-
-  int get aiCooldownMinutes => _isPro ? 0 : 60;
+  int get aiCooldownMinutes => _isPro ? 0 : 1;
 
   DateTime? get lastAiUsageTime {
     final ms = _prefs.getInt(_lastAiUsageKey);

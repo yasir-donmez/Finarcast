@@ -153,7 +153,7 @@ class PurgeSetting extends ConsumerWidget {
                             const SizedBox(width: 12),
                             Expanded(
                               child: Text(
-                                "Dikkat: Bu süre sonunda verileriniz cihazınızdan tamamen silinir ve bir daha geri getirilemez.",
+                                l10n.permanentDeletionDetail,
                                 style: TextStyle(
                                   color: AppColors.getTextPrimary(context),
                                   fontSize: 13,
@@ -168,7 +168,7 @@ class PurgeSetting extends ConsumerWidget {
                       Row(
                         children: [
                           Text(
-                            "Temizleme Süresi:",
+                            l10n.purgePeriodLabel,
                             style: TextStyle(
                               color: AppColors.getTextPrimary(context),
                               fontSize: 14,
@@ -193,7 +193,7 @@ class PurgeSetting extends ConsumerWidget {
                                     behavior: HitTestBehavior.opaque,
                                     onTap: () {
                                       HapticFeedback.heavyImpact();
-                                      _showPremiumRequiredDialog(context);
+                                      _showPremiumRequiredDialog(context, l10n);
                                     },
                                   ),
                                 ),
@@ -210,20 +210,20 @@ class PurgeSetting extends ConsumerWidget {
     );
   }
 
-  void _showPremiumRequiredDialog(BuildContext context) {
+  void _showPremiumRequiredDialog(BuildContext context, AppLocalizations l10n) {
     showCustomDialog(
       context: context,
       accentColor: const Color(0xFFFFB300), // Altın rengi
-      title: "Premium Gerekli",
-      content: "Veri saklama, arşivleme ve otomatik temizleme kuralları sadece Premium üyelerin erişimine açıktır.",
+      title: l10n.premiumRequired,
+      content: l10n.premiumRetentionDesc,
       actions: [
         PrecisionDialogAction(
-          label: "Daha Sonra",
+          label: l10n.later,
           onTap: () => Navigator.pop(context),
           isPrimary: false,
         ),
         PrecisionDialogAction(
-          label: "Premium'a Yükselt",
+          label: l10n.upgradeToPro,
           onTap: () {
             Navigator.pop(context);
             ProUpgradeSheet.show(context);

@@ -56,7 +56,8 @@ class _VaultsScreenState extends ConsumerState<VaultsScreen> {
     final groups = ref.watch(transactionGroupsProvider);
     final filter = ref.watch(transactionFilterProvider);
     final selectedVaultId = ref.watch(selectedVaultProvider);
-    final selectedPeriod = ref.watch(selectedPeriodProvider);
+    final selectedTimeRange = ref.watch(selectedTimeRangeProvider);
+    final paymentTypeFilter = ref.watch(paymentTypeFilterProvider);
     final activeColor = ref.watch(rotaryColorProvider);
     final unseenNotificationsCount = ref.watch(unseenNotificationsCountProvider);
     final isDark = Theme.of(context).brightness == Brightness.dark;
@@ -96,6 +97,7 @@ class _VaultsScreenState extends ConsumerState<VaultsScreen> {
 
     return Scaffold(
       backgroundColor: Colors.transparent,
+      resizeToAvoidBottomInset: false,
       body: Stack(
         children: [
           // Eski bloblar kaldırıldı, global pattern görünüyor
@@ -107,7 +109,7 @@ class _VaultsScreenState extends ConsumerState<VaultsScreen> {
             ),
             slivers: [
               _buildHeader(groups, allTransactions, selectedVaultId, activeColor, unseenNotificationsCount, gapAB, l10n, context),
-              _buildFilters(filter, selectedPeriod, activeColor, scalingFactor, gapCardToFilters, l10n, context),
+              _buildFilters(filter, paymentTypeFilter, selectedTimeRange, activeColor, scalingFactor, gapCardToFilters, l10n, context),
               
               if (filteredTransactions.isEmpty)
                 _buildEmptyState(activeColor, isDark, l10n)
@@ -154,13 +156,15 @@ class _VaultsScreenState extends ConsumerState<VaultsScreen> {
 
   Widget _buildFilters(
     TransactionFilter filter, 
-    int? selectedPeriod, 
+    PaymentTypeFilter paymentTypeFilter,
+    VaultTimeRange selectedTimeRange, 
     Color activeColor, 
     double scalingFactor, 
     double dynamicGap,
     AppLocalizations l10n, 
     BuildContext context
   ) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return SliverToBoxAdapter(
       child: Padding(
         padding: const EdgeInsets.fromLTRB(
@@ -173,56 +177,87 @@ class _VaultsScreenState extends ConsumerState<VaultsScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             SizedBox(height: dynamicGap), // Filtre butonları ile üstteki kart arasında tam simetrik boşluk (Gap B)
-            Row(
-              children: [
-                VaultFilterChip(
-                  label: l10n.all,
-                  isActive: filter == TransactionFilter.all,
-                  onTap: () => ref.read(transactionFilterProvider.notifier).state = TransactionFilter.all,
-                  activeColor: activeColor,
-                ),
-                const SizedBox(width: 8),
-                VaultFilterChip(
-                  label: l10n.income,
-                  isActive: filter == TransactionFilter.income,
-                  onTap: () => ref.read(transactionFilterProvider.notifier).state = TransactionFilter.income,
-                  activeColor: AppColors.getIncome(context),
-                ),
-                const SizedBox(width: 8),
-                VaultFilterChip(
-                  label: l10n.expense,
-                  isActive: filter == TransactionFilter.expense,
-                  onTap: () => ref.read(transactionFilterProvider.notifier).state = TransactionFilter.expense,
-                  activeColor: AppColors.getExpense(context),
-                ),
-              ],
-            ),
-            const SizedBox(height: 8),
+            
+            // 1. Satır: İşlem Yönü & Ödeme Türü (Yatay Kaydırılabilir)
             SingleChildScrollView(
               scrollDirection: Axis.horizontal,
               physics: const BouncingScrollPhysics(),
               clipBehavior: Clip.none,
               child: Row(
                 children: [
+                  // İşlem Yönü Grubu
                   VaultFilterChip(
-                    label: l10n.allTime,
-                    isActive: selectedPeriod == null,
-                    onTap: () => ref.read(selectedPeriodProvider.notifier).state = null,
+                    label: l10n.all,
+                    isActive: filter == TransactionFilter.all,
+                    onTap: () => ref.read(transactionFilterProvider.notifier).state = TransactionFilter.all,
                     activeColor: activeColor,
                   ),
                   const SizedBox(width: 8),
-                  ...[1, 2, 3].map(
-                    (p) => Padding(
-                      padding: const EdgeInsets.only(right: 8),
-                      child: VaultFilterChip(
-                        label: _getPeriodLabel(p, l10n),
-                        isActive: selectedPeriod == p,
-                        onTap: () => ref.read(selectedPeriodProvider.notifier).state = p,
-                        activeColor: activeColor,
-                      ),
-                    ),
+                  VaultFilterChip(
+                    label: l10n.income,
+                    isActive: filter == TransactionFilter.income,
+                    onTap: () => ref.read(transactionFilterProvider.notifier).state = TransactionFilter.income,
+                    activeColor: AppColors.getIncome(context),
+                  ),
+                  const SizedBox(width: 8),
+                  VaultFilterChip(
+                    label: l10n.expense,
+                    isActive: filter == TransactionFilter.expense,
+                    onTap: () => ref.read(transactionFilterProvider.notifier).state = TransactionFilter.expense,
+                    activeColor: AppColors.getExpense(context),
+                  ),
+                  
+                  // Dikey İnce Ayırıcı Çizgi
+                  Container(
+                    width: 1.2,
+                    height: 20,
+                    margin: const EdgeInsets.symmetric(horizontal: 12),
+                    color: (isDark ? Colors.white : Colors.black).withValues(alpha: 0.15),
+                  ),
+                  
+                  // Ödeme Türü Grubu
+                  VaultFilterChip(
+                    label: _getPaymentTypeLabel(PaymentTypeFilter.all, context, l10n),
+                    isActive: paymentTypeFilter == PaymentTypeFilter.all,
+                    onTap: () => ref.read(paymentTypeFilterProvider.notifier).state = PaymentTypeFilter.all,
+                    activeColor: activeColor,
+                  ),
+                  const SizedBox(width: 8),
+                  VaultFilterChip(
+                    label: _getPaymentTypeLabel(PaymentTypeFilter.oneTime, context, l10n),
+                    isActive: paymentTypeFilter == PaymentTypeFilter.oneTime,
+                    onTap: () => ref.read(paymentTypeFilterProvider.notifier).state = PaymentTypeFilter.oneTime,
+                    activeColor: activeColor,
+                  ),
+                  const SizedBox(width: 8),
+                  VaultFilterChip(
+                    label: _getPaymentTypeLabel(PaymentTypeFilter.recurring, context, l10n),
+                    isActive: paymentTypeFilter == PaymentTypeFilter.recurring,
+                    onTap: () => ref.read(paymentTypeFilterProvider.notifier).state = PaymentTypeFilter.recurring,
+                    activeColor: activeColor,
                   ),
                 ],
+              ),
+            ),
+            const SizedBox(height: 8),
+            
+            // 2. Satır: Zaman Aralığı (Yatay Kaydırılabilir)
+            SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              physics: const BouncingScrollPhysics(),
+              clipBehavior: Clip.none,
+              child: Row(
+                children: VaultTimeRange.values.map(
+                  (range) => Padding(
+                    padding: const EdgeInsets.only(right: 8),
+                    child: VaultFilterChip(
+                      label: _getTimeRangeLabel(range, context, l10n),
+                      isActive: selectedTimeRange == range,
+                      onTap: () => ref.read(selectedTimeRangeProvider.notifier).state = range,
+                      activeColor: activeColor,
+                    ),
+                  ),
+                ).toList(),
               ),
             ),
           ],
@@ -341,26 +376,29 @@ class _VaultsScreenState extends ConsumerState<VaultsScreen> {
     );
   }
 
-  String _getPeriodLabel(int period, AppLocalizations l10n) {
-    switch (period) {
-      case 0:
+  String _getPaymentTypeLabel(PaymentTypeFilter filter, BuildContext context, AppLocalizations l10n) {
+    final locale = Localizations.localeOf(context).languageCode;
+    switch (filter) {
+      case PaymentTypeFilter.all:
+        return l10n.all;
+      case PaymentTypeFilter.oneTime:
         return l10n.oneTime;
-      case 1:
-        return l10n.weekly;
-      case 4:
-        return l10n.every2Weeks;
-      case 5:
-        return l10n.every3Weeks;
-      case 2:
-        return l10n.monthly;
-      case 6:
-        return l10n.every3Months;
-      case 7:
-        return l10n.every6Months;
-      case 3:
-        return l10n.yearly;
-      default:
-        return '';
+      case PaymentTypeFilter.recurring:
+        return locale == 'tr' ? 'Abonelikler' : 'Recurring';
+    }
+  }
+
+  String _getTimeRangeLabel(VaultTimeRange range, BuildContext context, AppLocalizations l10n) {
+    final locale = Localizations.localeOf(context).languageCode;
+    switch (range) {
+      case VaultTimeRange.allTime:
+        return l10n.allTime;
+      case VaultTimeRange.thisWeek:
+        return locale == 'tr' ? 'Bu Hafta' : 'This Week';
+      case VaultTimeRange.thisMonth:
+        return locale == 'tr' ? 'Bu Ay' : 'This Month';
+      case VaultTimeRange.thisYear:
+        return locale == 'tr' ? 'Bu Yıl' : 'This Year';
     }
   }
 
@@ -382,13 +420,50 @@ class _VaultsScreenState extends ConsumerState<VaultsScreen> {
             customCategories: customCategories,
           )
         : null;
-    final fullTitle = parentName != null && parentName != categoryName 
-        ? '$parentName / $categoryName' 
-        : categoryName;
+    final categoryAccentColor = AppColors.getAccentDeep(context, tx.color);
+    final Widget sheetTitle;
+    if (parentName != null && parentName != categoryName) {
+      sheetTitle = Text.rich(
+        TextSpan(
+          children: [
+            TextSpan(text: parentName),
+            TextSpan(
+              text: ' / ',
+              style: TextStyle(
+                color: AppColors.getTextSecondary(context).withValues(alpha: 0.5),
+              ),
+            ),
+            TextSpan(
+              text: categoryName,
+              style: TextStyle(
+                color: categoryAccentColor,
+                fontWeight: FontWeight.w900,
+              ),
+            ),
+          ],
+        ),
+        style: TextStyle(
+          fontSize: 24,
+          fontWeight: FontWeight.w900,
+          color: AppColors.getTextPrimary(context),
+          letterSpacing: -0.8,
+        ),
+      );
+    } else {
+      sheetTitle = Text(
+        categoryName,
+        style: TextStyle(
+          fontSize: 24,
+          fontWeight: FontWeight.w900,
+          color: AppColors.getTextPrimary(context),
+          letterSpacing: -0.8,
+        ),
+      );
+    }
 
     CustomBottomSheet.show(
       context: context,
-      title: fullTitle,
+      title: sheetTitle,
       child: DetailSheet(
         transaction: tx,
         onEdit: () {
@@ -423,7 +498,7 @@ class _VaultsScreenState extends ConsumerState<VaultsScreen> {
                 initialCurrency: tx.currency,
                 initialPeriodType: tx.periodType,
                 initialRecurrenceDay: tx.recurrenceDay,
-                initialRecurrenceDate: tx.recurrenceDate,
+                initialRecurrenceDate: tx.recurrenceDate ?? tx.date,
                 initialRecurrenceDuration: tx.recurrenceDuration,
                 initialIsNotificationEnabled: tx.isNotificationEnabled,
                 initialNotificationReminderDays: tx.notificationReminderDays,

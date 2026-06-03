@@ -58,9 +58,6 @@ class TransactionRecord {
   /// Dashboard'daki sıralama
   int dashboardOrder = 0;
 
-  /// Dashboard'da bu işlemin dahil olduğu sayfanın yerleşim tipi (1, 2, 3, 4)
-  int dashboardLayoutType = 4;
-
   /// Arşiv bayrağı: Süresi dolmuş periyodik işlemler silinmez, arşivlenir.
   /// true → aktif listede görünmez, analiz motoru geçmiş hesabında kullanır.
   bool isArchived = false;
@@ -71,9 +68,6 @@ class TransactionRecord {
   /// İşlemin yapıldığı para birimi (USD, TRY vb.)
   String? currency;
 
-  /// İşlemin yapıldığı konumun koordinatları
-  double? latitude;
-  double? longitude;
   
   // --- Bildirim Ayarları ---
   bool isNotificationEnabled = false;

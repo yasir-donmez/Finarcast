@@ -55,7 +55,7 @@ class CurrencySetting extends ConsumerWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        "Para Birimi",
+                        l10n.currency,
                         style: TextStyle(
                           color: AppColors.getTextPrimary(context),
                           fontSize: 16,
@@ -63,7 +63,7 @@ class CurrencySetting extends ConsumerWidget {
                         ),
                       ),
                       Text(
-                        isExpanded ? "Ana uygulama birimini seçin." : currencySymbol,
+                        isExpanded ? l10n.selectMainCurrency : currencySymbol,
                         style: TextStyle(
                           color: AppColors.getTextSecondary(context).withValues(alpha: 0.5),
                           fontSize: 12,
@@ -104,8 +104,7 @@ class CurrencySetting extends ConsumerWidget {
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: Text(
-                          "Bu birim tüm uygulama genelinde (Dashboard, Kasalar ve İstatistikler) "
-                          "ana para birimi olarak kullanılır. Tüm varlıklarınız bu birime göre hesaplanır.",
+                          l10n.currencyDesc,
                           style: TextStyle(
                             color: AppColors.getTextSecondary(context),
                             fontSize: 13,
@@ -129,7 +128,7 @@ class CurrencySetting extends ConsumerWidget {
                             ),
                             const SizedBox(width: 12),
                             Text(
-                              "Birimi Değiştir",
+                              l10n.changeCurrency,
                               style: TextStyle(
                                 fontWeight: FontWeight.w700,
                                 color: AppColors.getTextPrimary(context),
@@ -172,21 +171,23 @@ class CurrencySetting extends ConsumerWidget {
                 onSelectedItemChanged: (index) => tempIndex = index,
                 itemBuilder: (context, index, isSelected) {
                   final symbol = currencies[index];
+                  final langCode = Localizations.localeOf(context).languageCode;
+                  final isTr = langCode == 'tr';
                   String name = "";
                   switch (symbol) {
-                    case '₺': name = "Türk Lirası"; break;
-                    case r'$': name = "Amerikan Doları"; break;
-                    case '€': name = "Euro"; break;
-                    case '£': name = "İngiliz Sterlini"; break;
-                    case '¥': name = "Japon Yeni"; break;
-                    case '₩': name = "Kore Wonu"; break;
-                    case '元': name = "Çin Yuanı"; break;
-                    case r'R$': name = "Brezilya Reali"; break;
-                    case 'Fr': name = "İsviçre Frangı"; break;
-                    case 'G': name = "Gram Altın"; break;
-                    case 'Ag': name = "Gümüş (Gram)"; break;
-                    case 'SR': name = "Suudi Riyali"; break;
-                    case 'KD': name = "Kuveyt Dinarı"; break;
+                    case '₺': name = isTr ? "Türk Lirası" : "Turkish Lira"; break;
+                    case r'$': name = isTr ? "Amerikan Doları" : "US Dollar"; break;
+                    case '€': name = isTr ? "Euro" : "Euro"; break;
+                    case '£': name = isTr ? "İngiliz Sterlini" : "British Pound"; break;
+                    case '¥': name = isTr ? "Japon Yeni" : "Japanese Yen"; break;
+                    case '₩': name = isTr ? "Kore Wonu" : "Korean Won"; break;
+                    case '元': name = isTr ? "Çin Yuanı" : "Chinese Yuan"; break;
+                    case r'R$': name = isTr ? "Brezilya Reali" : "Brazilian Real"; break;
+                    case 'Fr': name = isTr ? "İsviçre Frangı" : "Swiss Franc"; break;
+                    case 'G': name = isTr ? "Gram Altın" : "Gold (Gram)"; break;
+                    case 'Ag': name = isTr ? "Gümüş (Gram)" : "Silver (Gram)"; break;
+                    case 'SR': name = isTr ? "Suudi Riyali" : "Saudi Riyal"; break;
+                    case 'KD': name = isTr ? "Kuveyt Dinarı" : "Kuwaiti Dinar"; break;
                   }
 
                   return Center(
@@ -242,7 +243,7 @@ class CurrencySetting extends ConsumerWidget {
                             if (context.mounted) {
                               CustomNotification.error(
                                 context,
-                                "Seçilen para birimi için döviz kuru bulunamadı. Lütfen internet bağlantınızı kontrol edip tekrar deneyin.",
+                                l10n.exchangeRateNotFoundError,
                               );
                             }
                             setState(() => isLoading = false);
@@ -252,7 +253,7 @@ class CurrencySetting extends ConsumerWidget {
                           if (context.mounted) {
                             CustomNotification.error(
                               context,
-                              "Döviz kurları indirilemedi. İnternet bağlantınızı kontrol edin.",
+                              l10n.exchangeRatesDownloadFailed,
                             );
                           }
                           setState(() => isLoading = false);
@@ -263,7 +264,7 @@ class CurrencySetting extends ConsumerWidget {
                       if (context.mounted) {
                         CustomNotification.error(
                           context,
-                          "Kurlar kontrol edilirken hata oluştu. Lütfen tekrar deneyin.",
+                          l10n.exchangeRatesCheckError,
                         );
                       }
                       setState(() => isLoading = false);

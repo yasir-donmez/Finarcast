@@ -168,6 +168,10 @@ class DraftService {
       // Varsayılan kasayı veritabanından al (Eğer belirtilmemişse)
       final vaults = await DatabaseService.getAllVaults();
       final finalVaultId = vaultId ?? vaults.firstOrNull?.id;
+      if (finalVaultId == null) {
+        debugPrint('❌ [DraftService] promoteToTransaction hatası: Aktif kasa bulunamadı!');
+        return false;
+      }
 
       // Gerçek işlem modelini oluştur
       final tx = TransactionRecord()
@@ -178,7 +182,7 @@ class DraftService {
         ..categoryId = draft.categoryId
         ..date = draft.date
         ..isIncome = draft.isIncome
-        ..vaultIds = finalVaultId != null ? [finalVaultId] : []
+        ..vaultIds = [finalVaultId]
         ..currency = draft.currency ?? currency
         ..note = finalNote
         ..isNotificationEnabled = draft.isNotificationEnabled

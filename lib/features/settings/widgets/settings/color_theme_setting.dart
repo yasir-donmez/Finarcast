@@ -173,20 +173,20 @@ class ColorThemeSetting extends ConsumerWidget {
     );
   }
 
-  void _showPremiumRequiredDialog(BuildContext context) {
+  void _showPremiumRequiredDialog(BuildContext context, AppLocalizations l10n) {
     showCustomDialog(
       context: context,
       accentColor: const Color(0xFFFFB300), // Altın rengi
-      title: "Premium Gerekli",
-      content: "Özel renk temaları ve gelişmiş gradyanlar sadece Premium üyelerin erişimine açıktır.",
+      title: l10n.premiumRequired,
+      content: l10n.premiumColorDesc,
       actions: [
         PrecisionDialogAction(
-          label: "Daha Sonra",
+          label: l10n.later,
           onTap: () => Navigator.pop(context),
           isPrimary: false,
         ),
         PrecisionDialogAction(
-          label: "Premium'a Yükselt",
+          label: l10n.upgradeToPro,
           onTap: () {
             Navigator.pop(context);
             ProUpgradeSheet.show(context);
@@ -220,7 +220,7 @@ class ColorThemeSetting extends ConsumerWidget {
       onTap: () {
         if (!isPro) {
           HapticFeedback.heavyImpact();
-          _showPremiumRequiredDialog(context);
+          _showPremiumRequiredDialog(context, AppLocalizations.of(context)!);
           return;
         }
         if (isSelected) return;
@@ -249,7 +249,7 @@ class ColorThemeSetting extends ConsumerWidget {
       onTap: () {
         if (isColorPremium && !isPro) {
           HapticFeedback.heavyImpact();
-          _showPremiumRequiredDialog(context);
+          _showPremiumRequiredDialog(context, AppLocalizations.of(context)!);
           return;
         }
         if (isSelected) return;
@@ -390,7 +390,7 @@ class _LiquidColorDropState extends State<LiquidColorDrop> {
               const SizedBox(height: 6),
               // Palet İsmi
               Text(
-                widget.option.name,
+                _getPaletteLocalizedName(context, widget.option.name),
                 style: TextStyle(
                   fontSize: 11,
                   fontWeight: widget.isSelected ? FontWeight.w800 : FontWeight.w600,
@@ -406,6 +406,22 @@ class _LiquidColorDropState extends State<LiquidColorDrop> {
         ),
       ),
     );
+  }
+}
+
+String _getPaletteLocalizedName(BuildContext context, String name) {
+  final l10n = AppLocalizations.of(context)!;
+  switch (name) {
+    case "Sistem": return l10n.themeSystem;
+    case "Kutup": return l10n.paletteArctic;
+    case "Nane": return l10n.paletteMint;
+    case "Rose": return l10n.paletteRose;
+    case "Lavanta": return l10n.paletteLavender;
+    case "Sahra": return l10n.paletteSahara;
+    case "Safir": return l10n.paletteSapphire;
+    case "Bordo": return l10n.paletteBurgundy;
+    case "Platin": return l10n.palettePlatinum;
+    default: return name;
   }
 }
 

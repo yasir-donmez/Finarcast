@@ -1,6 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:finarcast/features/vaults/vaults_providers.dart';
-import 'package:finarcast/core/utils/currency_utils.dart';
 import 'package:finarcast/core/database/models/exchange_rate.dart';
 import 'package:flutter/material.dart';
 
@@ -49,7 +48,7 @@ void main() {
       return sum + (t.getConvertedAmount(targetCurrency, rates) * occurrencesThisMonth);
     });
 
-    print('Calculated income: $income');
-    print('Calculated expense: $expense');
+    debugPrint('Calculated income: $income');
+    debugPrint('Calculated expense: $expense');
   });
 }

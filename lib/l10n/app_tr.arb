@@ -8,7 +8,7 @@
   "aiNotifications": "AI Asistan Uyarıları",
   "dataAndAiSettings": "VERİ & AI AYARLARI",
   "dataRetention": "Veri Saklama",
-  "dataRetentionDesc": "Süresi dolan işlemler arşivlenir.\nAI Persona yalnızca bu süredeki verileri kullanır.",
+  "dataRetentionDesc": "Süresi dolan işlemler arşivlenir.\nAI Asistanı yalnızca bu süredeki verileri kullanır.",
   "permanentDataDeletion": "Kalıcı Silme",
   "permanentDataDeletionDesc": "Bu süreden sonra işlemler veritabanından kalıcı olarak silinir.\nBu işlem geri alınamaz.",
   "oneMonth": "1 Ay",
@@ -456,7 +456,7 @@
   "authBadCode": "Girdiğiniz doğrulama kodu hatalı veya geçersiz.",
   "authSignupDisabled": "Yeni kullanıcı kaydı şu anda devre dışıdır. Lütfen yöneticiyle iletişime geçin.",
   "authRateLimitExceeded": "Çok fazla istek gönderildi. E-posta limitini aştınız, lütfen bir süre bekleyip tekrar deneyin.",
-  "authOtpRequired": "Lütfen gelen doğrulama kodunu (6 veya 8 haneli) girin.",
+  "authOtpRequired": "Lütfen gelen 6 haneli doğrulama kodunu girin.",
   "authOtpSent": "Yeni doğrulama kodu e-postanıza gönderildi.",
   "authRegistrationSuccess": "Kayıt başarılı! Lütfen e-postanıza gelen doğrulama kodunu girin.",
   "authVerificationCode": "Doğrulama Kodu",
@@ -519,6 +519,161 @@
   "authPasswordResetSuccess": "Şifreniz başarıyla sıfırlandı ve giriş yapıldı.",
   "authGoogleError": "Google Giriş Hatası",
   "authPasswordDifferentError": "Yeni şifreniz mevcut şifrenizden farklı olmalıdır.",
-  "authUserNotFoundError": "Bu e-posta adresine kayıtlı bir kullanıcı bulunamadı."
+  "authUserNotFoundError": "Bu e-posta adresine kayıtlı bir kullanıcı bulunamadı.",
+  "dataRetentionDetail": "Bu süre sonunda işlemleriniz ana listeden gizlenerek arşive taşınır. Arşivlenen veriler bakiyenizi etkilemez ve Dashboard'u temiz tutar.",
+  "retentionPeriodLabel": "Saklama Süresi:",
+  "premiumRequired": "Premium Gerekli",
+  "premiumRetentionDesc": "Veri saklama, arşivleme ve otomatik temizleme kuralları sadece Premium üyelerin erişimine açıktır.",
+  "later": "Daha Sonra",
+  "permanentDeletionDetail": "Dikkat: Bu süre sonunda verileriniz cihazınızdan tamamen silinir ve bir daha geri getirilemez.",
+  "purgePeriodLabel": "Temizleme Süresi:",
+  "cloudSync": "Bulut Eşitleme",
+  "loginRequiredLabel": "Giriş gerekli",
+  "syncToday": "Bugün {time}",
+  "@syncToday": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "syncYesterday": "Dün {time}",
+  "@syncYesterday": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "noSyncYet": "Henüz eşitleme yapılmadı",
+  "syncStatus": "Senkronizasyon Durumu",
+  "lastSyncLabel": "Son Eşitleme: {time}",
+  "@lastSyncLabel": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "syncBackgroundDesc": "Verileriniz arka planda otomatik olarak buluta yedeklenmektedir.",
+  "syncCloudDesc": "Verileriniz Supabase bulut altyapısı ile anlık olarak yedeklenir. Uygulamayı silseniz bile hesabınıza giriş yaparak verilerinizi geri getirebilirsiniz.",
+  "syncNow": "ŞİMDİ SENKRONİZE ET",
+  "syncing": "VERİLER EŞİTLENİYOR...",
+  "syncPartialSuccess": "Kısmi başarı: {summary}",
+  "@syncPartialSuccess": {
+    "placeholders": {
+      "summary": {
+        "type": "String"
+      }
+    }
+  },
+  "syncFailed": "Eşitleme başarısız oldu. {error}",
+  "@syncFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "syncConnectionError": "Lütfen internetinizi veya giriş bilgilerinizi kontrol edin.",
+  "loginRequiredTitle": "Giriş Gerekli",
+  "loginRequiredSyncDesc": "Bulut senkronizasyonunu aktifleştirerek verilerinizi yedeklemek için giriş yapmanız gerekmektedir.",
+  "premiumSyncDesc": "Bulut Eşitleme özelliği Supabase yedekleme altyapısını kullanır ve sadece Premium üyelerin erişimine açıktır.",
+  "showOnPhone": "Telefonda Göster",
+  "appOnly": "Sadece Uygulama İçi",
+  "notificationDesc": "Hatırlatıcıların sadece uygulama içinde mi saklanacağını yoksa telefonunuzun bildirim panelinde de gösterilip gösterilmeyeceğini belirler. Kapalıyken hatırlatıcılar sessizce uygulama içinde kalır.",
+  "selectMainCurrency": "Ana uygulama birimini seçin.",
+  "currencyDesc": "Bu birim tüm uygulama genelinde (Dashboard, Kasalar ve İstatistikler) ana para birimi olarak kullanılır. Tüm varlıklarınız bu birime göre hesaplanır.",
+  "changeCurrency": "Birimi Değiştir",
+  "exchangeRateNotFoundError": "Seçilen para birimi için döviz kuru bulunamadı. Lütfen internet bağlantınızı kontrol edip tekrar deneyin.",
+  "exchangeRatesDownloadFailed": "Döviz kurları indirilemedi. İnternet bağlantınızı kontrol edin.",
+  "exchangeRatesCheckError": "Kurlar kontrol edilirken hata oluştu. Lütfen tekrar deneyin.",
+  "exchangeRates": "Döviz Kurları",
+  "baseUnitLira": "Baz Birim: Türk Lirası",
+  "baseUnitLabel": "Baz Birim: {currency}",
+  "@baseUnitLabel": {
+    "placeholders": {
+      "currency": {
+        "type": "String"
+      }
+    }
+  },
+  "lastSyncShort": "SON: {time}",
+  "@lastSyncShort": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "updateRatesNow": "KURLARI ŞİMDİ GÜNCELLE",
+  "updatingRates": "GÜNCELLENİYOR...",
+  "exchangeRatesUpdated": "Kurlar başarıyla güncellendi.",
+  "exchangeRatesUpdateFailed": "Güncelleme başarısız. İnternet bağlantınızı kontrol edin.",
+  "showLess": "Daha Az Göster",
+  "showMore": "Daha Fazla Göster",
+  "styleLabel": "Stil",
+  "styleDesc": "Kartların ve arka planın görünüm stilini seçin",
+  "styleColor": "Renkli",
+  "styleColorDesc": "Uyumlu renkler",
+  "styleSimple": "Sade",
+  "styleSimpleDesc": "Düz tasarım",
+  "premiumStyleDesc": "Renkli görünüm stili sadece Premium üyelerin erişimine açıktır.",
+  "premiumColorDesc": "Özel renk temaları ve gelişmiş gradyanlar sadece Premium üyelerin erişimine açıktır.",
+  "paletteArctic": "Kutup",
+  "paletteMint": "Nane",
+  "paletteRose": "Rose",
+  "paletteLavender": "Lavanta",
+  "paletteSahara": "Sahra",
+  "paletteSapphire": "Safir",
+  "paletteBurgundy": "Bordo",
+  "palettePlatinum": "Platin",
+  "yearlyDiscount": "Yıllık (-%33)",
+  "comparisonTitle": "KARŞILAŞTIRMA",
+  "limitVaults": "Kasa Sayısı",
+  "limitAiAnalysis": "AI İşlem Asistanı",
+  "limitCloudSync": "Bulut Eşitleme",
+  "limitDataRetention": "Veri Saklama & Silme",
+  "limitCustomThemes": "Özel Temalar",
+  "limitAdFree": "Reklamsız Deneyim",
+  "limitVaultsFree": "2 Kasa",
+  "limitVaultsPro": "Sınırsız",
+  "basicAnalysis": "Standart",
+  "advancedAnalysis": "Genişletilmiş",
+  "limitDataRetentionPro": "Özelleştirilebilir",
+  "cancelSubscriptionTest": "Aboneliği İptal Et (Test)",
+  "yearlyAccess": "Yıllık Erişim",
+  "monthlyAccess": "Aylık Erişim",
+  "yearlyPriceDetail": "Ayda ₺99'ye gelir",
+  "monthlyPriceDetail": "Her ay yenilenir",
+  "loginRequiredPurchaseDesc": "Satın alma işlemini tamamlamak için lütfen giriş yapın veya ücretsiz bir hesap oluşturun.",
+  "loginOrRegister": "Giriş Yap / Üye Ol",
+  "privilegesActive": "Ayrıcalıklar aktif",
+  "tapToUnlock": "Sınırları kaldırmak için dokunun",
+  "sectionMembershipAccount": "Üyelik ve Hesap",
+  "sectionAppearanceStyle": "Görünüm ve Stil",
+  "sectionDataCloud": "Veri ve Bulut",
+  "sectionSessionSecurity": "Oturum ve Güvenlik",
+  "guestUser": "Misafir Kullanıcı",
+  "tapToLogin": "Giriş yapmak veya kayıt olmak için dokunun",
+  "changePassword": "Şifre Değiştir",
+  "changePasswordDesc": "Mevcut şifrenizi doğrulayarak yeni bir şifre belirleyin. Şifreniz en az 6 karakter olmalıdır.",
+  "currentPasswordHint": "Mevcut Şifre",
+  "newPasswordHint": "Yeni Şifre",
+  "confirmNewPasswordHint": "Yeni Şifre Tekrar",
+  "currentPasswordRequired": "Mevcut şifrenizi girmeniz gerekir.",
+  "updatePassword": "Şifreyi Güncelle",
+  "signOut": "Çıkış Yap",
+  "logout": "Oturumu Kapat",
+  "logoutConfirm": "Oturumu kapatmak istediğinize emin misiniz?",
+  "deleteAccount": "Hesabımı Sil",
+  "deleteAccountPermanently": "Hesabımı Kalıcı Olarak Sil",
+  "deleteAccountConfirmDesc": "Hesabınızı ve buluttaki tüm verilerinizi kalıcı olarak silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.",
+  "reset": "Sıfırla",
+  "resetDataTitle": "Verileri Sıfırla?",
+  "resetDataDesc": "Tüm finansal verileriniz ve ayarlarınız kalıcı olarak silinecek. Bu işlem geri alınamaz.",
+  "deleteAll": "Hepsini Sil",
+  "resetSuccess": "Tüm veriler ve ayarlar başarıyla sıfırlandı.",
+  "supportEmailCopied": "E-posta uygulaması açılamadı. Destek adresi (finarcast.support@gmail.com) kopyalandı."
 }
 

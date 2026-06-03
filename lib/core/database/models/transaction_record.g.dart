@@ -32,138 +32,123 @@ const TransactionRecordSchema = CollectionSchema(
       name: r'currency',
       type: IsarType.string,
     ),
-    r'dashboardLayoutType': PropertySchema(
-      id: 3,
-      name: r'dashboardLayoutType',
-      type: IsarType.long,
-    ),
     r'dashboardOrder': PropertySchema(
-      id: 4,
+      id: 3,
       name: r'dashboardOrder',
       type: IsarType.long,
     ),
     r'date': PropertySchema(
-      id: 5,
+      id: 4,
       name: r'date',
       type: IsarType.dateTime,
     ),
     r'hasNotification': PropertySchema(
-      id: 6,
+      id: 5,
       name: r'hasNotification',
       type: IsarType.bool,
     ),
     r'iconCode': PropertySchema(
-      id: 7,
+      id: 6,
       name: r'iconCode',
       type: IsarType.string,
     ),
     r'isArchived': PropertySchema(
-      id: 8,
+      id: 7,
       name: r'isArchived',
       type: IsarType.bool,
     ),
     r'isIncome': PropertySchema(
-      id: 9,
+      id: 8,
       name: r'isIncome',
       type: IsarType.bool,
     ),
     r'isNotificationEnabled': PropertySchema(
-      id: 10,
+      id: 9,
       name: r'isNotificationEnabled',
       type: IsarType.bool,
     ),
-    r'latitude': PropertySchema(
-      id: 11,
-      name: r'latitude',
-      type: IsarType.double,
-    ),
-    r'longitude': PropertySchema(
-      id: 12,
-      name: r'longitude',
-      type: IsarType.double,
-    ),
     r'maxAmount': PropertySchema(
-      id: 13,
+      id: 10,
       name: r'maxAmount',
       type: IsarType.double,
     ),
     r'minAmount': PropertySchema(
-      id: 14,
+      id: 11,
       name: r'minAmount',
       type: IsarType.double,
     ),
     r'note': PropertySchema(
-      id: 15,
+      id: 12,
       name: r'note',
       type: IsarType.string,
     ),
     r'notificationHour': PropertySchema(
-      id: 16,
+      id: 13,
       name: r'notificationHour',
       type: IsarType.long,
     ),
     r'notificationMinute': PropertySchema(
-      id: 17,
+      id: 14,
       name: r'notificationMinute',
       type: IsarType.long,
     ),
     r'notificationReminderDays': PropertySchema(
-      id: 18,
+      id: 15,
       name: r'notificationReminderDays',
       type: IsarType.long,
     ),
     r'periodType': PropertySchema(
-      id: 19,
+      id: 16,
       name: r'periodType',
       type: IsarType.long,
     ),
     r'recurrenceDate': PropertySchema(
-      id: 20,
+      id: 17,
       name: r'recurrenceDate',
       type: IsarType.dateTime,
     ),
     r'recurrenceDay': PropertySchema(
-      id: 21,
+      id: 18,
       name: r'recurrenceDay',
       type: IsarType.long,
     ),
     r'recurrenceDuration': PropertySchema(
-      id: 22,
+      id: 19,
       name: r'recurrenceDuration',
       type: IsarType.long,
     ),
     r'remainingInstallments': PropertySchema(
-      id: 23,
+      id: 20,
       name: r'remainingInstallments',
       type: IsarType.long,
     ),
     r'remoteId': PropertySchema(
-      id: 24,
+      id: 21,
       name: r'remoteId',
       type: IsarType.string,
     ),
     r'showOnDashboard': PropertySchema(
-      id: 25,
+      id: 22,
       name: r'showOnDashboard',
       type: IsarType.bool,
     ),
     r'syncStatus': PropertySchema(
-      id: 26,
+      id: 23,
       name: r'syncStatus',
       type: IsarType.long,
     ),
     r'title': PropertySchema(
-      id: 27,
+      id: 24,
       name: r'title',
       type: IsarType.string,
     ),
     r'updatedAt': PropertySchema(
-      id: 28,
+      id: 25,
       name: r'updatedAt',
       type: IsarType.dateTime,
     ),
     r'vaultIds': PropertySchema(
-      id: 29,
+      id: 26,
       name: r'vaultIds',
       type: IsarType.longList,
     )
@@ -272,33 +257,30 @@ void _transactionRecordSerialize(
   writer.writeDouble(offsets[0], object.amount);
   writer.writeString(offsets[1], object.categoryId);
   writer.writeString(offsets[2], object.currency);
-  writer.writeLong(offsets[3], object.dashboardLayoutType);
-  writer.writeLong(offsets[4], object.dashboardOrder);
-  writer.writeDateTime(offsets[5], object.date);
-  writer.writeBool(offsets[6], object.hasNotification);
-  writer.writeString(offsets[7], object.iconCode);
-  writer.writeBool(offsets[8], object.isArchived);
-  writer.writeBool(offsets[9], object.isIncome);
-  writer.writeBool(offsets[10], object.isNotificationEnabled);
-  writer.writeDouble(offsets[11], object.latitude);
-  writer.writeDouble(offsets[12], object.longitude);
-  writer.writeDouble(offsets[13], object.maxAmount);
-  writer.writeDouble(offsets[14], object.minAmount);
-  writer.writeString(offsets[15], object.note);
-  writer.writeLong(offsets[16], object.notificationHour);
-  writer.writeLong(offsets[17], object.notificationMinute);
-  writer.writeLong(offsets[18], object.notificationReminderDays);
-  writer.writeLong(offsets[19], object.periodType);
-  writer.writeDateTime(offsets[20], object.recurrenceDate);
-  writer.writeLong(offsets[21], object.recurrenceDay);
-  writer.writeLong(offsets[22], object.recurrenceDuration);
-  writer.writeLong(offsets[23], object.remainingInstallments);
-  writer.writeString(offsets[24], object.remoteId);
-  writer.writeBool(offsets[25], object.showOnDashboard);
-  writer.writeLong(offsets[26], object.syncStatus);
-  writer.writeString(offsets[27], object.title);
-  writer.writeDateTime(offsets[28], object.updatedAt);
-  writer.writeLongList(offsets[29], object.vaultIds);
+  writer.writeLong(offsets[3], object.dashboardOrder);
+  writer.writeDateTime(offsets[4], object.date);
+  writer.writeBool(offsets[5], object.hasNotification);
+  writer.writeString(offsets[6], object.iconCode);
+  writer.writeBool(offsets[7], object.isArchived);
+  writer.writeBool(offsets[8], object.isIncome);
+  writer.writeBool(offsets[9], object.isNotificationEnabled);
+  writer.writeDouble(offsets[10], object.maxAmount);
+  writer.writeDouble(offsets[11], object.minAmount);
+  writer.writeString(offsets[12], object.note);
+  writer.writeLong(offsets[13], object.notificationHour);
+  writer.writeLong(offsets[14], object.notificationMinute);
+  writer.writeLong(offsets[15], object.notificationReminderDays);
+  writer.writeLong(offsets[16], object.periodType);
+  writer.writeDateTime(offsets[17], object.recurrenceDate);
+  writer.writeLong(offsets[18], object.recurrenceDay);
+  writer.writeLong(offsets[19], object.recurrenceDuration);
+  writer.writeLong(offsets[20], object.remainingInstallments);
+  writer.writeString(offsets[21], object.remoteId);
+  writer.writeBool(offsets[22], object.showOnDashboard);
+  writer.writeLong(offsets[23], object.syncStatus);
+  writer.writeString(offsets[24], object.title);
+  writer.writeDateTime(offsets[25], object.updatedAt);
+  writer.writeLongList(offsets[26], object.vaultIds);
 }
 
 TransactionRecord _transactionRecordDeserialize(
@@ -311,34 +293,31 @@ TransactionRecord _transactionRecordDeserialize(
   object.amount = reader.readDouble(offsets[0]);
   object.categoryId = reader.readStringOrNull(offsets[1]);
   object.currency = reader.readStringOrNull(offsets[2]);
-  object.dashboardLayoutType = reader.readLong(offsets[3]);
-  object.dashboardOrder = reader.readLong(offsets[4]);
-  object.date = reader.readDateTime(offsets[5]);
-  object.hasNotification = reader.readBool(offsets[6]);
-  object.iconCode = reader.readStringOrNull(offsets[7]);
+  object.dashboardOrder = reader.readLong(offsets[3]);
+  object.date = reader.readDateTime(offsets[4]);
+  object.hasNotification = reader.readBool(offsets[5]);
+  object.iconCode = reader.readStringOrNull(offsets[6]);
   object.id = id;
-  object.isArchived = reader.readBool(offsets[8]);
-  object.isIncome = reader.readBool(offsets[9]);
-  object.isNotificationEnabled = reader.readBool(offsets[10]);
-  object.latitude = reader.readDoubleOrNull(offsets[11]);
-  object.longitude = reader.readDoubleOrNull(offsets[12]);
-  object.maxAmount = reader.readDoubleOrNull(offsets[13]);
-  object.minAmount = reader.readDoubleOrNull(offsets[14]);
-  object.note = reader.readStringOrNull(offsets[15]);
-  object.notificationHour = reader.readLong(offsets[16]);
-  object.notificationMinute = reader.readLong(offsets[17]);
-  object.notificationReminderDays = reader.readLong(offsets[18]);
-  object.periodType = reader.readLong(offsets[19]);
-  object.recurrenceDate = reader.readDateTimeOrNull(offsets[20]);
-  object.recurrenceDay = reader.readLongOrNull(offsets[21]);
-  object.recurrenceDuration = reader.readLongOrNull(offsets[22]);
-  object.remainingInstallments = reader.readLongOrNull(offsets[23]);
-  object.remoteId = reader.readStringOrNull(offsets[24]);
-  object.showOnDashboard = reader.readBool(offsets[25]);
-  object.syncStatus = reader.readLong(offsets[26]);
-  object.title = reader.readString(offsets[27]);
-  object.updatedAt = reader.readDateTime(offsets[28]);
-  object.vaultIds = reader.readLongList(offsets[29]) ?? [];
+  object.isArchived = reader.readBool(offsets[7]);
+  object.isIncome = reader.readBool(offsets[8]);
+  object.isNotificationEnabled = reader.readBool(offsets[9]);
+  object.maxAmount = reader.readDoubleOrNull(offsets[10]);
+  object.minAmount = reader.readDoubleOrNull(offsets[11]);
+  object.note = reader.readStringOrNull(offsets[12]);
+  object.notificationHour = reader.readLong(offsets[13]);
+  object.notificationMinute = reader.readLong(offsets[14]);
+  object.notificationReminderDays = reader.readLong(offsets[15]);
+  object.periodType = reader.readLong(offsets[16]);
+  object.recurrenceDate = reader.readDateTimeOrNull(offsets[17]);
+  object.recurrenceDay = reader.readLongOrNull(offsets[18]);
+  object.recurrenceDuration = reader.readLongOrNull(offsets[19]);
+  object.remainingInstallments = reader.readLongOrNull(offsets[20]);
+  object.remoteId = reader.readStringOrNull(offsets[21]);
+  object.showOnDashboard = reader.readBool(offsets[22]);
+  object.syncStatus = reader.readLong(offsets[23]);
+  object.title = reader.readString(offsets[24]);
+  object.updatedAt = reader.readDateTime(offsets[25]);
+  object.vaultIds = reader.readLongList(offsets[26]) ?? [];
   return object;
 }
 
@@ -358,56 +337,50 @@ P _transactionRecordDeserializeProp<P>(
     case 3:
       return (reader.readLong(offset)) as P;
     case 4:
-      return (reader.readLong(offset)) as P;
-    case 5:
       return (reader.readDateTime(offset)) as P;
-    case 6:
+    case 5:
       return (reader.readBool(offset)) as P;
-    case 7:
+    case 6:
       return (reader.readStringOrNull(offset)) as P;
+    case 7:
+      return (reader.readBool(offset)) as P;
     case 8:
       return (reader.readBool(offset)) as P;
     case 9:
       return (reader.readBool(offset)) as P;
     case 10:
-      return (reader.readBool(offset)) as P;
+      return (reader.readDoubleOrNull(offset)) as P;
     case 11:
       return (reader.readDoubleOrNull(offset)) as P;
     case 12:
-      return (reader.readDoubleOrNull(offset)) as P;
-    case 13:
-      return (reader.readDoubleOrNull(offset)) as P;
-    case 14:
-      return (reader.readDoubleOrNull(offset)) as P;
-    case 15:
       return (reader.readStringOrNull(offset)) as P;
+    case 13:
+      return (reader.readLong(offset)) as P;
+    case 14:
+      return (reader.readLong(offset)) as P;
+    case 15:
+      return (reader.readLong(offset)) as P;
     case 16:
       return (reader.readLong(offset)) as P;
     case 17:
-      return (reader.readLong(offset)) as P;
-    case 18:
-      return (reader.readLong(offset)) as P;
-    case 19:
-      return (reader.readLong(offset)) as P;
-    case 20:
       return (reader.readDateTimeOrNull(offset)) as P;
+    case 18:
+      return (reader.readLongOrNull(offset)) as P;
+    case 19:
+      return (reader.readLongOrNull(offset)) as P;
+    case 20:
+      return (reader.readLongOrNull(offset)) as P;
     case 21:
-      return (reader.readLongOrNull(offset)) as P;
-    case 22:
-      return (reader.readLongOrNull(offset)) as P;
-    case 23:
-      return (reader.readLongOrNull(offset)) as P;
-    case 24:
       return (reader.readStringOrNull(offset)) as P;
-    case 25:
+    case 22:
       return (reader.readBool(offset)) as P;
-    case 26:
+    case 23:
       return (reader.readLong(offset)) as P;
-    case 27:
+    case 24:
       return (reader.readString(offset)) as P;
-    case 28:
+    case 25:
       return (reader.readDateTime(offset)) as P;
-    case 29:
+    case 26:
       return (reader.readLongList(offset) ?? []) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -1156,62 +1129,6 @@ extension TransactionRecordQueryFilter
   }
 
   QueryBuilder<TransactionRecord, TransactionRecord, QAfterFilterCondition>
-      dashboardLayoutTypeEqualTo(int value) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'dashboardLayoutType',
-        value: value,
-      ));
-    });
-  }
-
-  QueryBuilder<TransactionRecord, TransactionRecord, QAfterFilterCondition>
-      dashboardLayoutTypeGreaterThan(
-    int value, {
-    bool include = false,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        include: include,
-        property: r'dashboardLayoutType',
-        value: value,
-      ));
-    });
-  }
-
-  QueryBuilder<TransactionRecord, TransactionRecord, QAfterFilterCondition>
-      dashboardLayoutTypeLessThan(
-    int value, {
-    bool include = false,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.lessThan(
-        include: include,
-        property: r'dashboardLayoutType',
-        value: value,
-      ));
-    });
-  }
-
-  QueryBuilder<TransactionRecord, TransactionRecord, QAfterFilterCondition>
-      dashboardLayoutTypeBetween(
-    int lower,
-    int upper, {
-    bool includeLower = true,
-    bool includeUpper = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.between(
-        property: r'dashboardLayoutType',
-        lower: lower,
-        includeLower: includeLower,
-        upper: upper,
-        includeUpper: includeUpper,
-      ));
-    });
-  }
-
-  QueryBuilder<TransactionRecord, TransactionRecord, QAfterFilterCondition>
       dashboardOrderEqualTo(int value) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
@@ -1569,174 +1486,6 @@ extension TransactionRecordQueryFilter
       return query.addFilterCondition(FilterCondition.equalTo(
         property: r'isNotificationEnabled',
         value: value,
-      ));
-    });
-  }
-
-  QueryBuilder<TransactionRecord, TransactionRecord, QAfterFilterCondition>
-      latitudeIsNull() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(const FilterCondition.isNull(
-        property: r'latitude',
-      ));
-    });
-  }
-
-  QueryBuilder<TransactionRecord, TransactionRecord, QAfterFilterCondition>
-      latitudeIsNotNull() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(const FilterCondition.isNotNull(
-        property: r'latitude',
-      ));
-    });
-  }
-
-  QueryBuilder<TransactionRecord, TransactionRecord, QAfterFilterCondition>
-      latitudeEqualTo(
-    double? value, {
-    double epsilon = Query.epsilon,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'latitude',
-        value: value,
-        epsilon: epsilon,
-      ));
-    });
-  }
-
-  QueryBuilder<TransactionRecord, TransactionRecord, QAfterFilterCondition>
-      latitudeGreaterThan(
-    double? value, {
-    bool include = false,
-    double epsilon = Query.epsilon,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        include: include,
-        property: r'latitude',
-        value: value,
-        epsilon: epsilon,
-      ));
-    });
-  }
-
-  QueryBuilder<TransactionRecord, TransactionRecord, QAfterFilterCondition>
-      latitudeLessThan(
-    double? value, {
-    bool include = false,
-    double epsilon = Query.epsilon,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.lessThan(
-        include: include,
-        property: r'latitude',
-        value: value,
-        epsilon: epsilon,
-      ));
-    });
-  }
-
-  QueryBuilder<TransactionRecord, TransactionRecord, QAfterFilterCondition>
-      latitudeBetween(
-    double? lower,
-    double? upper, {
-    bool includeLower = true,
-    bool includeUpper = true,
-    double epsilon = Query.epsilon,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.between(
-        property: r'latitude',
-        lower: lower,
-        includeLower: includeLower,
-        upper: upper,
-        includeUpper: includeUpper,
-        epsilon: epsilon,
-      ));
-    });
-  }
-
-  QueryBuilder<TransactionRecord, TransactionRecord, QAfterFilterCondition>
-      longitudeIsNull() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(const FilterCondition.isNull(
-        property: r'longitude',
-      ));
-    });
-  }
-
-  QueryBuilder<TransactionRecord, TransactionRecord, QAfterFilterCondition>
-      longitudeIsNotNull() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(const FilterCondition.isNotNull(
-        property: r'longitude',
-      ));
-    });
-  }
-
-  QueryBuilder<TransactionRecord, TransactionRecord, QAfterFilterCondition>
-      longitudeEqualTo(
-    double? value, {
-    double epsilon = Query.epsilon,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'longitude',
-        value: value,
-        epsilon: epsilon,
-      ));
-    });
-  }
-
-  QueryBuilder<TransactionRecord, TransactionRecord, QAfterFilterCondition>
-      longitudeGreaterThan(
-    double? value, {
-    bool include = false,
-    double epsilon = Query.epsilon,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        include: include,
-        property: r'longitude',
-        value: value,
-        epsilon: epsilon,
-      ));
-    });
-  }
-
-  QueryBuilder<TransactionRecord, TransactionRecord, QAfterFilterCondition>
-      longitudeLessThan(
-    double? value, {
-    bool include = false,
-    double epsilon = Query.epsilon,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.lessThan(
-        include: include,
-        property: r'longitude',
-        value: value,
-        epsilon: epsilon,
-      ));
-    });
-  }
-
-  QueryBuilder<TransactionRecord, TransactionRecord, QAfterFilterCondition>
-      longitudeBetween(
-    double? lower,
-    double? upper, {
-    bool includeLower = true,
-    bool includeUpper = true,
-    double epsilon = Query.epsilon,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.between(
-        property: r'longitude',
-        lower: lower,
-        includeLower: includeLower,
-        upper: upper,
-        includeUpper: includeUpper,
-        epsilon: epsilon,
       ));
     });
   }
@@ -3192,20 +2941,6 @@ extension TransactionRecordQuerySortBy
   }
 
   QueryBuilder<TransactionRecord, TransactionRecord, QAfterSortBy>
-      sortByDashboardLayoutType() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'dashboardLayoutType', Sort.asc);
-    });
-  }
-
-  QueryBuilder<TransactionRecord, TransactionRecord, QAfterSortBy>
-      sortByDashboardLayoutTypeDesc() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'dashboardLayoutType', Sort.desc);
-    });
-  }
-
-  QueryBuilder<TransactionRecord, TransactionRecord, QAfterSortBy>
       sortByDashboardOrder() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'dashboardOrder', Sort.asc);
@@ -3300,34 +3035,6 @@ extension TransactionRecordQuerySortBy
       sortByIsNotificationEnabledDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'isNotificationEnabled', Sort.desc);
-    });
-  }
-
-  QueryBuilder<TransactionRecord, TransactionRecord, QAfterSortBy>
-      sortByLatitude() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'latitude', Sort.asc);
-    });
-  }
-
-  QueryBuilder<TransactionRecord, TransactionRecord, QAfterSortBy>
-      sortByLatitudeDesc() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'latitude', Sort.desc);
-    });
-  }
-
-  QueryBuilder<TransactionRecord, TransactionRecord, QAfterSortBy>
-      sortByLongitude() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'longitude', Sort.asc);
-    });
-  }
-
-  QueryBuilder<TransactionRecord, TransactionRecord, QAfterSortBy>
-      sortByLongitudeDesc() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'longitude', Sort.desc);
     });
   }
 
@@ -3601,20 +3308,6 @@ extension TransactionRecordQuerySortThenBy
   }
 
   QueryBuilder<TransactionRecord, TransactionRecord, QAfterSortBy>
-      thenByDashboardLayoutType() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'dashboardLayoutType', Sort.asc);
-    });
-  }
-
-  QueryBuilder<TransactionRecord, TransactionRecord, QAfterSortBy>
-      thenByDashboardLayoutTypeDesc() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'dashboardLayoutType', Sort.desc);
-    });
-  }
-
-  QueryBuilder<TransactionRecord, TransactionRecord, QAfterSortBy>
       thenByDashboardOrder() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'dashboardOrder', Sort.asc);
@@ -3722,34 +3415,6 @@ extension TransactionRecordQuerySortThenBy
       thenByIsNotificationEnabledDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'isNotificationEnabled', Sort.desc);
-    });
-  }
-
-  QueryBuilder<TransactionRecord, TransactionRecord, QAfterSortBy>
-      thenByLatitude() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'latitude', Sort.asc);
-    });
-  }
-
-  QueryBuilder<TransactionRecord, TransactionRecord, QAfterSortBy>
-      thenByLatitudeDesc() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'latitude', Sort.desc);
-    });
-  }
-
-  QueryBuilder<TransactionRecord, TransactionRecord, QAfterSortBy>
-      thenByLongitude() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'longitude', Sort.asc);
-    });
-  }
-
-  QueryBuilder<TransactionRecord, TransactionRecord, QAfterSortBy>
-      thenByLongitudeDesc() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'longitude', Sort.desc);
     });
   }
 
@@ -4002,13 +3667,6 @@ extension TransactionRecordQueryWhereDistinct
   }
 
   QueryBuilder<TransactionRecord, TransactionRecord, QDistinct>
-      distinctByDashboardLayoutType() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addDistinctBy(r'dashboardLayoutType');
-    });
-  }
-
-  QueryBuilder<TransactionRecord, TransactionRecord, QDistinct>
       distinctByDashboardOrder() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'dashboardOrder');
@@ -4054,20 +3712,6 @@ extension TransactionRecordQueryWhereDistinct
       distinctByIsNotificationEnabled() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'isNotificationEnabled');
-    });
-  }
-
-  QueryBuilder<TransactionRecord, TransactionRecord, QDistinct>
-      distinctByLatitude() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addDistinctBy(r'latitude');
-    });
-  }
-
-  QueryBuilder<TransactionRecord, TransactionRecord, QDistinct>
-      distinctByLongitude() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addDistinctBy(r'longitude');
     });
   }
 
@@ -4220,13 +3864,6 @@ extension TransactionRecordQueryProperty
   }
 
   QueryBuilder<TransactionRecord, int, QQueryOperations>
-      dashboardLayoutTypeProperty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r'dashboardLayoutType');
-    });
-  }
-
-  QueryBuilder<TransactionRecord, int, QQueryOperations>
       dashboardOrderProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'dashboardOrder');
@@ -4269,20 +3906,6 @@ extension TransactionRecordQueryProperty
       isNotificationEnabledProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'isNotificationEnabled');
-    });
-  }
-
-  QueryBuilder<TransactionRecord, double?, QQueryOperations>
-      latitudeProperty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r'latitude');
-    });
-  }
-
-  QueryBuilder<TransactionRecord, double?, QQueryOperations>
-      longitudeProperty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r'longitude');
     });
   }
 

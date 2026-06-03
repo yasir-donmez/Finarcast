@@ -1,5 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
-
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
@@ -15,6 +15,72 @@ serve(async (req) => {
     const apiKey = Deno.env.get('GEMINI_API_KEY')
     if (!apiKey) {
       throw new Error('GEMINI_API_KEY is not configured in Supabase.')
+    }
+
+    // 1. Verify Authentication
+    const authHeader = req.headers.get('Authorization')
+    if (!authHeader) {
+      return new Response(JSON.stringify({ error: 'Unauthorized: Missing Authorization header' }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 401,
+      })
+    }
+
+    const supabase = createClient(
+      Deno.env.get('SUPABASE_URL') ?? '',
+      Deno.env.get('SUPABASE_ANON_KEY') ?? '',
+      { global: { headers: { Authorization: authHeader } } }
+    )
+
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    if (authError || !user) {
+      return new Response(JSON.stringify({ error: 'Unauthorized: Invalid token' }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 401,
+      })
+    }
+
+    // 2. Check Subscription and Rate Limits
+    let isPro = false
+    const { data: subData } = await supabase
+      .from('user_subscriptions')
+      .select('is_pro')
+      .eq('user_id', user.id)
+      .maybeSingle()
+      
+    if (subData && subData.is_pro) {
+      isPro = true
+    }
+
+    const dailyLimit = isPro ? 50 : 5
+
+    // Check rate limit using anon role (RPC increments count safely due to SECURITY DEFINER)
+    const supabaseClient = createClient(
+      Deno.env.get('SUPABASE_URL') ?? '',
+      Deno.env.get('SUPABASE_ANON_KEY') ?? ''
+    )
+
+    const { data: rpcData, error: rpcError } = await supabaseClient.rpc('check_and_increment_ai_usage', {
+      p_user_id: user.id,
+      p_daily_limit: dailyLimit
+    })
+
+    if (rpcError) {
+      console.error('RPC Error:', rpcError)
+      throw new Error('Failed to verify usage quota: ' + rpcError.message)
+    }
+
+    if (!rpcData.allowed) {
+      return new Response(JSON.stringify({ 
+        error: 'Rate limit exceeded. Please wait or upgrade your plan.',
+        isRateLimit: true,
+        limit: rpcData.limit,
+        used: rpcData.used,
+        isPro: isPro
+      }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 429,
+      })
     }
 
     const payload = await req.json()

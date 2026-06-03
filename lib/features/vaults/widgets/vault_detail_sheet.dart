@@ -16,6 +16,7 @@ import '../../../shared/widgets/custom_card.dart';
 import '../../../shared/widgets/custom_text_field.dart';
 import '../../../shared/widgets/custom_icon_button.dart';
 import '../../../shared/widgets/custom_dialog.dart';
+import '../../../shared/widgets/custom_button.dart';
 import '../../../l10n/app_localizations.dart';
 import '../vaults_providers.dart';
 
@@ -238,9 +239,7 @@ class _VaultDetailSheetState extends ConsumerState<VaultDetailSheet> with Single
 
     return PopScope(
       onPopInvokedWithResult: (didPop, result) async {
-        if (didPop) {
-          await _saveChanges(l10n);
-        }
+        // Changes are only saved when explicitly clicking the "Save" button.
       },
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -271,6 +270,7 @@ class _VaultDetailSheetState extends ConsumerState<VaultDetailSheet> with Single
   }
 
   Widget _buildMainView(BuildContext context, Vault vault, List<TransactionUI> vaultTransactions, Color activeColor, bool isDark, bool isMainVault, String currency, double sf, List<ExchangeRate> rates, AppLocalizations l10n) {
+    final isTr = Localizations.localeOf(context).languageCode == 'tr';
     // === FİNANSAL HESAPLAMALAR ===
     final recurringTxs = vaultTransactions.where((t) => t.periodType != 0).toList();
     final incomeLoad = recurringTxs.where((t) => t.isIncome).fold<double>(0, (sum, t) => sum + t.getConvertedMonthlyEquivalent(currency, rates));
@@ -358,9 +358,13 @@ class _VaultDetailSheetState extends ConsumerState<VaultDetailSheet> with Single
                   ],
                 ),
                 SizedBox(height: 12 * sf),
-                Text(
-                  CurrencyUtils.formatFullAmount(netLoad, symbol: currency),
-                  style: TextStyle(fontSize: 28 * sf, fontWeight: FontWeight.w900, color: netLoad >= 0 ? AppColors.getIncome(context) : AppColors.getExpense(context), letterSpacing: -1),
+                FittedBox(
+                  fit: BoxFit.scaleDown,
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    CurrencyUtils.formatFullAmount(netLoad, symbol: currency),
+                    style: TextStyle(fontSize: 28 * sf, fontWeight: FontWeight.w900, color: netLoad >= 0 ? AppColors.getIncome(context) : AppColors.getExpense(context), letterSpacing: -1),
+                  ),
                 ),
                 SizedBox(height: 12 * sf),
                 // Gelir & Gider satırı
@@ -395,9 +399,17 @@ class _VaultDetailSheetState extends ConsumerState<VaultDetailSheet> with Single
                         ],
                       ),
                       SizedBox(height: 8 * sf),
-                      Text(
-                        incomeLoad > 0 ? '%${savingsRate.toStringAsFixed(1)}' : '—',
-                        style: TextStyle(fontSize: 22 * sf, fontWeight: FontWeight.w900, color: savingsRate >= 20 ? Colors.teal : savingsRate >= 0 ? Colors.orange : AppColors.getExpense(context)),
+                      FittedBox(
+                        fit: BoxFit.scaleDown,
+                        alignment: Alignment.centerLeft,
+                        child: Text(
+                          incomeLoad > 0 
+                              ? (isTr 
+                                  ? (savingsRate >= 0 ? '%${savingsRate.toStringAsFixed(1)}' : '-%${savingsRate.abs().toStringAsFixed(1)}')
+                                  : '${savingsRate.toStringAsFixed(1)}%')
+                              : '—',
+                          style: TextStyle(fontSize: 22 * sf, fontWeight: FontWeight.w900, color: savingsRate >= 20 ? Colors.teal : savingsRate >= 0 ? Colors.orange : AppColors.getExpense(context)),
+                        ),
                       ),
                     ],
                   ),
@@ -457,7 +469,11 @@ class _VaultDetailSheetState extends ConsumerState<VaultDetailSheet> with Single
                           ],
                         ),
                         SizedBox(height: 4 * sf),
-                        Text(CurrencyUtils.formatFullAmount(topIncome.getConvertedMonthlyEquivalent(currency, rates), symbol: currency), style: TextStyle(fontSize: 14 * sf, fontWeight: FontWeight.w900, color: AppColors.getIncome(context))),
+                        FittedBox(
+                          fit: BoxFit.scaleDown,
+                          alignment: Alignment.centerLeft,
+                          child: Text(CurrencyUtils.formatFullAmount(topIncome.getConvertedMonthlyEquivalent(currency, rates), symbol: currency), style: TextStyle(fontSize: 14 * sf, fontWeight: FontWeight.w900, color: AppColors.getIncome(context))),
+                        ),
                       ] else
                         Text('—', style: TextStyle(fontSize: 14 * sf, fontWeight: FontWeight.w700, color: AppColors.getTextSecondary(context).withValues(alpha: 0.3))),
                     ],
@@ -483,7 +499,11 @@ class _VaultDetailSheetState extends ConsumerState<VaultDetailSheet> with Single
                           ],
                         ),
                         SizedBox(height: 4 * sf),
-                        Text(CurrencyUtils.formatFullAmount(topExpense.getConvertedMonthlyEquivalent(currency, rates), symbol: currency), style: TextStyle(fontSize: 14 * sf, fontWeight: FontWeight.w900, color: AppColors.getExpense(context))),
+                        FittedBox(
+                          fit: BoxFit.scaleDown,
+                          alignment: Alignment.centerLeft,
+                          child: Text(CurrencyUtils.formatFullAmount(topExpense.getConvertedMonthlyEquivalent(currency, rates), symbol: currency), style: TextStyle(fontSize: 14 * sf, fontWeight: FontWeight.w900, color: AppColors.getExpense(context))),
+                        ),
                       ] else
                         Text('—', style: TextStyle(fontSize: 14 * sf, fontWeight: FontWeight.w700, color: AppColors.getTextSecondary(context).withValues(alpha: 0.3))),
                     ],
@@ -751,6 +771,18 @@ class _VaultDetailSheetState extends ConsumerState<VaultDetailSheet> with Single
                 );
               }).toList(),
             ),
+          ),
+          const SizedBox(height: 24),
+          CustomButton(
+            label: l10n.save,
+            onTap: () async {
+              await _saveChanges(l10n);
+              if (context.mounted) {
+                Navigator.pop(context);
+              }
+            },
+            activeColor: activeColor,
+            height: 54 * sf,
           ),
           const SizedBox(height: 20),
         ],

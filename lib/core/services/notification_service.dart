@@ -1,8 +1,10 @@
-import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:timezone/timezone.dart' as tz;
 import 'package:timezone/data/latest.dart' as tz_data;
 import '../database/models/transaction_record.dart';
+import '../utils/currency_utils.dart';
+
 
 class NotificationService {
   static final NotificationService _instance = NotificationService._internal();
@@ -114,6 +116,11 @@ class NotificationService {
       final androidImplementation = _notifications.resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>();
       if (androidImplementation != null) {
         final granted = await androidImplementation.requestNotificationsPermission();
+        try {
+          await androidImplementation.requestExactAlarmsPermission();
+        } catch (e) {
+          debugPrint('⚠️ [NotificationService] Hassas alarm izni alınamadı/desteklenmiyor: $e');
+        }
         return granted ?? false;
       }
     } catch (e) {
@@ -141,6 +148,7 @@ class NotificationService {
         importance: Importance.max,
         priority: Priority.high,
         playSound: true,
+        color: Color(0xFF00BCD4),
       );
 
       const NotificationDetails details = NotificationDetails(
@@ -155,32 +163,36 @@ class NotificationService {
       if (delaySeconds <= 0) {
         await _notifications.show(
           id: 9999,
-          title: '🔔 Finarcast Test Bildirimi',
-          body: 'Harika! Uygulama içi (foreground) bildirimleriniz sorunsuz çalışıyor. 🚀',
+          title: 'Finarcast Test Bildirimi',
+          body: 'Harika! Uygulama içi (foreground) bildirimleriniz sorunsuz çalışıyor.',
           notificationDetails: details,
         );
         debugPrint('🔔 [NotificationService] Anlık test bildirimi gönderildi.');
       } else {
-        tz.Location location;
-        try {
-          location = tz.local;
-        } catch (e) {
-          try {
-            location = tz.getLocation('Europe/Istanbul');
-          } catch (_) {
-            location = tz.UTC;
-          }
-        }
-
-        final scheduledDate = tz.TZDateTime.now(location).add(Duration(seconds: delaySeconds));
-        await _notifications.zonedSchedule(
-          id: 9999,
-          title: '🔔 Finarcast Gecikmeli Test',
-          body: 'Uygulama dışı (background) bildirim testi başarıyla tamamlandı! 🌟',
-          scheduledDate: scheduledDate,
-          notificationDetails: details,
-          androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+        final scheduledDate = tz.TZDateTime.from(
+          DateTime.now().add(Duration(seconds: delaySeconds)).toUtc(),
+          tz.UTC,
         );
+        try {
+          await _notifications.zonedSchedule(
+            id: 9999,
+            title: 'Finarcast Gecikmeli Test',
+            body: 'Uygulama dışı (background) bildirim testi başarıyla tamamlandı!',
+            scheduledDate: scheduledDate,
+            notificationDetails: details,
+            androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+          );
+        } catch (e) {
+          debugPrint('⚠️ [NotificationService] exactAllowWhileIdle başarısız oldu, inexact deneniyor: $e');
+          await _notifications.zonedSchedule(
+            id: 9999,
+            title: 'Finarcast Gecikmeli Test',
+            body: 'Uygulama dışı (background) bildirim testi başarıyla tamamlandı!',
+            scheduledDate: scheduledDate,
+            notificationDetails: details,
+            androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
+          );
+        }
         debugPrint('🔔 [NotificationService] $delaySeconds saniye gecikmeli test bildirimi zamanlandı: $scheduledDate');
       }
     } catch (e) {
@@ -205,7 +217,7 @@ class NotificationService {
       targetDate = targetDate.subtract(Duration(days: record.notificationReminderDays));
       
       // Saat ve dakikayı ayarla
-      targetDate = DateTime(
+      DateTime localTarget = DateTime(
         targetDate.year,
         targetDate.month,
         targetDate.day,
@@ -215,7 +227,7 @@ class NotificationService {
 
       // Eğer hedef tarih geçmişte ise bir sonraki periyoda aktar (periyodik ise)
       final now = DateTime.now();
-      if (targetDate.isBefore(now)) {
+      if (localTarget.isBefore(now)) {
         if (record.periodType == 0) {
           // Tek seferlik ise ve geçtiyse, sadece iptal et (veya kurma)
           await cancelNotification(record.id);
@@ -223,60 +235,93 @@ class NotificationService {
         }
         
         // Gelecek bir tarih bulana kadar ilerlet
-        while (targetDate.isBefore(now)) {
-          targetDate = _calculateNextOccurrence(targetDate, record.periodType);
+        while (localTarget.isBefore(now)) {
+          localTarget = _calculateNextOccurrence(localTarget, record.periodType);
         }
       }
 
-      const AndroidNotificationDetails androidDetails = AndroidNotificationDetails(
+      final String amountText = record.minAmount != null && record.maxAmount != null
+          ? "${CurrencyUtils.formatAmount(record.minAmount!, currencySymbol: record.currency ?? "₺")} - ${CurrencyUtils.formatAmount(record.maxAmount!, currencySymbol: record.currency ?? "₺")}"
+          : CurrencyUtils.formatAmount(record.effectiveAmount, currencySymbol: record.currency ?? "₺");
+
+      final String dateText;
+      final today = DateTime(now.year, now.month, now.day);
+      final paymentDateOnly = DateTime(record.date.year, record.date.month, record.date.day);
+      final difference = paymentDateOnly.difference(today).inDays;
+      if (difference == 0) {
+        dateText = "Bugün";
+      } else if (difference == 1) {
+        dateText = "Yarın";
+      } else if (difference == -1) {
+        dateText = "Dün";
+      } else {
+        dateText = "${record.date.day} ${_getMonthName(record.date.month)}";
+      }
+
+      final String notificationTitle = record.isIncome
+          ? 'Gelir Hatırlatıcısı: ${record.title}'
+          : 'Ödeme Hatırlatıcısı: ${record.title}';
+
+      final buffer = StringBuffer();
+      buffer.write('Tutar: $amountText');
+      buffer.write('  •  Tarih: $dateText');
+      if (record.note != null && record.note!.trim().isNotEmpty) {
+        buffer.write('\nNot: ${record.note!.trim()}');
+      }
+      final String notificationBody = buffer.toString();
+
+      final BigTextStyleInformation bigTextStyleInfo = BigTextStyleInformation(
+        notificationBody,
+        contentTitle: notificationTitle,
+        htmlFormatContentTitle: false,
+        htmlFormatBigText: false,
+      );
+
+      final AndroidNotificationDetails androidDetails = AndroidNotificationDetails(
         'transaction_reminders',
         'İşlem Hatırlatıcıları',
         channelDescription: 'Periyodik ödemeler ve gelirler için hatırlatıcılar',
         importance: Importance.max,
         priority: Priority.high,
+        color: const Color(0xFF00BCD4),
+        styleInformation: bigTextStyleInfo,
       );
 
-      const NotificationDetails details = NotificationDetails(
+      final NotificationDetails details = NotificationDetails(
         android: androidDetails,
-        iOS: DarwinNotificationDetails(
+        iOS: const DarwinNotificationDetails(
           presentAlert: true,
           presentBadge: true,
           presentSound: true,
         ),
       );
 
-      // Zaman dilimi kontrolü
-      tz.Location location;
+      // Yerel saati cihazın kendi sistemi üzerinden UTC'ye çevirip UTC diliminde zamanlıyoruz.
+      // Bu sayede yerel saat dilimi ve DST (yaz/kış saati) uyuşmazlıkları tamamen aşılır.
+      final scheduledDate = tz.TZDateTime.from(localTarget.toUtc(), tz.UTC);
+
       try {
-        location = tz.local;
+        await _notifications.zonedSchedule(
+          id: notificationId,
+          title: notificationTitle,
+          body: notificationBody,
+          scheduledDate: scheduledDate,
+          notificationDetails: details,
+          androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+          matchDateTimeComponents: _getMatchComponents(record.periodType),
+        );
       } catch (e) {
-        // Eğer yerel saat dilimi ayarlanmamışsa varsayılan olarak İstanbul kullan (veya UTC)
-        try {
-          location = tz.getLocation('Europe/Istanbul');
-        } catch (_) {
-          location = tz.UTC;
-        }
+        debugPrint('⚠️ [NotificationService] exactAllowWhileIdle başarısız oldu (Transaction), inexact deneniyor: $e');
+        await _notifications.zonedSchedule(
+          id: notificationId,
+          title: notificationTitle,
+          body: notificationBody,
+          scheduledDate: scheduledDate,
+          notificationDetails: details,
+          androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
+          matchDateTimeComponents: _getMatchComponents(record.periodType),
+        );
       }
-
-      final scheduledDate = tz.TZDateTime(
-        location,
-        targetDate.year,
-        targetDate.month,
-        targetDate.day,
-        targetDate.hour,
-        targetDate.minute,
-        targetDate.second,
-      );
-
-      await _notifications.zonedSchedule(
-        id: notificationId,
-        title: 'Finarcast Hatırlatıcısı',
-        body: '${record.title} için ödeme/gelir zamanı geldi!',
-        scheduledDate: scheduledDate,
-        notificationDetails: details,
-        androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-        matchDateTimeComponents: _getMatchComponents(record.periodType),
-      );
       debugPrint('🔔 [NotificationService] Bildirim başarıyla zamanlandı: ID $notificationId, Tarih: $scheduledDate');
     } catch (e, stack) {
       debugPrint('❌ [NotificationService] Bildirim zamanlama hatası: $e');
@@ -349,4 +394,16 @@ class NotificationService {
       default: return null;
     }
   }
+
+  String _getMonthName(int month) {
+    const months = [
+      "Ocak", "Şubat", "Mart", "Nisan", "Mayıs", "Haziran", 
+      "Temmuz", "Ağustos", "Eylül", "Ekim", "Kasım", "Aralık"
+    ];
+    if (month >= 1 && month <= 12) {
+      return months[month - 1];
+    }
+    return "";
+  }
 }
+

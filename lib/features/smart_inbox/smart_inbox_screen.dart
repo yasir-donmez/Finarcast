@@ -26,6 +26,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'widgets/empty_state.dart';
 import 'widgets/smart_input_area.dart';
 import 'widgets/draft_card.dart';
+import '../vaults/widgets/staggered_entry_anim.dart';
 
 class SmartInboxScreen extends ConsumerStatefulWidget {
   const SmartInboxScreen({super.key});
@@ -72,8 +73,8 @@ class _SmartInboxScreenState extends ConsumerState<SmartInboxScreen> with Widget
       showCustomDialog(
         context: context,
         accentColor: const Color(0xFFFFB300), // Altın rengi
-        title: "Günlük Limit Aşıldı",
-        content: "Adil Kullanım Politikası (FUP) ve servis sağlayıcı kotaları gereği günlük yapay zeka analiz limitinize ulaştınız. Yarın tekrar kullanabilirsiniz.",
+        title: "Sınırsız Erişim Limiti",
+        content: "Sistem güvenliği gereği adil kullanım limitine ulaştınız. Yarın tekrar sınırsız olarak kullanabilirsiniz.",
         actions: [
           PrecisionDialogAction(
             label: "Kapat",
@@ -86,8 +87,8 @@ class _SmartInboxScreenState extends ConsumerState<SmartInboxScreen> with Widget
       showCustomDialog(
         context: context,
         accentColor: const Color(0xFFFFB300), // Altın rengi
-        title: "Günlük Limit Aşıldı",
-        content: "Günlük ücretsiz analiz limitinize ulaştınız. Limitlerinizi genişletmek ve tüm premium özelliklere erişmek için yükseltin.",
+        title: "Standart Erişim Limiti",
+        content: "Günlük standart yapay zeka analiz kotanızı doldurdunuz. Sınırsız analiz için Genişletilmiş Erişime geçin.",
         actions: [
           PrecisionDialogAction(
             label: "Daha Sonra",
@@ -105,30 +106,6 @@ class _SmartInboxScreenState extends ConsumerState<SmartInboxScreen> with Widget
         ],
       );
     }
-  }
-
-  void _showCooldownDialog(BuildContext context, String remainingTime) {
-    showCustomDialog(
-      context: context,
-      accentColor: const Color(0xFFFFB300), // Altın rengi
-      title: "Bekleme Süresi Aktif",
-      content: "Ücretsiz planda yapay zeka analizleri arasında en az 1 saat beklemelisiniz.\n\nKalan süre: $remainingTime\n\nBeklemek istemiyor musunuz? Sınırsız analiz için şimdi PRO sürüme yükseltin!",
-      actions: [
-        PrecisionDialogAction(
-          label: "Daha Sonra",
-          onTap: () => Navigator.pop(context),
-          isPrimary: false,
-        ),
-        PrecisionDialogAction(
-          label: "Sınırsıza Yükselt",
-          onTap: () {
-            Navigator.pop(context);
-            ProUpgradeSheet.show(context);
-          },
-          isPrimary: true,
-        ),
-      ],
-    );
   }
 
   void _showLoginRequiredDialog(BuildContext context) {
@@ -174,11 +151,6 @@ class _SmartInboxScreenState extends ConsumerState<SmartInboxScreen> with Widget
       return;
     }
 
-    if (subService.isAiCooldownActive) {
-      _showCooldownDialog(context, subService.getFormattedRemainingCooldownTime());
-      return;
-    }
-
     ref.read(smartInboxLoadingProvider.notifier).state = 'Yapay zeka harcamanızı çözümlüyor...';
 
     try {
@@ -212,11 +184,6 @@ class _SmartInboxScreenState extends ConsumerState<SmartInboxScreen> with Widget
     final subService = ref.read(subscriptionServiceProvider);
     if (subService.usedAiCount >= subService.dailyAiLimit) {
       _showAiLimitDialog(context, subService.isPro);
-      return;
-    }
-
-    if (subService.isAiCooldownActive) {
-      _showCooldownDialog(context, subService.getFormattedRemainingCooldownTime());
       return;
     }
 
@@ -542,19 +509,25 @@ class _SmartInboxScreenState extends ConsumerState<SmartInboxScreen> with Widget
           ...drafts.map((draft) {
             final defaultVaultId = vaults.isNotEmpty ? vaults.first.id : -1;
             final selectedVaultId = _selectedVaultIdForDraft[draft.id] ?? defaultVaultId;
-            return DismissibleDraftCard(
-              draft: draft,
-              vaults: vaults,
-              currencySymbol: currencySymbol,
-              selectedVaultId: selectedVaultId,
-              onVaultSelected: (vaultId) {
-                setState(() {
-                  _selectedVaultIdForDraft[draft.id] = vaultId;
-                });
-              },
-              onEdit: () => _navigateToDetailedAdd(draft),
-              onApprove: () => _approveDraft(draft.id),
-              onDelete: () => _deleteDraft(draft.id),
+            final index = drafts.indexOf(draft);
+            return StaggeredEntryAnim(
+              key: ValueKey(draft.id),
+              index: index,
+              animate: true,
+              child: DismissibleDraftCard(
+                draft: draft,
+                vaults: vaults,
+                currencySymbol: currencySymbol,
+                selectedVaultId: selectedVaultId,
+                onVaultSelected: (vaultId) {
+                  setState(() {
+                    _selectedVaultIdForDraft[draft.id] = vaultId;
+                  });
+                },
+                onEdit: () => _navigateToDetailedAdd(draft),
+                onApprove: () => _approveDraft(draft.id),
+                onDelete: () => _deleteDraft(draft.id),
+              ),
             );
           }),
           const SizedBox(height: 32),

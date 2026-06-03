@@ -39,12 +39,35 @@ class _PrecisionInlinePickerState extends State<InlinePicker> {
   @override
   void didUpdateWidget(InlinePicker oldWidget) {
     super.didUpdateWidget(oldWidget);
+    
+    // Clamp selection index if items length changed or is empty
+    if (widget.items.isEmpty) {
+      _selectedIndex = 0;
+      _lastReportedIndex = 0;
+    } else {
+      if (_selectedIndex >= widget.items.length) {
+        _selectedIndex = widget.items.length - 1;
+      }
+      if (_lastReportedIndex != null && _lastReportedIndex! >= widget.items.length) {
+        _lastReportedIndex = widget.items.length - 1;
+      }
+    }
+
     if (oldWidget.selectedIndex != widget.selectedIndex) {
       if (widget.selectedIndex != _lastReportedIndex) {
-        _controller.jumpToItem(widget.selectedIndex);
-        _lastReportedIndex = widget.selectedIndex;
+        int targetIndex = widget.selectedIndex;
+        if (widget.items.isNotEmpty) {
+          targetIndex = targetIndex.clamp(0, widget.items.length - 1);
+        } else {
+          targetIndex = 0;
+        }
+
+        if (widget.items.isNotEmpty && _controller.hasClients) {
+          _controller.jumpToItem(targetIndex);
+        }
+        _lastReportedIndex = targetIndex;
         setState(() {
-          _selectedIndex = widget.selectedIndex;
+          _selectedIndex = targetIndex;
         });
       }
     }
@@ -92,10 +115,19 @@ class _PrecisionInlinePickerState extends State<InlinePicker> {
           
           NotificationListener<ScrollNotification>(
             onNotification: (notification) {
+              if (notification is ScrollStartNotification) {
+                FocusManager.instance.primaryFocus?.unfocus();
+              }
               if (notification is ScrollEndNotification && notification.depth == 0) {
                 if (_selectedIndex != widget.selectedIndex) {
                   _lastReportedIndex = _selectedIndex;
-                  widget.onChanged(_selectedIndex);
+                  if (widget.items.isNotEmpty && _selectedIndex >= 0 && _selectedIndex < widget.items.length) {
+                    WidgetsBinding.instance.addPostFrameCallback((_) {
+                      if (mounted) {
+                        widget.onChanged(_selectedIndex);
+                      }
+                    });
+                  }
                 }
               }
               return false;
@@ -124,6 +156,10 @@ class _PrecisionInlinePickerState extends State<InlinePicker> {
                   final isSelected = index == _selectedIndex;
                   final onSurface = Theme.of(context).colorScheme.onSurface;
                   
+                  if (index < 0 || index >= widget.items.length) {
+                    return const SizedBox.shrink();
+                  }
+
                   return Center(
                     child: AnimatedDefaultTextStyle(
                       duration: const Duration(milliseconds: 250),

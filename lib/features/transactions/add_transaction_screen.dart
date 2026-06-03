@@ -31,6 +31,7 @@ import '../../shared/widgets/custom_button.dart';
 import '../../shared/widgets/custom_bottom_sheet.dart';
 import '../../shared/widgets/glass_surface.dart';
 import '../../shared/widgets/custom_notification.dart';
+import '../../shared/widgets/custom_dialog.dart';
 
 class AddTransactionScreen extends ConsumerStatefulWidget {
   final int? initialId;
@@ -290,7 +291,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
     if (mounted) {
       setState(() {
         _vaults = v;
-        if (_selectedVaultIds.isEmpty && widget.initialId == null && v.isNotEmpty) {
+        if (_selectedVaultIds.isEmpty && v.isNotEmpty) {
           _selectedVaultIds = [v.first.id];
         }
       });
@@ -550,32 +551,23 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
   }
 
   Future<void> _handleRemoveCustomCategory(String subcategoryId) async {
-    final confirmed = await showDialog<bool>(
+    final confirmed = await showCustomDialog<bool>(
       context: context,
-      builder: (ctx) {
-        final isDark = Theme.of(ctx).brightness == Brightness.dark;
-        return AlertDialog(
-          backgroundColor: isDark ? const Color(0xFF1C1C1E) : Colors.white,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
-          ),
-          title: Text(l10n.deleteCustomCategory),
-          content: Text(l10n.deleteCustomCategoryConfirm),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(ctx, false),
-              child: Text(l10n.cancel),
-            ),
-            FilledButton(
-              onPressed: () => Navigator.pop(ctx, true),
-              style: FilledButton.styleFrom(
-                backgroundColor: AppColors.getExpense(ctx),
-              ),
-              child: Text(l10n.yes),
-            ),
-          ],
-        );
-      },
+      accentColor: AppColors.getExpense(context),
+      title: l10n.deleteCustomCategory,
+      content: l10n.deleteCustomCategoryConfirm,
+      actions: [
+        PrecisionDialogAction(
+          label: l10n.cancel,
+          onTap: () => Navigator.pop(context, false),
+          isPrimary: false,
+        ),
+        PrecisionDialogAction(
+          label: l10n.yes,
+          onTap: () => Navigator.pop(context, true),
+          isPrimary: true,
+        ),
+      ],
     );
 
     if (confirmed == true) {
@@ -621,6 +613,18 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
         }
         if (minAmount >= maxAmount) {
           _showValidationError('Minimum tutar maksimumdan küçük olmalıdır.');
+          return;
+        }
+      }
+
+      if (_selectedVaultIds.isEmpty) {
+        final vaults = await DatabaseService.getAllVaults();
+        if (vaults.isNotEmpty) {
+          setState(() {
+            _selectedVaultIds = [vaults.first.id];
+          });
+        } else {
+          _showValidationError('Lütfen işlem için en az bir kasa seçin. Eğer kasanız yoksa önce bir kasa oluşturun.');
           return;
         }
       }
@@ -709,10 +713,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
               ? _noteController.text
               : null;
           old.currency = _selectedCurrency;
-
-          if (_periodData.periodType == 0) {
-            old.date = _periodData.selectedDateForRecurrence;
-          }
+          old.date = _periodData.selectedDateForRecurrence;
 
           old.isNotificationEnabled = _isNotificationEnabled;
           if (_isNotificationEnabled) {
@@ -776,6 +777,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
 
   void _onCurrencyChanged(String newCurrency) {
     if (newCurrency == _selectedCurrency) return;
+    FocusManager.instance.primaryFocus?.unfocus();
 
     void formatFieldForNewCurrency(TextEditingController controller) {
       final text = controller.text.trim();
@@ -965,6 +967,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                   tabIndex: _tabIndex,
                   onTabChanged: (index) {
                     HapticFeedback.selectionClick();
+                    FocusManager.instance.primaryFocus?.unfocus();
                     setState(() {
                       _tabIndex = index;
                       _selectedCategoryIndex = 0;
@@ -1019,6 +1022,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                           scalingFactor: scalingFactor * 0.9,
                           onChanged: (val) {
                             HapticFeedback.mediumImpact();
+                            FocusManager.instance.primaryFocus?.unfocus();
                             setState(() {
                               _isFlexibleAmount = val;
                               if (!val) _amountFocusNode.requestFocus();
@@ -1037,6 +1041,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                   expandedCategoryIndex: _expandedCategoryIndex,
                   onChanged: (catIndex, subIndex, expIndex) {
                     HapticFeedback.lightImpact();
+                    FocusManager.instance.primaryFocus?.unfocus();
                     setState(() {
                       _selectedCategoryIndex = catIndex;
                       _selectedSubModelIndex = subIndex;
@@ -1061,6 +1066,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                           selectedVaultIds: _selectedVaultIds,
                           scalingFactor: scalingFactor,
                           onChanged: (ids) {
+                            FocusManager.instance.primaryFocus?.unfocus();
                             setState(() {
                               _selectedVaultIds = ids;
                               if (ids.isNotEmpty) {
@@ -1097,6 +1103,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                       scalingFactor: scalingFactor,
                       onChanged: (data) {
                         HapticFeedback.mediumImpact();
+                        FocusManager.instance.primaryFocus?.unfocus();
                         setState(() => _periodData = data);
                       },
                     ),
@@ -1197,9 +1204,10 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                                   }
                                 }
                                 HapticFeedback.mediumImpact();
-                                  setState(() {
-                                    _isNotificationEnabled = val;
-                                  });
+                                FocusManager.instance.primaryFocus?.unfocus();
+                                setState(() {
+                                  _isNotificationEnabled = val;
+                                });
                               },
                             ),
                           ],

@@ -74,20 +74,10 @@ class ShareHandlerService {
     if (subService.usedAiCount >= subService.dailyAiLimit) {
       if (onProcessingError != null) {
         onProcessingError!(
-          'Limit Aşıldı',
+          subService.isPro ? 'Sınırsız Erişim Limiti' : 'Standart Erişim Limiti',
           subService.isPro
-              ? 'Adil Kullanım Politikası (FUP) ve servis sağlayıcı kotaları gereği günlük yapay zeka analiz limitinize ulaştınız. Yarın tekrar kullanabilirsiniz.'
-              : 'Günlük ücretsiz analiz limitinize ulaştınız. Limitlerinizi genişletmek ve tüm premium özelliklere erişmek için yükseltin.',
-        );
-      }
-      return;
-    }
-
-    if (subService.isAiCooldownActive) {
-      if (onProcessingError != null) {
-        onProcessingError!(
-          'Bekleme Süresi Aktif',
-          'Ücretsiz planda yapay zeka analizleri arasında en az 1 saat beklemelisiniz. Kalan süre: ${subService.getFormattedRemainingCooldownTime()}',
+              ? 'Sistem güvenliği gereği adil kullanım limitine ulaştınız. Yarın tekrar sınırsız olarak kullanabilirsiniz.'
+              : 'Günlük standart yapay zeka analiz kotanızı doldurdunuz. Sınırsız analiz için Genişletilmiş Erişime geçin.',
         );
       }
       return;
@@ -124,20 +114,10 @@ class ShareHandlerService {
     if (subService.usedAiCount >= subService.dailyAiLimit) {
       if (onProcessingError != null) {
         onProcessingError!(
-          'Limit Aşıldı',
+          subService.isPro ? 'Sınırsız Erişim Limiti' : 'Standart Erişim Limiti',
           subService.isPro
-              ? 'Adil Kullanım Politikası (FUP) ve servis sağlayıcı kotaları gereği günlük yapay zeka analiz limitinize ulaştınız. Yarın tekrar kullanabilirsiniz.'
-              : 'Günlük ücretsiz analiz limitinize ulaştınız. Limitlerinizi genişletmek ve tüm premium özelliklere erişmek için yükseltin.',
-        );
-      }
-      return;
-    }
-
-    if (subService.isAiCooldownActive) {
-      if (onProcessingError != null) {
-        onProcessingError!(
-          'Bekleme Süresi Aktif',
-          'Ücretsiz planda yapay zeka analizleri arasında en az 1 saat beklemelisiniz. Kalan süre: ${subService.getFormattedRemainingCooldownTime()}',
+              ? 'Sistem güvenliği gereği adil kullanım limitine ulaştınız. Yarın tekrar sınırsız olarak kullanabilirsiniz.'
+              : 'Günlük standart yapay zeka analiz kotanızı doldurdunuz. Sınırsız analiz için Genişletilmiş Erişime geçin.',
         );
       }
       return;

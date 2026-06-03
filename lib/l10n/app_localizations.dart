@@ -171,7 +171,7 @@ abstract class AppLocalizations {
   /// No description provided for @dataRetentionDesc.
   ///
   /// In tr, this message translates to:
-  /// **'Süresi dolan işlemler arşivlenir.\nAI Persona yalnızca bu süredeki verileri kullanır.'**
+  /// **'Süresi dolan işlemler arşivlenir.\nAI Asistanı yalnızca bu süredeki verileri kullanır.'**
   String get dataRetentionDesc;
 
   /// No description provided for @permanentDataDeletion.
@@ -2607,7 +2607,7 @@ abstract class AppLocalizations {
   /// No description provided for @authOtpRequired.
   ///
   /// In tr, this message translates to:
-  /// **'Lütfen gelen doğrulama kodunu (6 veya 8 haneli) girin.'**
+  /// **'Lütfen gelen 6 haneli doğrulama kodunu girin.'**
   String get authOtpRequired;
 
   /// No description provided for @authOtpSent.
@@ -2861,6 +2861,642 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'Bu e-posta adresine kayıtlı bir kullanıcı bulunamadı.'**
   String get authUserNotFoundError;
+
+  /// No description provided for @dataRetentionDetail.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu süre sonunda işlemleriniz ana listeden gizlenerek arşive taşınır. Arşivlenen veriler bakiyenizi etkilemez ve Dashboard\'u temiz tutar.'**
+  String get dataRetentionDetail;
+
+  /// No description provided for @retentionPeriodLabel.
+  ///
+  /// In tr, this message translates to:
+  /// **'Saklama Süresi:'**
+  String get retentionPeriodLabel;
+
+  /// No description provided for @premiumRequired.
+  ///
+  /// In tr, this message translates to:
+  /// **'Premium Gerekli'**
+  String get premiumRequired;
+
+  /// No description provided for @premiumRetentionDesc.
+  ///
+  /// In tr, this message translates to:
+  /// **'Veri saklama, arşivleme ve otomatik temizleme kuralları sadece Premium üyelerin erişimine açıktır.'**
+  String get premiumRetentionDesc;
+
+  /// No description provided for @later.
+  ///
+  /// In tr, this message translates to:
+  /// **'Daha Sonra'**
+  String get later;
+
+  /// No description provided for @permanentDeletionDetail.
+  ///
+  /// In tr, this message translates to:
+  /// **'Dikkat: Bu süre sonunda verileriniz cihazınızdan tamamen silinir ve bir daha geri getirilemez.'**
+  String get permanentDeletionDetail;
+
+  /// No description provided for @purgePeriodLabel.
+  ///
+  /// In tr, this message translates to:
+  /// **'Temizleme Süresi:'**
+  String get purgePeriodLabel;
+
+  /// No description provided for @cloudSync.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bulut Eşitleme'**
+  String get cloudSync;
+
+  /// No description provided for @loginRequiredLabel.
+  ///
+  /// In tr, this message translates to:
+  /// **'Giriş gerekli'**
+  String get loginRequiredLabel;
+
+  /// No description provided for @syncToday.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bugün {time}'**
+  String syncToday(String time);
+
+  /// No description provided for @syncYesterday.
+  ///
+  /// In tr, this message translates to:
+  /// **'Dün {time}'**
+  String syncYesterday(String time);
+
+  /// No description provided for @noSyncYet.
+  ///
+  /// In tr, this message translates to:
+  /// **'Henüz eşitleme yapılmadı'**
+  String get noSyncYet;
+
+  /// No description provided for @syncStatus.
+  ///
+  /// In tr, this message translates to:
+  /// **'Senkronizasyon Durumu'**
+  String get syncStatus;
+
+  /// No description provided for @lastSyncLabel.
+  ///
+  /// In tr, this message translates to:
+  /// **'Son Eşitleme: {time}'**
+  String lastSyncLabel(String time);
+
+  /// No description provided for @syncBackgroundDesc.
+  ///
+  /// In tr, this message translates to:
+  /// **'Verileriniz arka planda otomatik olarak buluta yedeklenmektedir.'**
+  String get syncBackgroundDesc;
+
+  /// No description provided for @syncCloudDesc.
+  ///
+  /// In tr, this message translates to:
+  /// **'Verileriniz Supabase bulut altyapısı ile anlık olarak yedeklenir. Uygulamayı silseniz bile hesabınıza giriş yaparak verilerinizi geri getirebilirsiniz.'**
+  String get syncCloudDesc;
+
+  /// No description provided for @syncNow.
+  ///
+  /// In tr, this message translates to:
+  /// **'ŞİMDİ SENKRONİZE ET'**
+  String get syncNow;
+
+  /// No description provided for @syncing.
+  ///
+  /// In tr, this message translates to:
+  /// **'VERİLER EŞİTLENİYOR...'**
+  String get syncing;
+
+  /// No description provided for @syncPartialSuccess.
+  ///
+  /// In tr, this message translates to:
+  /// **'Kısmi başarı: {summary}'**
+  String syncPartialSuccess(String summary);
+
+  /// No description provided for @syncFailed.
+  ///
+  /// In tr, this message translates to:
+  /// **'Eşitleme başarısız oldu. {error}'**
+  String syncFailed(String error);
+
+  /// No description provided for @syncConnectionError.
+  ///
+  /// In tr, this message translates to:
+  /// **'Lütfen internetinizi veya giriş bilgilerinizi kontrol edin.'**
+  String get syncConnectionError;
+
+  /// No description provided for @loginRequiredTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Giriş Gerekli'**
+  String get loginRequiredTitle;
+
+  /// No description provided for @loginRequiredSyncDesc.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bulut senkronizasyonunu aktifleştirerek verilerinizi yedeklemek için giriş yapmanız gerekmektedir.'**
+  String get loginRequiredSyncDesc;
+
+  /// No description provided for @premiumSyncDesc.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bulut Eşitleme özelliği Supabase yedekleme altyapısını kullanır ve sadece Premium üyelerin erişimine açıktır.'**
+  String get premiumSyncDesc;
+
+  /// No description provided for @showOnPhone.
+  ///
+  /// In tr, this message translates to:
+  /// **'Telefonda Göster'**
+  String get showOnPhone;
+
+  /// No description provided for @appOnly.
+  ///
+  /// In tr, this message translates to:
+  /// **'Sadece Uygulama İçi'**
+  String get appOnly;
+
+  /// No description provided for @notificationDesc.
+  ///
+  /// In tr, this message translates to:
+  /// **'Hatırlatıcıların sadece uygulama içinde mi saklanacağını yoksa telefonunuzun bildirim panelinde de gösterilip gösterilmeyeceğini belirler. Kapalıyken hatırlatıcılar sessizce uygulama içinde kalır.'**
+  String get notificationDesc;
+
+  /// No description provided for @selectMainCurrency.
+  ///
+  /// In tr, this message translates to:
+  /// **'Ana uygulama birimini seçin.'**
+  String get selectMainCurrency;
+
+  /// No description provided for @currencyDesc.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu birim tüm uygulama genelinde (Dashboard, Kasalar ve İstatistikler) ana para birimi olarak kullanılır. Tüm varlıklarınız bu birime göre hesaplanır.'**
+  String get currencyDesc;
+
+  /// No description provided for @changeCurrency.
+  ///
+  /// In tr, this message translates to:
+  /// **'Birimi Değiştir'**
+  String get changeCurrency;
+
+  /// No description provided for @exchangeRateNotFoundError.
+  ///
+  /// In tr, this message translates to:
+  /// **'Seçilen para birimi için döviz kuru bulunamadı. Lütfen internet bağlantınızı kontrol edip tekrar deneyin.'**
+  String get exchangeRateNotFoundError;
+
+  /// No description provided for @exchangeRatesDownloadFailed.
+  ///
+  /// In tr, this message translates to:
+  /// **'Döviz kurları indirilemedi. İnternet bağlantınızı kontrol edin.'**
+  String get exchangeRatesDownloadFailed;
+
+  /// No description provided for @exchangeRatesCheckError.
+  ///
+  /// In tr, this message translates to:
+  /// **'Kurlar kontrol edilirken hata oluştu. Lütfen tekrar deneyin.'**
+  String get exchangeRatesCheckError;
+
+  /// No description provided for @exchangeRates.
+  ///
+  /// In tr, this message translates to:
+  /// **'Döviz Kurları'**
+  String get exchangeRates;
+
+  /// No description provided for @baseUnitLira.
+  ///
+  /// In tr, this message translates to:
+  /// **'Baz Birim: Türk Lirası'**
+  String get baseUnitLira;
+
+  /// No description provided for @baseUnitLabel.
+  ///
+  /// In tr, this message translates to:
+  /// **'Baz Birim: {currency}'**
+  String baseUnitLabel(String currency);
+
+  /// No description provided for @lastSyncShort.
+  ///
+  /// In tr, this message translates to:
+  /// **'SON: {time}'**
+  String lastSyncShort(String time);
+
+  /// No description provided for @updateRatesNow.
+  ///
+  /// In tr, this message translates to:
+  /// **'KURLARI ŞİMDİ GÜNCELLE'**
+  String get updateRatesNow;
+
+  /// No description provided for @updatingRates.
+  ///
+  /// In tr, this message translates to:
+  /// **'GÜNCELLENİYOR...'**
+  String get updatingRates;
+
+  /// No description provided for @exchangeRatesUpdated.
+  ///
+  /// In tr, this message translates to:
+  /// **'Kurlar başarıyla güncellendi.'**
+  String get exchangeRatesUpdated;
+
+  /// No description provided for @exchangeRatesUpdateFailed.
+  ///
+  /// In tr, this message translates to:
+  /// **'Güncelleme başarısız. İnternet bağlantınızı kontrol edin.'**
+  String get exchangeRatesUpdateFailed;
+
+  /// No description provided for @showLess.
+  ///
+  /// In tr, this message translates to:
+  /// **'Daha Az Göster'**
+  String get showLess;
+
+  /// No description provided for @showMore.
+  ///
+  /// In tr, this message translates to:
+  /// **'Daha Fazla Göster'**
+  String get showMore;
+
+  /// No description provided for @styleLabel.
+  ///
+  /// In tr, this message translates to:
+  /// **'Stil'**
+  String get styleLabel;
+
+  /// No description provided for @styleDesc.
+  ///
+  /// In tr, this message translates to:
+  /// **'Kartların ve arka planın görünüm stilini seçin'**
+  String get styleDesc;
+
+  /// No description provided for @styleColor.
+  ///
+  /// In tr, this message translates to:
+  /// **'Renkli'**
+  String get styleColor;
+
+  /// No description provided for @styleColorDesc.
+  ///
+  /// In tr, this message translates to:
+  /// **'Uyumlu renkler'**
+  String get styleColorDesc;
+
+  /// No description provided for @styleSimple.
+  ///
+  /// In tr, this message translates to:
+  /// **'Sade'**
+  String get styleSimple;
+
+  /// No description provided for @styleSimpleDesc.
+  ///
+  /// In tr, this message translates to:
+  /// **'Düz tasarım'**
+  String get styleSimpleDesc;
+
+  /// No description provided for @premiumStyleDesc.
+  ///
+  /// In tr, this message translates to:
+  /// **'Renkli görünüm stili sadece Premium üyelerin erişimine açıktır.'**
+  String get premiumStyleDesc;
+
+  /// No description provided for @premiumColorDesc.
+  ///
+  /// In tr, this message translates to:
+  /// **'Özel renk temaları ve gelişmiş gradyanlar sadece Premium üyelerin erişimine açıktır.'**
+  String get premiumColorDesc;
+
+  /// No description provided for @paletteArctic.
+  ///
+  /// In tr, this message translates to:
+  /// **'Kutup'**
+  String get paletteArctic;
+
+  /// No description provided for @paletteMint.
+  ///
+  /// In tr, this message translates to:
+  /// **'Nane'**
+  String get paletteMint;
+
+  /// No description provided for @paletteRose.
+  ///
+  /// In tr, this message translates to:
+  /// **'Rose'**
+  String get paletteRose;
+
+  /// No description provided for @paletteLavender.
+  ///
+  /// In tr, this message translates to:
+  /// **'Lavanta'**
+  String get paletteLavender;
+
+  /// No description provided for @paletteSahara.
+  ///
+  /// In tr, this message translates to:
+  /// **'Sahra'**
+  String get paletteSahara;
+
+  /// No description provided for @paletteSapphire.
+  ///
+  /// In tr, this message translates to:
+  /// **'Safir'**
+  String get paletteSapphire;
+
+  /// No description provided for @paletteBurgundy.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bordo'**
+  String get paletteBurgundy;
+
+  /// No description provided for @palettePlatinum.
+  ///
+  /// In tr, this message translates to:
+  /// **'Platin'**
+  String get palettePlatinum;
+
+  /// No description provided for @yearlyDiscount.
+  ///
+  /// In tr, this message translates to:
+  /// **'Yıllık (-%33)'**
+  String get yearlyDiscount;
+
+  /// No description provided for @comparisonTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'KARŞILAŞTIRMA'**
+  String get comparisonTitle;
+
+  /// No description provided for @limitVaults.
+  ///
+  /// In tr, this message translates to:
+  /// **'Kasa Sayısı'**
+  String get limitVaults;
+
+  /// No description provided for @limitAiAnalysis.
+  ///
+  /// In tr, this message translates to:
+  /// **'AI İşlem Asistanı'**
+  String get limitAiAnalysis;
+
+  /// No description provided for @limitCloudSync.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bulut Eşitleme'**
+  String get limitCloudSync;
+
+  /// No description provided for @limitDataRetention.
+  ///
+  /// In tr, this message translates to:
+  /// **'Veri Saklama & Silme'**
+  String get limitDataRetention;
+
+  /// No description provided for @limitCustomThemes.
+  ///
+  /// In tr, this message translates to:
+  /// **'Özel Temalar'**
+  String get limitCustomThemes;
+
+  /// No description provided for @limitAdFree.
+  ///
+  /// In tr, this message translates to:
+  /// **'Reklamsız Deneyim'**
+  String get limitAdFree;
+
+  /// No description provided for @limitVaultsFree.
+  ///
+  /// In tr, this message translates to:
+  /// **'2 Kasa'**
+  String get limitVaultsFree;
+
+  /// No description provided for @limitVaultsPro.
+  ///
+  /// In tr, this message translates to:
+  /// **'Sınırsız'**
+  String get limitVaultsPro;
+
+  /// No description provided for @basicAnalysis.
+  ///
+  /// In tr, this message translates to:
+  /// **'Standart'**
+  String get basicAnalysis;
+
+  /// No description provided for @advancedAnalysis.
+  ///
+  /// In tr, this message translates to:
+  /// **'Genişletilmiş'**
+  String get advancedAnalysis;
+
+  /// No description provided for @limitDataRetentionPro.
+  ///
+  /// In tr, this message translates to:
+  /// **'Özelleştirilebilir'**
+  String get limitDataRetentionPro;
+
+  /// No description provided for @cancelSubscriptionTest.
+  ///
+  /// In tr, this message translates to:
+  /// **'Aboneliği İptal Et (Test)'**
+  String get cancelSubscriptionTest;
+
+  /// No description provided for @yearlyAccess.
+  ///
+  /// In tr, this message translates to:
+  /// **'Yıllık Erişim'**
+  String get yearlyAccess;
+
+  /// No description provided for @monthlyAccess.
+  ///
+  /// In tr, this message translates to:
+  /// **'Aylık Erişim'**
+  String get monthlyAccess;
+
+  /// No description provided for @yearlyPriceDetail.
+  ///
+  /// In tr, this message translates to:
+  /// **'Ayda ₺99\'ye gelir'**
+  String get yearlyPriceDetail;
+
+  /// No description provided for @monthlyPriceDetail.
+  ///
+  /// In tr, this message translates to:
+  /// **'Her ay yenilenir'**
+  String get monthlyPriceDetail;
+
+  /// No description provided for @loginRequiredPurchaseDesc.
+  ///
+  /// In tr, this message translates to:
+  /// **'Satın alma işlemini tamamlamak için lütfen giriş yapın veya ücretsiz bir hesap oluşturun.'**
+  String get loginRequiredPurchaseDesc;
+
+  /// No description provided for @loginOrRegister.
+  ///
+  /// In tr, this message translates to:
+  /// **'Giriş Yap / Üye Ol'**
+  String get loginOrRegister;
+
+  /// No description provided for @privilegesActive.
+  ///
+  /// In tr, this message translates to:
+  /// **'Ayrıcalıklar aktif'**
+  String get privilegesActive;
+
+  /// No description provided for @tapToUnlock.
+  ///
+  /// In tr, this message translates to:
+  /// **'Sınırları kaldırmak için dokunun'**
+  String get tapToUnlock;
+
+  /// No description provided for @sectionMembershipAccount.
+  ///
+  /// In tr, this message translates to:
+  /// **'Üyelik ve Hesap'**
+  String get sectionMembershipAccount;
+
+  /// No description provided for @sectionAppearanceStyle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Görünüm ve Stil'**
+  String get sectionAppearanceStyle;
+
+  /// No description provided for @sectionDataCloud.
+  ///
+  /// In tr, this message translates to:
+  /// **'Veri ve Bulut'**
+  String get sectionDataCloud;
+
+  /// No description provided for @sectionSessionSecurity.
+  ///
+  /// In tr, this message translates to:
+  /// **'Oturum ve Güvenlik'**
+  String get sectionSessionSecurity;
+
+  /// No description provided for @guestUser.
+  ///
+  /// In tr, this message translates to:
+  /// **'Misafir Kullanıcı'**
+  String get guestUser;
+
+  /// No description provided for @tapToLogin.
+  ///
+  /// In tr, this message translates to:
+  /// **'Giriş yapmak veya kayıt olmak için dokunun'**
+  String get tapToLogin;
+
+  /// No description provided for @changePassword.
+  ///
+  /// In tr, this message translates to:
+  /// **'Şifre Değiştir'**
+  String get changePassword;
+
+  /// No description provided for @changePasswordDesc.
+  ///
+  /// In tr, this message translates to:
+  /// **'Mevcut şifrenizi doğrulayarak yeni bir şifre belirleyin. Şifreniz en az 6 karakter olmalıdır.'**
+  String get changePasswordDesc;
+
+  /// No description provided for @currentPasswordHint.
+  ///
+  /// In tr, this message translates to:
+  /// **'Mevcut Şifre'**
+  String get currentPasswordHint;
+
+  /// No description provided for @newPasswordHint.
+  ///
+  /// In tr, this message translates to:
+  /// **'Yeni Şifre'**
+  String get newPasswordHint;
+
+  /// No description provided for @confirmNewPasswordHint.
+  ///
+  /// In tr, this message translates to:
+  /// **'Yeni Şifre Tekrar'**
+  String get confirmNewPasswordHint;
+
+  /// No description provided for @currentPasswordRequired.
+  ///
+  /// In tr, this message translates to:
+  /// **'Mevcut şifrenizi girmeniz gerekir.'**
+  String get currentPasswordRequired;
+
+  /// No description provided for @updatePassword.
+  ///
+  /// In tr, this message translates to:
+  /// **'Şifreyi Güncelle'**
+  String get updatePassword;
+
+  /// No description provided for @signOut.
+  ///
+  /// In tr, this message translates to:
+  /// **'Çıkış Yap'**
+  String get signOut;
+
+  /// No description provided for @logout.
+  ///
+  /// In tr, this message translates to:
+  /// **'Oturumu Kapat'**
+  String get logout;
+
+  /// No description provided for @logoutConfirm.
+  ///
+  /// In tr, this message translates to:
+  /// **'Oturumu kapatmak istediğinize emin misiniz?'**
+  String get logoutConfirm;
+
+  /// No description provided for @deleteAccount.
+  ///
+  /// In tr, this message translates to:
+  /// **'Hesabımı Sil'**
+  String get deleteAccount;
+
+  /// No description provided for @deleteAccountPermanently.
+  ///
+  /// In tr, this message translates to:
+  /// **'Hesabımı Kalıcı Olarak Sil'**
+  String get deleteAccountPermanently;
+
+  /// No description provided for @deleteAccountConfirmDesc.
+  ///
+  /// In tr, this message translates to:
+  /// **'Hesabınızı ve buluttaki tüm verilerinizi kalıcı olarak silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.'**
+  String get deleteAccountConfirmDesc;
+
+  /// No description provided for @reset.
+  ///
+  /// In tr, this message translates to:
+  /// **'Sıfırla'**
+  String get reset;
+
+  /// No description provided for @resetDataTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Verileri Sıfırla?'**
+  String get resetDataTitle;
+
+  /// No description provided for @resetDataDesc.
+  ///
+  /// In tr, this message translates to:
+  /// **'Tüm finansal verileriniz ve ayarlarınız kalıcı olarak silinecek. Bu işlem geri alınamaz.'**
+  String get resetDataDesc;
+
+  /// No description provided for @deleteAll.
+  ///
+  /// In tr, this message translates to:
+  /// **'Hepsini Sil'**
+  String get deleteAll;
+
+  /// No description provided for @resetSuccess.
+  ///
+  /// In tr, this message translates to:
+  /// **'Tüm veriler ve ayarlar başarıyla sıfırlandı.'**
+  String get resetSuccess;
+
+  /// No description provided for @supportEmailCopied.
+  ///
+  /// In tr, this message translates to:
+  /// **'E-posta uygulaması açılamadı. Destek adresi (finarcast.support@gmail.com) kopyalandı.'**
+  String get supportEmailCopied;
 }
 
 class _AppLocalizationsDelegate

@@ -7,7 +7,7 @@ import '../../core/providers/settings_provider.dart';
 /// Tüm popup ve modal ekranlar bu bileşeni kullanarak standartlaşır.
 class CustomBottomSheet extends ConsumerWidget {
   final Widget child;
-  final String? title;
+  final dynamic title; // String? veya Widget? kabul eder
   final List<Widget>? actions;
   final double? height;
   final bool showHandle;
@@ -27,7 +27,7 @@ class CustomBottomSheet extends ConsumerWidget {
   static Future<T?> show<T>({
     required BuildContext context,
     required Widget child,
-    String? title,
+    dynamic title,
     List<Widget>? actions,
     double? height,
     bool showHandle = true,
@@ -151,15 +151,17 @@ class CustomBottomSheet extends ConsumerWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Expanded(
-                  child: Text(
-                    title!,
-                    style: TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.w900,
-                      color: AppColors.getTextPrimary(context),
-                      letterSpacing: -0.8,
-                    ),
-                  ),
+                  child: title is Widget
+                      ? (title as Widget)
+                      : Text(
+                          title!.toString(),
+                          style: TextStyle(
+                            fontSize: 24,
+                            fontWeight: FontWeight.w900,
+                            color: AppColors.getTextPrimary(context),
+                            letterSpacing: -0.8,
+                          ),
+                        ),
                 ),
                 if (actions != null) Row(children: actions!),
               ],

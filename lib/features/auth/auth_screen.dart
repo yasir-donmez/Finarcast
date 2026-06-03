@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import '../home/main_scaffold.dart';
 import '../../../core/utils/route_transitions.dart';
 import '../../../core/services/auth_service.dart';
@@ -237,7 +238,24 @@ class _AuthScreenState extends ConsumerState<AuthScreen> with TickerProviderStat
         }
       }
     } catch (e) {
-      if (mounted) CustomNotification.error(context, AuthErrorHelper.getFriendlyErrorMessage(context, e));
+      if (mounted) {
+        final friendlyError = AuthErrorHelper.getFriendlyErrorMessage(context, e);
+        final isEmailNotConfirmed = e is AuthException && 
+            (e.code == 'email_not_confirmed' || e.message.toLowerCase().contains('email not confirmed'));
+        
+        if (isEmailNotConfirmed) {
+          setState(() {
+            _registeredEmail = email;
+            _showOtpVerification = true;
+            _otpError = null;
+            _otpController.clear();
+          });
+          CustomNotification.info(context, friendlyError);
+          _startCountdown();
+        } else {
+          CustomNotification.error(context, friendlyError);
+        }
+      }
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
@@ -406,7 +424,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen> with TickerProviderStat
     if (_isLoading || _isGoogleLoading) return;
     final l10n = AppLocalizations.of(context)!;
     final code = _otpController.text.trim();
-    if (code.isEmpty || (code.length != 6 && code.length != 8)) {
+    if (code.isEmpty || code.length != 6) {
       setState(() => _otpError = l10n.authOtpRequired);
       return;
     }
@@ -507,36 +525,45 @@ class _AuthScreenState extends ConsumerState<AuthScreen> with TickerProviderStat
                               : _showForgotPassword
                                   ? _isFlippingBack
                                   : _isLogin,
-                          front: _showOtpVerification 
-                              ? OtpForm(
-                                  otpController: _otpController,
-                                  otpFocusNode: _otpFocusNode,
-                                  otpError: _otpError,
-                                  isLoading: _isLoading,
-                                  resendCountdown: _resendCountdown,
-                                  onVerify: _submitOtp,
-                                  onResend: _resendOtp,
-                                  registeredEmail: _registeredEmail,
-                                )
-                              : LoginForm(
-                                  emailController: _emailController,
-                                  passwordController: _passwordController,
-                                  emailError: _emailError,
-                                  passwordError: _passwordError,
-                                  obscurePassword: _obscurePassword,
-                                  onObscurePasswordToggle: () => setState(() => _obscurePassword = !_obscurePassword),
-                                  onForgotPasswordPressed: () {
-                                    setState(() {
-                                      _showForgotPassword = true;
-                                      _forgotPasswordStep = 1;
-                                      _resetErrors();
-                                    });
-                                  },
-                                  onSubmit: _submit,
-                                  isLoading: _isLoading,
-                                  isGoogleLoading: _isGoogleLoading,
-                                  onGoogleSignIn: _signInWithGoogle,
-                                ),
+                          front: AnimatedSwitcher(
+                            duration: const Duration(milliseconds: 300),
+                            transitionBuilder: (Widget child, Animation<double> animation) {
+                              return FadeTransition(
+                                opacity: animation,
+                                child: child,
+                              );
+                            },
+                            child: _showOtpVerification 
+                                ? OtpForm(
+                                    otpController: _otpController,
+                                    otpFocusNode: _otpFocusNode,
+                                    otpError: _otpError,
+                                    isLoading: _isLoading,
+                                    resendCountdown: _resendCountdown,
+                                    onVerify: _submitOtp,
+                                    onResend: _resendOtp,
+                                    registeredEmail: _registeredEmail,
+                                  )
+                                : LoginForm(
+                                    emailController: _emailController,
+                                    passwordController: _passwordController,
+                                    emailError: _emailError,
+                                    passwordError: _passwordError,
+                                    obscurePassword: _obscurePassword,
+                                    onObscurePasswordToggle: () => setState(() => _obscurePassword = !_obscurePassword),
+                                    onForgotPasswordPressed: () {
+                                      setState(() {
+                                        _showForgotPassword = true;
+                                        _forgotPasswordStep = 1;
+                                        _resetErrors();
+                                      });
+                                    },
+                                    onSubmit: _submit,
+                                    isLoading: _isLoading,
+                                    isGoogleLoading: _isGoogleLoading,
+                                    onGoogleSignIn: _signInWithGoogle,
+                                  ),
+                          ),
                           back: _showForgotPassword
                               ? ForgotPasswordForm(
                                   emailController: _emailController,

@@ -107,7 +107,7 @@ class ProUpgradeSheet extends ConsumerWidget {
             ),
 
             // 🚀 Avantajlar Hepsini Göster
-            _buildFeatureItem(context, Icons.analytics_rounded, 'AI Analizleri', 'Günlük 50 adet genişletilmiş derin analiz.', isSmallScreen),
+            _buildFeatureItem(context, Icons.analytics_rounded, 'AI Analizleri', 'Sınırsız ve derin yapay zeka analizleri.*', isSmallScreen),
             _buildFeatureItem(context, Icons.account_balance_wallet_rounded, 'Sınırsız Kasa', 'Dilediğiniz kadar kasa ve cüzdan oluşturun.', isSmallScreen),
             _buildFeatureItem(context, Icons.sync_rounded, 'Bulut Eşitleme', 'Verilerinizi güvenle yedekleyin ve senkronize edin.', isSmallScreen),
             _buildFeatureItem(context, Icons.palette_rounded, 'Özel Temalar', 'Ayrıcalıklı renk paletleri ve arka plan stilleri.', isSmallScreen),

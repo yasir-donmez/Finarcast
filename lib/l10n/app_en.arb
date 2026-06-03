@@ -8,7 +8,7 @@
   "aiNotifications": "AI Assistant Alerts",
   "dataAndAiSettings": "DATA & AI SETTINGS",
   "dataRetention": "Data Retention",
-  "dataRetentionDesc": "Expired transactions are archived.\nAI Persona only uses data within this period.",
+  "dataRetentionDesc": "Expired transactions are archived.\nAI Assistant only uses data within this period.",
   "permanentDataDeletion": "Permanent Deletion",
   "permanentDataDeletionDesc": "After this period, transactions are permanently deleted from the database.\nThis action cannot be undone.",
   "oneMonth": "1 Month",
@@ -456,7 +456,7 @@
   "authBadCode": "The verification code you entered is incorrect or invalid.",
   "authSignupDisabled": "New user registration is currently disabled. Please contact the administrator.",
   "authRateLimitExceeded": "Too many requests sent. Email rate limit exceeded, please try again in a while.",
-  "authOtpRequired": "Please enter the verification code (6 or 8 digits).",
+  "authOtpRequired": "Please enter the 6-digit verification code.",
   "authOtpSent": "A new verification code has been sent to your email.",
   "authRegistrationSuccess": "Registration successful! Please enter the verification code sent to your email.",
   "authVerificationCode": "Verification Code",
@@ -519,6 +519,161 @@
   "authPasswordResetSuccess": "Your password has been successfully reset and you are signed in.",
   "authGoogleError": "Google Sign-In Error",
   "authPasswordDifferentError": "Your new password must be different from your current password.",
-  "authUserNotFoundError": "No user found registered with this email address."
+  "authUserNotFoundError": "No user found registered with this email address.",
+  "dataRetentionDetail": "After this period, your transactions are hidden from the main list and moved to the archive. Archived data does not affect your balance and keeps the Dashboard clean.",
+  "retentionPeriodLabel": "Retention Period:",
+  "premiumRequired": "Premium Required",
+  "premiumRetentionDesc": "Data retention, archiving, and automatic deletion rules are only available for Premium members.",
+  "later": "Later",
+  "permanentDeletionDetail": "Warning: After this period, your data will be completely deleted from your device and cannot be recovered.",
+  "purgePeriodLabel": "Deletion Period:",
+  "cloudSync": "Cloud Sync",
+  "loginRequiredLabel": "Login required",
+  "syncToday": "Today at {time}",
+  "@syncToday": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "syncYesterday": "Yesterday at {time}",
+  "@syncYesterday": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "noSyncYet": "No sync performed yet",
+  "syncStatus": "Sync Status",
+  "lastSyncLabel": "Last Sync: {time}",
+  "@lastSyncLabel": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "syncBackgroundDesc": "Your data is automatically backed up to the cloud in the background.",
+  "syncCloudDesc": "Your data is backed up instantly using Supabase cloud infrastructure. Even if you delete the app, you can restore your data by logging in.",
+  "syncNow": "SYNC NOW",
+  "syncing": "SYNCING DATA...",
+  "syncPartialSuccess": "Partial success: {summary}",
+  "@syncPartialSuccess": {
+    "placeholders": {
+      "summary": {
+        "type": "String"
+      }
+    }
+  },
+  "syncFailed": "Sync failed. {error}",
+  "@syncFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "syncConnectionError": "Please check your internet connection or login details.",
+  "loginRequiredTitle": "Login Required",
+  "loginRequiredSyncDesc": "You must log in to back up your data by enabling cloud sync.",
+  "premiumSyncDesc": "Cloud Sync feature uses Supabase backup infrastructure and is only available for Premium members.",
+  "showOnPhone": "Show on Phone",
+  "appOnly": "App Only",
+  "notificationDesc": "Determines whether reminders are only kept within the app or also shown in your phone's notification panel. When turned off, reminders remain silently in the app.",
+  "selectMainCurrency": "Select main application currency.",
+  "currencyDesc": "This currency is used as the primary currency throughout the app (Dashboard, Vaults, and Statistics). All your assets are calculated based on this currency.",
+  "changeCurrency": "Change Currency",
+  "exchangeRateNotFoundError": "No exchange rate found for the selected currency. Please check your internet connection and try again.",
+  "exchangeRatesDownloadFailed": "Could not download exchange rates. Check your internet connection.",
+  "exchangeRatesCheckError": "An error occurred while checking rates. Please try again.",
+  "exchangeRates": "Exchange Rates",
+  "baseUnitLira": "Base Unit: Turkish Lira",
+  "baseUnitLabel": "Base Unit: {currency}",
+  "@baseUnitLabel": {
+    "placeholders": {
+      "currency": {
+        "type": "String"
+      }
+    }
+  },
+  "lastSyncShort": "LAST: {time}",
+  "@lastSyncShort": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "updateRatesNow": "UPDATE RATES NOW",
+  "updatingRates": "UPDATING...",
+  "exchangeRatesUpdated": "Exchange rates updated successfully.",
+  "exchangeRatesUpdateFailed": "Update failed. Check your internet connection.",
+  "showLess": "Show Less",
+  "showMore": "Show More",
+  "styleLabel": "Style",
+  "styleDesc": "Select visual style of cards and background",
+  "styleColor": "Colored",
+  "styleColorDesc": "Harmonious colors",
+  "styleSimple": "Simple",
+  "styleSimpleDesc": "Flat design",
+  "premiumStyleDesc": "Colored style is only available for Premium members.",
+  "premiumColorDesc": "Custom color themes and advanced gradients are only available for Premium members.",
+  "paletteArctic": "Arctic",
+  "paletteMint": "Mint",
+  "paletteRose": "Rose",
+  "paletteLavender": "Lavender",
+  "paletteSahara": "Sahara",
+  "paletteSapphire": "Sapphire",
+  "paletteBurgundy": "Burgundy",
+  "palettePlatinum": "Platinum",
+  "yearlyDiscount": "Yearly (-33%)",
+  "comparisonTitle": "COMPARISON",
+  "limitVaults": "Vault Limit",
+  "limitAiAnalysis": "AI Transaction Assistant",
+  "limitCloudSync": "Cloud Sync",
+  "limitDataRetention": "Data Retention & Purge",
+  "limitCustomThemes": "Custom Themes",
+  "limitAdFree": "Ad-Free Experience",
+  "limitVaultsFree": "2 Vaults",
+  "limitVaultsPro": "Unlimited",
+  "basicAnalysis": "Standard",
+  "advancedAnalysis": "Extended",
+  "limitDataRetentionPro": "Customizable",
+  "cancelSubscriptionTest": "Cancel Subscription (Test)",
+  "yearlyAccess": "Yearly Access",
+  "monthlyAccess": "Monthly Access",
+  "yearlyPriceDetail": "Costs ₺99/month",
+  "monthlyPriceDetail": "Renews monthly",
+  "loginRequiredPurchaseDesc": "Please log in or create a free account to complete the purchase.",
+  "loginOrRegister": "Log In / Register",
+  "privilegesActive": "Privileges active",
+  "tapToUnlock": "Tap to unlock limits",
+  "sectionMembershipAccount": "Membership & Account",
+  "sectionAppearanceStyle": "Appearance & Style",
+  "sectionDataCloud": "Data & Cloud",
+  "sectionSessionSecurity": "Session & Security",
+  "guestUser": "Guest User",
+  "tapToLogin": "Tap to log in or register",
+  "changePassword": "Change Password",
+  "changePasswordDesc": "Confirm your current password to set a new password. Your password must be at least 6 characters.",
+  "currentPasswordHint": "Current Password",
+  "newPasswordHint": "New Password",
+  "confirmNewPasswordHint": "Confirm New Password",
+  "currentPasswordRequired": "You must enter your current password.",
+  "updatePassword": "Update Password",
+  "signOut": "Sign Out",
+  "logout": "Log Out",
+  "logoutConfirm": "Are you sure you want to log out?",
+  "deleteAccount": "Delete Account",
+  "deleteAccountPermanently": "Permanently Delete Account",
+  "deleteAccountConfirmDesc": "Are you sure you want to permanently delete your account and all data in the cloud? This action cannot be undone.",
+  "reset": "Reset",
+  "resetDataTitle": "Reset Data?",
+  "resetDataDesc": "All your financial data and settings will be permanently deleted. This action cannot be undone.",
+  "deleteAll": "Delete All",
+  "resetSuccess": "All data and settings have been successfully reset.",
+  "supportEmailCopied": "Could not open email client. Support email (finarcast.support@gmail.com) was copied."
 }
 

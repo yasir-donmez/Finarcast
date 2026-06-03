@@ -1,101 +1,132 @@
 <div align="center">
-  <h1>🚀 Finarcast</h1>
-  <p><strong>Finansal Zaman Makinesi & Akıllı Servet Yönetimi</strong></p>
+  <img src="https://via.placeholder.com/800x200/1A1A1A/FFFFFF?text=FinCast+Banner" alt="FinCast Banner" width="100%">
 
-  <p>
-    <img src="https://img.shields.io/badge/Flutter-%2302569B.svg?style=for-the-badge&logo=Flutter&logoColor=white" alt="Flutter" />
-    <img src="https://img.shields.io/badge/Dart-%230175C2.svg?style=for-the-badge&logo=dart&logoColor=white" alt="Dart" />
-    <img src="https://img.shields.io/badge/Isar_Database-Hot_Pink?style=for-the-badge&logo=databricks&logoColor=white" alt="Isar" />
-    <img src="https://img.shields.io/badge/Design-Dark_Neumorphism-black?style=for-the-badge" alt="Design" />
-    <img src="https://img.shields.io/badge/Architecture-Feature_First-success?style=for-the-badge" alt="Feature-First" />
-  </p>
+  <br />
+  <br />
+
+  <h1>FinCast 💸</h1>
+  <p><strong>Flutter tabanlı, Yapay Zeka destekli yeni nesil finans ve abonelik yönetim uygulaması.</strong></p>
+
+  <a href="#indir">
+    <img src="https://img.shields.io/badge/Google_Play-414141?style=for-the-badge&logo=google-play&logoColor=white" alt="Google Play" />
+  </a>
+  <a href="#indir">
+    <img src="https://img.shields.io/badge/App_Store-0D0D0D?style=for-the-badge&logo=apple&logoColor=white" alt="App Store" />
+  </a>
+
+  <br />
+  <br />
+
+  <img src="https://img.shields.io/badge/platform-iOS%20%7C%20Android-lightgrey" alt="Platform" />
+  <img src="https://img.shields.io/badge/framework-Flutter%203.x-blue" alt="Flutter" />
+  <img src="https://img.shields.io/badge/state-Riverpod-orange" alt="Riverpod" />
+  <img src="https://img.shields.io/badge/database-Isar%20%7C%20Supabase-green" alt="Database" />
 </div>
 
----
+<br />
 
-## 🌟 Uygulama Vizyonu ve Farkımız
-
-**Finarcast**, kullanıcıları her gün kuruş kuruş veri girmeye zorlayan, geçmiş odaklı ve geleneksel bütçe uygulamalarından tamamen farklıdır. 
-
-Uygulamamız bir **"Finansal Zaman Makinesi"** vizyonuyla çalışır. Geçmiş verileri listelemek yerine; **matematiksel modeller** ve **kısıtlı optimizasyon (Constrained Optimization)** algoritmaları kullanarak kullanıcının gelecekteki bakiyesini simüle eder, finansal hedeflerine ulaşması için stratejiler ve akıllı rotalar sunar.
+> **Not:** FinCast, standart bütçe takibinin ötesine geçerek; harcamalarınızı özel **Kasalar (Vaults)** içinde izole etmenizi, **Gemini AI** destekli "Smart Inbox" (Akıllı Gelen Kutusu) üzerinden finansal optimizasyon yapmanızı sağlayan premium bir mobil uygulamadır.
 
 ---
 
-## ✨ Temel Özellikler (Core Features)
+## 📱 Ekran Görüntüleri
 
-- **📊 Esnek Bütçeleme (Min-Max):** Harcamalarınıza tek bir katı rakam girmek yerine esnek aralıklar belirlersiniz (Örn: *Haftalık market 200 TL - 450 TL*). Sistem bu aralıklara göre kısıtlı optimizasyon hesaplamaları yapar.
-- **🔒 Kilit Mekanizması (Kırmızı Çizgi):** Yurt aidatı, eğitim, sağlık veya spor/supplement gibi vazgeçilmez temel giderlerinizi "Kilitlersiniz" (Lock). Sistem, tasarruf rotası oluştururken bu kilitli giderlere asla dokunmaz, tasarruf yükünü esnek harcamalara optimal şekilde dağıtır.
-- **⏳ Zaman Makinesi (Gelecek Projeksiyonu):** Ekranda yer alan yenilikçi bir kaydırıcı (slider) ile aylar veya yıllar sonraki tahmini bakiyenizi anında simüle edebilirsiniz.
-- **💼 Çoklu Varlık Kasaları (Vaults):** Sadece TL (Türk Lirası) değil; Altın, Dolar vb. farklı varlık kasaları oluşturabilirsiniz. Çevrimdışı öncelikli (offline-first) çalışarak toplam servetinizi anında ve internete bağlı kalmadan takip edebilirsiniz.
-- **📸 Geçmiş Veri Snapshot'ları:** Her gün veri girmeseniz bile, sistem ay sonlarında bakiyenizin ve ayarlarınızın fotoğrafını (snapshot) çeker. Bu sayede geçmişe dönük tarihsel trend grafikleri (Bar charts) oluşturulur.
+*Geliştirme aşaması tamamlandıkça, uygulamanın özel cam efektli (GlassSurface) ve neumorphic (InsetContainer) tasarımlarına sahip ekran görüntüleri buraya eklenecektir.*
 
----
-
-## 🛠 Teknik Mimari (Tech Stack & Architecture)
-
-Finarcast, modern, hızlı ve tamamen gizlilik odaklı bir mimariyle inşa edilmiştir:
-
-- **Frontend (Flutter):** Saniyede 120 FPS akıcılığa sahip sıvı animasyonlar (fluid animations) ve pürüzsüz bir arayüz deneyimi sunar.
-- **Local Database (Isar):** Çevrimdışı öncelikli (offline-first) mimari üzerine kuruludur. İlişkisel NoSQL yapısıyla sıfır gecikme (zero-latency) sağlar. Uygulama internet olmadan %100 işlevsel çalışır.
-- **Cloud Sync (Opsiyonel):** Firebase veya Google Drive üzerinden arka planda sessiz veri yedekleme olanağı bulunur. Ağır bir custom backend (.NET/PostgreSQL sunucusu vb.) kullanılmaz.
-- **Yapay Zeka & Algoritma:** Yavaş LLM'ler (sohbet botları) yerine, cihaz üzerinde anında çalışan (on-device) kısıtlı optimizasyon algoritmaları kullanır. Gelecekte, başarı olasılığı hesaplayan özel **TFLite** tabanlı ML (Makine Öğrenimi) modelleri entegre edilecektir.
+<p align="center">
+  <img src="https://via.placeholder.com/250x500/1e1e1e/ffffff?text=Dashboard+Mockup" width="30%">
+  &nbsp;&nbsp;&nbsp;&nbsp;
+  <img src="https://via.placeholder.com/250x500/1e1e1e/ffffff?text=Vaults+Mockup" width="30%">
+  &nbsp;&nbsp;&nbsp;&nbsp;
+  <img src="https://via.placeholder.com/250x500/1e1e1e/ffffff?text=AI+Optimization+Mockup" width="30%">
+</p>
 
 ---
 
-## 🎨 UI/UX Tasarım Dili
+## ✨ Gerçek Özellikler (Uygulamada Olanlar)
 
-Finarcast, kullanıcıya premium ve dokunsal (tactile) bir his verir:
-
-- **Tema (Dark Mode First):** Karanlık tema önceliklidir. Zemin rengi olarak obsidyen siyahı ve mat antrasit gri tercih edilmiştir.
-- **Stil (Dark Neumorphism):** Karanlık Kabartma (Dark Neumorphism) stili kullanılmıştır. Ekranda yer alan kartlar ve butonlar fiziksel olarak ekrana gömülü (debossed) veya dışarı kabartılmış (embossed) gibi durarak mat ve premium bir hissiyat sunar.
-- **Vurgu Renkleri:** Fütüristik dokunuşlar için **Elektrik Mavisi (Cyan)** ve **Neon Mor** parlamalar (glow) kullanılmıştır.
+<table>
+  <tr>
+    <td align="center" width="50%">
+      <h3>🛡️ Kasa (Vault) Mimarisi</h3>
+      <p>Nakit, Kredi Kartı gibi varlıklarınızı ayrı kasalara bölün. <code>VaultGrid</code> ve <code>IntegratedVaultCard</code> bileşenleriyle tüm bakiyelerinizi tek panelden yönetin.</p>
+    </td>
+    <td align="center" width="50%">
+      <h3>🤖 Gemini AI Optimizasyonu</h3>
+      <p><code>google_generative_ai</code> entegrasyonu ile harcama geçmişiniz analiz edilir. "Smart Inbox" (Akıllı Kutu) üzerinden size özel bütçe optimizasyon tavsiyeleri sunulur.</p>
+    </td>
+  </tr>
+  <tr>
+    <td align="center" width="50%">
+      <h3>💎 Premium Cam Tasarım</h3>
+      <p>Özel <code>GlassSurface</code>, <code>SolidSurface</code> ve sıvı animasyonlara sahip <code>DynamicSegmentedControl</code> bileşenleri ile üst düzey, akıcı bir arayüz deneyimi.</p>
+    </td>
+    <td align="center" width="50%">
+      <h3>🔁 Akıllı İşlem ve Abonelikler</h3>
+      <p>Tekrarlayan gelir ve giderlerinizi takip edin, uygulama içi özel hatırlatıcılar ile yaklaşan ödemelerinizi asla kaçırmayın.</p>
+    </td>
+  </tr>
+</table>
 
 ---
 
-## 📂 Klasör Mimarisi (Architecture)
+## 🛠 Kullanılan Teknolojiler (Tech Stack)
 
-Proje, sürdürülebilir ve temiz kod prensiplerine uygun olarak **Feature-First (Özellik Odaklı)** mimaride kurgulanmıştır:
+FinCast, en güncel Flutter paketleri ve modern mobil mimari standartlarıyla inşa edilmiştir:
 
-```plaintext
+*   **SDK & UI:** <img src="https://img.shields.io/badge/Flutter-02569B?style=flat-square&logo=flutter&logoColor=white" alt="Flutter" /> (Material & Özel Bileşenler)
+*   **State Management:** `flutter_riverpod` (Reaktif durum yönetimi)
+*   **Veritabanı (Lokal & Uzak):** 
+    *   `isar`: Işık hızında yerel veri depolama
+    *   `supabase_flutter`: Uzak sunucu, senkronizasyon ve kimlik doğrulama
+*   **Yapay Zeka:** `google_generative_ai` (Gemini API)
+*   **Abonelikler (Premium):** `purchases_flutter` (RevenueCat entegrasyonu)
+*   **Grafikler:** `fl_chart` (Veri görselleştirme)
+
+---
+
+## 🏗 Proje Klasör Yapısı
+
+Proje özellikleri bağımsız modüller (Feature-based architecture) olarak ayrılmıştır:
+
+```text
 lib/
-├── core/               # Konfigürasyon, Neumorphic temalar, Isar DB motoru ve sabitler
-├── features/           # Uygulamanın bağımsız özellikleri (Modüler yapı)
-│   ├── dashboard/      # Ana ekran, Zaman Makinesi UI (Slider ve projeksiyonlar)
-│   ├── budget/         # Min-Max bütçeleme kuralları ve Kilit mekanizması
-│   └── vaults/         # Çoklu varlık kasaları (Altın, Döviz vb.) yönetimi
-├── shared/             # Ortak Neumorphic butonlar ve widget'lar
-└── main.dart           # Uygulama başlatıcısı 
+├── core/         # Temel yapılandırmalar (Tema, Rotalar, Ortam Değişkenleri)
+├── features/     # İş modülleri
+│   ├── auth/         # Giriş / Kayıt
+│   ├── dashboard/    # Ana Panel ve Widget Yöneticisi
+│   ├── optimization/ # AI Asistan, Smart Inbox
+│   ├── profile/      # Ayarlar ve Abonelik (Premium Orb)
+│   ├── transactions/ # İşlem Ekleme, Periyot ve Hatırlatıcılar
+│   └── vaults/       # Kasa Yönetimi
+├── l10n/         # Çoklu Dil Destekleri
+└── shared/       # Ortak Bileşenler (Custom Widgets)
 ```
 
 ---
 
-## 🚀 Kurulum (Getting Started)
+## 🚀 Geliştiriciler İçin Başlangıç
 
-Finarcast'i kendi ortamınızda derlemek ve deneyimlemek için aşağıdaki adımları takip edebilirsiniz:
+Projeyi lokal ortamınızda derlemek için aşağıdaki adımları izleyin.
 
-1. **Repoyu Klonlayın:**
+### Kurulum
+
+1. **Flutter SDK'yı yükleyin:** Cihazınızda Flutter `^3.9.2` ve üzeri kurulu olmalıdır.
+2. **Repoyu indirin:**
    ```bash
-   git clone https://github.com/yasir-donmez/Finarcast.git
-   cd Finarcast
+   git clone <repository-url>
+   cd FinCast
    ```
-
-2. **Bağımlılıkları Yükleyin:**
+3. **Bağımlılıkları yükleyin:**
    ```bash
    flutter pub get
    ```
-
-3. **Kod Üretimini Başlatın (Isar veri modelleri için):**
+4. **Kod Üretimini (Isar/Riverpod) Çalıştırın:**
    ```bash
    flutter pub run build_runner build --delete-conflicting-outputs
    ```
-
-4. **Uygulamayı Çalıştırın:**
+5. **Ortam Değişkenlerini Ayarlayın:** Proje dizininde bir `.env` dosyası oluşturun ve gerekli Supabase / Gemini API anahtarlarını ekleyin.
+6. **Projeyi Başlatın:**
    ```bash
    flutter run
    ```
-
----
-
-<div align="center">
-  <p><i>Finarcast — Gelecekteki Servetinizi Bugünden Optimizasyonla İnşa Edin.</i></p>
-</div>

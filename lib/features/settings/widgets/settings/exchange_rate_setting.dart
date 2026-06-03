@@ -14,6 +14,7 @@ import '../../../../core/theme/app_constants.dart';
 import '../../../../shared/widgets/custom_notification.dart';
 import '../../../../core/database/models/exchange_rate.dart';
 import '../settings_list_items.dart';
+import '../../../../l10n/app_localizations.dart';
 
 class ExchangeRateSetting extends ConsumerStatefulWidget {
   const ExchangeRateSetting({super.key});
@@ -31,6 +32,7 @@ class _ExchangeRateSettingState extends ConsumerState<ExchangeRateSetting> with 
   Widget build(BuildContext context) {
     final activeColor = SettingsListItems.getSettingColor(context, SettingType.exchangeRate, ref.watch(rotaryColorProvider));
     final rates = ref.watch(exchangeRatesProvider).value ?? [];
+    final l10n = AppLocalizations.of(context)!;
     
     final lastUpdate = rates.isNotEmpty 
         ? rates.first.lastUpdated 
@@ -70,7 +72,7 @@ class _ExchangeRateSettingState extends ConsumerState<ExchangeRateSetting> with 
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        "Döviz Kurları",
+                        l10n.exchangeRates,
                         style: TextStyle(
                           color: AppColors.getTextPrimary(context),
                           fontSize: 16,
@@ -78,9 +80,9 @@ class _ExchangeRateSettingState extends ConsumerState<ExchangeRateSetting> with 
                         ),
                       ),
                       Text(
-                        userCurrency == '₺' 
-                            ? "Baz Birim: Türk Lirası" 
-                            : "Baz Birim: $userCurrency",
+                        userCurrency == '₺' || userCurrency == 'TRY'
+                            ? l10n.baseUnitLira
+                            : l10n.baseUnitLabel(userCurrency),
                         style: TextStyle(
                           color: AppColors.getTextSecondary(context).withValues(alpha: 0.4),
                           fontSize: 12,
@@ -94,7 +96,7 @@ class _ExchangeRateSettingState extends ConsumerState<ExchangeRateSetting> with 
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
                     Text(
-                      "SON: $lastUpdateStr",
+                      l10n.lastSyncShort(lastUpdateStr),
                       style: TextStyle(
                         color: activeColor,
                         fontSize: 12,
@@ -132,7 +134,7 @@ class _ExchangeRateSettingState extends ConsumerState<ExchangeRateSetting> with 
                       ..._buildRatesList(context, rates, userCurrency, activeColor),
                       const SizedBox(height: 16),
                       CustomButton(
-                        label: _isUpdating ? "GÜNCELLENİYOR..." : "KURLARI ŞİMDİ GÜNCELLE",
+                        label: _isUpdating ? l10n.updatingRates : l10n.updateRatesNow,
                         height: 48,
                         fontSize: 13,
                         onTap: () async {
@@ -143,9 +145,9 @@ class _ExchangeRateSettingState extends ConsumerState<ExchangeRateSetting> with 
 
                           if (!context.mounted) return;
                           if (success) {
-                            CustomNotification.success(context, "Kurlar başarıyla güncellendi.");
+                            CustomNotification.success(context, l10n.exchangeRatesUpdated);
                           } else {
-                            CustomNotification.error(context, "Güncelleme başarısız. İnternet bağlantınızı kontrol edin.");
+                            CustomNotification.error(context, l10n.exchangeRatesUpdateFailed);
                           }
                         },
                         activeColor: activeColor,
@@ -340,7 +342,7 @@ class _ExchangeRateSettingState extends ConsumerState<ExchangeRateSetting> with 
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text(
-                    _showAllRates ? "Daha Az Göster" : "Daha Fazla Göster",
+                    _showAllRates ? AppLocalizations.of(context)!.showLess : AppLocalizations.of(context)!.showMore,
                     style: TextStyle(
                       color: activeColor,
                       fontSize: 13,

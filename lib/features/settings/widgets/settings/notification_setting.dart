@@ -8,6 +8,7 @@ import '../../../../shared/widgets/custom_switch.dart';
 import '../../../../shared/widgets/custom_animated_icon.dart';
 import '../../../home/home_providers.dart';
 import '../settings_list_items.dart';
+import '../../../../l10n/app_localizations.dart';
 
 final _notifExpandedProvider = StateProvider.autoDispose<bool>((ref) => false);
 
@@ -19,6 +20,7 @@ class NotificationSetting extends ConsumerWidget {
     final isEnabled = ref.watch(settingsProvider.select((s) => s.isNotificationsEnabled));
     final activeColor = SettingsListItems.getSettingColor(context, SettingType.notification, ref.watch(rotaryColorProvider));
     final isExpanded = ref.watch(_notifExpandedProvider);
+    final l10n = AppLocalizations.of(context)!;
 
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -53,7 +55,7 @@ class NotificationSetting extends ConsumerWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        "Bildirimler",
+                        l10n.notifications,
                         style: TextStyle(
                           color: AppColors.getTextPrimary(context),
                           fontSize: 16,
@@ -71,7 +73,7 @@ class NotificationSetting extends ConsumerWidget {
                         ),
                         transitionBuilder: (child, animation) => FadeTransition(opacity: animation, child: child),
                         child: Text(
-                          isEnabled ? "Telefonda Göster" : "Sadece Uygulama İçi",
+                          isEnabled ? l10n.showOnPhone : l10n.appOnly,
                           key: ValueKey(isEnabled),
                           style: TextStyle(
                             color: AppColors.getTextSecondary(context).withValues(alpha: 0.5),
@@ -111,18 +113,22 @@ class NotificationSetting extends ConsumerWidget {
                       color: AppColors.getInnerSurface(context),
                       borderRadius: BorderRadius.circular(12),
                     ),
-                    child: Text(
-                      "Hatırlatıcıların sadece uygulama içinde mi saklanacağını yoksa telefonunuzun bildirim "
-                      "panelinde de gösterilip gösterilmeyeceğini belirler. Kapalıyken hatırlatıcılar sessizce "
-                      "uygulama içinde kalır.",
-                      style: TextStyle(
-                        color: AppColors.getTextSecondary(context),
-                        fontSize: 13,
-                        height: 1.4,
-                      ),
-                    ),
-                  ),
-                )
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          l10n.notificationDesc,
+                          style: TextStyle(
+                            color: AppColors.getTextSecondary(context),
+                            fontSize: 13,
+                            height: 1.4,
+                          ),
+                        ),
+
+                  ],
+                ),
+              ),
+            )
               : const SizedBox.shrink(),
         ),
       ],

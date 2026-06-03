@@ -7,6 +7,7 @@ import 'custom_card.dart';
 /// Odaklandığında (focus) hafifçe büyüyen, kenarlıkları parlayan ve premium hissiyat veren input.
 class CustomTextField extends StatefulWidget {
   final TextEditingController controller;
+  final FocusNode? focusNode;
   final String hintText;
   final IconData icon;
   final String? suffixText;
@@ -20,6 +21,7 @@ class CustomTextField extends StatefulWidget {
   const CustomTextField({
     super.key,
     required this.controller,
+    this.focusNode,
     required this.hintText,
     required this.icon,
     this.suffixText,
@@ -47,23 +49,47 @@ class CustomTextField extends StatefulWidget {
 }
 
 class _PrecisionInputState extends State<CustomTextField> with SingleTickerProviderStateMixin {
-  late FocusNode _focusNode;
+  FocusNode? _localFocusNode;
+  FocusNode get _effectiveFocusNode => widget.focusNode ?? (_localFocusNode ??= FocusNode());
   bool _isFocused = false;
 
   @override
   void initState() {
     super.initState();
-    _focusNode = FocusNode();
-    _focusNode.addListener(() {
-      if (mounted) {
-        setState(() => _isFocused = _focusNode.hasFocus);
+    if (widget.focusNode == null) {
+      _localFocusNode = FocusNode();
+    }
+    _effectiveFocusNode.addListener(_handleFocusChange);
+    _isFocused = _effectiveFocusNode.hasFocus;
+  }
+
+  void _handleFocusChange() {
+    if (mounted) {
+      setState(() => _isFocused = _effectiveFocusNode.hasFocus);
+    }
+  }
+
+  @override
+  void didUpdateWidget(CustomTextField oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.focusNode != oldWidget.focusNode) {
+      oldWidget.focusNode?.removeListener(_handleFocusChange);
+      if (oldWidget.focusNode == null) {
+        _localFocusNode?.dispose();
+        _localFocusNode = null;
       }
-    });
+      if (widget.focusNode == null) {
+        _localFocusNode = FocusNode();
+      }
+      _effectiveFocusNode.addListener(_handleFocusChange);
+      _isFocused = _effectiveFocusNode.hasFocus;
+    }
   }
 
   @override
   void dispose() {
-    _focusNode.dispose();
+    _effectiveFocusNode.removeListener(_handleFocusChange);
+    _localFocusNode?.dispose();
     super.dispose();
   }
 
@@ -93,14 +119,18 @@ class _PrecisionInputState extends State<CustomTextField> with SingleTickerProvi
             ? CustomCard(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: SizedBox(
-                  height: 52 * widget.scalingFactor,
+                  height: widget.fontSize != null 
+                      ? (widget.fontSize! + 24 * widget.scalingFactor) 
+                      : (52 * widget.scalingFactor),
                   child: Center(
                     child: _buildTextField(activeColor, isDark),
                   ),
                 ),
               )
             : SizedBox(
-                height: 52 * widget.scalingFactor,
+                height: widget.fontSize != null 
+                    ? (widget.fontSize! + 24 * widget.scalingFactor) 
+                    : (52 * widget.scalingFactor),
                 child: Center(
                   child: _buildTextField(activeColor, isDark),
                 ),
@@ -147,7 +177,7 @@ class _PrecisionInputState extends State<CustomTextField> with SingleTickerProvi
   Widget _buildTextField(Color activeColor, bool isDark) {
     return TextField(
       controller: widget.controller,
-      focusNode: _focusNode,
+      focusNode: _effectiveFocusNode,
       autofocus: widget.autofocus,
       keyboardType: widget.keyboardType,
       inputFormatters: widget.inputFormatters,
@@ -178,13 +208,13 @@ class _PrecisionInputState extends State<CustomTextField> with SingleTickerProvi
         hintStyle: TextStyle(
           fontWeight: FontWeight.w500, 
           color: AppColors.getTextSecondary(context).withValues(alpha: 0.5), 
-          fontSize: (widget.fontSize != null ? widget.fontSize! * 0.8 : 15 * widget.scalingFactor)
+          fontSize: (widget.fontSize ?? 15 * widget.scalingFactor)
         ),
         prefixText: widget.textAlign == TextAlign.center ? widget.suffixText : null, // Center ise prefix olarak kullanabiliyoruz
         prefixStyle: TextStyle(
           fontWeight: FontWeight.w900, 
           color: activeColor.withValues(alpha: 0.4), 
-          fontSize: (widget.fontSize != null ? widget.fontSize! * 0.8 : 15 * widget.scalingFactor)
+          fontSize: (widget.fontSize ?? 15 * widget.scalingFactor)
         ),
         suffixText: widget.textAlign == TextAlign.center ? null : widget.suffixText,
         suffixStyle: TextStyle(
