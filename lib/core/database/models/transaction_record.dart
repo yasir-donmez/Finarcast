@@ -52,14 +52,9 @@ class TransactionRecord {
   /// İşlem tektir ancak birden fazla kasada listelenebilir.
   List<int> vaultIds = [];
 
-  /// Ana sayfada gösterilsin mi?
-  bool showOnDashboard = false;
 
-  /// Dashboard'daki sıralama
-  int dashboardOrder = 0;
 
-  /// Arşiv bayrağı: Süresi dolmuş periyodik işlemler silinmez, arşivlenir.
-  /// true → aktif listede görünmez, analiz motoru geçmiş hesabında kullanır.
+  /// İşlemin arşivlenip arşivlenmediğini belirtir. Arşivlenen işlemler aktif listelerde ve hatırlatıcılarda gösterilmez ancak geçmiş raporlarında ve grafiklerde hesaplamaya katılır.
   bool isArchived = false;
 
   /// İşleme dair not veya açıklama

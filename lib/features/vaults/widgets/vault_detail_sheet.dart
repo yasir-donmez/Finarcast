@@ -1,14 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
 import '../../../core/theme/app_constants.dart';
+import '../../transactions/widgets/transaction_amount_input.dart';
 import '../../../core/database/database_service.dart';
 import '../../../core/database/models/vault.dart';
 import '../../../core/database/models/transaction_record.dart';
 import '../../../core/providers/db_providers.dart';
 import '../../../core/providers/settings_provider.dart';
 import '../../../core/utils/currency_utils.dart';
-import '../../../core/utils/icon_utils.dart';
 import '../../../core/services/currency_service.dart';
 import '../../../core/database/models/exchange_rate.dart';
 import '../../../shared/widgets/segmented_control.dart';
@@ -18,6 +19,7 @@ import '../../../shared/widgets/custom_icon_button.dart';
 import '../../../shared/widgets/custom_dialog.dart';
 import '../../../shared/widgets/custom_button.dart';
 import '../../../l10n/app_localizations.dart';
+import '../../../core/utils/string_utils.dart';
 import '../vaults_providers.dart';
 
 enum VaultDetailTab { transactions, manage }
@@ -116,9 +118,9 @@ class _VaultDetailSheetState extends ConsumerState<VaultDetailSheet> with Single
         if (!hasRate) {
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
+              SnackBar(
                 content: Text(
-                  "Döviz kurları yüklü değil. Kasa para birimi değiştirilemedi. Lütfen internete bağlanıp kurları güncelleyin.",
+                  l10n.exchangeRatesNotLoadedVault,
                 ),
                 backgroundColor: Colors.redAccent,
               ),
@@ -140,7 +142,21 @@ class _VaultDetailSheetState extends ConsumerState<VaultDetailSheet> with Single
     }
 
     // --- BAKIYE DUZELTME ISLEMI ---
-    final double? editedBalance = double.tryParse(_balanceController.text.replaceAll(',', '.'));
+    double? parseLocaleDouble(String input) {
+      if (input.isEmpty) return null;
+      final locale = Localizations.localeOf(context).toString();
+      final format = NumberFormat.decimalPattern(locale);
+      final decimalSep = format.symbols.DECIMAL_SEP;
+      final groupSep = format.symbols.GROUP_SEP;
+
+      String clean = input.replaceAll(groupSep, '');
+      if (decimalSep != '.') {
+        clean = clean.replaceAll(decimalSep, '.');
+      }
+      return double.tryParse(clean);
+    }
+
+    final double? editedBalance = parseLocaleDouble(_balanceController.text);
     if (editedBalance != null) {
       final tempCurrency = (_tempCurrency ?? vault.currency) == 'AUTO' ? globalCurrency : (_tempCurrency ?? vault.currency);
       
@@ -169,8 +185,7 @@ class _VaultDetailSheetState extends ConsumerState<VaultDetailSheet> with Single
           ..categoryId = difference > 0 ? 'inc_other_general' : 'exp_other_general'
           ..iconCode = 'account_balance_wallet_rounded'
           ..note = l10n.balanceAdjustmentNote(oldBalanceStr, newBalanceStr)
-          ..periodType = 0 // Tek Seferlik
-          ..showOnDashboard = true;
+          ..periodType = 0; // Tek Seferlik
 
         await DatabaseService.addTransaction(tx);
       }
@@ -198,7 +213,6 @@ class _VaultDetailSheetState extends ConsumerState<VaultDetailSheet> with Single
     if (isMainVault) {
       vault = Vault()
         ..name = l10n.mainVault
-        ..iconCode = 'account_balance_wallet_rounded'
         ..currency = 'AUTO';
       displayTxs = allTransactions;
     } else {
@@ -220,7 +234,15 @@ class _VaultDetailSheetState extends ConsumerState<VaultDetailSheet> with Single
           final amt = t.getConvertedAmount(tempCurrency, rates) * t.passedOccurrences;
           return t.isIncome ? sum + amt : sum - amt;
         });
-        _balanceController.text = _initialCurrentBalance.toStringAsFixed(2).replaceAll(RegExp(r'\.00$'), '');
+        final locale = Localizations.localeOf(context).toString();
+        final format = NumberFormat.decimalPattern(locale);
+        final decimalSep = format.symbols.DECIMAL_SEP;
+        String rawText = _initialCurrentBalance.toStringAsFixed(2).replaceAll(RegExp(r'\.00$'), '').replaceAll('.', decimalSep);
+        final formatter = LocaleCurrencyFormatter(locale);
+        _balanceController.text = formatter.formatEditUpdate(
+          TextEditingValue.empty,
+          TextEditingValue(text: rawText),
+        ).text;
         
         _isInitialized = true;
       }
@@ -315,7 +337,7 @@ class _VaultDetailSheetState extends ConsumerState<VaultDetailSheet> with Single
             child: Row(
               children: [
                 Icon(
-                  IconUtils.getIcon(vault.iconCode ?? vault.name),
+                  Icons.account_balance_wallet_rounded,
                   color: activeColor.withValues(alpha: 0.4),
                   size: 22 * sf,
                 ),
@@ -622,7 +644,7 @@ class _VaultDetailSheetState extends ConsumerState<VaultDetailSheet> with Single
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(label.toUpperCase(), style: TextStyle(fontSize: 8 * sf, fontWeight: FontWeight.w900, color: color.withValues(alpha: isDark ? 0.6 : 0.85), letterSpacing: 0.8)),
+            Text(label.toSafeUpperCase(context), style: TextStyle(fontSize: 8 * sf, fontWeight: FontWeight.w900, color: color.withValues(alpha: isDark ? 0.6 : 0.85), letterSpacing: 0.8)),
             SizedBox(height: 2 * sf),
             FittedBox(
               fit: BoxFit.scaleDown,
@@ -709,11 +731,11 @@ class _VaultDetailSheetState extends ConsumerState<VaultDetailSheet> with Single
                         showCustomDialog(
                           context: context,
                           accentColor: AppColors.error,
-                          title: "Kasa Silinemez",
-                          content: "Uygulamada en az bir aktif kasa bulunmalıdır. Bu kasayı silmek için önce yeni bir kasa oluşturmalısınız.",
+                          title: l10n.cannotDeleteVault,
+                          content: l10n.cannotDeleteVaultDesc,
                           actions: [
                             PrecisionDialogAction(
-                              label: "Tamam",
+                              label: l10n.ok,
                               onTap: () => Navigator.pop(context),
                               isPrimary: true,
                             ),
@@ -736,14 +758,14 @@ class _VaultDetailSheetState extends ConsumerState<VaultDetailSheet> with Single
             hintText: l10n.currentBalance,
             icon: Icons.payments_rounded,
             suffixText: (_tempCurrency ?? vault.currency) == 'AUTO' ? '' : (_tempCurrency ?? vault.currency),
-            keyboardType: const TextInputType.numberWithOptions(decimal: true),
+            keyboardType: const TextInputType.numberWithOptions(decimal: true, signed: true),
             inputFormatters: [
-              FilteringTextInputFormatter.allow(RegExp(r'[0-9.,]')),
+              LocaleCurrencyFormatter(Localizations.localeOf(context).toString()),
             ],
             scalingFactor: sf,
           ),
           const SizedBox(height: 20),
-          Text(l10n.currency.toUpperCase(), style: TextStyle(fontSize: 10, fontWeight: FontWeight.w900, color: AppColors.getTextSecondary(context), letterSpacing: 1)),
+          Text(l10n.currency.toSafeUpperCase(context), style: TextStyle(fontSize: 10, fontWeight: FontWeight.w900, color: AppColors.getTextSecondary(context), letterSpacing: 1)),
           const SizedBox(height: 12),
           SingleChildScrollView(
             scrollDirection: Axis.horizontal,

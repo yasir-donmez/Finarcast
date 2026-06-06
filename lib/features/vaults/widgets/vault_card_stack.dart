@@ -2,15 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../l10n/app_localizations.dart';
-import '../../../core/utils/currency_utils.dart';
 import '../../../core/providers/settings_provider.dart';
-import '../../../core/providers/db_providers.dart';
 import '../vaults_providers.dart';
 import 'integrated_vault_card.dart';
 
 class VaultCardStack extends ConsumerStatefulWidget {
   final List<String?> deckItems;
-  final List<TransactionUI> allTransactions;
   final int currentIndex;
   final Function(String?) onVaultSelect;
   final Color activeColor;
@@ -22,7 +19,6 @@ class VaultCardStack extends ConsumerStatefulWidget {
   const VaultCardStack({
     super.key,
     required this.deckItems, 
-    required this.allTransactions, 
     required this.currentIndex, 
     required this.onVaultSelect, 
     required this.activeColor, 
@@ -113,55 +109,19 @@ class _VaultCardStackState extends ConsumerState<VaultCardStack> {
         itemBuilder: (context, index) {
           final vaultId = widget.deckItems[index];
           final globalCurrency = ref.watch(settingsProvider).currencySymbol;
-          final rates = ref.watch(exchangeRatesProvider).value ?? [];
-          final allVaults = ref.watch(allVaultsProvider);
-          final allTransactions = ref.watch(vaultTransactionsProvider);
-          final vault = allVaults.where((v) => 'v_${v.id}' == vaultId).firstOrNull;
-          final vaultCurrency = vault?.currency ?? 'AUTO';
-          final targetCurrency = vaultCurrency == 'AUTO' ? globalCurrency : vaultCurrency;
-
-          final txs = vaultId == null ? allTransactions : allTransactions.where((t) => t.groupIds.contains(vaultId)).toList();
-
-          // 1. Aylık Akış (Gelir/Gider İstatistikleri) - Sadece Arşivlenmemişler
-          final activeTxs = txs.where((t) => !t.isArchived).toList();
-          final now = DateTime.now();
+          final cardDataMap = ref.watch(vaultCardDataProvider);
           
-          final income = activeTxs.where((t) => t.isIncome).fold<double>(0, (sum, t) {
-            final occurrencesThisMonth = t.getOccurrencesInMonth(now.year, now.month);
-            return sum + (t.getConvertedAmount(targetCurrency, rates) * occurrencesThisMonth);
-          });
-          
-          final expense = activeTxs.where((t) => !t.isIncome).fold<double>(0, (sum, t) {
-            final occurrencesThisMonth = t.getOccurrencesInMonth(now.year, now.month);
-            return sum + (t.getConvertedAmount(targetCurrency, rates) * occurrencesThisMonth);
-          });
-
-          // 2. Toplam Bakiye (Geçmişten Bugüne Tüm Hareketler)
-          // Bu Dashboard ile tutarlı olmalı. (Artık gerçekleşen tekrarlarla çarpılarak tam doğru bakiye veriliyor)
-          final double initialBalanceVal;
-          if (vaultId == null) {
-            double sumVaults = 0;
-            for (final v in allVaults) {
-              final vCurrency = v.currency == 'AUTO' ? globalCurrency : v.currency;
-              sumVaults += CurrencyUtils.convert(v.balance, vCurrency, globalCurrency, rates);
-            }
-            initialBalanceVal = sumVaults;
-          } else {
-            initialBalanceVal = vault?.balance ?? 0.0;
-          }
-
-          final balance = txs.fold<double>(initialBalanceVal, (sum, t) {
-            final amt = t.getConvertedAmount(targetCurrency, rates) * t.passedOccurrences;
-            return t.isIncome ? sum + amt : sum - amt;
-          });
-
-          // Döviz çevrisi (Görünür sembol ve opsiyonel global bakiye)
-          final currencySymbol = vaultCurrency == 'AUTO' ? globalCurrency : vaultCurrency;
-
-          double? convertedBalance;
-          if (vaultCurrency != 'AUTO' && vaultCurrency != globalCurrency) {
-            convertedBalance = CurrencyUtils.convert(balance, vaultCurrency, globalCurrency, rates);
-          }
+          final cardData = cardDataMap[vaultId] ?? VaultCardData(
+            vaultId: vaultId,
+            income: 0,
+            expense: 0,
+            balance: 0,
+            currencySymbol: globalCurrency,
+            targetCurrency: globalCurrency,
+            hasFlexibleTx: false,
+            minNet: 0,
+            maxNet: 0,
+          );
 
           return AnimatedBuilder(
             animation: _pageController,
@@ -192,18 +152,18 @@ class _VaultCardStackState extends ConsumerState<VaultCardStack> {
                           onTap: isCurrent ? () => widget.onVaultTap(vaultId) : null,
                           child: IntegratedVaultCard(
                             vaultId: vaultId,
-                            income: income,
-                            expense: expense,
-                            balance: balance,
-                            txs: txs,
+                            income: cardData.income,
+                            expense: cardData.expense,
+                            balance: cardData.balance,
                             activeColor: widget.activeColor,
                             l10n: widget.l10n,
                             vaultName: widget.groups[index].name,
-                            currencySymbol: currencySymbol,
-                            convertedBalance: convertedBalance,
+                            currencySymbol: cardData.currencySymbol,
+                            convertedBalance: cardData.convertedBalance,
                             convertedSymbol: globalCurrency,
-                            exchangeRates: rates,
-                            targetCurrency: targetCurrency,
+                            hasFlexibleTx: cardData.hasFlexibleTx,
+                            minNet: cardData.minNet,
+                            maxNet: cardData.maxNet,
                             morphProgress: widget.morphProgress,
                             isCurrent: isCurrent,
                           ),

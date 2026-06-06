@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'dart:async';
+import 'package:intl/intl.dart';
 import '../../../core/theme/app_constants.dart';
 import '../../../core/services/notification_service.dart';
 import '../../../l10n/app_localizations.dart';
+import '../../../core/utils/string_utils.dart';
 import '../vaults_providers.dart';
 import '../../home/home_providers.dart';
 import '../../transactions/transaction_builder_screen.dart';
@@ -101,7 +103,7 @@ class _InAppNotificationsSheetState extends ConsumerState<InAppNotificationsShee
                 const SizedBox(width: 10),
                 Expanded(
                   child: Text(
-                    "SİSTEM BİLDİRİM İZİNLERİ KAPALI!\nLütfen telefon ayarlarınızdan Finarcast'e bildirim izni verin, aksi halde alarmlarınız çalışmayacaktır.",
+                    l10n.systemNotificationsDisabled,
                     style: TextStyle(
                       color: AppColors.error,
                       fontSize: 10.5,
@@ -121,8 +123,8 @@ class _InAppNotificationsSheetState extends ConsumerState<InAppNotificationsShee
           _buildEmptyState(
             activeColor: activeColor,
             isDark: isDark,
-            title: "Geçmiş Bildirim Yok",
-            subtitle: "Daha önce tetiklenmiş herhangi bir işlem alarmı geçmişi bulunmuyor.",
+            title: l10n.noNotificationHistory,
+            subtitle: l10n.noNotificationHistoryDesc,
           )
         else
           Column(
@@ -155,7 +157,7 @@ class _InAppNotificationsSheetState extends ConsumerState<InAppNotificationsShee
             ),
             const SizedBox(height: 12),
             Text(
-              title.toUpperCase(),
+              title.toSafeUpperCase(context),
               style: TextStyle(
                 fontSize: 12,
                 fontWeight: FontWeight.w900,
@@ -281,18 +283,20 @@ class _InAppNotificationsSheetState extends ConsumerState<InAppNotificationsShee
     final paymentDateOnly = DateTime(tx.date.year, tx.date.month, tx.date.day);
     final difference = paymentDateOnly.difference(today).inDays;
 
+    final locale = Localizations.localeOf(context).toString();
+
     if (difference == 0) {
-      paymentDateStr = "Bugün";
+      paymentDateStr = l10n.today;
     } else if (difference == 1) {
-      paymentDateStr = "Yarın";
+      paymentDateStr = l10n.tomorrow;
     } else if (difference == -1) {
-      paymentDateStr = "Dün";
+      paymentDateStr = l10n.yesterday;
     } else {
-      paymentDateStr = "${tx.date.day} ${_getMonthName(tx.date.month)}";
+      paymentDateStr = DateFormat('d MMMM', locale).format(tx.date);
     }
 
     final String subtitleText = [
-      "Ödeme: $paymentDateStr",
+      l10n.paymentDate(paymentDateStr),
       if (vaultsText.isNotEmpty) vaultsText,
     ].join(' • ');
 
@@ -533,14 +537,4 @@ class _InAppNotificationsSheetState extends ConsumerState<InAppNotificationsShee
     );
   }
 
-  String _getMonthName(int month) {
-    const months = [
-      "Ocak", "Şubat", "Mart", "Nisan", "Mayıs", "Haziran", 
-      "Temmuz", "Ağustos", "Eylül", "Ekim", "Kasım", "Aralık"
-    ];
-    if (month >= 1 && month <= 12) {
-      return months[month - 1];
-    }
-    return "";
-  }
 }

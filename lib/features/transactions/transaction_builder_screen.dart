@@ -2,8 +2,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
 import '../../l10n/app_localizations.dart';
 import '../../core/theme/app_constants.dart';
+import '../../core/utils/string_utils.dart';
 import '../../core/database/database_service.dart';
 import '../../core/database/models/transaction_record.dart';
 import '../../core/database/models/vault.dart';
@@ -14,6 +16,8 @@ import '../../core/services/notification_service.dart';
 import '../../core/utils/currency_utils.dart';
 import '../../core/services/currency_service.dart';
 import '../auth/widgets/auth_background.dart';
+import '../../core/services/subscription_service.dart';
+import '../subscription/widgets/pro_upgrade_sheet.dart';
 
 import 'widgets/transaction_vault_selector.dart';
 import 'widgets/transaction_currency_selector.dart';
@@ -144,26 +148,48 @@ class _TransactionBuilderScreenState extends ConsumerState<TransactionBuilderScr
     }
   }
 
+  String _formatAmount(double val, String currencySymbol) {
+    final locale = Localizations.localeOf(context).toString();
+    final code = AppCurrency.getCode(currencySymbol);
+    final bool isZeroDecimal = (code == 'JPY' || code == 'KRW');
+
+    int decimals = isZeroDecimal ? 0 : 2;
+    if (val == val.toInt()) decimals = 0;
+
+    final format = NumberFormat.decimalPattern(locale);
+    final decimalSep = format.symbols.DECIMAL_SEP;
+
+    // Convert raw double to a simple localized string (e.g. 213412.5 -> "213412,5")
+    String rawText = val.toStringAsFixed(decimals).replaceAll('.', decimalSep);
+
+    // Trigger the input formatter programmatically
+    final formatter = LocaleCurrencyFormatter(locale);
+    return formatter.formatEditUpdate(
+      TextEditingValue.empty,
+      TextEditingValue(text: rawText),
+    ).text;
+  }
+
   void _prefillIfEditing() {
     // 1. DÜZENLEME MODU (Mevcut İşlem)
     if (widget.initialId != null) {
       _tabIndex = widget.initialIsIncome == true ? 1 : 0;
+      if (widget.initialCurrency != null) {
+        _selectedCurrency = widget.initialCurrency!;
+      }
       if (widget.initialAmount != null) {
-        _amountController.text = widget.initialAmount!.toStringAsFixed(0);
+        _amountController.text = _formatAmount(widget.initialAmount!, _selectedCurrency);
       }
       if (widget.initialMinAmount != null) {
-        _minController.text = widget.initialMinAmount!.toStringAsFixed(0);
+        _minController.text = _formatAmount(widget.initialMinAmount!, _selectedCurrency);
         _isFlexibleAmount = true;
       }
       if (widget.initialMaxAmount != null) {
-        _maxController.text = widget.initialMaxAmount!.toStringAsFixed(0);
+        _maxController.text = _formatAmount(widget.initialMaxAmount!, _selectedCurrency);
         _isFlexibleAmount = true;
       }
       if (widget.initialNote != null) {
         _noteController.text = widget.initialNote!;
-      }
-      if (widget.initialCurrency != null) {
-        _selectedCurrency = widget.initialCurrency!;
       }
       if (widget.initialVaultIds != null) {
         _selectedVaultIds = List<int>.from(widget.initialVaultIds!);
@@ -203,6 +229,7 @@ class _TransactionBuilderScreenState extends ConsumerState<TransactionBuilderScr
               if (subModels[j]['id'] == widget.initialCategoryId) {
                 _selectedCategoryIndex = i;
                 _selectedSubModelIndex = j;
+                _expandedCategoryIndex = i;
                 break;
               }
             }
@@ -215,15 +242,18 @@ class _TransactionBuilderScreenState extends ConsumerState<TransactionBuilderScr
       if (widget.initialIsIncome != null) {
         _tabIndex = widget.initialIsIncome! ? 1 : 0;
       }
+      if (widget.initialCurrency != null) {
+        _selectedCurrency = widget.initialCurrency!;
+      }
       if (widget.initialAmount != null && widget.initialAmount! > 0) {
-        _amountController.text = widget.initialAmount!.toStringAsFixed(0);
+        _amountController.text = _formatAmount(widget.initialAmount!, _selectedCurrency);
       }
       if (widget.initialMinAmount != null && widget.initialMinAmount! > 0) {
-        _minController.text = widget.initialMinAmount!.toStringAsFixed(0);
+        _minController.text = _formatAmount(widget.initialMinAmount!, _selectedCurrency);
         _isFlexibleAmount = true;
       }
       if (widget.initialMaxAmount != null && widget.initialMaxAmount! > 0) {
-        _maxController.text = widget.initialMaxAmount!.toStringAsFixed(0);
+        _maxController.text = _formatAmount(widget.initialMaxAmount!, _selectedCurrency);
         _isFlexibleAmount = true;
       }
       if (widget.initialNote != null) {
@@ -272,6 +302,7 @@ class _TransactionBuilderScreenState extends ConsumerState<TransactionBuilderScr
               if (subModels[j]['id'] == widget.initialCategoryId) {
                 _selectedCategoryIndex = i;
                 _selectedSubModelIndex = j;
+                _expandedCategoryIndex = i;
                 break;
               }
             }
@@ -302,10 +333,18 @@ class _TransactionBuilderScreenState extends ConsumerState<TransactionBuilderScr
     final base = _tabIndex == 0
         ? TransactionCategoryData.getExpenseCategories(context, l10n)
         : TransactionCategoryData.getIncomeCategories(context, l10n);
+    final isPro = ref.watch(subscriptionServiceProvider).isPro;
+    if (!isPro) return base;
     return TransactionCategoryData.mergeCustomSubcategories(base, _customSubs);
   }
 
   Future<void> _showAddCustomCategoryDialog(String parentCategoryId) async {
+    final isPro = ref.read(subscriptionServiceProvider).isPro;
+    if (!isPro) {
+      ProUpgradeSheet.show(context);
+      return;
+    }
+
     final controller = TextEditingController();
     final parentCat = _getMergedCategories().firstWhere(
       (c) => c['id'] == parentCategoryId,
@@ -372,7 +411,7 @@ class _TransactionBuilderScreenState extends ConsumerState<TransactionBuilderScr
                     Icon(selectedIcon, color: parentColor, size: 16),
                     const SizedBox(width: 8),
                     Text(
-                      parentName.toUpperCase(),
+                      parentName.toSafeUpperCase(context),
                       style: TextStyle(
                         fontSize: 10,
                         fontWeight: FontWeight.w900,
@@ -429,7 +468,7 @@ class _TransactionBuilderScreenState extends ConsumerState<TransactionBuilderScr
                 Row(
                   children: [
                     Text(
-                      'İKON SEÇİN'.toUpperCase(),
+                      l10n.selectIcon,
                       style: TextStyle(
                         fontSize: 11,
                         fontWeight: FontWeight.w900,
@@ -439,7 +478,7 @@ class _TransactionBuilderScreenState extends ConsumerState<TransactionBuilderScr
                     ),
                     const Spacer(),
                     Text(
-                      '${iconOptions.length} SEÇENEK',
+                      l10n.optionsCount(iconOptions.length),
                       style: TextStyle(
                         fontSize: 10,
                         fontWeight: FontWeight.w900,
@@ -579,35 +618,39 @@ class _TransactionBuilderScreenState extends ConsumerState<TransactionBuilderScr
       final minStr = _minController.text.trim();
       final maxStr = _maxController.text.trim();
 
-      String sanitize(String input) {
-        if (input.isEmpty) return '0';
-        final clean = input.trim();
-        if (clean.contains(',')) {
-          return clean.replaceAll('.', '').replaceAll(',', '.');
-        } else {
-          if (RegExp(r'\.\d{3}$').hasMatch(clean)) {
-            return clean.replaceAll('.', '');
-          }
-          return clean;
+      double parseLocaleDouble(String input) {
+        if (input.isEmpty) return 0.0;
+        final locale = Localizations.localeOf(context).toString();
+        final format = NumberFormat.decimalPattern(locale);
+        final decimalSep = format.symbols.DECIMAL_SEP;
+        final groupSep = format.symbols.GROUP_SEP;
+
+        // Remove all grouping separators
+        String clean = input.replaceAll(groupSep, '');
+        // Replace decimal separator with standard '.' if it is not '.'
+        if (decimalSep != '.') {
+          clean = clean.replaceAll(decimalSep, '.');
         }
+
+        return double.tryParse(clean) ?? 0.0;
       }
 
-      final amount = double.tryParse(sanitize(amountStr)) ?? 0.0;
-      final minAmount = double.tryParse(sanitize(minStr)) ?? 0.0;
-      final maxAmount = double.tryParse(sanitize(maxStr)) ?? 0.0;
+      final amount = parseLocaleDouble(amountStr);
+      final minAmount = parseLocaleDouble(minStr);
+      final maxAmount = parseLocaleDouble(maxStr);
 
       if (!_isFlexibleAmount && amount <= 0) {
-        _showValidationError('Lütfen geçerli bir tutar girin.');
+        _showValidationError(l10n.invalidAmountError);
         return;
       }
 
       if (_isFlexibleAmount) {
         if (maxAmount <= 0) {
-          _showValidationError('Maksimum tutar 0\'dan büyük olmalıdır.');
+          _showValidationError(l10n.maxAmountMustBePositive);
           return;
         }
         if (minAmount >= maxAmount) {
-          _showValidationError('Minimum tutar maksimumdan küçük olmalıdır.');
+          _showValidationError(l10n.minMustBeLessThanMax);
           return;
         }
       }
@@ -619,7 +662,7 @@ class _TransactionBuilderScreenState extends ConsumerState<TransactionBuilderScr
             _selectedVaultIds = [vaults.first.id];
           });
         } else {
-          _showValidationError('Lütfen işlem için en az bir kasa seçin. Eğer kasanız yoksa önce bir kasa oluşturun.');
+          _showValidationError(l10n.selectAtLeastOneVault);
           return;
         }
       }
@@ -647,7 +690,7 @@ class _TransactionBuilderScreenState extends ConsumerState<TransactionBuilderScr
       if (_selectedCurrency != baseCurrency) {
         final hasRate = await ensureRate(_selectedCurrency);
         if (!hasRate) {
-          _showValidationError('Döviz kurları yüklü değil. Farklı para biriminde işlem eklemek/güncellemek için lütfen internete bağlanıp kurları güncelleyin.');
+          _showValidationError(l10n.exchangeRatesNotLoaded);
           return;
         }
       }
@@ -660,7 +703,7 @@ class _TransactionBuilderScreenState extends ConsumerState<TransactionBuilderScr
           if (vaultCurrency != baseCurrency) {
             final hasRate = await ensureRate(vaultCurrency);
             if (!hasRate) {
-              _showValidationError('Seçili kasanın para birimi (${vault.currency}) için döviz kurları yüklü değil. Lütfen internete bağlanıp kurları güncelleyin.');
+              _showValidationError(l10n.vaultCurrencyRateNotLoaded(vault.currency));
               return;
             }
           }
@@ -766,7 +809,7 @@ class _TransactionBuilderScreenState extends ConsumerState<TransactionBuilderScr
       HapticFeedback.heavyImpact();
     } catch (e) {
       debugPrint('❌ [AddTransactionScreen] Kaydetme hatası: $e');
-      _showValidationError('İşlem kaydedilirken bir hata oluştu: $e');
+      _showValidationError(l10n.transactionSaveError(e.toString()));
     }
   }
 
@@ -774,41 +817,28 @@ class _TransactionBuilderScreenState extends ConsumerState<TransactionBuilderScr
     if (newCurrency == _selectedCurrency) return;
     FocusManager.instance.primaryFocus?.unfocus();
 
+    double? parseLocaleDouble(String input) {
+      if (input.isEmpty) return null;
+      final locale = Localizations.localeOf(context).toString();
+      final format = NumberFormat.decimalPattern(locale);
+      final decimalSep = format.symbols.DECIMAL_SEP;
+      final groupSep = format.symbols.GROUP_SEP;
+
+      String clean = input.replaceAll(groupSep, '');
+      if (decimalSep != '.') {
+        clean = clean.replaceAll(decimalSep, '.');
+      }
+
+      return double.tryParse(clean);
+    }
+
     void formatFieldForNewCurrency(TextEditingController controller) {
       final text = controller.text.trim();
       if (text.isEmpty) return;
 
-      // Sayıyı al (Formatı temizle)
-      final valStr = text.replaceAll('.', '').replaceAll(',', '.');
-      final val = double.tryParse(valStr);
-
+      final val = parseLocaleDouble(text);
       if (val != null) {
-        // Kullanıcı sayının DEĞİŞMEMESİNİ istediği için convert yapmıyoruz.
-        // Sadece yeni birimin format kurallarını uyguluyoruz (Örn: JPY için küsurat silme)
-        final code = AppCurrency.getCode(newCurrency);
-        final bool isZeroDecimal = (code == 'JPY' || code == 'KRW');
-
-        int decimals = isZeroDecimal ? 0 : 2;
-        if (val == val.toInt()) decimals = 0;
-
-        String formatted = val.toStringAsFixed(decimals).replaceAll('.', ',');
-
-        // Binlik ayırıcıları tekrar ekle
-        if (formatted.contains(',')) {
-          List<String> parts = formatted.split(',');
-          parts[0] = parts[0].replaceAllMapped(
-            RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
-            (Match m) => '${m[1]}.',
-          );
-          formatted = parts.join(',');
-        } else {
-          formatted = formatted.replaceAllMapped(
-            RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
-            (Match m) => '${m[1]}.',
-          );
-        }
-
-        controller.text = formatted;
+        controller.text = _formatAmount(val, newCurrency);
       }
     }
 
@@ -881,6 +911,9 @@ class _TransactionBuilderScreenState extends ConsumerState<TransactionBuilderScr
                         borderColor: (isDark ? Colors.white : Colors.black).withValues(
                           alpha: revT > 0.95 ? (revT - 0.95) * 2 : 0.0,
                         ),
+                        showTopBorder: false,
+                        showLeftBorder: false,
+                        showRightBorder: false,
                         child: const SizedBox.expand(),
                       ),
                     ),
@@ -920,7 +953,7 @@ class _TransactionBuilderScreenState extends ConsumerState<TransactionBuilderScr
                                 (widget.initialId != null
                                         ? l10n.edit
                                         : l10n.addTransaction)
-                                    .toUpperCase(),
+                                    .toSafeUpperCase(context),
                                 textAlign: TextAlign.center,
                                 style: TextStyle(
                                   color: AppColors.getTextPrimary(context),
@@ -1033,6 +1066,7 @@ class _TransactionBuilderScreenState extends ConsumerState<TransactionBuilderScr
                   selectedCategoryIndex: _selectedCategoryIndex,
                   selectedSubModelIndex: _selectedSubModelIndex,
                   expandedCategoryIndex: _expandedCategoryIndex,
+                  isPro: ref.watch(subscriptionServiceProvider).isPro,
                   onChanged: (catIndex, subIndex, expIndex) {
                     HapticFeedback.lightImpact();
                     FocusManager.instance.primaryFocus?.unfocus();
@@ -1123,7 +1157,7 @@ class _TransactionBuilderScreenState extends ConsumerState<TransactionBuilderScr
                             ),
                             const SizedBox(width: 12),
                             Text(
-                              l10n.description.toUpperCase(),
+                              l10n.description.toSafeUpperCase(context),
                               style: TextStyle(
                                 fontSize: 13,
                                 fontWeight: FontWeight.w900,
@@ -1138,7 +1172,7 @@ class _TransactionBuilderScreenState extends ConsumerState<TransactionBuilderScr
                         const SizedBox(height: 12),
                         CustomTextField(
                           controller: _noteController,
-                          hintText: 'İşleme dair not bırakın...',
+                          hintText: l10n.transactionNoteHint,
                           icon: Icons.edit_note_rounded,
                         ),
                       ],
@@ -1167,7 +1201,7 @@ class _TransactionBuilderScreenState extends ConsumerState<TransactionBuilderScr
                                 ),
                                 const SizedBox(width: 12),
                                 Text(
-                                  'HATIRLATICI',
+                                  l10n.reminder.toSafeUpperCase(context),
                                   style: TextStyle(
                                     fontSize: 13,
                                     fontWeight: FontWeight.w900,
@@ -1192,7 +1226,7 @@ class _TransactionBuilderScreenState extends ConsumerState<TransactionBuilderScr
                                   if (!granted && context.mounted) {
                                     CustomNotification.warning(
                                       context,
-                                      'Bildirim izni verilmedi. Lütfen ayarlardan açın.',
+                                      l10n.notificationPermissionDenied,
                                     );
                                     return;
                                   }

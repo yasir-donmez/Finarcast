@@ -9,6 +9,22 @@ import '../../../core/database/models/custom_category.dart';
 import '../../../core/utils/currency_utils.dart';
 import '../../../core/utils/category_utils.dart';
 import '../../../core/theme/app_constants.dart';
+import '../../../core/utils/string_utils.dart';
+import '../../../l10n/app_localizations.dart';
+
+final upcomingTransactionsProvider = Provider.family<List<TransactionRecord>, String?>((ref, selectedVaultId) {
+  final transactions = ref.watch(allTransactionsProvider);
+  
+  List<TransactionRecord> vaultFilteredTxs = transactions;
+  if (selectedVaultId != null && selectedVaultId.startsWith('v_')) {
+    final filterVaultId = int.tryParse(selectedVaultId.replaceFirst('v_', ''));
+    if (filterVaultId != null) {
+      vaultFilteredTxs = transactions.where((tx) => tx.vaultIds.contains(filterVaultId)).toList();
+    }
+  }
+
+  return _getUpcomingItems(vaultFilteredTxs);
+});
 
 class DueDateRadarWidget extends ConsumerStatefulWidget {
   final HomeWidgetSize size;
@@ -25,19 +41,8 @@ class _DueDateRadarWidgetState extends ConsumerState<DueDateRadarWidget> {
 
   @override
   Widget build(BuildContext context) {
-    final transactions = ref.watch(allTransactionsProvider);
+    final items = ref.watch(upcomingTransactionsProvider(widget.selectedVaultId));
     final customCategories = ref.watch(customCategoriesProvider);
-
-    // Kasa / Vault bazında filtrele
-    List<TransactionRecord> vaultFilteredTxs = transactions;
-    if (widget.selectedVaultId != null && widget.selectedVaultId!.startsWith('v_')) {
-      final filterVaultId = int.tryParse(widget.selectedVaultId!.replaceFirst('v_', ''));
-      if (filterVaultId != null) {
-        vaultFilteredTxs = transactions.where((tx) => tx.vaultIds.contains(filterVaultId)).toList();
-      }
-    }
-
-    final items = _getUpcomingItems(vaultFilteredTxs);
 
     if (items.isEmpty) return _buildEmptyState(context);
 
@@ -122,19 +127,21 @@ class _DueDateRadarWidgetState extends ConsumerState<DueDateRadarWidget> {
     final incomeItems = groupItems.where((tx) => tx.isIncome).toList();
     final expenseItems = groupItems.where((tx) => !tx.isIncome).toList();
     
+    final l10n = AppLocalizations.of(context)!;
+    final locale = Localizations.localeOf(context).toString();
     String railLabel;
     if (diff == 0) {
-      railLabel = 'BUGÜN';
+      railLabel = l10n.todayUpper;
     } else if (diff == 1) {
-      railLabel = 'YARIN';
+      railLabel = l10n.tomorrowUpper;
     } else if (diff <= 7) {
-      final dayName = DateFormat('EEEE', 'tr_TR').format(date).toUpperCase();
-      railLabel = '$diff GÜN - $dayName';
+      final dayName = DateFormat('EEEE', locale).format(date).toSafeLocaleUpperCase(Localizations.localeOf(context).languageCode);
+      railLabel = l10n.daysWithName(diff, dayName);
     } else if (diff <= 30) {
       final weekNum = (diff / 7).ceil();
-      railLabel = '$weekNum HAFTA SONRA';
+      railLabel = l10n.weeksLater(weekNum);
     } else {
-      railLabel = DateFormat('MMMM yyyy', 'tr_TR').format(date).toUpperCase();
+      railLabel = DateFormat('MMMM yyyy', locale).format(date).toSafeLocaleUpperCase(Localizations.localeOf(context).languageCode);
     }
 
     return Column(
@@ -351,7 +358,7 @@ class _DueDateRadarWidgetState extends ConsumerState<DueDateRadarWidget> {
           Icon(Icons.event_available_rounded, color: AppColors.getTextSecondary(context).withValues(alpha: 0.15), size: 48),
           const SizedBox(height: 12),
           Text(
-            'Yaklaşan Ödeme Bulunmadı',
+            AppLocalizations.of(context)!.upcomingPaymentsNotFound,
             style: TextStyle(
               color: AppColors.getTextSecondary(context).withValues(alpha: 0.5),
               fontSize: 10, 
@@ -364,123 +371,115 @@ class _DueDateRadarWidgetState extends ConsumerState<DueDateRadarWidget> {
     );
   }
 
-  List<TransactionRecord> _getUpcomingItems(List<TransactionRecord> transactions) {
-    final now = DateTime.now();
-    final today = DateTime(now.year, now.month, now.day);
-    final limit = today.add(const Duration(days: 365));
+}
+
+List<TransactionRecord> _getUpcomingItems(List<TransactionRecord> transactions) {
+  final now = DateTime.now();
+  final today = DateTime(now.year, now.month, now.day);
+  final limit = today.add(const Duration(days: 365));
+  
+  final List<TransactionRecord> projectedItems = [];
+
+  for (var tx in transactions) {
+    if (tx.isArchived) continue;
+
+    // 1. Tek Seferlik İşlemler
+    if (tx.periodType == 0) {
+      if (tx.date.isAfter(today.subtract(const Duration(hours: 1))) && tx.date.isBefore(limit)) {
+        projectedItems.add(tx);
+      }
+      continue;
+    }
+
+    // 2. Periyodik İşlemler (Projeksiyon)
+    // ÖNCELİK: recurrenceDate (Çapa Tarihi). Yoksa normal tarihi kullan.
+    DateTime anchorDate = tx.recurrenceDate ?? tx.date;
+    DateTime currentOccurrence = DateTime(anchorDate.year, anchorDate.month, anchorDate.day, anchorDate.hour, anchorDate.minute);
     
-    final List<TransactionRecord> projectedItems = [];
-
-    for (var tx in transactions) {
-      if (tx.isArchived) continue;
-
-      // 1. Tek Seferlik İşlemler
-      if (tx.periodType == 0) {
-        if (tx.date.isAfter(today.subtract(const Duration(hours: 1))) && tx.date.isBefore(limit)) {
-          projectedItems.add(tx);
-        }
-        continue;
-      }
-
-      // 2. Periyodik İşlemler (Projeksiyon)
-      // ÖNCELİK: recurrenceDate (Çapa Tarihi). Yoksa normal tarihi kullan.
-      DateTime anchorDate = tx.recurrenceDate ?? tx.date;
-      DateTime currentOccurrence = DateTime(anchorDate.year, anchorDate.month, anchorDate.day, anchorDate.hour, anchorDate.minute);
-      
-      // Başlangıç tarihini bugüne veya en yakın gelecekteki durağına çek
-      // Eğer anchorDate gelecekse, olduğu gibi kalsın. 
-      // Eğer anchorDate geçmişse, bugünden sonraki ilk durağına ilerlet.
-      if (currentOccurrence.isBefore(today)) {
-        while (currentOccurrence.isBefore(today)) {
-          currentOccurrence = _getNextOccurrence(currentOccurrence, tx.periodType);
-          if (currentOccurrence.isAfter(limit.add(const Duration(days: 3650)))) break;
-        }
-      }
-
-      // 1 Yıllık pencere içindeki tüm tekrarları ekle
-      int occurrencesProjected = 0;
-      
-      // Toplam limit hesabı:
-      // 1. Taksit varsa: Taksit sayısı kadar göster.
-      // 2. Taksit yoksa ama Duration (Tekrar Adedi) varsa: Başlangıçtan itibaren toplam adede bak.
-      int? maxOccurrences;
-      if (tx.remainingInstallments != null && tx.remainingInstallments! > 0) {
-        maxOccurrences = tx.remainingInstallments;
-      } else if (tx.recurrenceDuration != null && tx.recurrenceDuration! > 0) {
-        // Başlangıçtan bugüne kaç tane geçtiğini bulalım
-        DateTime pastOccurrence = DateTime(anchorDate.year, anchorDate.month, anchorDate.day, anchorDate.hour, anchorDate.minute);
-        int passedCount = 0;
-        while (pastOccurrence.isBefore(today)) {
-          pastOccurrence = _getNextOccurrence(pastOccurrence, tx.periodType);
-          passedCount++;
-        }
-        maxOccurrences = math.max(0, tx.recurrenceDuration! - (passedCount - 1)); // -1 çünkü today'e kadar olanları saydık
-      }
-
-      while (currentOccurrence.isBefore(limit)) {
-        // Limit dolduysa dur
-        if (maxOccurrences != null && occurrencesProjected >= maxOccurrences) break;
-
-        // Klon oluşturarak farklı tarihlerle listeye ekle
-        final projectedTx = TransactionRecord()
-          ..id = tx.id
-          ..title = tx.title
-          ..amount = tx.amount
-          ..minAmount = tx.minAmount
-          ..maxAmount = tx.maxAmount
-          ..isIncome = tx.isIncome
-          ..categoryId = tx.categoryId
-          ..iconCode = tx.iconCode
-          ..currency = tx.currency
-          ..periodType = tx.periodType
-          ..date = currentOccurrence; // Projeksiyon tarihi
-          
-        projectedItems.add(projectedTx);
-        
+    // Başlangıç tarihini bugüne veya en yakın gelecekteki durağına çek
+    if (currentOccurrence.isBefore(today)) {
+      while (currentOccurrence.isBefore(today)) {
         currentOccurrence = _getNextOccurrence(currentOccurrence, tx.periodType);
-        occurrencesProjected++;
-        if (occurrencesProjected > 100) break; // Sonsuz döngü koruması
+        if (currentOccurrence.isAfter(limit.add(const Duration(days: 3650)))) break;
       }
     }
 
-    return projectedItems..sort((a, b) => a.date.compareTo(b.date));
+    // 1 Yıllık pencere içindeki tüm tekrarları ekle
+    int occurrencesProjected = 0;
+    
+    // Toplam limit hesabı:
+    int? maxOccurrences;
+    if (tx.remainingInstallments != null && tx.remainingInstallments! > 0) {
+      maxOccurrences = tx.remainingInstallments;
+    } else if (tx.recurrenceDuration != null && tx.recurrenceDuration! > 0) {
+      DateTime pastOccurrence = DateTime(anchorDate.year, anchorDate.month, anchorDate.day, anchorDate.hour, anchorDate.minute);
+      int passedCount = 0;
+      while (pastOccurrence.isBefore(today)) {
+        pastOccurrence = _getNextOccurrence(pastOccurrence, tx.periodType);
+        passedCount++;
+      }
+      maxOccurrences = math.max(0, tx.recurrenceDuration! - (passedCount - 1));
+    }
+
+    while (currentOccurrence.isBefore(limit)) {
+      if (maxOccurrences != null && occurrencesProjected >= maxOccurrences) break;
+
+      final projectedTx = TransactionRecord()
+        ..id = tx.id
+        ..title = tx.title
+        ..amount = tx.amount
+        ..minAmount = tx.minAmount
+        ..maxAmount = tx.maxAmount
+        ..isIncome = tx.isIncome
+        ..categoryId = tx.categoryId
+        ..iconCode = tx.iconCode
+        ..currency = tx.currency
+        ..periodType = tx.periodType
+        ..date = currentOccurrence;
+        
+      projectedItems.add(projectedTx);
+      
+      currentOccurrence = _getNextOccurrence(currentOccurrence, tx.periodType);
+      occurrencesProjected++;
+      if (occurrencesProjected > 100) break;
+    }
   }
 
-  DateTime _getNextOccurrence(DateTime current, int periodType) {
-    if (periodType == 250) {
-      // Hafta İçi (Pzt-Cum)
-      int addDays = 1;
-      if (current.weekday == DateTime.friday) {
-        addDays = 3;
-      } else if (current.weekday == DateTime.saturday) {
-        addDays = 2;
-      }
-      return current.add(Duration(days: addDays));
-    } else if (periodType == 251) {
-      // Hafta Sonu (Cmt-Paz)
-      int addDays = 1;
-      if (current.weekday == DateTime.sunday) {
-        addDays = 6;
-      } else if (current.weekday >= DateTime.monday && current.weekday <= DateTime.friday) {
-        addDays = DateTime.saturday - current.weekday;
-      }
-      return current.add(Duration(days: addDays));
-    } else {
-      final unit = periodType ~/ 100;
-      final interval = periodType % 100;
-      if (interval > 0) {
-        switch (unit) {
-          case 1: // Gün
-            return current.add(Duration(days: interval));
-          case 2: // Hafta
-            return current.add(Duration(days: interval * 7));
-          case 3: // Ay
-            return DateTime(current.year, current.month + interval, current.day, current.hour, current.minute);
-          case 4: // Yıl
-            return DateTime(current.year + interval, current.month, current.day, current.hour, current.minute);
-        }
+  return projectedItems..sort((a, b) => a.date.compareTo(b.date));
+}
+
+DateTime _getNextOccurrence(DateTime current, int periodType) {
+  if (periodType == 250) {
+    int addDays = 1;
+    if (current.weekday == DateTime.friday) {
+      addDays = 3;
+    } else if (current.weekday == DateTime.saturday) {
+      addDays = 2;
+    }
+    return current.add(Duration(days: addDays));
+  } else if (periodType == 251) {
+    int addDays = 1;
+    if (current.weekday == DateTime.sunday) {
+      addDays = 6;
+    } else if (current.weekday >= DateTime.monday && current.weekday <= DateTime.friday) {
+      addDays = DateTime.saturday - current.weekday;
+    }
+    return current.add(Duration(days: addDays));
+  } else {
+    final unit = periodType ~/ 100;
+    final interval = periodType % 100;
+    if (interval > 0) {
+      switch (unit) {
+        case 1:
+          return current.add(Duration(days: interval));
+        case 2:
+          return current.add(Duration(days: interval * 7));
+        case 3:
+          return DateTime(current.year, current.month + interval, current.day, current.hour, current.minute);
+        case 4:
+          return DateTime(current.year + interval, current.month, current.day, current.hour, current.minute);
       }
     }
-    return current.add(const Duration(days: 30));
   }
+  return current.add(const Duration(days: 30));
 }

@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../l10n/app_localizations.dart';
 import '../../core/theme/app_constants.dart';
+import '../../core/utils/string_utils.dart';
 import '../../core/database/database_service.dart';
 import '../../shared/widgets/custom_bottom_sheet.dart';
 import '../../shared/widgets/custom_dialog.dart';
@@ -52,7 +53,6 @@ class _VaultsScreenState extends ConsumerState<VaultsScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final allTransactions = ref.watch(vaultTransactionsProvider);
     final groups = ref.watch(transactionGroupsProvider);
     final filter = ref.watch(transactionFilterProvider);
     final selectedVaultId = ref.watch(selectedVaultProvider);
@@ -108,7 +108,7 @@ class _VaultsScreenState extends ConsumerState<VaultsScreen> {
               maxScrollExtent: maxHeaderHeight - minHeaderHeight,
             ),
             slivers: [
-              _buildHeader(groups, allTransactions, selectedVaultId, activeColor, unseenNotificationsCount, gapAB, l10n, context),
+              _buildHeader(groups, selectedVaultId, activeColor, unseenNotificationsCount, gapAB, l10n, context),
               _buildFilters(filter, paymentTypeFilter, selectedTimeRange, activeColor, scalingFactor, gapCardToFilters, l10n, context),
               
               if (filteredTransactions.isEmpty)
@@ -126,7 +126,6 @@ class _VaultsScreenState extends ConsumerState<VaultsScreen> {
 
   Widget _buildHeader(
     List<TransactionGroup> groups, 
-    List<TransactionUI> allTransactions, 
     String? selectedVaultId, 
     Color activeColor, 
     int unseenNotificationsCount,
@@ -138,7 +137,6 @@ class _VaultsScreenState extends ConsumerState<VaultsScreen> {
       pinned: true,
       delegate: TrueMorphDeckHeaderDelegate(
         groups: groups,
-        allTransactions: allTransactions,
         selectedVaultId: selectedVaultId,
         onVaultSelect: (id) => ref.read(selectedVaultProvider.notifier).state = id,
         activeColor: activeColor,
@@ -295,15 +293,15 @@ class _VaultsScreenState extends ConsumerState<VaultsScreen> {
                 child: Icon(
                   Icons.auto_graph_rounded,
                   size: 40,
-                  color: activeColor.withValues(alpha: isDark ? 0.3 : 0.45),
+                  color: AppColors.getTextSecondary(context).withValues(alpha: 0.4),
                 ),
               ),
               const SizedBox(height: 24),
               Text(
-                "Kasa İşlemi Bulunmadı".toUpperCase(),
+                l10n.noVaultTransactions.toSafeUpperCase(context),
                 textAlign: TextAlign.center,
                 style: TextStyle(
-                  color: AppColors.getTextSecondary(context).withValues(alpha: isDark ? 0.4 : 0.7),
+                  color: AppColors.getTextSecondary(context).withValues(alpha: 0.7),
                   fontSize: 13,
                   fontWeight: FontWeight.w900,
                   letterSpacing: 2,
@@ -377,28 +375,26 @@ class _VaultsScreenState extends ConsumerState<VaultsScreen> {
   }
 
   String _getPaymentTypeLabel(PaymentTypeFilter filter, BuildContext context, AppLocalizations l10n) {
-    final locale = Localizations.localeOf(context).languageCode;
     switch (filter) {
       case PaymentTypeFilter.all:
         return l10n.all;
       case PaymentTypeFilter.oneTime:
         return l10n.oneTime;
       case PaymentTypeFilter.recurring:
-        return locale == 'tr' ? 'Abonelikler' : 'Recurring';
+        return l10n.recurring;
     }
   }
 
   String _getTimeRangeLabel(VaultTimeRange range, BuildContext context, AppLocalizations l10n) {
-    final locale = Localizations.localeOf(context).languageCode;
     switch (range) {
       case VaultTimeRange.allTime:
         return l10n.allTime;
       case VaultTimeRange.thisWeek:
-        return locale == 'tr' ? 'Bu Hafta' : 'This Week';
+        return l10n.thisWeek;
       case VaultTimeRange.thisMonth:
-        return locale == 'tr' ? 'Bu Ay' : 'This Month';
+        return l10n.thisMonth;
       case VaultTimeRange.thisYear:
-        return locale == 'tr' ? 'Bu Yıl' : 'This Year';
+        return l10n.thisYear;
     }
   }
 
@@ -541,6 +537,7 @@ class _VaultsScreenState extends ConsumerState<VaultsScreen> {
 
 
   void _showAddVaultSheet(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     HapticFeedback.heavyImpact();
 
     final vaults = ref.read(vaultsStreamProvider).valueOrNull ?? [];
@@ -550,16 +547,16 @@ class _VaultsScreenState extends ConsumerState<VaultsScreen> {
       showCustomDialog(
         context: context,
         accentColor: const Color(0xFFFFB300), // Altın rengi
-        title: "Premium Gerekli",
-        content: "Ücretsiz planda en fazla ${subService.maxVaults} kasa oluşturabilirsiniz. Sınırsız kasa oluşturmak ve tüm premium özelliklere erişmek için yükseltin.",
+        title: l10n.premiumRequired,
+        content: l10n.vaultLimitReachedDesc(subService.maxVaults),
         actions: [
           PrecisionDialogAction(
-            label: "Daha Sonra",
+            label: l10n.later,
             onTap: () => Navigator.pop(context),
             isPrimary: false,
           ),
           PrecisionDialogAction(
-            label: "Premium'a Yükselt",
+            label: l10n.upgradeToPro,
             onTap: () {
               Navigator.pop(context);
               ProUpgradeSheet.show(context);
@@ -588,10 +585,11 @@ class _VaultsScreenState extends ConsumerState<VaultsScreen> {
   }
 
   void _showNotificationsSheet(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     HapticFeedback.heavyImpact();
     CustomBottomSheet.show(
       context: context,
-      title: "Uygulama İçi Bildirimler",
+      title: l10n.inAppNotifications,
       child: const InAppNotificationsSheet(),
     );
   }

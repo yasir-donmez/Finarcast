@@ -91,13 +91,9 @@ class DatabaseService {
       }
 
       final defaultVault = Vault()
-        ..remoteId = const Uuid().v4()
         ..name = vaultName
         ..currency = defaultSettings.currencySymbol
         ..balance = 0.0
-        ..iconCode = 'account_balance_wallet_rounded'
-        ..isIncludedInTotal = true
-        ..showOnDashboard = true
         ..syncStatus = 1;
       await isar.writeTxn(() async {
         await isar.vaults.put(defaultVault);
@@ -447,8 +443,7 @@ class DatabaseService {
 
     return AppSettings()
       ..languageCode = defaultLang
-      ..currencySymbol = defaultCurrency
-      ..countryName = country;
+      ..currencySymbol = defaultCurrency;
   }
 
   static Future<AppSettings> getSettings() async {

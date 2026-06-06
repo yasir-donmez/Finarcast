@@ -6,6 +6,7 @@ import '../../../../core/theme/app_constants.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../../shared/widgets/inline_picker.dart';
 import '../../../../shared/widgets/clickable_action.dart';
+import '../../../../shared/widgets/custom_card.dart';
 import '../../../home/home_providers.dart';
 import '../settings_list_items.dart';
 import '../../../../core/services/subscription_service.dart';
@@ -74,9 +75,9 @@ class RetentionSetting extends ConsumerWidget {
                       ),
                       if (!isPro) ...[
                         const SizedBox(height: 2),
-                        const Text(
-                          "Premium",
-                          style: TextStyle(
+                        Text(
+                          l10n.premiumBadge,
+                          style: const TextStyle(
                             color: Colors.amber,
                             fontSize: 12,
                             fontWeight: FontWeight.w600,
@@ -130,12 +131,8 @@ class RetentionSetting extends ConsumerWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Container(
+                      CustomCard(
                         padding: const EdgeInsets.all(12),
-                        decoration: BoxDecoration(
-                          color: AppColors.getInnerSurface(context),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
                         child: Text(
                           l10n.dataRetentionDetail,
                           style: TextStyle(

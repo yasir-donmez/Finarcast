@@ -4,47 +4,48 @@ import 'package:uuid/uuid.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'draft_service.dart';
 import '../../../core/services/custom_category_service.dart';
+import '../../../l10n/app_localizations.dart';
 
 class SmartParserService {
   static bool get isAvailable => true;
 
-  static Exception _handleException(Object e) {
+  static Exception _handleException(Object e, AppLocalizations l10n) {
     final errorStr = e.toString();
     final lowerErrorStr = errorStr.toLowerCase();
     
     // Server-side yetkilendirme veya kotalar (Edge Function'dan gelen)
     if (lowerErrorStr.contains('rate limit exceeded') || lowerErrorStr.contains('upgrade your plan')) {
-      return Exception('Günlük Yapay Zeka analiz limitinizi doldurdunuz. Lütfen Premium plana yükseltin veya yarın tekrar deneyin.');
+      return Exception(l10n.aiErrorRateLimit);
     }
     if (lowerErrorStr.contains('unauthorized')) {
-      return Exception('Yetkisiz erişim. Lütfen tekrar giriş yapın.');
+      return Exception(l10n.aiErrorUnauthorized);
     }
     
     if (lowerErrorStr.contains('quota') || lowerErrorStr.contains('limit') || lowerErrorStr.contains('rate') || lowerErrorStr.contains('429')) {
-      return Exception('Yapay Zeka kullanım limitiniz (kota) doldu. Lütfen biraz bekleyip tekrar deneyin.');
+      return Exception(l10n.aiErrorQuota);
     }
     if (lowerErrorStr.contains('high demand') || lowerErrorStr.contains('503') || lowerErrorStr.contains('unavailable') || lowerErrorStr.contains('busy')) {
-      return Exception('Yapay Zeka sunucusu şu an çok yoğun. Lütfen birkaç saniye sonra tekrar deneyin.');
+      return Exception(l10n.aiErrorBusy);
     }
     if (lowerErrorStr.contains('api key') || lowerErrorStr.contains('key bulunamadı') || lowerErrorStr.contains('key not found') || lowerErrorStr.contains('api_key')) {
-      return Exception('Yapay Zeka API Anahtarı geçersiz veya bulunamadı. Lütfen ayarlarınızı kontrol edin.');
+      return Exception(l10n.aiErrorApiKey);
     }
     if (lowerErrorStr.contains('timeout') || lowerErrorStr.contains('zaman aşımı')) {
-      return Exception('İstek zaman aşımına uğradı. Lütfen internet bağlantınızı kontrol edip tekrar deneyin.');
+      return Exception(l10n.aiErrorTimeout);
     }
     
-    return Exception('Yapay Zeka analizi başarısız oldu: ${errorStr.replaceAll('Exception: ', '')}');
+    return Exception(l10n.aiErrorGeneric(errorStr.replaceAll('Exception: ', '')));
   }
 
   /// Serbest metni veya ses transkripsiyonunu analiz eder
-  static Future<DraftTransaction> parseText(String text) async {
+  static Future<DraftTransaction> parseText(String text, AppLocalizations l10n) async {
     final id = const Uuid().v4();
     final cleanText = text.trim();
 
     if (cleanText.isEmpty) {
       return DraftTransaction(
         id: id,
-        title: 'Boş Taslak',
+        title: '__EMPTY_DRAFT__',
         amount: 0.0,
         date: DateTime.now(),
       );
@@ -77,7 +78,7 @@ class SmartParserService {
         date: data['date'] != null ? DateTime.tryParse(data['date']) ?? DateTime.now() : DateTime.now(),
         isIncome: data['isIncome'] ?? false,
         note: data['note'],
-        reason: 'Hızlı Metin Girişi',
+        reason: l10n.reasonSmartInput,
         currency: data['currency'],
         isNotificationEnabled: data['isNotificationEnabled'] ?? false,
         notificationReminderDays: data['notificationReminderDays'] ?? 0,
@@ -91,12 +92,12 @@ class SmartParserService {
       );
     } catch (e) {
       debugPrint('❌ [SmartParserService] AI Parse hatası: $e');
-      throw _handleException(e);
+      throw _handleException(e, l10n);
     }
   }
 
   /// Fiş görselini analiz edip harcama bilgisi çıkarır (Gemini Vision)
-  static Future<DraftTransaction?> parseReceiptImage(Uint8List imageBytes, String mimeType) async {
+  static Future<DraftTransaction?> parseReceiptImage(Uint8List imageBytes, String mimeType, AppLocalizations l10n) async {
     try {
       final customCategories = await CustomCategoryService.getAllCustomSubcategories();
       final base64Image = base64Encode(imageBytes);
@@ -119,23 +120,23 @@ class SmartParserService {
 
       return DraftTransaction(
         id: id,
-        title: data['title'] ?? 'Fiş Harcaması',
+        title: data['title'] ?? '__RECEIPT_EXPENSE__',
         amount: (data['amount'] as num?)?.toDouble() ?? 0.0,
         categoryId: data['categoryId'] ?? 'exp_grocery_food',
         date: data['date'] != null ? DateTime.tryParse(data['date']) ?? DateTime.now() : DateTime.now(),
         isIncome: false,
         note: data['note'],
-        reason: 'Fiş Fotoğrafı',
+        reason: l10n.reasonReceiptScan,
         currency: data['currency'],
       );
     } catch (e) {
       debugPrint('❌ [SmartParserService] Fiş görseli analiz hatası: $e');
-      throw _handleException(e);
+      throw _handleException(e, l10n);
     }
   }
 
   /// Panodaki (Clipboard) metni analiz edip banka SMS'i veya harcama bildirimi olup olmadığını kontrol eder
-  static Future<DraftTransaction?> checkAndParseClipboard(String text) async {
+  static Future<DraftTransaction?> checkAndParseClipboard(String text, AppLocalizations l10n) async {
     final cleanText = text.trim();
     if (cleanText.isEmpty || cleanText.length < 15) return null;
 
@@ -153,7 +154,7 @@ class SmartParserService {
 
     try {
       // AI yardımıyla bu SMS'i çözümleriz
-      final parsed = await parseText(cleanText);
+      final parsed = await parseText(cleanText, l10n);
       if (parsed.amount > 0 || parsed.minAmount != null) {
         return DraftTransaction(
           id: parsed.id,
@@ -164,8 +165,8 @@ class SmartParserService {
           categoryId: parsed.categoryId,
           date: parsed.date,
           isIncome: parsed.isIncome,
-          note: parsed.note ?? 'Kopyalanan Metinden Yakalandı',
-          reason: 'Pano Bildirimi',
+          note: parsed.note ?? l10n.noteCapturedFromClipboard,
+          reason: l10n.reasonClipboard,
           currency: parsed.currency,
           isNotificationEnabled: parsed.isNotificationEnabled,
           notificationReminderDays: parsed.notificationReminderDays,
@@ -184,6 +185,9 @@ class SmartParserService {
 
   static String _capitalize(String s) {
     if (s.isEmpty) return s;
-    return s[0].toUpperCase() + s.substring(1);
+    final first = s[0];
+    if (first == 'i') return 'İ${s.substring(1)}';
+    if (first == 'ı') return 'I${s.substring(1)}';
+    return first.toUpperCase() + s.substring(1);
   }
 }

@@ -129,7 +129,7 @@ class _PrecisionInputState extends State<CustomTextField> with SingleTickerProvi
               )
             : SizedBox(
                 height: widget.fontSize != null 
-                    ? (widget.fontSize! + 24 * widget.scalingFactor) 
+                    ? (widget.fontSize! + (widget.fontSize! > 30 ? 36 : 24) * widget.scalingFactor) 
                     : (52 * widget.scalingFactor),
                 child: Center(
                   child: _buildTextField(activeColor, isDark),
@@ -224,8 +224,15 @@ class _PrecisionInputState extends State<CustomTextField> with SingleTickerProvi
         ),
         suffixIcon: widget.suffix,
         border: InputBorder.none,
-        isDense: true,
-        contentPadding: EdgeInsets.symmetric(vertical: 8 * widget.scalingFactor),
+        isDense: widget.fontSize != null && widget.fontSize! > 30 ? false : true,
+        contentPadding: EdgeInsets.symmetric(
+          vertical: widget.fontSize != null && widget.fontSize! > 30
+              ? 2 * widget.scalingFactor
+              : 8 * widget.scalingFactor,
+          horizontal: widget.fontSize != null && widget.fontSize! > 30
+              ? 12 * widget.scalingFactor
+              : 0,
+        ),
       ),
     );
   }

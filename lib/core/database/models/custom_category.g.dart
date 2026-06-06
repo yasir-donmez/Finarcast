@@ -32,13 +32,18 @@ const CustomCategorySchema = CollectionSchema(
       name: r'parentId',
       type: IsarType.string,
     ),
-    r'uniqueId': PropertySchema(
+    r'syncStatus': PropertySchema(
       id: 3,
+      name: r'syncStatus',
+      type: IsarType.long,
+    ),
+    r'uniqueId': PropertySchema(
+      id: 4,
       name: r'uniqueId',
       type: IsarType.string,
     ),
     r'updatedAt': PropertySchema(
-      id: 4,
+      id: 5,
       name: r'updatedAt',
       type: IsarType.dateTime,
     )
@@ -59,6 +64,19 @@ const CustomCategorySchema = CollectionSchema(
           name: r'uniqueId',
           type: IndexType.hash,
           caseSensitive: true,
+        )
+      ],
+    ),
+    r'syncStatus': IndexSchema(
+      id: 8239539375045684509,
+      name: r'syncStatus',
+      unique: false,
+      replace: false,
+      properties: [
+        IndexPropertySchema(
+          name: r'syncStatus',
+          type: IndexType.value,
+          caseSensitive: false,
         )
       ],
     )
@@ -92,8 +110,9 @@ void _customCategorySerialize(
   writer.writeLong(offsets[0], object.iconCode);
   writer.writeString(offsets[1], object.name);
   writer.writeString(offsets[2], object.parentId);
-  writer.writeString(offsets[3], object.uniqueId);
-  writer.writeDateTime(offsets[4], object.updatedAt);
+  writer.writeLong(offsets[3], object.syncStatus);
+  writer.writeString(offsets[4], object.uniqueId);
+  writer.writeDateTime(offsets[5], object.updatedAt);
 }
 
 CustomCategory _customCategoryDeserialize(
@@ -107,8 +126,9 @@ CustomCategory _customCategoryDeserialize(
   object.id = id;
   object.name = reader.readString(offsets[1]);
   object.parentId = reader.readString(offsets[2]);
-  object.uniqueId = reader.readString(offsets[3]);
-  object.updatedAt = reader.readDateTimeOrNull(offsets[4]);
+  object.syncStatus = reader.readLong(offsets[3]);
+  object.uniqueId = reader.readString(offsets[4]);
+  object.updatedAt = reader.readDateTime(offsets[5]);
   return object;
 }
 
@@ -126,9 +146,11 @@ P _customCategoryDeserializeProp<P>(
     case 2:
       return (reader.readString(offset)) as P;
     case 3:
-      return (reader.readString(offset)) as P;
+      return (reader.readLong(offset)) as P;
     case 4:
-      return (reader.readDateTimeOrNull(offset)) as P;
+      return (reader.readString(offset)) as P;
+    case 5:
+      return (reader.readDateTime(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
   }
@@ -207,6 +229,14 @@ extension CustomCategoryQueryWhereSort
   QueryBuilder<CustomCategory, CustomCategory, QAfterWhere> anyId() {
     return QueryBuilder.apply(this, (query) {
       return query.addWhereClause(const IdWhereClause.any());
+    });
+  }
+
+  QueryBuilder<CustomCategory, CustomCategory, QAfterWhere> anySyncStatus() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(
+        const IndexWhereClause.any(indexName: r'syncStatus'),
+      );
     });
   }
 }
@@ -324,6 +354,99 @@ extension CustomCategoryQueryWhere
               includeUpper: false,
             ));
       }
+    });
+  }
+
+  QueryBuilder<CustomCategory, CustomCategory, QAfterWhereClause>
+      syncStatusEqualTo(int syncStatus) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(IndexWhereClause.equalTo(
+        indexName: r'syncStatus',
+        value: [syncStatus],
+      ));
+    });
+  }
+
+  QueryBuilder<CustomCategory, CustomCategory, QAfterWhereClause>
+      syncStatusNotEqualTo(int syncStatus) {
+    return QueryBuilder.apply(this, (query) {
+      if (query.whereSort == Sort.asc) {
+        return query
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r'syncStatus',
+              lower: [],
+              upper: [syncStatus],
+              includeUpper: false,
+            ))
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r'syncStatus',
+              lower: [syncStatus],
+              includeLower: false,
+              upper: [],
+            ));
+      } else {
+        return query
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r'syncStatus',
+              lower: [syncStatus],
+              includeLower: false,
+              upper: [],
+            ))
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r'syncStatus',
+              lower: [],
+              upper: [syncStatus],
+              includeUpper: false,
+            ));
+      }
+    });
+  }
+
+  QueryBuilder<CustomCategory, CustomCategory, QAfterWhereClause>
+      syncStatusGreaterThan(
+    int syncStatus, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(IndexWhereClause.between(
+        indexName: r'syncStatus',
+        lower: [syncStatus],
+        includeLower: include,
+        upper: [],
+      ));
+    });
+  }
+
+  QueryBuilder<CustomCategory, CustomCategory, QAfterWhereClause>
+      syncStatusLessThan(
+    int syncStatus, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(IndexWhereClause.between(
+        indexName: r'syncStatus',
+        lower: [],
+        upper: [syncStatus],
+        includeUpper: include,
+      ));
+    });
+  }
+
+  QueryBuilder<CustomCategory, CustomCategory, QAfterWhereClause>
+      syncStatusBetween(
+    int lowerSyncStatus,
+    int upperSyncStatus, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(IndexWhereClause.between(
+        indexName: r'syncStatus',
+        lower: [lowerSyncStatus],
+        includeLower: includeLower,
+        upper: [upperSyncStatus],
+        includeUpper: includeUpper,
+      ));
     });
   }
 }
@@ -714,6 +837,62 @@ extension CustomCategoryQueryFilter
   }
 
   QueryBuilder<CustomCategory, CustomCategory, QAfterFilterCondition>
+      syncStatusEqualTo(int value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'syncStatus',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<CustomCategory, CustomCategory, QAfterFilterCondition>
+      syncStatusGreaterThan(
+    int value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'syncStatus',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<CustomCategory, CustomCategory, QAfterFilterCondition>
+      syncStatusLessThan(
+    int value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'syncStatus',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<CustomCategory, CustomCategory, QAfterFilterCondition>
+      syncStatusBetween(
+    int lower,
+    int upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'syncStatus',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+      ));
+    });
+  }
+
+  QueryBuilder<CustomCategory, CustomCategory, QAfterFilterCondition>
       uniqueIdEqualTo(
     String value, {
     bool caseSensitive = true,
@@ -850,25 +1029,7 @@ extension CustomCategoryQueryFilter
   }
 
   QueryBuilder<CustomCategory, CustomCategory, QAfterFilterCondition>
-      updatedAtIsNull() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(const FilterCondition.isNull(
-        property: r'updatedAt',
-      ));
-    });
-  }
-
-  QueryBuilder<CustomCategory, CustomCategory, QAfterFilterCondition>
-      updatedAtIsNotNull() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(const FilterCondition.isNotNull(
-        property: r'updatedAt',
-      ));
-    });
-  }
-
-  QueryBuilder<CustomCategory, CustomCategory, QAfterFilterCondition>
-      updatedAtEqualTo(DateTime? value) {
+      updatedAtEqualTo(DateTime value) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
         property: r'updatedAt',
@@ -879,7 +1040,7 @@ extension CustomCategoryQueryFilter
 
   QueryBuilder<CustomCategory, CustomCategory, QAfterFilterCondition>
       updatedAtGreaterThan(
-    DateTime? value, {
+    DateTime value, {
     bool include = false,
   }) {
     return QueryBuilder.apply(this, (query) {
@@ -893,7 +1054,7 @@ extension CustomCategoryQueryFilter
 
   QueryBuilder<CustomCategory, CustomCategory, QAfterFilterCondition>
       updatedAtLessThan(
-    DateTime? value, {
+    DateTime value, {
     bool include = false,
   }) {
     return QueryBuilder.apply(this, (query) {
@@ -907,8 +1068,8 @@ extension CustomCategoryQueryFilter
 
   QueryBuilder<CustomCategory, CustomCategory, QAfterFilterCondition>
       updatedAtBetween(
-    DateTime? lower,
-    DateTime? upper, {
+    DateTime lower,
+    DateTime upper, {
     bool includeLower = true,
     bool includeUpper = true,
   }) {
@@ -967,6 +1128,20 @@ extension CustomCategoryQuerySortBy
       sortByParentIdDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'parentId', Sort.desc);
+    });
+  }
+
+  QueryBuilder<CustomCategory, CustomCategory, QAfterSortBy>
+      sortBySyncStatus() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'syncStatus', Sort.asc);
+    });
+  }
+
+  QueryBuilder<CustomCategory, CustomCategory, QAfterSortBy>
+      sortBySyncStatusDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'syncStatus', Sort.desc);
     });
   }
 
@@ -1049,6 +1224,20 @@ extension CustomCategoryQuerySortThenBy
     });
   }
 
+  QueryBuilder<CustomCategory, CustomCategory, QAfterSortBy>
+      thenBySyncStatus() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'syncStatus', Sort.asc);
+    });
+  }
+
+  QueryBuilder<CustomCategory, CustomCategory, QAfterSortBy>
+      thenBySyncStatusDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'syncStatus', Sort.desc);
+    });
+  }
+
   QueryBuilder<CustomCategory, CustomCategory, QAfterSortBy> thenByUniqueId() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'uniqueId', Sort.asc);
@@ -1098,6 +1287,13 @@ extension CustomCategoryQueryWhereDistinct
     });
   }
 
+  QueryBuilder<CustomCategory, CustomCategory, QDistinct>
+      distinctBySyncStatus() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'syncStatus');
+    });
+  }
+
   QueryBuilder<CustomCategory, CustomCategory, QDistinct> distinctByUniqueId(
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
@@ -1139,14 +1335,19 @@ extension CustomCategoryQueryProperty
     });
   }
 
+  QueryBuilder<CustomCategory, int, QQueryOperations> syncStatusProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'syncStatus');
+    });
+  }
+
   QueryBuilder<CustomCategory, String, QQueryOperations> uniqueIdProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'uniqueId');
     });
   }
 
-  QueryBuilder<CustomCategory, DateTime?, QQueryOperations>
-      updatedAtProperty() {
+  QueryBuilder<CustomCategory, DateTime, QQueryOperations> updatedAtProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'updatedAt');
     });

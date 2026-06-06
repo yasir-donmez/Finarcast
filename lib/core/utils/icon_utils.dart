@@ -21,37 +21,21 @@ class IconUtils {
     // ==========================================
     switch (lowerCode) {
       // --- GİDER (EXPENSE) ---
-      case 'exp_grocery':
-        return Icons.shopping_basket_rounded;
-      case 'exp_grocery_food':
-        return Icons.egg_rounded;
-      case 'exp_grocery_cleaning':
-        return Icons.cleaning_services_rounded;
-      case 'exp_grocery_personal':
-        return Icons.face_rounded;
-      case 'exp_grocery_pet':
-        return Icons.pets_rounded;
-      
-      case 'exp_dining':
-        return Icons.restaurant_rounded;
-      case 'exp_dining_restaurant':
-        return Icons.restaurant_menu_rounded;
-      case 'exp_dining_fastfood':
-        return Icons.fastfood_rounded;
-      case 'exp_dining_cafe':
-        return Icons.coffee_rounded;
-      case 'exp_dining_delivery':
-        return Icons.delivery_dining_rounded;
-
+      // Barınma
       case 'exp_rent':
         return Icons.home_rounded;
       case 'exp_rent_home':
         return Icons.apartment_rounded;
       case 'exp_rent_office':
         return Icons.business_rounded;
+      case 'exp_rent_mortgage':
+        return Icons.account_balance_rounded;
+      case 'exp_rent_maintenance':
+        return Icons.build_rounded;
       case 'exp_rent_storage':
         return Icons.warehouse_rounded;
-
+      
+      // Faturalar
       case 'exp_bill':
         return Icons.receipt_long_rounded;
       case 'exp_bill_electricity':
@@ -66,77 +50,70 @@ class IconUtils {
         return Icons.phone_android_rounded;
       case 'exp_bill_dues':
         return Icons.home_work_rounded;
+      case 'exp_bill_tv':
+        return Icons.tv_rounded;
 
-      case 'exp_home':
-        return Icons.weekend_rounded;
-      case 'exp_home_furniture':
-        return Icons.chair_rounded;
-      case 'exp_home_maintenance':
-        return Icons.build_rounded;
-      case 'exp_home_supplies':
-        return Icons.shopping_bag_rounded;
-      case 'exp_home_garden':
-        return Icons.yard_rounded;
+      // Market
+      case 'exp_grocery':
+        return Icons.shopping_basket_rounded;
+      case 'exp_grocery_food':
+        return Icons.egg_rounded;
+      case 'exp_grocery_cleaning':
+        return Icons.cleaning_services_rounded;
+      case 'exp_grocery_drink':
+        return Icons.local_bar_rounded;
+      case 'exp_grocery_pet':
+        return Icons.pets_rounded;
+      case 'exp_grocery_hygiene':
+        return Icons.clean_hands_rounded;
 
-      case 'exp_fun':
-        return Icons.movie_creation_rounded;
-      case 'exp_fun_cinema':
-        return Icons.local_movies_rounded;
-      case 'exp_fun_concert':
-        return Icons.music_note_rounded;
-      case 'exp_fun_game':
-        return Icons.sports_esports_rounded;
-      case 'exp_fun_event':
-        return Icons.event_rounded;
-      case 'exp_fun_hobby':
-        return Icons.palette_rounded;
+      // Yemek
+      case 'exp_dining':
+        return Icons.restaurant_rounded;
+      case 'exp_dining_restaurant':
+        return Icons.restaurant_menu_rounded;
+      case 'exp_dining_cafe':
+        return Icons.coffee_rounded;
+      case 'exp_dining_fastfood':
+        return Icons.fastfood_rounded;
+      case 'exp_dining_delivery':
+        return Icons.delivery_dining_rounded;
+      case 'exp_dining_canteen':
+        return Icons.storefront_rounded;
 
-      case 'exp_sub':
-        return Icons.subscriptions_rounded;
-      case 'exp_sub_stream':
-        return Icons.smart_display_rounded;
-      case 'exp_sub_music':
-        return Icons.headphones_rounded;
-      case 'exp_sub_software':
-        return Icons.code_rounded;
-      case 'exp_sub_gym':
-        return Icons.fitness_center_rounded;
-
-      case 'exp_health':
-        return Icons.medical_services_rounded;
-      case 'exp_health_doctor':
-        return Icons.local_hospital_rounded;
-      case 'exp_health_medicine':
-        return Icons.medication_rounded;
-      case 'exp_health_surgery':
-        return Icons.vaccines_rounded;
-      case 'exp_health_dentist':
-        return Icons.sentiment_satisfied_alt_rounded;
-
+      // Ulaşım
       case 'exp_trans':
         return Icons.directions_transit_rounded;
-      case 'exp_trans_taxi':
-        return Icons.local_taxi_rounded;
       case 'exp_trans_bus':
         return Icons.directions_bus_rounded;
-      case 'exp_trans_train':
-        return Icons.train_rounded;
-      case 'exp_trans_flight':
-        return Icons.flight_rounded;
-      case 'exp_trans_travel':
-        return Icons.luggage_rounded;
+      case 'exp_trans_taxi':
+        return Icons.local_taxi_rounded;
+      case 'exp_trans_intercity':
+        return Icons.departure_board_rounded;
+      case 'exp_trans_scooter':
+        return Icons.electric_scooter_rounded;
 
+      // Araç
       case 'exp_car':
         return Icons.directions_car_rounded;
       case 'exp_car_fuel':
         return Icons.local_gas_station_rounded;
       case 'exp_car_maintenance':
         return Icons.construction_rounded;
-      case 'exp_car_insurance':
-        return Icons.shield_rounded;
       case 'exp_car_parking':
         return Icons.local_parking_rounded;
+      case 'exp_car_wash':
+        return Icons.local_car_wash_rounded;
+      case 'exp_car_toll':
+        return Icons.add_road_rounded;
+      case 'exp_car_insurance':
+        return Icons.shield_rounded;
+      case 'exp_car_tax':
+        return Icons.description_rounded;
+      case 'exp_car_rental':
+        return Icons.car_rental_rounded;
 
+      // Giyim
       case 'exp_cloth':
         return Icons.checkroom_rounded;
       case 'exp_cloth_daily':
@@ -145,7 +122,10 @@ class IconUtils {
         return Icons.ice_skating_rounded;
       case 'exp_cloth_acc':
         return Icons.watch_rounded;
+      case 'exp_cloth_tailor':
+        return Icons.content_cut_rounded;
 
+      // Kişisel Bakım
       case 'exp_beauty':
         return Icons.spa_rounded;
       case 'exp_beauty_salon':
@@ -155,15 +135,71 @@ class IconUtils {
       case 'exp_beauty_spa':
         return Icons.spa_rounded;
 
+      // Sağlık
+      case 'exp_health':
+        return Icons.medical_services_rounded;
+      case 'exp_health_doctor':
+        return Icons.local_hospital_rounded;
+      case 'exp_health_medicine':
+        return Icons.medication_rounded;
+      case 'exp_health_dentist':
+        return Icons.sentiment_satisfied_alt_rounded;
+      case 'exp_health_surgery':
+        return Icons.vaccines_rounded;
+      case 'exp_health_optics':
+        return Icons.visibility_rounded;
+      case 'exp_health_veterinary':
+        return Icons.pets_rounded;
+      case 'exp_health_therapy':
+        return Icons.psychology_rounded;
+      case 'exp_health_supplements':
+        return Icons.medication_liquid_rounded;
+
+      // Abonelikler
+      case 'exp_sub':
+        return Icons.subscriptions_rounded;
+      case 'exp_sub_stream':
+        return Icons.smart_display_rounded;
+      case 'exp_sub_music':
+        return Icons.headphones_rounded;
+      case 'exp_sub_gym':
+        return Icons.fitness_center_rounded;
+      case 'exp_sub_software':
+        return Icons.code_rounded;
+      case 'exp_sub_publishing':
+        return Icons.newspaper_rounded;
+
+      // Eğlence
+      case 'exp_fun':
+        return Icons.movie_creation_rounded;
+      case 'exp_fun_cinema':
+        return Icons.local_movies_rounded;
+      case 'exp_fun_concert':
+        return Icons.music_note_rounded;
+      case 'exp_fun_event':
+        return Icons.event_rounded;
+      case 'exp_fun_game':
+        return Icons.sports_esports_rounded;
+      case 'exp_fun_hobby':
+        return Icons.palette_rounded;
+      case 'exp_fun_gambling':
+        return Icons.casino_rounded;
+
+      // Eğitim
       case 'exp_edu':
         return Icons.school_rounded;
+      case 'exp_edu_school':
+        return Icons.account_balance_rounded;
       case 'exp_edu_course':
         return Icons.menu_book_rounded;
       case 'exp_edu_book':
         return Icons.auto_stories_rounded;
-      case 'exp_edu_school':
-        return Icons.account_balance_rounded;
+      case 'exp_edu_stationery':
+        return Icons.draw_rounded;
+      case 'exp_edu_exams':
+        return Icons.quiz_rounded;
 
+      // Aile
       case 'exp_family':
         return Icons.child_care_rounded;
       case 'exp_family_baby':
@@ -172,7 +208,38 @@ class IconUtils {
         return Icons.smart_toy_rounded;
       case 'exp_family_allowance':
         return Icons.savings_rounded;
+      case 'exp_family_daycare':
+        return Icons.escalator_warning_rounded;
 
+      // Alışveriş
+      case 'exp_shopping':
+        return Icons.shopping_bag_rounded;
+      case 'exp_shopping_tech':
+        return Icons.devices_rounded;
+      case 'exp_shopping_furniture':
+        return Icons.chair_rounded;
+      case 'exp_shopping_decor':
+        return Icons.bed_rounded;
+      case 'exp_shopping_kitchen':
+        return Icons.kitchen_rounded;
+      case 'exp_shopping_gift':
+        return Icons.card_giftcard_rounded;
+      case 'exp_shopping_general':
+        return Icons.shopping_cart_rounded;
+
+      // Seyahat
+      case 'exp_travel':
+        return Icons.beach_access_rounded;
+      case 'exp_travel_hotel':
+        return Icons.hotel_rounded;
+      case 'exp_travel_flight':
+        return Icons.airplane_ticket_rounded;
+      case 'exp_travel_tour':
+        return Icons.map_rounded;
+      case 'exp_travel_visa':
+        return Icons.assignment_ind_rounded;
+
+      // Borç
       case 'exp_debt':
         return Icons.credit_card_rounded;
       case 'exp_debt_credit_card':
@@ -182,6 +249,7 @@ class IconUtils {
       case 'exp_debt_personal':
         return Icons.handshake_rounded;
 
+      // Vergiler
       case 'exp_tax':
         return Icons.gavel_rounded;
       case 'exp_tax_income':
@@ -191,27 +259,18 @@ class IconUtils {
       case 'exp_tax_fee':
         return Icons.assured_workload_rounded;
 
-      case 'exp_invest':
-        return Icons.trending_up_rounded;
-      case 'exp_invest_gold':
-        return Icons.workspace_premium_rounded;
-      case 'exp_invest_stock':
-        return Icons.show_chart_rounded;
-      case 'exp_invest_crypto':
-        return Icons.currency_bitcoin_rounded;
-      case 'exp_invest_savings':
-        return Icons.savings_rounded;
-
+      // Diğer Giderler
       case 'exp_other':
         return Icons.more_horiz_rounded;
       case 'exp_other_general':
         return Icons.category_rounded;
       case 'exp_other_donation':
         return Icons.volunteer_activism_rounded;
-      case 'exp_other_insurance':
-        return Icons.security_rounded;
+      case 'exp_other_tip':
+        return Icons.monetization_on_rounded;
 
       // --- GELİR (INCOME) ---
+      // Maaş
       case 'inc_salary':
         return Icons.account_balance_wallet_rounded;
       case 'inc_salary_main':
@@ -222,7 +281,10 @@ class IconUtils {
         return Icons.celebration_rounded;
       case 'inc_salary_pension':
         return Icons.elderly_rounded;
+      case 'inc_salary_severance':
+        return Icons.wallet_rounded;
 
+      // Ek Gelir
       case 'inc_extra':
         return Icons.monetization_on_rounded;
       case 'inc_extra_freelance':
@@ -231,7 +293,10 @@ class IconUtils {
         return Icons.work_outline_rounded;
       case 'inc_extra_commission':
         return Icons.handshake_rounded;
+      case 'inc_extra_content':
+        return Icons.video_library_rounded;
 
+      // Yatırım Geliri
       case 'inc_invest':
         return Icons.trending_up_rounded;
       case 'inc_invest_stock':
@@ -242,25 +307,10 @@ class IconUtils {
         return Icons.savings_rounded;
       case 'inc_invest_gold':
         return Icons.currency_exchange_rounded;
-      case 'inc_invest_property':
-        return Icons.real_estate_agent_rounded;
+      case 'inc_invest_bond':
+        return Icons.description_rounded;
 
-      case 'inc_scholarship':
-        return Icons.school_rounded;
-      case 'inc_scholarship_award':
-        return Icons.emoji_events_rounded;
-      case 'inc_scholarship_loan':
-        return Icons.account_balance_rounded;
-      case 'inc_scholarship_gov':
-        return Icons.assured_workload_rounded;
-
-      case 'inc_sale':
-        return Icons.store_rounded;
-      case 'inc_sale_online':
-        return Icons.shopping_cart_rounded;
-      case 'inc_sale_physical':
-        return Icons.storefront_rounded;
-
+      // Kira Geliri
       case 'inc_rent':
         return Icons.house_rounded;
       case 'inc_rent_home':
@@ -269,14 +319,46 @@ class IconUtils {
         return Icons.business_rounded;
       case 'inc_rent_car':
         return Icons.car_rental_rounded;
+      case 'inc_rent_equipment':
+        return Icons.camera_alt_rounded;
 
+      // Burs
+      case 'inc_scholarship':
+        return Icons.school_rounded;
+      case 'inc_scholarship_award':
+        return Icons.emoji_events_rounded;
+      case 'inc_scholarship_loan':
+        return Icons.account_balance_rounded;
+      case 'inc_scholarship_gov':
+        return Icons.assured_workload_rounded;
+      case 'inc_scholarship_grant':
+        return Icons.science_rounded;
+
+      // Satış
+      case 'inc_sale':
+        return Icons.store_rounded;
+      case 'inc_sale_online':
+        return Icons.shopping_cart_rounded;
+      case 'inc_sale_physical':
+        return Icons.storefront_rounded;
+      case 'inc_sale_vehicle':
+        return Icons.directions_car_rounded;
+      case 'inc_sale_property':
+        return Icons.real_estate_agent_rounded;
+
+      // Hediye
       case 'inc_gift':
         return Icons.card_giftcard_rounded;
       case 'inc_gift_general':
         return Icons.cake_rounded;
       case 'inc_gift_award':
         return Icons.emoji_events_rounded;
+      case 'inc_gift_inheritance':
+        return Icons.account_balance_rounded;
+      case 'inc_gift_alimony':
+        return Icons.handshake_rounded;
 
+      // Diğer Gelirler
       case 'inc_other':
         return Icons.more_horiz_rounded;
       case 'inc_other_general':
@@ -285,6 +367,8 @@ class IconUtils {
         return Icons.assignment_return_rounded;
       case 'inc_other_lottery':
         return Icons.casino_rounded;
+      case 'inc_other_collection':
+        return Icons.assignment_turned_in_rounded;
     }
 
     // ==========================================
@@ -319,6 +403,8 @@ class IconUtils {
     if (lowerCode.startsWith('exp_debt')) return Colors.redAccent;
     if (lowerCode.startsWith('exp_tax')) return Colors.blueGrey;
     if (lowerCode.startsWith('exp_invest')) return Colors.amberAccent;
+    if (lowerCode.startsWith('exp_shopping')) return Colors.tealAccent;
+    if (lowerCode.startsWith('exp_travel')) return Colors.cyanAccent;
     
     if (lowerCode.startsWith('inc_salary')) return AppColors.primary;
     if (lowerCode.startsWith('inc_extra')) return Colors.green;

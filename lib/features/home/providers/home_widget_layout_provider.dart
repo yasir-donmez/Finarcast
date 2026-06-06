@@ -1,4 +1,6 @@
+import 'dart:convert';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../widgets/home_widget.dart';
 
 class WidgetConfig {
@@ -15,6 +17,26 @@ class WidgetConfig {
     required this.page,
     this.selectedVaultId,
   });
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'type': type,
+      'size': size.index,
+      'page': page,
+      'selectedVaultId': selectedVaultId,
+    };
+  }
+
+  factory WidgetConfig.fromJson(Map<String, dynamic> json) {
+    return WidgetConfig(
+      id: json['id'] as String,
+      type: json['type'] as String,
+      size: HomeWidgetSize.values[json['size'] as int],
+      page: json['page'] as int,
+      selectedVaultId: json['selectedVaultId'] as String?,
+    );
+  }
 
   WidgetConfig copyWith({
     String? id,
@@ -36,8 +58,8 @@ class WidgetConfig {
 
 class WidgetLayoutNotifier extends StateNotifier<List<List<WidgetConfig>>> {
   WidgetLayoutNotifier() : super([]) {
-    // Başlangıç verilerini normalize ederek yükle
-    _normalize(_initialWidgets);
+    // Başlangıç verilerini yerel hafızadan yükle
+    _loadFromPrefs();
   }
 
   static final List<WidgetConfig> _initialWidgets = [
@@ -167,6 +189,36 @@ class WidgetLayoutNotifier extends StateNotifier<List<List<WidgetConfig>>> {
     }
 
     state = pages;
+    _saveToPrefs(pages.expand((p) => p).toList());
+  }
+
+  Future<void> _loadFromPrefs() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final listJson = prefs.getStringList('home_widget_layout');
+      if (listJson != null && listJson.isNotEmpty) {
+        final List<WidgetConfig> loaded = [];
+        for (final itemStr in listJson) {
+          final map = jsonDecode(itemStr) as Map<String, dynamic>;
+          loaded.add(WidgetConfig.fromJson(map));
+        }
+        _normalize(loaded);
+      } else {
+        _normalize(_initialWidgets);
+      }
+    } catch (e) {
+      _normalize(_initialWidgets);
+    }
+  }
+
+  Future<void> _saveToPrefs(List<WidgetConfig> widgets) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final List<String> listJson = widgets.map((w) => jsonEncode(w.toJson())).toList();
+      await prefs.setStringList('home_widget_layout', listJson);
+    } catch (e) {
+      // Hata yutulabilir
+    }
   }
 
   void removeWidget(String id) {

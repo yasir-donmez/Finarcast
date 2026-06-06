@@ -20,7 +20,6 @@ extension AppSettingsCopy on AppSettings {
     int? permanentDeletionDays,
     bool? isNotificationsEnabled,
     bool? isSyncEnabled,
-    String? countryName,
     String? remoteId,
     int? syncStatus,
   }) {
@@ -37,7 +36,6 @@ extension AppSettingsCopy on AppSettings {
       ..isNotificationsEnabled =
           isNotificationsEnabled ?? this.isNotificationsEnabled
       ..isSyncEnabled = isSyncEnabled ?? this.isSyncEnabled
-      ..countryName = countryName ?? this.countryName
       ..remoteId = remoteId ?? this.remoteId
       ..syncStatus = syncStatus ?? this.syncStatus;
   }
@@ -48,19 +46,20 @@ final rootRepaintBoundaryKey = GlobalKey();
 class SettingsNotifier extends StateNotifier<AppSettings> {
   final Ref _ref;
 
-  SettingsNotifier(this._ref) : super(AppSettings()) {
-    _loadSettings();
+  SettingsNotifier(this._ref) : super(DatabaseService.createDefaultSettings()) {
     _listenToSubscriptionChanges();
+    _loadSettings();
   }
 
   void _listenToSubscriptionChanges() {
-    _ref.listen<SubscriptionService>(subscriptionServiceProvider, (previous, next) {
-      if (previous == null || previous.isPro != next.isPro) {
-        if (!next.isPro) {
+    _ref.listen<bool>(
+      subscriptionServiceProvider.select((s) => s.isPro),
+      (previous, next) {
+        if (previous != next && !next) {
           _resetPremiumSettings();
         }
-      }
-    });
+      },
+    );
   }
 
   Future<void> _resetPremiumSettings() async {
@@ -253,14 +252,9 @@ class SettingsNotifier extends StateNotifier<AppSettings> {
 
   /// Buluttan cekilen ayarlari yansit
   Future<void> reloadFromDb() async {
-    state = await DatabaseService.getSettings();
-    _updateIntl(state.languageCode);
+    await _loadSettings();
   }
 
-  Future<void> setCountry(String? name) async {
-    if (state.countryName == name) return;
-    await _save(state.copyWith(countryName: name));
-  }
 
   Future<void> _save(AppSettings settings) async {
     await DatabaseService.saveSettings(settings);

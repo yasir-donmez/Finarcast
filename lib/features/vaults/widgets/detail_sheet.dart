@@ -12,6 +12,7 @@ import '../../../../shared/widgets/custom_card.dart';
 import '../../../../shared/widgets/custom_button.dart';
 import '../../../../shared/widgets/custom_icon_button.dart';
 import '../../../../l10n/app_localizations.dart';
+import '../../../../core/utils/string_utils.dart';
 import '../../../../shared/widgets/custom_switch.dart';
 import '../../../../shared/widgets/clickable_action.dart';
 import '../../../../shared/widgets/custom_animated_icon.dart';
@@ -149,28 +150,14 @@ class _PrecisionDetailSheetState extends ConsumerState<DetailSheet> {
             );
           },
           child: Center(
-            child: Stack(
-              alignment: Alignment.center,
-              children: [
-                Container(
-                  width: 110 * sf, height: 110 * sf,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    gradient: RadialGradient(
-                      colors: [tx.color.withValues(alpha: 0.2), tx.color.withValues(alpha: 0.0)],
-                    ),
-                  ),
-                ),
-                Container(
-                  width: 80 * sf, height: 80 * sf,
-                  decoration: BoxDecoration(
-                    color: isDark ? Colors.white.withValues(alpha: 0.05) : Colors.black.withValues(alpha: 0.02),
-                    borderRadius: BorderRadius.circular(24 * sf),
-                    border: Border.all(color: AppColors.getAccentDeep(context, tx.color).withValues(alpha: 0.3), width: 0.5),
-                  ),
-                  child: Icon(tx.icon, size: 36 * sf, color: AppColors.getAccentDeep(context, tx.color)),
-                ),
-              ],
+            child: Container(
+              width: 80 * sf, height: 80 * sf,
+              decoration: BoxDecoration(
+                color: isDark ? Colors.white.withValues(alpha: 0.05) : Colors.black.withValues(alpha: 0.02),
+                borderRadius: BorderRadius.circular(24 * sf),
+                border: Border.all(color: AppColors.getAccentDeep(context, tx.color).withValues(alpha: 0.3), width: 0.5),
+              ),
+              child: Icon(tx.icon, size: 36 * sf, color: AppColors.getAccentDeep(context, tx.color)),
             ),
           ),
         ),
@@ -347,7 +334,7 @@ class _PrecisionDetailSheetState extends ConsumerState<DetailSheet> {
           Align(
             alignment: Alignment.centerLeft,
             child: Text(
-              l10n.vaults.toUpperCase(),
+              l10n.vaults.toSafeUpperCase(context),
               style: TextStyle(
                 fontSize: 9 * sf,
                 fontWeight: FontWeight.w900,
@@ -551,7 +538,7 @@ class _PrecisionDetailSheetState extends ConsumerState<DetailSheet> {
       mainAxisSize: MainAxisSize.min,
       children: [
         Text(
-          label.toUpperCase(),
+          label.toSafeUpperCase(context),
           style: TextStyle(
             fontSize: 9 * sf,
             fontWeight: FontWeight.w900,
@@ -650,15 +637,14 @@ class _PrecisionDetailSheetState extends ConsumerState<DetailSheet> {
   }
 
   String _getDetailedPeriodLabel(TransactionUI tx, AppLocalizations l10n, BuildContext context) {
-    final isTr = Localizations.localeOf(context).languageCode == 'tr';
     String base = '';
     
     if (tx.periodType == 0) {
       base = l10n.oneTime;
     } else if (tx.periodType == 250) {
-      base = isTr ? 'Hafta İçi' : 'Weekdays';
+      base = l10n.weekdays;
     } else if (tx.periodType == 251) {
-      base = isTr ? 'Hafta Sonu' : 'Weekends';
+      base = l10n.weekends;
     } else {
       final unit = tx.periodType ~/ 100;
       final interval = tx.periodType % 100;
@@ -668,28 +654,28 @@ class _PrecisionDetailSheetState extends ConsumerState<DetailSheet> {
           if (interval == 1) {
             base = l10n.everyDayDetailed;
           } else {
-            base = isTr ? '$interval Günde Bir' : 'Every $interval Days';
+            base = l10n.everyXDays(interval);
           }
           break;
         case 2: // Hafta
           if (interval == 1) {
             base = l10n.everyWeekDetailed;
           } else {
-            base = isTr ? '$interval Haftada Bir' : 'Every $interval Weeks';
+            base = l10n.everyXWeeks(interval);
           }
           break;
         case 3: // Ay
           if (interval == 1) {
             base = l10n.everyMonthDetailed;
           } else {
-            base = isTr ? '$interval Ayda Bir' : 'Every $interval Months';
+            base = l10n.everyXMonths(interval);
           }
           break;
         case 4: // Yıl
           if (interval == 1) {
             base = l10n.everyYearDetailed;
           } else {
-            base = isTr ? '$interval Yılda Bir' : 'Every $interval Years';
+            base = l10n.everyXYears(interval);
           }
           break;
         default:

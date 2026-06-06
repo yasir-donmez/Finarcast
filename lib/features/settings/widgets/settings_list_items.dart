@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../core/utils/string_utils.dart';
 import '../../../core/theme/app_constants.dart';
 import '../../../shared/widgets/clickable_action.dart';
 import '../../../shared/widgets/custom_switch.dart';
@@ -98,7 +99,7 @@ class SettingsListItems {
           key: key,
           padding: const EdgeInsets.only(left: 0, bottom: 8),
           child: Text(
-            title.toUpperCase(),
+            title.toSafeUpperCase(context),
             style: TextStyle(
               fontSize: 10,
               fontWeight: FontWeight.w900,

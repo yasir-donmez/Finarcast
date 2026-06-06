@@ -4,6 +4,7 @@ import 'dart:ui';
 import 'dart:math';
 import '../../../core/theme/app_constants.dart';
 import '../../../shared/widgets/glass_surface.dart';
+import '../../../l10n/app_localizations.dart';
 
 class SmartInputArea extends StatefulWidget {
   final TextEditingController controller;
@@ -136,7 +137,7 @@ class _SmartInputAreaState extends State<SmartInputArea>
                   }
                 },
                 decoration: InputDecoration(
-                  hintText: 'Örn: "Dün Starbucks filtre kahve 120 TL"',
+                  hintText: AppLocalizations.of(context)!.smartInputHint,
                   hintStyle: TextStyle(
                     color: AppColors.getTextFaint(context)
                         .withValues(alpha: 0.55),
@@ -354,6 +355,7 @@ class _ExpandingMenuButtonState extends State<_ExpandingMenuButton>
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return AnimatedBuilder(
       animation: _heightFactor,
       builder: (context, _) {
@@ -370,7 +372,7 @@ class _ExpandingMenuButtonState extends State<_ExpandingMenuButton>
               height: 44,
               child: _MenuOptionItem(
                 icon: Icons.camera_alt_rounded,
-                tooltip: 'Kamera',
+                tooltip: l10n.camera,
                 onTap: widget.onCameraPressed,
                 animation: _cameraAnim,
                 isDark: widget.isDark,
@@ -385,7 +387,7 @@ class _ExpandingMenuButtonState extends State<_ExpandingMenuButton>
               height: 44,
               child: _MenuOptionItem(
                 icon: Icons.photo_library_rounded,
-                tooltip: 'Galeri',
+                tooltip: l10n.gallery,
                 onTap: widget.onGalleryPressed,
                 animation: _galleryAnim,
                 isDark: widget.isDark,

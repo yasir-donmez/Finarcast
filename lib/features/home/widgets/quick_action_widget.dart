@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../l10n/app_localizations.dart';
 
 /// Hızlı İşlem Ekleme Widget'ı (1x1)
 class QuickActionWidget extends StatelessWidget {
@@ -7,6 +8,7 @@ class QuickActionWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
@@ -25,7 +27,7 @@ class QuickActionWidget extends StatelessWidget {
         ),
         const SizedBox(height: 12),
         Text(
-          'EKLE',
+          l10n.add,
           style: theme.textTheme.labelLarge?.copyWith(
             fontSize: 10,
             letterSpacing: 1.5,

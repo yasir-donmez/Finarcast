@@ -6,6 +6,7 @@ import '../../../core/database/database_service.dart';
 import '../../../core/database/models/vault.dart';
 import '../../../core/providers/settings_provider.dart';
 import '../../../core/utils/currency_utils.dart';
+import '../../../core/utils/string_utils.dart';
 import '../../../core/services/currency_service.dart';
 import '../../../shared/widgets/custom_text_field.dart';
 import '../../../shared/widgets/custom_button.dart';
@@ -102,7 +103,7 @@ class _AddVaultSheetState extends ConsumerState<AddVaultSheet> with SingleTicker
               Padding(
                 padding: const EdgeInsets.only(left: 4),
                 child: Text(
-                  l10n.currency.toUpperCase(),
+                  l10n.currency.toSafeUpperCase(context),
                   style: TextStyle(
                     fontSize: 10,
                     fontWeight: FontWeight.w900,
@@ -188,9 +189,9 @@ class _AddVaultSheetState extends ConsumerState<AddVaultSheet> with SingleTicker
                       if (!hasRate) {
                         if (context.mounted) {
                           ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
+                            SnackBar(
                               content: Text(
-                                "Döviz kurları yüklü değil. Farklı para biriminde kasa oluşturmak için lütfen internete bağlanıp kurları güncelleyin.",
+                                l10n.exchangeRatesNotLoadedNewVault,
                               ),
                               backgroundColor: Colors.redAccent,
                             ),
@@ -205,8 +206,7 @@ class _AddVaultSheetState extends ConsumerState<AddVaultSheet> with SingleTicker
                     final newVault = Vault()
                       ..name = _nameController.text.trim()
                       ..currency = _selectedCurrency
-                      ..balance = initialBalance ?? 0.0
-                      ..showOnDashboard = true;
+                      ..balance = initialBalance ?? 0.0;
                     
                     await DatabaseService.addVault(newVault);
                     _nameController.clear();

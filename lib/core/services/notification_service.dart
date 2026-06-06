@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:timezone/timezone.dart' as tz;
 import 'package:timezone/data/latest.dart' as tz_data;
+import 'package:intl/intl.dart';
 import '../database/models/transaction_record.dart';
+import '../database/database_service.dart';
 import '../utils/currency_utils.dart';
-
+import '../../l10n/app_localizations.dart';
 
 class NotificationService {
   static final NotificationService _instance = NotificationService._internal();
@@ -141,19 +143,22 @@ class NotificationService {
 
   Future<void> showTestNotification({int delaySeconds = 0}) async {
     try {
-      const AndroidNotificationDetails androidDetails = AndroidNotificationDetails(
+      final settings = await DatabaseService.getSettings();
+      final l10n = await AppLocalizations.delegate.load(Locale(settings.languageCode));
+
+      final AndroidNotificationDetails androidDetails = AndroidNotificationDetails(
         'test_reminders',
-        'Test Bildirimleri',
-        channelDescription: 'Finarcast bildirim test kanalı',
+        l10n.notificationTestChannelName,
+        channelDescription: l10n.notificationTestChannelDesc,
         importance: Importance.max,
         priority: Priority.high,
         playSound: true,
-        color: Color(0xFF00BCD4),
+        color: const Color(0xFF00BCD4),
       );
 
-      const NotificationDetails details = NotificationDetails(
+      final NotificationDetails details = NotificationDetails(
         android: androidDetails,
-        iOS: DarwinNotificationDetails(
+        iOS: const DarwinNotificationDetails(
           presentAlert: true,
           presentBadge: true,
           presentSound: true,
@@ -163,8 +168,8 @@ class NotificationService {
       if (delaySeconds <= 0) {
         await _notifications.show(
           id: 9999,
-          title: 'Finarcast Test Bildirimi',
-          body: 'Harika! Uygulama içi (foreground) bildirimleriniz sorunsuz çalışıyor.',
+          title: l10n.notificationTestTitle,
+          body: l10n.notificationTestBody,
           notificationDetails: details,
         );
         debugPrint('🔔 [NotificationService] Anlık test bildirimi gönderildi.');
@@ -176,8 +181,8 @@ class NotificationService {
         try {
           await _notifications.zonedSchedule(
             id: 9999,
-            title: 'Finarcast Gecikmeli Test',
-            body: 'Uygulama dışı (background) bildirim testi başarıyla tamamlandı!',
+            title: l10n.notificationTestDelayedTitle,
+            body: l10n.notificationTestDelayedBody,
             scheduledDate: scheduledDate,
             notificationDetails: details,
             androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
@@ -186,8 +191,8 @@ class NotificationService {
           debugPrint('⚠️ [NotificationService] exactAllowWhileIdle başarısız oldu, inexact deneniyor: $e');
           await _notifications.zonedSchedule(
             id: 9999,
-            title: 'Finarcast Gecikmeli Test',
-            body: 'Uygulama dışı (background) bildirim testi başarıyla tamamlandı!',
+            title: l10n.notificationTestDelayedTitle,
+            body: l10n.notificationTestDelayedBody,
             scheduledDate: scheduledDate,
             notificationDetails: details,
             androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
@@ -240,6 +245,9 @@ class NotificationService {
         }
       }
 
+      final settings = await DatabaseService.getSettings();
+      final l10n = await AppLocalizations.delegate.load(Locale(settings.languageCode));
+
       final String amountText = record.minAmount != null && record.maxAmount != null
           ? "${CurrencyUtils.formatAmount(record.minAmount!, currencySymbol: record.currency ?? "₺")} - ${CurrencyUtils.formatAmount(record.maxAmount!, currencySymbol: record.currency ?? "₺")}"
           : CurrencyUtils.formatAmount(record.effectiveAmount, currencySymbol: record.currency ?? "₺");
@@ -249,24 +257,26 @@ class NotificationService {
       final paymentDateOnly = DateTime(record.date.year, record.date.month, record.date.day);
       final difference = paymentDateOnly.difference(today).inDays;
       if (difference == 0) {
-        dateText = "Bugün";
+        dateText = l10n.today;
       } else if (difference == 1) {
-        dateText = "Yarın";
+        dateText = l10n.tomorrow;
       } else if (difference == -1) {
-        dateText = "Dün";
+        dateText = l10n.yesterday;
       } else {
-        dateText = "${record.date.day} ${_getMonthName(record.date.month)}";
+        dateText = DateFormat('d MMMM', settings.languageCode).format(record.date);
       }
 
       final String notificationTitle = record.isIncome
-          ? 'Gelir Hatırlatıcısı: ${record.title}'
-          : 'Ödeme Hatırlatıcısı: ${record.title}';
+          ? l10n.notificationIncomeTitle(record.title)
+          : l10n.notificationExpenseTitle(record.title);
 
       final buffer = StringBuffer();
-      buffer.write('Tutar: $amountText');
-      buffer.write('  •  Tarih: $dateText');
+      buffer.write(l10n.notificationBodyAmount(amountText));
+      buffer.write('  •  ');
+      buffer.write(l10n.notificationBodyDate(dateText));
       if (record.note != null && record.note!.trim().isNotEmpty) {
-        buffer.write('\nNot: ${record.note!.trim()}');
+        buffer.write('\n');
+        buffer.write(l10n.notificationBodyNote(record.note!.trim()));
       }
       final String notificationBody = buffer.toString();
 
@@ -279,8 +289,8 @@ class NotificationService {
 
       final AndroidNotificationDetails androidDetails = AndroidNotificationDetails(
         'transaction_reminders',
-        'İşlem Hatırlatıcıları',
-        channelDescription: 'Periyodik ödemeler ve gelirler için hatırlatıcılar',
+        l10n.notificationChannelName,
+        channelDescription: l10n.notificationChannelDesc,
         importance: Importance.max,
         priority: Priority.high,
         color: const Color(0xFF00BCD4),
@@ -394,16 +404,4 @@ class NotificationService {
       default: return null;
     }
   }
-
-  String _getMonthName(int month) {
-    const months = [
-      "Ocak", "Şubat", "Mart", "Nisan", "Mayıs", "Haziran", 
-      "Temmuz", "Ağustos", "Eylül", "Ekim", "Kasım", "Aralık"
-    ];
-    if (month >= 1 && month <= 12) {
-      return months[month - 1];
-    }
-    return "";
-  }
 }
-

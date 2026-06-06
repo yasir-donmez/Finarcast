@@ -114,7 +114,7 @@ class _MainScaffoldState extends ConsumerState<MainScaffold> with TickerProvider
           
           CustomNotification.success(
             context,
-            'Paylaşılan harcama analiz edildi ve sepete eklendi!',
+            AppLocalizations.of(context)!.sharedExpenseAnalyzed,
           );
         }
       },
@@ -123,18 +123,21 @@ class _MainScaffoldState extends ConsumerState<MainScaffold> with TickerProvider
           // Clear loading message
           ref.read(smartInboxLoadingProvider.notifier).state = null;
           
+          final l10n = AppLocalizations.of(context)!;
+          final String effectiveTitle = title == 'LIMIT_EXCEEDED' ? l10n.limitExceeded : title;
+
           // Show error dialog
-          if (title == 'Limit Aşıldı') {
+          if (title == 'LIMIT_EXCEEDED') {
             final isPro = ref.read(subscriptionServiceProvider).isPro;
             if (isPro) {
               showCustomDialog(
                 context: context,
                 accentColor: const Color(0xFFFFB300), // Altın rengi
-                title: title,
-                content: detail ?? "Günlük analiz limitinize ulaştınız.",
+                title: effectiveTitle,
+                content: l10n.unlimitedAccessLimitDesc,
                 actions: [
                   PrecisionDialogAction(
-                    label: "Kapat",
+                    label: l10n.close,
                     onTap: () => Navigator.pop(context),
                     isPrimary: true,
                   ),
@@ -144,16 +147,16 @@ class _MainScaffoldState extends ConsumerState<MainScaffold> with TickerProvider
               showCustomDialog(
                 context: context,
                 accentColor: const Color(0xFFFFB300), // Altın rengi
-                title: title,
-                content: detail ?? "Günlük analiz limitinize ulaştınız.",
+                title: effectiveTitle,
+                content: l10n.standardAccessLimitDesc,
                 actions: [
                   PrecisionDialogAction(
-                    label: "Daha Sonra",
+                    label: l10n.later,
                     onTap: () => Navigator.pop(context),
                     isPrimary: false,
                   ),
                   PrecisionDialogAction(
-                    label: "Genişletilmiş Erişime Geç",
+                    label: l10n.upgradeToExtendedAccess,
                     onTap: () {
                       Navigator.pop(context);
                       ProUpgradeSheet.show(context);
@@ -164,19 +167,7 @@ class _MainScaffoldState extends ConsumerState<MainScaffold> with TickerProvider
               );
             }
           } else {
-            showCustomDialog(
-              context: context,
-              accentColor: AppColors.error,
-              title: title,
-              content: detail ?? 'İşlem analiz edilirken bir hata oluştu.',
-              actions: [
-                PrecisionDialogAction(
-                  label: "Kapat",
-                  onTap: () => Navigator.pop(context),
-                  isPrimary: true,
-                ),
-              ],
-            );
+            CustomNotification.error(context, detail != null && detail.isNotEmpty ? '$effectiveTitle: $detail' : effectiveTitle);
           }
         }
       },
@@ -543,13 +534,13 @@ class _MainScaffoldState extends ConsumerState<MainScaffold> with TickerProvider
                 padding: const EdgeInsets.symmetric(horizontal: 10),
                 child: Row(
                   children: [
-                    _buildNavItem(0, Icons.home_rounded, Icons.home_outlined, AppLocalizations.of(context)!.home, itemWidth, maxLabelWidth),
+                    _buildNavItem(0, Icons.dashboard_rounded, Icons.dashboard_outlined, AppLocalizations.of(context)!.dashboard, itemWidth, maxLabelWidth),
                     _buildNavItem(1, Icons.account_balance_wallet_rounded, Icons.account_balance_wallet_outlined, AppLocalizations.of(context)!.vaults, itemWidth, maxLabelWidth),
                     _buildNavItem(
                       2,
                       Icons.auto_awesome_rounded,
                       Icons.auto_awesome_outlined,
-                      Localizations.localeOf(context).languageCode == 'tr' ? 'Gelen Kutusu' : 'Inbox',
+                      AppLocalizations.of(context)!.smartScanTitle,
                       itemWidth,
                       maxLabelWidth,
                     ),

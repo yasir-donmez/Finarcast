@@ -23,10 +23,22 @@ class CategoryUtils {
       }
     }
 
+    // 2. If it's a custom category but wasn't found in the list (e.g. user is not Premium or it was deleted),
+    // fall back to the parent category!
+    if (categoryId.contains('_custom_')) {
+      final parentId = categoryId.split('_custom_')[0];
+      return getCategoryName(
+        categoryId: parentId,
+        context: context,
+        customCategories: customCategories,
+        fallbackTitle: fallbackTitle,
+      );
+    }
+
     final l10n = AppLocalizations.of(context);
     if (l10n == null) return fallbackTitle ?? 'Diğer';
 
-    // 2. Check built-in expense categories
+    // 3. Check built-in expense categories
     final expenses = TransactionCategoryData.getExpenseCategories(context, l10n);
     for (final cat in expenses) {
       if (cat['id'] == categoryId) {
@@ -42,7 +54,7 @@ class CategoryUtils {
       }
     }
 
-    // 3. Check built-in income categories
+    // 4. Check built-in income categories
     final incomes = TransactionCategoryData.getIncomeCategories(context, l10n);
     for (final cat in incomes) {
       if (cat['id'] == categoryId) {
@@ -58,7 +70,7 @@ class CategoryUtils {
       }
     }
 
-    // 4. Fallback to title
+    // 5. Fallback to title
     return fallbackTitle ?? l10n.other;
   }
 
@@ -68,13 +80,6 @@ class CategoryUtils {
     required List<CustomCategory> customCategories,
     String? iconCode,
   }) {
-    if (iconCode != null && iconCode.isNotEmpty) {
-      final int? codepoint = int.tryParse(iconCode);
-      if (codepoint != null) {
-        return IconData(codepoint, fontFamily: 'MaterialIcons');
-      }
-    }
-
     if (categoryId != null && categoryId.isNotEmpty) {
       // 1. Check custom categories
       for (final c in customCategories) {
@@ -82,9 +87,26 @@ class CategoryUtils {
           return IconData(c.iconCode, fontFamily: 'MaterialIcons');
         }
       }
+
+      // 2. If it's a custom category but not found, fall back to parent
+      if (categoryId.contains('_custom_')) {
+        final parentId = categoryId.split('_custom_')[0];
+        return getCategoryIcon(
+          categoryId: parentId,
+          customCategories: customCategories,
+          iconCode: null,
+        );
+      }
     }
 
-    // 2. Fallback to built-in IconUtils resolver
+    if (iconCode != null && iconCode.isNotEmpty) {
+      final int? codepoint = int.tryParse(iconCode);
+      if (codepoint != null) {
+        return IconData(codepoint, fontFamily: 'MaterialIcons');
+      }
+    }
+
+    // 3. Fallback to built-in IconUtils resolver
     return IconUtils.getIcon(iconCode ?? categoryId);
   }
 
@@ -102,9 +124,18 @@ class CategoryUtils {
           return IconUtils.getColor(parentId);
         }
       }
+
+      // 2. If it's a custom category but not found, fall back to parent
+      if (categoryId.contains('_custom_')) {
+        final parentId = categoryId.split('_custom_')[0];
+        return getCategoryColor(
+          categoryId: parentId,
+          customCategories: customCategories,
+        );
+      }
     }
 
-    // 2. Fallback to built-in IconUtils resolver
+    // 3. Fallback to built-in IconUtils resolver
     return IconUtils.getColor(categoryId);
   }
 }

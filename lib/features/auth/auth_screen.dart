@@ -2,8 +2,6 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import '../home/main_scaffold.dart';
-import '../../../core/utils/route_transitions.dart';
 import '../../../core/services/auth_service.dart';
 import '../../../core/theme/app_constants.dart';
 import '../../../shared/widgets/solid_surface.dart';
@@ -202,12 +200,8 @@ class _AuthScreenState extends ConsumerState<AuthScreen> with TickerProviderStat
       final authService = ref.read(authServiceProvider);
       if (_isLogin) {
         await authService.signIn(email: email, password: password);
-        if (mounted) {
-          Navigator.of(context).pushAndRemoveUntil(
-            FadeScalePageRoute(child: const MainScaffold()),
-            (route) => false,
-          );
-        }
+        // Oturum açıldığında authStateProvider güncellenecek ve main.dart'taki
+        // reaktif home builder otomatik olarak MainScaffold'a geçiş yapacaktır.
       } else {
         // Kullanıcı adının benzersiz olup olmadığını kontrol et
         final isTaken = await authService.isUsernameTaken(username);
@@ -405,10 +399,8 @@ class _AuthScreenState extends ConsumerState<AuthScreen> with TickerProviderStat
       if (mounted) {
         final l10n = AppLocalizations.of(context)!;
         CustomNotification.success(context, l10n.authPasswordResetSuccess);
-        Navigator.of(context, rootNavigator: true).pushAndRemoveUntil(
-          FadeScalePageRoute(child: const MainScaffold()),
-          (route) => false,
-        );
+        // Şifre güncellendiğinde oturum otomatik açılmış olur ve reaktif home
+        // builder geçişi sağlar.
       }
     } catch (e) {
       if (mounted) {
@@ -437,12 +429,8 @@ class _AuthScreenState extends ConsumerState<AuthScreen> with TickerProviderStat
     try {
       final authService = ref.read(authServiceProvider);
       await authService.verifyOTP(email: _registeredEmail, token: code);
-      if (mounted) {
-        Navigator.of(context).pushAndRemoveUntil(
-          FadeScalePageRoute(child: const MainScaffold()),
-          (route) => false,
-        );
-      }
+      // OTP doğrulandığında oturum açılmış olur ve reaktif home builder
+      // geçişi sağlar.
     } catch (e) {
       if (mounted) {
         setState(() => _otpError = AuthErrorHelper.getFriendlyErrorMessage(context, e));

@@ -61,6 +61,13 @@ class GlassSurface extends StatelessWidget {
   /// Opaklık çarpanı (animasyonlu geçişler için). Varsayılan: 1.0.
   final double opacityMultiplier;
 
+  /// Hangi kenarların çizileceğini kontrol etmek için parametreler.
+  /// Not: Kısmi kenarlar çizilirken borderRadius değeri 0 olmalıdır, aksi halde Flutter hata verir.
+  final bool showTopBorder;
+  final bool showBottomBorder;
+  final bool showLeftBorder;
+  final bool showRightBorder;
+
   const GlassSurface({
     super.key,
     required this.child,
@@ -76,6 +83,10 @@ class GlassSurface extends StatelessWidget {
     this.borderWidth = 1.0,
     this.showShadow = true,
     this.opacityMultiplier = 1.0,
+    this.showTopBorder = true,
+    this.showBottomBorder = true,
+    this.showLeftBorder = true,
+    this.showRightBorder = true,
   });
 
   @override
@@ -118,6 +129,19 @@ class GlassSurface extends StatelessWidget {
 
     final activeBlurSigma = blurSigma * opacityMultiplier;
 
+    final hasCustomBorders = !showTopBorder || !showBottomBorder || !showLeftBorder || !showRightBorder;
+    final effectiveBorder = hasCustomBorders
+        ? Border(
+            top: showTopBorder ? BorderSide(color: brdColor, width: borderWidth) : BorderSide.none,
+            bottom: showBottomBorder ? BorderSide(color: brdColor, width: borderWidth) : BorderSide.none,
+            left: showLeftBorder ? BorderSide(color: brdColor, width: borderWidth) : BorderSide.none,
+            right: showRightBorder ? BorderSide(color: brdColor, width: borderWidth) : BorderSide.none,
+          )
+        : Border.all(
+            color: brdColor,
+            width: borderWidth,
+          );
+
     // ═══════════════════════════════════════════
     // Widget Hiyerarşisi
     // ═══════════════════════════════════════════
@@ -141,10 +165,7 @@ class GlassSurface extends StatelessWidget {
               decoration: BoxDecoration(
                 color: bgColor,
                 borderRadius: BorderRadius.circular(borderRadius),
-                border: Border.all(
-                  color: brdColor,
-                  width: borderWidth,
-                ),
+                border: effectiveBorder,
               ),
               child: child,
             ),

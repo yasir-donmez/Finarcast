@@ -8,7 +8,6 @@ import 'vault_card_stack.dart';
 
 class TrueMorphDeckHeaderDelegate extends SliverPersistentHeaderDelegate {
   final List<TransactionGroup> groups;
-  final List<TransactionUI> allTransactions;
   final String? selectedVaultId;
   final Function(String?) onVaultSelect;
   final Color activeColor;
@@ -22,7 +21,6 @@ class TrueMorphDeckHeaderDelegate extends SliverPersistentHeaderDelegate {
 
   TrueMorphDeckHeaderDelegate({
     required this.groups,
-    required this.allTransactions,
     required this.selectedVaultId,
     required this.onVaultSelect,
     required this.activeColor,
@@ -72,6 +70,9 @@ class TrueMorphDeckHeaderDelegate extends SliverPersistentHeaderDelegate {
                 borderColor: (isDark ? Colors.white : Colors.black).withValues(
                   alpha: progress > 0.95 ? (progress - 0.95) * 2 : 0.0,
                 ),
+                showTopBorder: false,
+                showLeftBorder: false,
+                showRightBorder: false,
                 child: const SizedBox.expand(),
               ),
             ),
@@ -86,7 +87,6 @@ class TrueMorphDeckHeaderDelegate extends SliverPersistentHeaderDelegate {
                   height: lerpDouble(kExpandedCardHeight, kCompactCardHeight, progress)!,
                   child: VaultCardStack(
                     deckItems: deckItems,
-                    allTransactions: allTransactions,
                     currentIndex: currentIndex,
                     onVaultSelect: onVaultSelect,
                     activeColor: activeColor,

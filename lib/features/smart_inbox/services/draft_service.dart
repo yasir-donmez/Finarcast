@@ -155,8 +155,8 @@ class DraftService {
       // Prepend merchant name (draft.title) to note if it's a specific merchant
       String? finalNote;
       if (draft.title.isNotEmpty && 
-          draft.title != 'Boş Taslak' && 
-          draft.title != 'Fiş Harcaması' && 
+          draft.title != '__EMPTY_DRAFT__' && 
+          draft.title != '__RECEIPT_EXPENSE__' && 
           draft.title != categoryName) {
         finalNote = draft.note != null && draft.note!.isNotEmpty
             ? '${draft.title} - ${draft.note}'

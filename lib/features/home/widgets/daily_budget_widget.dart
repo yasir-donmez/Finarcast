@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../core/theme/app_constants.dart';
+import '../../../l10n/app_localizations.dart';
 
 /// Günlük bütçe durumunu gösteren yatay widget (2x1)
 class DailyBudgetWidget extends StatelessWidget {
@@ -8,6 +9,7 @@ class DailyBudgetWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
     return Row(
       children: [
         Container(
@@ -29,7 +31,7 @@ class DailyBudgetWidget extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'GÜNLÜK LİMİT',
+                l10n.dailyLimit,
                 style: theme.textTheme.labelLarge?.copyWith(
                   fontSize: 9,
                   color: AppColors.getTextSecondary(context),
@@ -43,7 +45,7 @@ class DailyBudgetWidget extends StatelessWidget {
                 ),
               ),
               Text(
-                'Harcanabilir Kalan',
+                l10n.spendableRemaining,
                 style: theme.textTheme.bodySmall?.copyWith(fontSize: 10),
               ),
             ],

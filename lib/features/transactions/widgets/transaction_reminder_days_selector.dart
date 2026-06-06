@@ -4,6 +4,8 @@ import '../../../shared/widgets/custom_bottom_sheet.dart';
 import '../../../shared/widgets/wheel_picker.dart';
 import '../../../shared/widgets/custom_button.dart';
 import '../../../shared/widgets/clickable_action.dart';
+import '../../../l10n/app_localizations.dart';
+import '../../../core/utils/string_utils.dart';
 
 class TransactionReminderDaysSelector extends StatelessWidget {
   final int selectedDays;
@@ -19,13 +21,14 @@ class TransactionReminderDaysSelector extends StatelessWidget {
 
   void _showDaysPickerSheet(BuildContext context) {
     HapticFeedback.mediumImpact();
+    final l10n = AppLocalizations.of(context)!;
     
     final Map<int, String> options = {
-      0: 'Aynı Gün',
-      1: '1 Gün Önce',
-      2: '2 Gün Önce',
-      3: '3 Gün Önce',
-      7: '1 Hafta Önce',
+      0: l10n.sameDay,
+      1: l10n.oneDayBefore,
+      2: l10n.twoDaysBefore,
+      3: l10n.threeDaysBefore,
+      7: l10n.oneWeekBefore,
     };
 
     final keys = options.keys.toList();
@@ -36,7 +39,7 @@ class TransactionReminderDaysSelector extends StatelessWidget {
 
     CustomBottomSheet.show(
       context: context,
-      title: 'HATIRLATMA GÜNÜ',
+      title: l10n.reminderDay,
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -52,7 +55,7 @@ class TransactionReminderDaysSelector extends StatelessWidget {
               Navigator.pop(context);
               HapticFeedback.mediumImpact();
             },
-            label: 'TAMAM',
+            label: l10n.ok,
             activeColor: Theme.of(context).colorScheme.primary,
           ),
           const SizedBox(height: 12),
@@ -63,12 +66,13 @@ class TransactionReminderDaysSelector extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final Map<int, String> options = {
-      0: 'Aynı Gün',
-      1: '1 Gün Önce',
-      2: '2 Gün Önce',
-      3: '3 Gün Önce',
-      7: '1 Hafta Önce',
+      0: l10n.sameDay,
+      1: l10n.oneDayBefore,
+      2: l10n.twoDaysBefore,
+      3: l10n.threeDaysBefore,
+      7: l10n.oneWeekBefore,
     };
 
     return ClickableAction(
@@ -92,7 +96,7 @@ class TransactionReminderDaysSelector extends StatelessWidget {
               ),
               SizedBox(width: 12 * scalingFactor),
               Text(
-                'HATIRLATMA GÜNÜ'.toUpperCase(),
+                l10n.reminderDay.toSafeUpperCase(context),
                 style: TextStyle(
                   fontSize: 11 * scalingFactor,
                   fontWeight: FontWeight.w900,
@@ -106,7 +110,7 @@ class TransactionReminderDaysSelector extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               Text(
-                options[selectedDays] ?? 'Bilinmiyor',
+                options[selectedDays] ?? l10n.unknown,
                 style: TextStyle(
                   fontSize: 14 * scalingFactor,
                   fontWeight: FontWeight.w900,

@@ -224,8 +224,17 @@ class _ExchangeRateSettingState extends ConsumerState<ExchangeRateSetting> with 
     }
 
     final List<Widget> listItems = [];
-    final langCode = Localizations.localeOf(context).languageCode;
+    final l10n = AppLocalizations.of(context)!;
     final isGlobal = userCurrency != '₺' && userCurrency != 'TRY';
+    final locale = Localizations.localeOf(context).toString();
+
+    String formatRate(double rate) {
+      final decimals = rate < 1 ? 4 : 2;
+      final formatter = NumberFormat.decimalPattern(locale);
+      formatter.minimumFractionDigits = decimals;
+      formatter.maximumFractionDigits = decimals;
+      return formatter.format(rate);
+    }
 
     // Popüler Kurlar
     for (final rate in filteredCommon) {
@@ -251,7 +260,7 @@ class _ExchangeRateSettingState extends ConsumerState<ExchangeRateSetting> with 
                 ),
                 const SizedBox(width: 12),
                 Text(
-                  _getCurrencyName(rate.currencyCode, userCurrency, langCode),
+                  _getCurrencyName(rate.currencyCode, userCurrency, l10n),
                   style: TextStyle(
                     fontWeight: FontWeight.w800,
                     fontSize: 14,
@@ -260,7 +269,7 @@ class _ExchangeRateSettingState extends ConsumerState<ExchangeRateSetting> with 
                 ),
                 const Spacer(),
                 Text(
-                  "$userCurrency${displayRate.toStringAsFixed(displayRate < 1 ? 4 : 2)}",
+                  "$userCurrency${formatRate(displayRate)}",
                   style: TextStyle(
                     fontWeight: FontWeight.w900,
                     fontSize: 16,
@@ -299,7 +308,7 @@ class _ExchangeRateSettingState extends ConsumerState<ExchangeRateSetting> with 
                   ),
                   const SizedBox(width: 12),
                   Text(
-                    _getCurrencyName(rate.currencyCode, userCurrency, langCode),
+                    _getCurrencyName(rate.currencyCode, userCurrency, l10n),
                     style: TextStyle(
                       fontWeight: FontWeight.w800,
                       fontSize: 14,
@@ -308,7 +317,7 @@ class _ExchangeRateSettingState extends ConsumerState<ExchangeRateSetting> with 
                   ),
                   const Spacer(),
                   Text(
-                    "$userCurrency${displayRate.toStringAsFixed(displayRate < 1 ? 4 : 2)}",
+                    "$userCurrency${formatRate(displayRate)}",
                     style: TextStyle(
                       fontWeight: FontWeight.w900,
                       fontSize: 16,
@@ -385,31 +394,22 @@ class _ExchangeRateSettingState extends ConsumerState<ExchangeRateSetting> with 
     }
   }
 
-  String _getCurrencyName(String code, String userCurrency, String langCode) {
+  String _getCurrencyName(String code, String userCurrency, AppLocalizations l10n) {
     final isGlobal = userCurrency != '₺' && userCurrency != 'TRY';
-    final isTr = langCode == 'tr';
-
+ 
     switch (code) {
-      case 'USD': return isTr ? 'Amerikan Doları' : 'US Dollar';
-      case 'EUR': return isTr ? 'Euro' : 'Euro';
-      case 'TRY': return isTr ? 'Türk Lirası' : 'Turkish Lira';
-      case 'GBP': return isTr ? 'İngiliz Sterlini' : 'British Pound';
-      case 'CHF': return isTr ? 'İsviçre Frangı' : 'Swiss Franc';
-      case 'KWD': return isTr ? 'Kuveyt Dinarı' : 'Kuwaiti Dinar';
-      case 'SAR': return isTr ? 'Suudi Arabistan Riyali' : 'Saudi Riyal';
-      case 'JPY': return isTr ? 'Japon Yeni' : 'Japanese Yen';
+      case 'USD': return l10n.currencyUSD;
+      case 'EUR': return l10n.currencyEUR;
+      case 'TRY': return l10n.currencyTRY;
+      case 'GBP': return l10n.currencyGBP;
+      case 'CHF': return l10n.currencyCHF;
+      case 'KWD': return l10n.currencyKWD;
+      case 'SAR': return l10n.currencySAR;
+      case 'JPY': return l10n.currencyJPY;
       case 'SILVER':
-        if (isGlobal) {
-          return isTr ? 'Gümüş (Ons)' : 'Silver (Ounce)';
-        } else {
-          return isTr ? 'Gümüş (Gram)' : 'Silver (Gram)';
-        }
+        return isGlobal ? l10n.currencySILVEROunce : l10n.currencySILVER;
       case 'GOLD':
-        if (isGlobal) {
-          return isTr ? 'Ons Altın' : 'Gold (Ounce)';
-        } else {
-          return isTr ? 'Gram Altın' : 'Gold (Gram)';
-        }
+        return isGlobal ? l10n.currencyGOLDOunce : l10n.currencyGOLD;
       default: return code;
     }
   }

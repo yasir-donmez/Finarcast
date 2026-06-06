@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../core/theme/app_constants.dart';
 import '../../../shared/widgets/segmented_control.dart';
+import '../../../core/utils/string_utils.dart';
 import '../../../l10n/app_localizations.dart';
 
 class TransactionTypeToggle extends StatelessWidget {
@@ -22,8 +23,8 @@ class TransactionTypeToggle extends StatelessWidget {
       padding: const EdgeInsets.symmetric(vertical: 16),
       child: SegmentedControl(
         tabs: [
-          l10n.expense.toUpperCase(),
-          l10n.income.toUpperCase(),
+          l10n.expense.toSafeUpperCase(context),
+          l10n.income.toSafeUpperCase(context),
         ],
         // Seçili sekmeye göre ana rengi değiştiriyoruz
         activeColor: isIncome ? AppColors.getIncome(context) : AppColors.getExpense(context),

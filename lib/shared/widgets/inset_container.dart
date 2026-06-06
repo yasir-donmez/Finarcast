@@ -62,7 +62,7 @@ class InsetContainer extends StatelessWidget {
         ),
         child: Center(
           child: Opacity(
-            opacity: 0.6, // İkonun da yüzeye gömülü durması için opaklığı azaltıyoruz
+            opacity: 0.9, // İkonun da yüzeye gömülü durması için hafif opaklık
             child: child,
           ),
         ),

@@ -9,6 +9,7 @@ import '../../../../core/services/sync_coordinator.dart';
 import '../../../../core/services/subscription_service.dart';
 import '../../../../core/theme/app_constants.dart';
 import '../../../../shared/widgets/clickable_action.dart';
+import '../../../../shared/widgets/custom_card.dart';
 import '../../../../shared/widgets/custom_switch.dart';
 import '../../../../shared/widgets/custom_animated_icon.dart';
 import '../../../../shared/widgets/custom_dialog.dart';
@@ -134,7 +135,7 @@ class _SyncSettingState extends ConsumerState<SyncSetting> {
                         transitionBuilder: (child, animation) => FadeTransition(opacity: animation, child: child),
                         child: Text(
                           !isPro
-                              ? "Premium"
+                              ? l10n.premiumBadge
                               : (!isLoggedIn
                                   ? l10n.loginRequiredLabel
                                   : (isSyncEnabled ? l10n.active : l10n.disabled)),
@@ -184,61 +185,59 @@ class _SyncSettingState extends ConsumerState<SyncSetting> {
                   padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
                   child: Column(
                     children: [
-                      Container(
+                      SizedBox(
                         width: double.infinity,
-                        padding: const EdgeInsets.all(16),
-                        decoration: BoxDecoration(
-                          color: AppColors.getInnerSurface(context),
-                          borderRadius: BorderRadius.circular(16),
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            if (isPro && isLoggedIn && isSyncEnabled) ...[
-                              Row(
-                                children: [
-                                  Icon(Icons.sync_outlined, size: 16, color: activeColor),
-                                  const SizedBox(width: 8),
-                                  Text(
-                                    l10n.syncStatus,
-                                    style: TextStyle(
-                                      color: AppColors.getTextPrimary(context),
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.w800,
+                        child: CustomCard(
+                          padding: const EdgeInsets.all(16),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              if (isPro && isLoggedIn && isSyncEnabled) ...[
+                                Row(
+                                  children: [
+                                    Icon(Icons.sync_outlined, size: 16, color: activeColor),
+                                    const SizedBox(width: 8),
+                                    Text(
+                                      l10n.syncStatus,
+                                      style: TextStyle(
+                                        color: AppColors.getTextPrimary(context),
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.w800,
+                                      ),
                                     ),
+                                  ],
+                                ),
+                                const SizedBox(height: 8),
+                                Text(
+                                  l10n.lastSyncLabel(_formatLastSyncTime(_lastSyncTime)),
+                                  style: TextStyle(
+                                    color: AppColors.getTextSecondary(context),
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w600,
                                   ),
-                                ],
-                              ),
-                              const SizedBox(height: 8),
-                              Text(
-                                l10n.lastSyncLabel(_formatLastSyncTime(_lastSyncTime)),
-                                style: TextStyle(
-                                  color: AppColors.getTextSecondary(context),
-                                  fontSize: 13,
-                                  fontWeight: FontWeight.w600,
                                 ),
-                              ),
-                              const SizedBox(height: 4),
-                              Text(
-                                l10n.syncBackgroundDesc,
-                                style: TextStyle(
-                                  color: AppColors.getTextSecondary(context).withValues(alpha: 0.6),
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w500,
-                                  height: 1.4,
+                                const SizedBox(height: 4),
+                                Text(
+                                  l10n.syncBackgroundDesc,
+                                  style: TextStyle(
+                                    color: AppColors.getTextSecondary(context).withValues(alpha: 0.6),
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w500,
+                                    height: 1.4,
+                                  ),
                                 ),
-                              ),
-                            ] else ...[
-                              Text(
-                                l10n.syncCloudDesc,
-                                style: TextStyle(
-                                  color: AppColors.getTextSecondary(context),
-                                  fontSize: 13,
-                                  height: 1.4,
+                              ] else ...[
+                                Text(
+                                  l10n.syncCloudDesc,
+                                  style: TextStyle(
+                                    color: AppColors.getTextSecondary(context),
+                                    fontSize: 13,
+                                    height: 1.4,
+                                  ),
                                 ),
-                              ),
+                              ],
                             ],
-                          ],
+                          ),
                         ),
                       ),
                       if (isPro && isLoggedIn && isSyncEnabled) ...[
@@ -251,15 +250,15 @@ class _SyncSettingState extends ConsumerState<SyncSetting> {
                             if (_isSyncing) return;
                             HapticFeedback.mediumImpact();
                             setState(() => _isSyncing = true);
-                            final success = await SyncCoordinator.syncNow();
+                            final success = await SyncCoordinator.syncNow(l10n);
                             await _loadLastSyncTime();
                             setState(() => _isSyncing = false);
                             if (context.mounted) {
                               final result = SyncCoordinator.lastResult;
                               if (success && result != null && result.isFullySuccessful) {
-                                CustomNotification.success(context, result.summary);
+                                CustomNotification.success(context, result.getLocalizedSummary(l10n));
                               } else if (result != null && result.hasPartialErrors) {
-                                CustomNotification.success(context, l10n.syncPartialSuccess(result.summary));
+                                CustomNotification.success(context, l10n.syncPartialSuccess(result.getLocalizedSummary(l10n)));
                               } else {
                                 final errorDetail = SyncCoordinator.lastError ?? l10n.syncConnectionError;
                                 CustomNotification.error(context, l10n.syncFailed(errorDetail));

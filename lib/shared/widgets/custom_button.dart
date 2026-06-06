@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../core/theme/app_constants.dart';
+import '../../core/utils/string_utils.dart';
 import 'clickable_action.dart';
 
 /// Finarcast Standart "Ghost & Precision" Butonu.
@@ -71,7 +72,7 @@ class CustomButton extends StatelessWidget {
                         const SizedBox(width: 12),
                       ],
                       Text(
-                        label.toUpperCase(),
+                        label.toSafeUpperCase(context),
                         style: TextStyle(
                           color: color,
                           fontWeight: FontWeight.w900,

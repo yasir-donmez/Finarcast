@@ -114,12 +114,6 @@ abstract class AppLocalizations {
     Locale('zh'),
   ];
 
-  /// No description provided for @appTitle.
-  ///
-  /// In tr, this message translates to:
-  /// **'Finarcast'**
-  String get appTitle;
-
   /// No description provided for @settings.
   ///
   /// In tr, this message translates to:
@@ -131,12 +125,6 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'Profil'**
   String get profile;
-
-  /// No description provided for @memberPremium.
-  ///
-  /// In tr, this message translates to:
-  /// **'Finarcast Premium Üyelik'**
-  String get memberPremium;
 
   /// No description provided for @preferences.
   ///
@@ -150,41 +138,17 @@ abstract class AppLocalizations {
   /// **'Dil'**
   String get language;
 
-  /// No description provided for @aiNotifications.
-  ///
-  /// In tr, this message translates to:
-  /// **'AI Asistan Uyarıları'**
-  String get aiNotifications;
-
-  /// No description provided for @dataAndAiSettings.
-  ///
-  /// In tr, this message translates to:
-  /// **'VERİ & AI AYARLARI'**
-  String get dataAndAiSettings;
-
   /// No description provided for @dataRetention.
   ///
   /// In tr, this message translates to:
   /// **'Veri Saklama'**
   String get dataRetention;
 
-  /// No description provided for @dataRetentionDesc.
-  ///
-  /// In tr, this message translates to:
-  /// **'Süresi dolan işlemler arşivlenir.\nAI Asistanı yalnızca bu süredeki verileri kullanır.'**
-  String get dataRetentionDesc;
-
   /// No description provided for @permanentDataDeletion.
   ///
   /// In tr, this message translates to:
   /// **'Kalıcı Silme'**
   String get permanentDataDeletion;
-
-  /// No description provided for @permanentDataDeletionDesc.
-  ///
-  /// In tr, this message translates to:
-  /// **'Bu süreden sonra işlemler veritabanından kalıcı olarak silinir.\nBu işlem geri alınamaz.'**
-  String get permanentDataDeletionDesc;
 
   /// No description provided for @oneMonth.
   ///
@@ -215,12 +179,6 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'Sonsuz'**
   String get infinite;
-
-  /// No description provided for @dataManagement.
-  ///
-  /// In tr, this message translates to:
-  /// **'VERİ YÖNETİMİ'**
-  String get dataManagement;
 
   /// No description provided for @driveBackup.
   ///
@@ -257,12 +215,6 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'Finarcast, AI destekli finansal asistanınızdır. Harcamalarınızı analiz eder, tasarruf hedefleri belirlemenize yardımcı olur ve finansal geleceğinizi optimize eder.'**
   String get aboutFinarcast;
-
-  /// No description provided for @editProfile.
-  ///
-  /// In tr, this message translates to:
-  /// **'Profil Düzenleme'**
-  String get editProfile;
 
   /// No description provided for @comingSoon.
   ///
@@ -318,42 +270,6 @@ abstract class AppLocalizations {
   /// **'Analiz'**
   String get analysis;
 
-  /// No description provided for @dailySummary.
-  ///
-  /// In tr, this message translates to:
-  /// **'Günlük Özet'**
-  String get dailySummary;
-
-  /// No description provided for @todaySpending.
-  ///
-  /// In tr, this message translates to:
-  /// **'Bugünkü Harcama'**
-  String get todaySpending;
-
-  /// No description provided for @weeklyRemaining.
-  ///
-  /// In tr, this message translates to:
-  /// **'Haftalık Kalan'**
-  String get weeklyRemaining;
-
-  /// No description provided for @recentTransactions.
-  ///
-  /// In tr, this message translates to:
-  /// **'Son İşlemler'**
-  String get recentTransactions;
-
-  /// No description provided for @seeAll.
-  ///
-  /// In tr, this message translates to:
-  /// **'Tümünü Gör'**
-  String get seeAll;
-
-  /// No description provided for @myVaults.
-  ///
-  /// In tr, this message translates to:
-  /// **'Kasalarım'**
-  String get myVaults;
-
   /// No description provided for @totalBalance.
   ///
   /// In tr, this message translates to:
@@ -365,18 +281,6 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'Yeni Kasa Ekle'**
   String get addNewVault;
-
-  /// No description provided for @setGoal.
-  ///
-  /// In tr, this message translates to:
-  /// **'Hedef Belirle'**
-  String get setGoal;
-
-  /// No description provided for @analyze.
-  ///
-  /// In tr, this message translates to:
-  /// **'Analiz Et'**
-  String get analyze;
 
   /// No description provided for @addTransaction.
   ///
@@ -414,12 +318,6 @@ abstract class AppLocalizations {
   /// **'Açıklama'**
   String get description;
 
-  /// No description provided for @selectVault.
-  ///
-  /// In tr, this message translates to:
-  /// **'Kasa Seç'**
-  String get selectVault;
-
   /// No description provided for @done.
   ///
   /// In tr, this message translates to:
@@ -443,18 +341,6 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'Yeni Kasa'**
   String get newVault;
-
-  /// No description provided for @monthlyIncome.
-  ///
-  /// In tr, this message translates to:
-  /// **'Aylık Gelir'**
-  String get monthlyIncome;
-
-  /// No description provided for @monthlyExpense.
-  ///
-  /// In tr, this message translates to:
-  /// **'Aylık Gider'**
-  String get monthlyExpense;
 
   /// No description provided for @all.
   ///
@@ -516,23 +402,11 @@ abstract class AppLocalizations {
   /// **'Yıllık'**
   String get yearly;
 
-  /// No description provided for @noTransactions.
-  ///
-  /// In tr, this message translates to:
-  /// **'Henüz bu kategoride işlem yok'**
-  String get noTransactions;
-
   /// No description provided for @period.
   ///
   /// In tr, this message translates to:
   /// **'Periyot'**
   String get period;
-
-  /// No description provided for @remainingTime.
-  ///
-  /// In tr, this message translates to:
-  /// **'Kalan Süre'**
-  String get remainingTime;
 
   /// No description provided for @week.
   ///
@@ -564,18 +438,6 @@ abstract class AppLocalizations {
   /// **'Kategori'**
   String get category;
 
-  /// No description provided for @transactionName.
-  ///
-  /// In tr, this message translates to:
-  /// **'İşlem Adı'**
-  String get transactionName;
-
-  /// No description provided for @frequency.
-  ///
-  /// In tr, this message translates to:
-  /// **'Sıklık'**
-  String get frequency;
-
   /// No description provided for @themeMode.
   ///
   /// In tr, this message translates to:
@@ -606,18 +468,6 @@ abstract class AppLocalizations {
   /// **'Renk'**
   String get colorTheme;
 
-  /// No description provided for @colorSystem.
-  ///
-  /// In tr, this message translates to:
-  /// **'Sistem'**
-  String get colorSystem;
-
-  /// No description provided for @market.
-  ///
-  /// In tr, this message translates to:
-  /// **'Market'**
-  String get market;
-
   /// No description provided for @food.
   ///
   /// In tr, this message translates to:
@@ -630,12 +480,6 @@ abstract class AppLocalizations {
   /// **'Temizlik'**
   String get cleaning;
 
-  /// No description provided for @personalCare.
-  ///
-  /// In tr, this message translates to:
-  /// **'Kişisel Bakım'**
-  String get personalCare;
-
   /// No description provided for @grocery.
   ///
   /// In tr, this message translates to:
@@ -647,12 +491,6 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'Paket Servis'**
   String get delivery;
-
-  /// No description provided for @workspace.
-  ///
-  /// In tr, this message translates to:
-  /// **'Ofis/Çalışma Alanı'**
-  String get workspace;
 
   /// No description provided for @gas.
   ///
@@ -687,7 +525,7 @@ abstract class AppLocalizations {
   /// No description provided for @maximum.
   ///
   /// In tr, this message translates to:
-  /// **'Maximum'**
+  /// **'Maksimum'**
   String get maximum;
 
   /// No description provided for @dayOfWeek.
@@ -702,23 +540,11 @@ abstract class AppLocalizations {
   /// **'Ayın Günü'**
   String get dayOfMonth;
 
-  /// No description provided for @dayOfYear.
-  ///
-  /// In tr, this message translates to:
-  /// **'Yılın Günü'**
-  String get dayOfYear;
-
   /// No description provided for @dayOf.
   ///
   /// In tr, this message translates to:
   /// **'Günü'**
   String get dayOf;
-
-  /// No description provided for @recurrencePeriod.
-  ///
-  /// In tr, this message translates to:
-  /// **'Tekrar Periyodu'**
-  String get recurrencePeriod;
 
   /// No description provided for @dining.
   ///
@@ -732,35 +558,17 @@ abstract class AppLocalizations {
   /// **'Restoran'**
   String get restaurant;
 
-  /// No description provided for @fastFood.
-  ///
-  /// In tr, this message translates to:
-  /// **'Hızlı Yemek'**
-  String get fastFood;
-
   /// No description provided for @cafe.
   ///
   /// In tr, this message translates to:
   /// **'Kafe'**
   String get cafe;
 
-  /// No description provided for @takeout.
-  ///
-  /// In tr, this message translates to:
-  /// **'Paket Servis'**
-  String get takeout;
-
   /// No description provided for @rent.
   ///
   /// In tr, this message translates to:
   /// **'Kira'**
   String get rent;
-
-  /// No description provided for @homeRent.
-  ///
-  /// In tr, this message translates to:
-  /// **'Ev Kirası'**
-  String get homeRent;
 
   /// No description provided for @office.
   ///
@@ -792,12 +600,6 @@ abstract class AppLocalizations {
   /// **'Su'**
   String get water;
 
-  /// No description provided for @naturalGas.
-  ///
-  /// In tr, this message translates to:
-  /// **'Doğalgaz'**
-  String get naturalGas;
-
   /// No description provided for @internet.
   ///
   /// In tr, this message translates to:
@@ -809,12 +611,6 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'Telefon'**
   String get phone;
-
-  /// No description provided for @entertainment.
-  ///
-  /// In tr, this message translates to:
-  /// **'Eğlence'**
-  String get entertainment;
 
   /// No description provided for @cinema.
   ///
@@ -845,18 +641,6 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'Abonelik'**
   String get subscription;
-
-  /// No description provided for @streaming.
-  ///
-  /// In tr, this message translates to:
-  /// **'Dijital Yayın'**
-  String get streaming;
-
-  /// No description provided for @musicSubscription.
-  ///
-  /// In tr, this message translates to:
-  /// **'Müzik'**
-  String get musicSubscription;
 
   /// No description provided for @software.
   ///
@@ -900,12 +684,6 @@ abstract class AppLocalizations {
   /// **'Diş Hekimi'**
   String get dentist;
 
-  /// No description provided for @transportation.
-  ///
-  /// In tr, this message translates to:
-  /// **'Ulaşım'**
-  String get transportation;
-
   /// No description provided for @taxi.
   ///
   /// In tr, this message translates to:
@@ -936,35 +714,11 @@ abstract class AppLocalizations {
   /// **'Yakıt'**
   String get fuel;
 
-  /// No description provided for @clothing.
-  ///
-  /// In tr, this message translates to:
-  /// **'Giyim'**
-  String get clothing;
-
-  /// No description provided for @dailyWear.
-  ///
-  /// In tr, this message translates to:
-  /// **'Günlük Giyim'**
-  String get dailyWear;
-
   /// No description provided for @shoes.
   ///
   /// In tr, this message translates to:
   /// **'Ayakkabı'**
   String get shoes;
-
-  /// No description provided for @accessory.
-  ///
-  /// In tr, this message translates to:
-  /// **'Aksesuar'**
-  String get accessory;
-
-  /// No description provided for @education.
-  ///
-  /// In tr, this message translates to:
-  /// **'Eğitim'**
-  String get education;
 
   /// No description provided for @course.
   ///
@@ -984,29 +738,11 @@ abstract class AppLocalizations {
   /// **'Okul'**
   String get school;
 
-  /// No description provided for @debtPayment.
-  ///
-  /// In tr, this message translates to:
-  /// **'Borç Ödemesi'**
-  String get debtPayment;
-
-  /// No description provided for @creditCard.
-  ///
-  /// In tr, this message translates to:
-  /// **'Kredi Kartı'**
-  String get creditCard;
-
   /// No description provided for @loan.
   ///
   /// In tr, this message translates to:
   /// **'Kredi'**
   String get loan;
-
-  /// No description provided for @personalDebt.
-  ///
-  /// In tr, this message translates to:
-  /// **'Kişisel Borç'**
-  String get personalDebt;
 
   /// No description provided for @credit.
   ///
@@ -1038,12 +774,6 @@ abstract class AppLocalizations {
   /// **'Maaş'**
   String get salary;
 
-  /// No description provided for @mainSalary.
-  ///
-  /// In tr, this message translates to:
-  /// **'Ana Maaş'**
-  String get mainSalary;
-
   /// No description provided for @bonus.
   ///
   /// In tr, this message translates to:
@@ -1056,35 +786,17 @@ abstract class AppLocalizations {
   /// **'Temettü'**
   String get dividend;
 
-  /// No description provided for @extraIncome.
-  ///
-  /// In tr, this message translates to:
-  /// **'Ek Gelir'**
-  String get extraIncome;
-
   /// No description provided for @freelance.
   ///
   /// In tr, this message translates to:
   /// **'Serbest Çalışma'**
   String get freelance;
 
-  /// No description provided for @partTime.
-  ///
-  /// In tr, this message translates to:
-  /// **'Yarı Zamanlı'**
-  String get partTime;
-
   /// No description provided for @commission.
   ///
   /// In tr, this message translates to:
   /// **'Komisyon'**
   String get commission;
-
-  /// No description provided for @investmentReturn.
-  ///
-  /// In tr, this message translates to:
-  /// **'Yatırım Getirisi'**
-  String get investmentReturn;
 
   /// No description provided for @stock.
   ///
@@ -1104,12 +816,6 @@ abstract class AppLocalizations {
   /// **'Faiz'**
   String get interest;
 
-  /// No description provided for @scholarshipLoan.
-  ///
-  /// In tr, this message translates to:
-  /// **'Burs/Kredi'**
-  String get scholarshipLoan;
-
   /// No description provided for @scholarship.
   ///
   /// In tr, this message translates to:
@@ -1122,41 +828,11 @@ abstract class AppLocalizations {
   /// **'Satış'**
   String get sale;
 
-  /// No description provided for @onlineSale.
-  ///
-  /// In tr, this message translates to:
-  /// **'Online Satış'**
-  String get onlineSale;
-
-  /// No description provided for @physicalSale.
-  ///
-  /// In tr, this message translates to:
-  /// **'Fiziksel Satış'**
-  String get physicalSale;
-
-  /// No description provided for @rentalIncome.
-  ///
-  /// In tr, this message translates to:
-  /// **'Kira Geliri'**
-  String get rentalIncome;
-
-  /// No description provided for @officeIncome.
-  ///
-  /// In tr, this message translates to:
-  /// **'Ofis Geliri'**
-  String get officeIncome;
-
   /// No description provided for @gift.
   ///
   /// In tr, this message translates to:
   /// **'Hediye'**
   String get gift;
-
-  /// No description provided for @vaultOrGroup.
-  ///
-  /// In tr, this message translates to:
-  /// **'Kasa veya Grup'**
-  String get vaultOrGroup;
 
   /// No description provided for @cancel.
   ///
@@ -1164,29 +840,11 @@ abstract class AppLocalizations {
   /// **'İptal'**
   String get cancel;
 
-  /// No description provided for @generalBalance.
-  ///
-  /// In tr, this message translates to:
-  /// **'Genel Bakiye'**
-  String get generalBalance;
-
   /// No description provided for @everyDay.
   ///
   /// In tr, this message translates to:
   /// **'Her Gün'**
   String get everyDay;
-
-  /// No description provided for @every2Days.
-  ///
-  /// In tr, this message translates to:
-  /// **'2 Günde Bir'**
-  String get every2Days;
-
-  /// No description provided for @every3Days.
-  ///
-  /// In tr, this message translates to:
-  /// **'3 Günde Bir'**
-  String get every3Days;
 
   /// No description provided for @everyWeek.
   ///
@@ -1218,35 +876,11 @@ abstract class AppLocalizations {
   /// **'3 Gün'**
   String get threeDays;
 
-  /// No description provided for @twoWeeks.
-  ///
-  /// In tr, this message translates to:
-  /// **'2 Hafta'**
-  String get twoWeeks;
-
-  /// No description provided for @threeWeeks.
-  ///
-  /// In tr, this message translates to:
-  /// **'3 Hafta'**
-  String get threeWeeks;
-
   /// No description provided for @flexibleAmount.
   ///
   /// In tr, this message translates to:
   /// **'Esnek Tutar'**
   String get flexibleAmount;
-
-  /// No description provided for @singleAmount.
-  ///
-  /// In tr, this message translates to:
-  /// **'Tek Tutar'**
-  String get singleAmount;
-
-  /// No description provided for @advancedOptions.
-  ///
-  /// In tr, this message translates to:
-  /// **'Gelişmiş Seçenekler'**
-  String get advancedOptions;
 
   /// No description provided for @monday.
   ///
@@ -1368,41 +1002,11 @@ abstract class AppLocalizations {
   /// **'Tarih Seç'**
   String get selectDate;
 
-  /// No description provided for @selectDay.
-  ///
-  /// In tr, this message translates to:
-  /// **'Gün Seç'**
-  String get selectDay;
-
-  /// No description provided for @financialIdentity.
-  ///
-  /// In tr, this message translates to:
-  /// **'Finansal Kimliğin'**
-  String get financialIdentity;
-
-  /// No description provided for @setTarget.
-  ///
-  /// In tr, this message translates to:
-  /// **'Hedef Belirle'**
-  String get setTarget;
-
   /// No description provided for @allVaults.
   ///
   /// In tr, this message translates to:
   /// **'Tüm Kasalar'**
   String get allVaults;
-
-  /// No description provided for @hidePreselect.
-  ///
-  /// In tr, this message translates to:
-  /// **'Ön seçimi gizle'**
-  String get hidePreselect;
-
-  /// No description provided for @showPreselect.
-  ///
-  /// In tr, this message translates to:
-  /// **'Ön seçimi göster'**
-  String get showPreselect;
 
   /// No description provided for @items.
   ///
@@ -1422,65 +1026,11 @@ abstract class AppLocalizations {
   /// **'GELİRLER'**
   String get incomes;
 
-  /// No description provided for @doNotTouch.
-  ///
-  /// In tr, this message translates to:
-  /// **'Dokunulmasın'**
-  String get doNotTouch;
-
-  /// No description provided for @changeable.
-  ///
-  /// In tr, this message translates to:
-  /// **'Değiştirilebilir'**
-  String get changeable;
-
-  /// No description provided for @excellent.
-  ///
-  /// In tr, this message translates to:
-  /// **'MÜKEMMEL'**
-  String get excellent;
-
-  /// No description provided for @analysisResult.
-  ///
-  /// In tr, this message translates to:
-  /// **'ANALİZ SONUCU'**
-  String get analysisResult;
-
-  /// No description provided for @onTrackMessage.
-  ///
-  /// In tr, this message translates to:
-  /// **'Hedefe Ulaşıyorsun'**
-  String get onTrackMessage;
-
-  /// No description provided for @savingsNeeded.
-  ///
-  /// In tr, this message translates to:
-  /// **'Tasarruf Gerekli'**
-  String get savingsNeeded;
-
   /// No description provided for @currentBalance.
   ///
   /// In tr, this message translates to:
   /// **'Mevcut Bakiye'**
   String get currentBalance;
-
-  /// No description provided for @targetGap.
-  ///
-  /// In tr, this message translates to:
-  /// **'Hedef Açığı'**
-  String get targetGap;
-
-  /// No description provided for @currentSurplus.
-  ///
-  /// In tr, this message translates to:
-  /// **'Mevcut Fazlan'**
-  String get currentSurplus;
-
-  /// No description provided for @requiredMonthlySavings.
-  ///
-  /// In tr, this message translates to:
-  /// **'Gereken Aylık Tasarruf'**
-  String get requiredMonthlySavings;
 
   /// No description provided for @score.
   ///
@@ -1488,65 +1038,11 @@ abstract class AppLocalizations {
   /// **'SKOR'**
   String get score;
 
-  /// No description provided for @currentSavings.
-  ///
-  /// In tr, this message translates to:
-  /// **'Mevcut Birikimlerin'**
-  String get currentSavings;
-
-  /// No description provided for @aiSavingsTarget.
-  ///
-  /// In tr, this message translates to:
-  /// **'AI Tasarruf Hedefi'**
-  String get aiSavingsTarget;
-
-  /// No description provided for @remainingGap.
-  ///
-  /// In tr, this message translates to:
-  /// **'Kalan Açık'**
-  String get remainingGap;
-
-  /// No description provided for @dailyAiQuotaFull.
-  ///
-  /// In tr, this message translates to:
-  /// **'Günlük AI kotası doldu'**
-  String get dailyAiQuotaFull;
-
-  /// No description provided for @noInternetConnection.
-  ///
-  /// In tr, this message translates to:
-  /// **'İnternet bağlantısı yok'**
-  String get noInternetConnection;
-
-  /// No description provided for @aiApiError.
-  ///
-  /// In tr, this message translates to:
-  /// **'AI API hatası'**
-  String get aiApiError;
-
-  /// No description provided for @aiCoachSuggestion.
-  ///
-  /// In tr, this message translates to:
-  /// **'AI KOÇUNUN ÖNERİSİ'**
-  String get aiCoachSuggestion;
-
-  /// No description provided for @cutbackPlan.
-  ///
-  /// In tr, this message translates to:
-  /// **'KISINTI PLANI'**
-  String get cutbackPlan;
-
   /// No description provided for @no.
   ///
   /// In tr, this message translates to:
   /// **'Hayır'**
   String get no;
-
-  /// No description provided for @recentAnalyses.
-  ///
-  /// In tr, this message translates to:
-  /// **'Son Analizler'**
-  String get recentAnalyses;
 
   /// No description provided for @vault.
   ///
@@ -1559,12 +1055,6 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'Kasa Detayı'**
   String get vaultDetail;
-
-  /// No description provided for @managePanel.
-  ///
-  /// In tr, this message translates to:
-  /// **'Paneli Yönet'**
-  String get managePanel;
 
   /// No description provided for @vaultNameHint.
   ///
@@ -1595,24 +1085,6 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'Yönet'**
   String get manage;
-
-  /// No description provided for @averageMonthlyLoad.
-  ///
-  /// In tr, this message translates to:
-  /// **'AYLIK ORTALAMA YÜK'**
-  String get averageMonthlyLoad;
-
-  /// No description provided for @noTransactionsInVault.
-  ///
-  /// In tr, this message translates to:
-  /// **'Bu kasada işlem bulunmuyor.'**
-  String get noTransactionsInVault;
-
-  /// No description provided for @manageTransactionsInVault.
-  ///
-  /// In tr, this message translates to:
-  /// **'Kasadaki İşlemleri Yönet'**
-  String get manageTransactionsInVault;
 
   /// No description provided for @deleteVault.
   ///
@@ -1710,53 +1182,11 @@ abstract class AppLocalizations {
   /// **'Her yıl'**
   String get everyYearDetailed;
 
-  /// No description provided for @every2WeeksDetailed.
-  ///
-  /// In tr, this message translates to:
-  /// **'2 haftada bir'**
-  String get every2WeeksDetailed;
-
-  /// No description provided for @every3WeeksDetailed.
-  ///
-  /// In tr, this message translates to:
-  /// **'3 haftada bir'**
-  String get every3WeeksDetailed;
-
-  /// No description provided for @every3MonthsDetailed.
-  ///
-  /// In tr, this message translates to:
-  /// **'3 ayda bir'**
-  String get every3MonthsDetailed;
-
-  /// No description provided for @every6MonthsDetailed.
-  ///
-  /// In tr, this message translates to:
-  /// **'6 ayda bir'**
-  String get every6MonthsDetailed;
-
   /// No description provided for @everyDayDetailed.
   ///
   /// In tr, this message translates to:
   /// **'Her gün'**
   String get everyDayDetailed;
-
-  /// No description provided for @every2DaysDetailed.
-  ///
-  /// In tr, this message translates to:
-  /// **'2 günde bir'**
-  String get every2DaysDetailed;
-
-  /// No description provided for @every3DaysDetailed.
-  ///
-  /// In tr, this message translates to:
-  /// **'3 günde bir'**
-  String get every3DaysDetailed;
-
-  /// No description provided for @allLabel.
-  ///
-  /// In tr, this message translates to:
-  /// **'Hepsi'**
-  String get allLabel;
 
   /// No description provided for @custom.
   ///
@@ -1770,47 +1200,17 @@ abstract class AppLocalizations {
   /// **'Durum'**
   String get status;
 
-  /// No description provided for @approved.
-  ///
-  /// In tr, this message translates to:
-  /// **'Onaylandı'**
-  String get approved;
-
-  /// No description provided for @rejected.
-  ///
-  /// In tr, this message translates to:
-  /// **'Reddedildi'**
-  String get rejected;
-
   /// No description provided for @pending.
   ///
   /// In tr, this message translates to:
   /// **'Bekliyor'**
   String get pending;
 
-  /// No description provided for @visibilityManagement.
-  ///
-  /// In tr, this message translates to:
-  /// **'Görünürlük Yönetimi'**
-  String get visibilityManagement;
-
-  /// No description provided for @editTransaction.
-  ///
-  /// In tr, this message translates to:
-  /// **'İşlem bilgilerini güncelle'**
-  String get editTransaction;
-
   /// No description provided for @removeFromVault.
   ///
   /// In tr, this message translates to:
   /// **'Kasadan Çıkar'**
   String get removeFromVault;
-
-  /// No description provided for @removeFromVaultDesc.
-  ///
-  /// In tr, this message translates to:
-  /// **'İşlem ana kasaya geri döner, silinmez'**
-  String get removeFromVaultDesc;
 
   /// No description provided for @permanentDelete.
   ///
@@ -1830,156 +1230,6 @@ abstract class AppLocalizations {
   /// **'Evet'**
   String get yes;
 
-  /// No description provided for @groupNameHint.
-  ///
-  /// In tr, this message translates to:
-  /// **'Grup adı...'**
-  String get groupNameHint;
-
-  /// No description provided for @transactionCount.
-  ///
-  /// In tr, this message translates to:
-  /// **'{count, plural, =1{1 işlem} other{{count} işlem}}'**
-  String transactionCount(num count);
-
-  /// No description provided for @noRemainingTransactions.
-  ///
-  /// In tr, this message translates to:
-  /// **'Eklenebilecek boş işlem kalmadı.'**
-  String get noRemainingTransactions;
-
-  /// No description provided for @editTransactionDesc.
-  ///
-  /// In tr, this message translates to:
-  /// **'İşlem bilgilerini güncelle'**
-  String get editTransactionDesc;
-
-  /// No description provided for @visibilityDesc.
-  ///
-  /// In tr, this message translates to:
-  /// **'Ana sayfada hangi grup veya işlemlerin görüneceğini seçin.'**
-  String get visibilityDesc;
-
-  /// No description provided for @vaultsAndGroups.
-  ///
-  /// In tr, this message translates to:
-  /// **'Kasalar & Gruplar'**
-  String get vaultsAndGroups;
-
-  /// No description provided for @individualTransactions.
-  ///
-  /// In tr, this message translates to:
-  /// **'Tekil İşlemler'**
-  String get individualTransactions;
-
-  /// No description provided for @analyzingFinancialIdentity.
-  ///
-  /// In tr, this message translates to:
-  /// **'Finansal kimliğin analiz ediliyor...'**
-  String get analyzingFinancialIdentity;
-
-  /// No description provided for @financialIdentityHint.
-  ///
-  /// In tr, this message translates to:
-  /// **'Analiz yaptığında finansal kimliğin burada belirecek.'**
-  String get financialIdentityHint;
-
-  /// No description provided for @targetDateLabel.
-  ///
-  /// In tr, this message translates to:
-  /// **'Hedef Tarihi:'**
-  String get targetDateLabel;
-
-  /// No description provided for @scopeLabel.
-  ///
-  /// In tr, this message translates to:
-  /// **'Kapsam:'**
-  String get scopeLabel;
-
-  /// No description provided for @preselectHint.
-  ///
-  /// In tr, this message translates to:
-  /// **'Kalemler üzerinde ön seçim yap (isteğe bağlı)'**
-  String get preselectHint;
-
-  /// No description provided for @noItemsToAnalyze.
-  ///
-  /// In tr, this message translates to:
-  /// **'Seçilen tarihe kadar etki edecek işlem bulunamadı.'**
-  String get noItemsToAnalyze;
-
-  /// No description provided for @itemsToAnalyze.
-  ///
-  /// In tr, this message translates to:
-  /// **'{count, plural, =1{Hedef tarihe ({months} ay) kadar etki edecek 1 kalem.} other{Hedef tarihe ({months} ay) kadar etki edecek {count} kalem.}}'**
-  String itemsToAnalyze(num count, Object months);
-
-  /// No description provided for @budgetNotFeasible.
-  ///
-  /// In tr, this message translates to:
-  /// **'Bu hedef mevcut esnek bütçenle tam karşılanamıyor. Süreyi uzatmayı veya geliri artırmayı düşünebilirsin.'**
-  String get budgetNotFeasible;
-
-  /// No description provided for @financialIdentityUpdated.
-  ///
-  /// In tr, this message translates to:
-  /// **'Harika! Finansal kimliğin güncellendi ve analiz kaydedildi.'**
-  String get financialIdentityUpdated;
-
-  /// No description provided for @feedbackMemoized.
-  ///
-  /// In tr, this message translates to:
-  /// **'Tamam, bu tercihler hafızaya alındı. Bir sonraki analizde farklı öneriler sunulacak.'**
-  String get feedbackMemoized;
-
-  /// No description provided for @excludedCategories.
-  ///
-  /// In tr, this message translates to:
-  /// **'Hariç Tutulanlar:'**
-  String get excludedCategories;
-
-  /// No description provided for @newFrequency.
-  ///
-  /// In tr, this message translates to:
-  /// **'Yeni Sıklık: {frequency}'**
-  String newFrequency(Object frequency);
-
-  /// No description provided for @doYouLikeThisSuggestion.
-  ///
-  /// In tr, this message translates to:
-  /// **'Bu öneriyi beğendin mi?'**
-  String get doYouLikeThisSuggestion;
-
-  /// No description provided for @yesILikeIt.
-  ///
-  /// In tr, this message translates to:
-  /// **'Evet, Beğendim'**
-  String get yesILikeIt;
-
-  /// No description provided for @targetAmountLabel.
-  ///
-  /// In tr, this message translates to:
-  /// **'{amount} Hedef'**
-  String targetAmountLabel(Object amount);
-
-  /// No description provided for @weeksToTargetLabel.
-  ///
-  /// In tr, this message translates to:
-  /// **'{count, plural, =1{1 Hafta} other{{count} Hafta}}'**
-  String weeksToTargetLabel(num count);
-
-  /// No description provided for @monthsToTargetLabel.
-  ///
-  /// In tr, this message translates to:
-  /// **'{count, plural, =1{1 Ay} other{{count} Ay}}'**
-  String monthsToTargetLabel(num count);
-
-  /// No description provided for @yearsToTargetLabel.
-  ///
-  /// In tr, this message translates to:
-  /// **'{count, plural, =1{1 Yıl} other{{count} Yıl}}'**
-  String yearsToTargetLabel(num count);
-
   /// No description provided for @minAmount.
   ///
   /// In tr, this message translates to:
@@ -1989,14 +1239,8 @@ abstract class AppLocalizations {
   /// No description provided for @maxAmount.
   ///
   /// In tr, this message translates to:
-  /// **'Max.'**
+  /// **'Maks.'**
   String get maxAmount;
-
-  /// No description provided for @limitedTotal.
-  ///
-  /// In tr, this message translates to:
-  /// **'Toplam'**
-  String get limitedTotal;
 
   /// No description provided for @netBalance.
   ///
@@ -2016,59 +1260,11 @@ abstract class AppLocalizations {
   /// **'En Kötü Senaryo'**
   String get worstCase;
 
-  /// No description provided for @layoutAndSorting.
-  ///
-  /// In tr, this message translates to:
-  /// **'Görünüm ve Sıralama'**
-  String get layoutAndSorting;
-
-  /// No description provided for @layout1.
-  ///
-  /// In tr, this message translates to:
-  /// **'1\'li'**
-  String get layout1;
-
-  /// No description provided for @layout2.
-  ///
-  /// In tr, this message translates to:
-  /// **'2\'li'**
-  String get layout2;
-
-  /// No description provided for @layout3.
-  ///
-  /// In tr, this message translates to:
-  /// **'3\'lü'**
-  String get layout3;
-
-  /// No description provided for @layout4.
-  ///
-  /// In tr, this message translates to:
-  /// **'4\'lü'**
-  String get layout4;
-
-  /// No description provided for @moveForward.
-  ///
-  /// In tr, this message translates to:
-  /// **'Öne Taşı'**
-  String get moveForward;
-
-  /// No description provided for @moveBackward.
-  ///
-  /// In tr, this message translates to:
-  /// **'Arkaya Taşı'**
-  String get moveBackward;
-
   /// No description provided for @selectCurrency.
   ///
   /// In tr, this message translates to:
   /// **'Para Birimi Seçin'**
   String get selectCurrency;
-
-  /// No description provided for @membershipPlan.
-  ///
-  /// In tr, this message translates to:
-  /// **'Üyelik Planı'**
-  String get membershipPlan;
 
   /// No description provided for @upgrade.
   ///
@@ -2093,12 +1289,6 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'0'**
   String get zero;
-
-  /// No description provided for @aiMode.
-  ///
-  /// In tr, this message translates to:
-  /// **'AI Modu'**
-  String get aiMode;
 
   /// No description provided for @addCustomCategory.
   ///
@@ -2136,35 +1326,11 @@ abstract class AppLocalizations {
   /// **'Kütüphane'**
   String get library;
 
-  /// No description provided for @dashboardEmpty.
-  ///
-  /// In tr, this message translates to:
-  /// **'Dashboard şu an boş.'**
-  String get dashboardEmpty;
-
-  /// No description provided for @libraryEmpty.
-  ///
-  /// In tr, this message translates to:
-  /// **'Kütüphane şu an boş.'**
-  String get libraryEmpty;
-
   /// No description provided for @pageLabel.
   ///
   /// In tr, this message translates to:
   /// **'Sayfa'**
   String get pageLabel;
-
-  /// No description provided for @sizeLabel.
-  ///
-  /// In tr, this message translates to:
-  /// **'Boyut'**
-  String get sizeLabel;
-
-  /// No description provided for @widgetAdded.
-  ///
-  /// In tr, this message translates to:
-  /// **'{name} panoya eklendi!'**
-  String widgetAdded(String name);
 
   /// No description provided for @historyTitle.
   ///
@@ -2183,24 +1349,6 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'Harcama Devleri'**
   String get giantsTitle;
-
-  /// No description provided for @quickActionTitle.
-  ///
-  /// In tr, this message translates to:
-  /// **'Hızlı İşlem'**
-  String get quickActionTitle;
-
-  /// No description provided for @vaultStatusTitle.
-  ///
-  /// In tr, this message translates to:
-  /// **'Kasa Durumları'**
-  String get vaultStatusTitle;
-
-  /// No description provided for @dailyBudgetTitle.
-  ///
-  /// In tr, this message translates to:
-  /// **'Günlük Bütçe'**
-  String get dailyBudgetTitle;
 
   /// No description provided for @dailyLimit.
   ///
@@ -2256,6 +1404,12 @@ abstract class AppLocalizations {
   /// **'Dün'**
   String get yesterday;
 
+  /// No description provided for @tomorrow.
+  ///
+  /// In tr, this message translates to:
+  /// **'Yarın'**
+  String get tomorrow;
+
   /// No description provided for @daysAgo.
   ///
   /// In tr, this message translates to:
@@ -2277,13 +1431,13 @@ abstract class AppLocalizations {
   /// No description provided for @historyEmpty.
   ///
   /// In tr, this message translates to:
-  /// **'İşlem Geçmişi Henüz Boş'**
+  /// **'Henüz işlem geçmişi yok'**
   String get historyEmpty;
 
   /// No description provided for @upcomingPaymentsNotFound.
   ///
   /// In tr, this message translates to:
-  /// **'Yaklaşan Ödeme Bulunmadı'**
+  /// **'Yaklaşan ödeme bulunamadı'**
   String get upcomingPaymentsNotFound;
 
   /// No description provided for @transaction.
@@ -2298,18 +1452,6 @@ abstract class AppLocalizations {
   /// **'ÜYELİK'**
   String get membership;
 
-  /// No description provided for @currentPlan.
-  ///
-  /// In tr, this message translates to:
-  /// **'Mevcut Plan'**
-  String get currentPlan;
-
-  /// No description provided for @manageSubscription.
-  ///
-  /// In tr, this message translates to:
-  /// **'Üyeliği Yönet'**
-  String get manageSubscription;
-
   /// No description provided for @restorePurchases.
   ///
   /// In tr, this message translates to:
@@ -2322,47 +1464,17 @@ abstract class AppLocalizations {
   /// **'Ücretsiz Plan'**
   String get freePlan;
 
-  /// No description provided for @proPlan.
-  ///
-  /// In tr, this message translates to:
-  /// **'Finarcast Premium'**
-  String get proPlan;
-
   /// No description provided for @upgradeToPro.
   ///
   /// In tr, this message translates to:
   /// **'Premium\'a Yükselt'**
   String get upgradeToPro;
 
-  /// No description provided for @proFeatures.
-  ///
-  /// In tr, this message translates to:
-  /// **'Premium Özellikleri'**
-  String get proFeatures;
-
   /// No description provided for @unlimitedVaults.
   ///
   /// In tr, this message translates to:
   /// **'Sınırsız Kasa'**
   String get unlimitedVaults;
-
-  /// No description provided for @aiInsights.
-  ///
-  /// In tr, this message translates to:
-  /// **'Gelişmiş AI Analizleri'**
-  String get aiInsights;
-
-  /// No description provided for @prioritySupport.
-  ///
-  /// In tr, this message translates to:
-  /// **'Öncelikli Destek'**
-  String get prioritySupport;
-
-  /// No description provided for @subscriptionStatus.
-  ///
-  /// In tr, this message translates to:
-  /// **'Üyelik Durumu'**
-  String get subscriptionStatus;
 
   /// No description provided for @active.
   ///
@@ -2387,12 +1499,6 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'Kapalı'**
   String get disabled;
-
-  /// No description provided for @financialOverview.
-  ///
-  /// In tr, this message translates to:
-  /// **'FİNANSAL ÖZET'**
-  String get financialOverview;
 
   /// No description provided for @monthlyNetBalance.
   ///
@@ -2472,23 +1578,11 @@ abstract class AppLocalizations {
   /// **'YILLIK EN KÖTÜ'**
   String get yearlyWorst;
 
-  /// No description provided for @noRecurring.
-  ///
-  /// In tr, this message translates to:
-  /// **'Tekrarlayan işlem yok'**
-  String get noRecurring;
-
   /// No description provided for @perMonth.
   ///
   /// In tr, this message translates to:
   /// **'/ay'**
   String get perMonth;
-
-  /// No description provided for @perYear.
-  ///
-  /// In tr, this message translates to:
-  /// **'/yıl'**
-  String get perYear;
 
   /// No description provided for @itemCount.
   ///
@@ -2579,12 +1673,6 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'Şifreniz çok zayıf. Lütfen en az 6 karakterli daha güçlü bir şifre girin.'**
   String get authWeakPassword;
-
-  /// No description provided for @authOtpExpired.
-  ///
-  /// In tr, this message translates to:
-  /// **'Doğrulama kodunun süresi dolmuş. Lütfen yeni bir kod isteyin.'**
-  String get authOtpExpired;
 
   /// No description provided for @authBadCode.
   ///
@@ -3003,7 +2091,7 @@ abstract class AppLocalizations {
   /// No description provided for @premiumSyncDesc.
   ///
   /// In tr, this message translates to:
-  /// **'Bulut Eşitleme özelliği Supabase yedekleme altyapısını kullanır ve sadece Premium üyelerin erişimine açıktır.'**
+  /// **'Uygulama ayarlarınız ücretsiz olarak otomatik eşitlenmektedir. Kasa ve işlem verilerinizin buluta yedeklenmesi ise Premium üyelere özeldir.'**
   String get premiumSyncDesc;
 
   /// No description provided for @showOnPhone.
@@ -3497,6 +2585,1092 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'E-posta uygulaması açılamadı. Destek adresi (finarcast.support@gmail.com) kopyalandı.'**
   String get supportEmailCopied;
+
+  /// No description provided for @signInMethod.
+  ///
+  /// In tr, this message translates to:
+  /// **'Giriş Yöntemi'**
+  String get signInMethod;
+
+  /// No description provided for @errorGeneric.
+  ///
+  /// In tr, this message translates to:
+  /// **'Hata: {error}'**
+  String errorGeneric(Object error);
+
+  /// No description provided for @resetFailed.
+  ///
+  /// In tr, this message translates to:
+  /// **'Sıfırlama başarısız oldu: {error}'**
+  String resetFailed(Object error);
+
+  /// No description provided for @criticalDatabaseError.
+  ///
+  /// In tr, this message translates to:
+  /// **'Kritik Veritabanı Hatası'**
+  String get criticalDatabaseError;
+
+  /// No description provided for @criticalDatabaseErrorDesc.
+  ///
+  /// In tr, this message translates to:
+  /// **'Uygulama veritabanında okunamayan/bozuk veriler tespit edildi. Aşağıdaki butona basarak veritabanını temizleyip uygulamayı sıfırdan başlatabilirsiniz.'**
+  String get criticalDatabaseErrorDesc;
+
+  /// No description provided for @resetDatabaseAndRestart.
+  ///
+  /// In tr, this message translates to:
+  /// **'Veritabanını Sıfırla ve Yeniden Başlat'**
+  String get resetDatabaseAndRestart;
+
+  /// No description provided for @errorDetail.
+  ///
+  /// In tr, this message translates to:
+  /// **'Hata Ayrıntısı:'**
+  String get errorDetail;
+
+  /// No description provided for @unlimitedAccessLimit.
+  ///
+  /// In tr, this message translates to:
+  /// **'Sınırsız Erişim Limiti'**
+  String get unlimitedAccessLimit;
+
+  /// No description provided for @unlimitedAccessLimitDesc.
+  ///
+  /// In tr, this message translates to:
+  /// **'Sistem güvenliği gereği adil kullanım limitine ulaştınız. Lütfen daha sonra tekrar deneyin veya desteğe başvurun.'**
+  String get unlimitedAccessLimitDesc;
+
+  /// No description provided for @standardAccessLimit.
+  ///
+  /// In tr, this message translates to:
+  /// **'Standart Erişim Limiti'**
+  String get standardAccessLimit;
+
+  /// No description provided for @standardAccessLimitDesc.
+  ///
+  /// In tr, this message translates to:
+  /// **'Günlük standart yapay zeka analiz kotanızı doldurdunuz. Sınırları kaldırmak için Premium\'a yükseltebilirsiniz.'**
+  String get standardAccessLimitDesc;
+
+  /// No description provided for @upgradeToExtendedAccess.
+  ///
+  /// In tr, this message translates to:
+  /// **'Genişletilmiş Erişime Geç'**
+  String get upgradeToExtendedAccess;
+
+  /// No description provided for @loginRequired.
+  ///
+  /// In tr, this message translates to:
+  /// **'Giriş Yapılması Gerekiyor'**
+  String get loginRequired;
+
+  /// No description provided for @loginRequiredDesc.
+  ///
+  /// In tr, this message translates to:
+  /// **'Yapay zeka asistanını ve harcama sepetini kullanabilmek için giriş yapmanız veya hesap oluşturmanız gerekmektedir.'**
+  String get loginRequiredDesc;
+
+  /// No description provided for @loginOrSignUp.
+  ///
+  /// In tr, this message translates to:
+  /// **'Giriş Yap / Üye Ol'**
+  String get loginOrSignUp;
+
+  /// No description provided for @aiAnalyzingExpense.
+  ///
+  /// In tr, this message translates to:
+  /// **'Yapay zeka harcamanızı çözümlüyor...'**
+  String get aiAnalyzingExpense;
+
+  /// No description provided for @draftAddedToInbox.
+  ///
+  /// In tr, this message translates to:
+  /// **'Taslak harcama gelen kutusuna eklendi.'**
+  String get draftAddedToInbox;
+
+  /// No description provided for @analysisError.
+  ///
+  /// In tr, this message translates to:
+  /// **'İşlem analiz edilirken bir hata oluştu.'**
+  String get analysisError;
+
+  /// No description provided for @scanningReceipt.
+  ///
+  /// In tr, this message translates to:
+  /// **'Fiş taranıyor, bilgiler çıkartılıyor...'**
+  String get scanningReceipt;
+
+  /// No description provided for @receiptUnreadable.
+  ///
+  /// In tr, this message translates to:
+  /// **'Fiş Okunamadı'**
+  String get receiptUnreadable;
+
+  /// No description provided for @receiptUnreadableDesc.
+  ///
+  /// In tr, this message translates to:
+  /// **'Yüklenen görselde herhangi bir fiş veya fatura bilgisi tespit edilemedi.'**
+  String get receiptUnreadableDesc;
+
+  /// No description provided for @receiptAddedToInbox.
+  ///
+  /// In tr, this message translates to:
+  /// **'Fiş verileri başarıyla gelen kutusuna eklendi.'**
+  String get receiptAddedToInbox;
+
+  /// No description provided for @receiptReadError.
+  ///
+  /// In tr, this message translates to:
+  /// **'Fiş okunamadı. Lütfen bilgileri el ile girin veya daha net bir fotoğraf çekin.'**
+  String get receiptReadError;
+
+  /// No description provided for @imageUploadError.
+  ///
+  /// In tr, this message translates to:
+  /// **'Görsel yüklenirken bir hata oluştu.'**
+  String get imageUploadError;
+
+  /// No description provided for @draftDeleted.
+  ///
+  /// In tr, this message translates to:
+  /// **'Taslak harcama silindi.'**
+  String get draftDeleted;
+
+  /// No description provided for @transactionProcessedSuccess.
+  ///
+  /// In tr, this message translates to:
+  /// **'İşlem kasaya başarıyla işlendi!'**
+  String get transactionProcessedSuccess;
+
+  /// No description provided for @transactionApprovalError.
+  ///
+  /// In tr, this message translates to:
+  /// **'İşlem onaylanırken bir hata oluştu.'**
+  String get transactionApprovalError;
+
+  /// No description provided for @smartScanTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Smart Scan'**
+  String get smartScanTitle;
+
+  /// No description provided for @pendingApprovalCount.
+  ///
+  /// In tr, this message translates to:
+  /// **'ONAY BEKLEYEN İŞLEMLER ({count})'**
+  String pendingApprovalCount(int count);
+
+  /// No description provided for @clearAll.
+  ///
+  /// In tr, this message translates to:
+  /// **'Tümünü Temizle'**
+  String get clearAll;
+
+  /// No description provided for @smartInputHint.
+  ///
+  /// In tr, this message translates to:
+  /// **'Örn: Dün Starbucks filtre kahve 120 TL'**
+  String get smartInputHint;
+
+  /// No description provided for @camera.
+  ///
+  /// In tr, this message translates to:
+  /// **'Kamera'**
+  String get camera;
+
+  /// No description provided for @gallery.
+  ///
+  /// In tr, this message translates to:
+  /// **'Galeri'**
+  String get gallery;
+
+  /// No description provided for @inboxEmpty.
+  ///
+  /// In tr, this message translates to:
+  /// **'GELEN KUTUNUZ BOŞ'**
+  String get inboxEmpty;
+
+  /// No description provided for @otherCategory.
+  ///
+  /// In tr, this message translates to:
+  /// **'Diğer'**
+  String get otherCategory;
+
+  /// No description provided for @add.
+  ///
+  /// In tr, this message translates to:
+  /// **'EKLE'**
+  String get add;
+
+  /// No description provided for @todayUpper.
+  ///
+  /// In tr, this message translates to:
+  /// **'BUGÜN'**
+  String get todayUpper;
+
+  /// No description provided for @tomorrowUpper.
+  ///
+  /// In tr, this message translates to:
+  /// **'YARIN'**
+  String get tomorrowUpper;
+
+  /// No description provided for @daysWithName.
+  ///
+  /// In tr, this message translates to:
+  /// **'{count} GÜN - {dayName}'**
+  String daysWithName(int count, String dayName);
+
+  /// No description provided for @weeksLater.
+  ///
+  /// In tr, this message translates to:
+  /// **'{count} HAFTA SONRA'**
+  String weeksLater(int count);
+
+  /// No description provided for @daysCount.
+  ///
+  /// In tr, this message translates to:
+  /// **'{count, plural, =1{1 Gün} other{{count} Gün}}'**
+  String daysCount(num count);
+
+  /// No description provided for @weeksCount.
+  ///
+  /// In tr, this message translates to:
+  /// **'{count, plural, =1{1 Hafta} other{{count} Hafta}}'**
+  String weeksCount(num count);
+
+  /// No description provided for @monthsCount.
+  ///
+  /// In tr, this message translates to:
+  /// **'{count, plural, =1{1 Ay} other{{count} Ay}}'**
+  String monthsCount(num count);
+
+  /// No description provided for @yearsCount.
+  ///
+  /// In tr, this message translates to:
+  /// **'{count, plural, =1{1 Yıl} other{{count} Yıl}}'**
+  String yearsCount(num count);
+
+  /// No description provided for @sharedExpenseAnalyzed.
+  ///
+  /// In tr, this message translates to:
+  /// **'Paylaşılan harcama analiz edildi ve sepete eklendi!'**
+  String get sharedExpenseAnalyzed;
+
+  /// No description provided for @limitExceeded.
+  ///
+  /// In tr, this message translates to:
+  /// **'Limit Aşıldı'**
+  String get limitExceeded;
+
+  /// No description provided for @selectIcon.
+  ///
+  /// In tr, this message translates to:
+  /// **'İKON SEÇİN'**
+  String get selectIcon;
+
+  /// No description provided for @optionsCount.
+  ///
+  /// In tr, this message translates to:
+  /// **'{count} SEÇENEK'**
+  String optionsCount(int count);
+
+  /// No description provided for @invalidAmountError.
+  ///
+  /// In tr, this message translates to:
+  /// **'Lütfen geçerli bir tutar girin.'**
+  String get invalidAmountError;
+
+  /// No description provided for @maxAmountMustBePositive.
+  ///
+  /// In tr, this message translates to:
+  /// **'Maksimum tutar 0\'dan büyük olmalıdır.'**
+  String get maxAmountMustBePositive;
+
+  /// No description provided for @minMustBeLessThanMax.
+  ///
+  /// In tr, this message translates to:
+  /// **'Minimum tutar maksimumdan küçük olmalıdır.'**
+  String get minMustBeLessThanMax;
+
+  /// No description provided for @selectAtLeastOneVault.
+  ///
+  /// In tr, this message translates to:
+  /// **'Lütfen işlem için en az bir kasa seçin...'**
+  String get selectAtLeastOneVault;
+
+  /// No description provided for @exchangeRatesNotLoaded.
+  ///
+  /// In tr, this message translates to:
+  /// **'Döviz kurları yüklü değil. Farklı para biriminde işlem eklemek/güncellemek için kurları güncellemeniz gerekir.'**
+  String get exchangeRatesNotLoaded;
+
+  /// No description provided for @vaultCurrencyRateNotLoaded.
+  ///
+  /// In tr, this message translates to:
+  /// **'Seçili kasanın para birimi ({currency}) için döviz kurları yüklü değil. Kurları güncellemeniz gerekir.'**
+  String vaultCurrencyRateNotLoaded(String currency);
+
+  /// No description provided for @transactionSaveError.
+  ///
+  /// In tr, this message translates to:
+  /// **'İşlem kaydedilirken bir hata oluştu: {error}'**
+  String transactionSaveError(String error);
+
+  /// No description provided for @notificationPermissionDenied.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bildirim izni verilmedi. Lütfen ayarlardan açın.'**
+  String get notificationPermissionDenied;
+
+  /// No description provided for @defaultUser.
+  ///
+  /// In tr, this message translates to:
+  /// **'Kullanıcı'**
+  String get defaultUser;
+
+  /// No description provided for @premiumBadge.
+  ///
+  /// In tr, this message translates to:
+  /// **'Premium'**
+  String get premiumBadge;
+
+  /// No description provided for @email.
+  ///
+  /// In tr, this message translates to:
+  /// **'E-posta'**
+  String get email;
+
+  /// No description provided for @password.
+  ///
+  /// In tr, this message translates to:
+  /// **'Şifre'**
+  String get password;
+
+  /// No description provided for @errorOccurred.
+  ///
+  /// In tr, this message translates to:
+  /// **'Hata oluştu: {error}'**
+  String errorOccurred(String error);
+
+  /// No description provided for @aboutVersion.
+  ///
+  /// In tr, this message translates to:
+  /// **'{version} • Made with ❤️'**
+  String aboutVersion(String version);
+
+  /// No description provided for @comingSoonDesc.
+  ///
+  /// In tr, this message translates to:
+  /// **'{feature} özelliği çok yakında sizlerle olacak.'**
+  String comingSoonDesc(String feature);
+
+  /// No description provided for @noVaultTransactions.
+  ///
+  /// In tr, this message translates to:
+  /// **'Kasa İşlemi Bulunmadı'**
+  String get noVaultTransactions;
+
+  /// No description provided for @recurring.
+  ///
+  /// In tr, this message translates to:
+  /// **'Abonelikler'**
+  String get recurring;
+
+  /// No description provided for @thisWeek.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu Hafta'**
+  String get thisWeek;
+
+  /// No description provided for @thisMonth.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu Ay'**
+  String get thisMonth;
+
+  /// No description provided for @thisYear.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu Yıl'**
+  String get thisYear;
+
+  /// No description provided for @vaultLimitReachedDesc.
+  ///
+  /// In tr, this message translates to:
+  /// **'Ücretsiz planda en fazla {count} kasa oluşturabilirsiniz. Sınırları kaldırmak için Premium\'a geçebilirsiniz.'**
+  String vaultLimitReachedDesc(int count);
+
+  /// No description provided for @inAppNotifications.
+  ///
+  /// In tr, this message translates to:
+  /// **'Uygulama İçi Bildirimler'**
+  String get inAppNotifications;
+
+  /// No description provided for @exchangeRatesNotLoadedVault.
+  ///
+  /// In tr, this message translates to:
+  /// **'Döviz kurları yüklü değil. Kasa para birimi değiştirilemedi.'**
+  String get exchangeRatesNotLoadedVault;
+
+  /// No description provided for @cannotDeleteVault.
+  ///
+  /// In tr, this message translates to:
+  /// **'Kasa Silinemez'**
+  String get cannotDeleteVault;
+
+  /// No description provided for @cannotDeleteVaultDesc.
+  ///
+  /// In tr, this message translates to:
+  /// **'Uygulamada en az bir aktif kasa bulunmalıdır. Başka kasa oluşturup bunu sonra silebilirsiniz.'**
+  String get cannotDeleteVaultDesc;
+
+  /// No description provided for @exchangeRatesNotLoadedNewVault.
+  ///
+  /// In tr, this message translates to:
+  /// **'Döviz kurları yüklü değil. Farklı para biriminde kasa oluşturmak için kurları güncellemeniz gerekir.'**
+  String get exchangeRatesNotLoadedNewVault;
+
+  /// No description provided for @systemNotificationsDisabled.
+  ///
+  /// In tr, this message translates to:
+  /// **'SİSTEM BİLDİRİM İZİNLERİ KAPALI!\nLütfen telefon ayarlarınızdan bildirim izinlerini etkinleştirin.'**
+  String get systemNotificationsDisabled;
+
+  /// No description provided for @noNotificationHistory.
+  ///
+  /// In tr, this message translates to:
+  /// **'Geçmiş Bildirim Yok'**
+  String get noNotificationHistory;
+
+  /// No description provided for @noNotificationHistoryDesc.
+  ///
+  /// In tr, this message translates to:
+  /// **'Daha önce tetiklenmiş herhangi bir işlem alarmı geçmişi bulunmuyor.'**
+  String get noNotificationHistoryDesc;
+
+  /// No description provided for @paymentDate.
+  ///
+  /// In tr, this message translates to:
+  /// **'Ödeme: {date}'**
+  String paymentDate(String date);
+
+  /// No description provided for @loginRequiredForPurchase.
+  ///
+  /// In tr, this message translates to:
+  /// **'Satın alma işlemini tamamlamak için lütfen giriş yapın veya ücretsiz bir hesap oluşturun.'**
+  String get loginRequiredForPurchase;
+
+  /// No description provided for @unlockFinancialPotential.
+  ///
+  /// In tr, this message translates to:
+  /// **'Finansal potansiyelinizi %100 açığa çıkarın.'**
+  String get unlockFinancialPotential;
+
+  /// No description provided for @aiAnalysis.
+  ///
+  /// In tr, this message translates to:
+  /// **'AI Analizleri'**
+  String get aiAnalysis;
+
+  /// No description provided for @aiAnalysisDesc.
+  ///
+  /// In tr, this message translates to:
+  /// **'Sınırsız ve derin yapay zeka analizleri.'**
+  String get aiAnalysisDesc;
+
+  /// No description provided for @unlimitedVaultsDesc.
+  ///
+  /// In tr, this message translates to:
+  /// **'Dilediğiniz kadar kasa ve cüzdan oluşturun.'**
+  String get unlimitedVaultsDesc;
+
+  /// No description provided for @cloudSyncDesc.
+  ///
+  /// In tr, this message translates to:
+  /// **'Ayarlarınızı ve verilerinizi güvenle yedekleyin ve senkronize edin.'**
+  String get cloudSyncDesc;
+
+  /// No description provided for @customThemes.
+  ///
+  /// In tr, this message translates to:
+  /// **'Özel Temalar'**
+  String get customThemes;
+
+  /// No description provided for @customThemesDesc.
+  ///
+  /// In tr, this message translates to:
+  /// **'Ayrıcalıklı renk paletleri ve arka plan stilleri.'**
+  String get customThemesDesc;
+
+  /// No description provided for @zeroAds.
+  ///
+  /// In tr, this message translates to:
+  /// **'Sıfır Reklam'**
+  String get zeroAds;
+
+  /// No description provided for @zeroAdsDesc.
+  ///
+  /// In tr, this message translates to:
+  /// **'Kesintisiz ve reklamsız premium deneyim.'**
+  String get zeroAdsDesc;
+
+  /// No description provided for @availablePlans.
+  ///
+  /// In tr, this message translates to:
+  /// **'MEVCUT PLANLAR'**
+  String get availablePlans;
+
+  /// No description provided for @yearlyPremium.
+  ///
+  /// In tr, this message translates to:
+  /// **'Yıllık Premium'**
+  String get yearlyPremium;
+
+  /// No description provided for @monthlyPremium.
+  ///
+  /// In tr, this message translates to:
+  /// **'Aylık Premium'**
+  String get monthlyPremium;
+
+  /// No description provided for @bestValueFreeTrialSubtitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'En iyi değer • 7 gün ücretsiz'**
+  String get bestValueFreeTrialSubtitle;
+
+  /// No description provided for @cancelAnytime.
+  ///
+  /// In tr, this message translates to:
+  /// **'İstediğin zaman iptal et'**
+  String get cancelAnytime;
+
+  /// No description provided for @bestValue.
+  ///
+  /// In tr, this message translates to:
+  /// **'AVANTAJLI'**
+  String get bestValue;
+
+  /// No description provided for @yearlyPremiumSimulated.
+  ///
+  /// In tr, this message translates to:
+  /// **'Yıllık Premium (Simüle)'**
+  String get yearlyPremiumSimulated;
+
+  /// No description provided for @monthlyPremiumSimulated.
+  ///
+  /// In tr, this message translates to:
+  /// **'Aylık Premium (Simüle)'**
+  String get monthlyPremiumSimulated;
+
+  /// No description provided for @subscriptionAutoRenewalNote.
+  ///
+  /// In tr, this message translates to:
+  /// **'Abonelik otomatik olarak yenilenir. İstediğiniz zaman iptal edebilirsiniz.'**
+  String get subscriptionAutoRenewalNote;
+
+  /// No description provided for @sessionNotFound.
+  ///
+  /// In tr, this message translates to:
+  /// **'Kullanıcı oturumu bulunamadı. Lütfen tekrar giriş yapın.'**
+  String get sessionNotFound;
+
+  /// No description provided for @upgradeToPremiumTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Finarcast Premium\'a Geçin'**
+  String get upgradeToPremiumTitle;
+
+  /// No description provided for @yearlyPremiumSimulatedPrice.
+  ///
+  /// In tr, this message translates to:
+  /// **'₺1.190 / yıl'**
+  String get yearlyPremiumSimulatedPrice;
+
+  /// No description provided for @yearlyPremiumSimulatedSubtitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Aylık ₺99 • 7 gün ücretsiz'**
+  String get yearlyPremiumSimulatedSubtitle;
+
+  /// No description provided for @monthlyPremiumSimulatedPrice.
+  ///
+  /// In tr, this message translates to:
+  /// **'₺149 / ay'**
+  String get monthlyPremiumSimulatedPrice;
+
+  /// No description provided for @currencyTRY.
+  ///
+  /// In tr, this message translates to:
+  /// **'Türk Lirası'**
+  String get currencyTRY;
+
+  /// No description provided for @currencyUSD.
+  ///
+  /// In tr, this message translates to:
+  /// **'Amerikan Doları'**
+  String get currencyUSD;
+
+  /// No description provided for @currencyEUR.
+  ///
+  /// In tr, this message translates to:
+  /// **'Euro'**
+  String get currencyEUR;
+
+  /// No description provided for @currencyGBP.
+  ///
+  /// In tr, this message translates to:
+  /// **'İngiliz Sterlini'**
+  String get currencyGBP;
+
+  /// No description provided for @currencyJPY.
+  ///
+  /// In tr, this message translates to:
+  /// **'Japon Yeni'**
+  String get currencyJPY;
+
+  /// No description provided for @currencyKRW.
+  ///
+  /// In tr, this message translates to:
+  /// **'Kore Wonu'**
+  String get currencyKRW;
+
+  /// No description provided for @currencyCNY.
+  ///
+  /// In tr, this message translates to:
+  /// **'Çin Yuanı'**
+  String get currencyCNY;
+
+  /// No description provided for @currencyBRL.
+  ///
+  /// In tr, this message translates to:
+  /// **'Brezilya Reali'**
+  String get currencyBRL;
+
+  /// No description provided for @currencyCHF.
+  ///
+  /// In tr, this message translates to:
+  /// **'İsviçre Frangı'**
+  String get currencyCHF;
+
+  /// No description provided for @currencyGOLD.
+  ///
+  /// In tr, this message translates to:
+  /// **'Gram Altın'**
+  String get currencyGOLD;
+
+  /// No description provided for @currencyGOLDOunce.
+  ///
+  /// In tr, this message translates to:
+  /// **'Ons Altın'**
+  String get currencyGOLDOunce;
+
+  /// No description provided for @currencySILVER.
+  ///
+  /// In tr, this message translates to:
+  /// **'Gümüş (Gram)'**
+  String get currencySILVER;
+
+  /// No description provided for @currencySILVEROunce.
+  ///
+  /// In tr, this message translates to:
+  /// **'Gümüş (Ons)'**
+  String get currencySILVEROunce;
+
+  /// No description provided for @currencySAR.
+  ///
+  /// In tr, this message translates to:
+  /// **'Suudi Riyali'**
+  String get currencySAR;
+
+  /// No description provided for @currencyKWD.
+  ///
+  /// In tr, this message translates to:
+  /// **'Kuveyt Dinarı'**
+  String get currencyKWD;
+
+  /// No description provided for @vaultGuideTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Kasa Rehberi'**
+  String get vaultGuideTitle;
+
+  /// No description provided for @vaultGuideContent.
+  ///
+  /// In tr, this message translates to:
+  /// **'📊 Karttaki Veriler Ne Anlama Geliyor?\n\n• Kasa Bakiyesi (Wallet): Kasadaki tüm zamanların kümülatif net bakiyesidir. Kasa başlangıç bakiyesi ve geçmişten bugüne gerçekleşen tüm gelir/gider hareketlerinin toplamıdır.\n\n• Gelir (Bu Ay): Sadece içinde bulunulan cari ay için tahmin edilen toplam geliri gösterir.\n\n• Gider (Bu Ay): Sadece içinde bulunulan cari ay için tahmin edilen toplam gideri gösterir.\n\n💡 Önemli Not:\nKasa Bakiyesi kümülatif (tüm zamanlar) olduğundan, o ayki Gelir ve Gider farkından farklı çıkması tamamen normaldir.'**
+  String get vaultGuideContent;
+
+  /// No description provided for @gotIt.
+  ///
+  /// In tr, this message translates to:
+  /// **'Anladım'**
+  String get gotIt;
+
+  /// No description provided for @startDate.
+  ///
+  /// In tr, this message translates to:
+  /// **'Başlangıç Tarihi'**
+  String get startDate;
+
+  /// No description provided for @daily.
+  ///
+  /// In tr, this message translates to:
+  /// **'Günlük'**
+  String get daily;
+
+  /// No description provided for @weekdays.
+  ///
+  /// In tr, this message translates to:
+  /// **'Hafta İçi'**
+  String get weekdays;
+
+  /// No description provided for @weekends.
+  ///
+  /// In tr, this message translates to:
+  /// **'Hafta Sonu'**
+  String get weekends;
+
+  /// No description provided for @everyXDays.
+  ///
+  /// In tr, this message translates to:
+  /// **'{count} günde bir'**
+  String everyXDays(Object count);
+
+  /// No description provided for @everyXWeeks.
+  ///
+  /// In tr, this message translates to:
+  /// **'{count} haftada bir'**
+  String everyXWeeks(Object count);
+
+  /// No description provided for @everyXMonths.
+  ///
+  /// In tr, this message translates to:
+  /// **'{count} ayda bir'**
+  String everyXMonths(Object count);
+
+  /// No description provided for @everyXYears.
+  ///
+  /// In tr, this message translates to:
+  /// **'{count} yılda bir'**
+  String everyXYears(Object count);
+
+  /// No description provided for @incomePerMonthLabel.
+  ///
+  /// In tr, this message translates to:
+  /// **'GELİR / AY'**
+  String get incomePerMonthLabel;
+
+  /// No description provided for @expensePerMonthLabel.
+  ///
+  /// In tr, this message translates to:
+  /// **'GİDER / AY'**
+  String get expensePerMonthLabel;
+
+  /// No description provided for @transactionNoteHint.
+  ///
+  /// In tr, this message translates to:
+  /// **'İşleme dair not bırakın...'**
+  String get transactionNoteHint;
+
+  /// No description provided for @weekdaysShort.
+  ///
+  /// In tr, this message translates to:
+  /// **'İçi'**
+  String get weekdaysShort;
+
+  /// No description provided for @weekendsShort.
+  ///
+  /// In tr, this message translates to:
+  /// **'Sonu'**
+  String get weekendsShort;
+
+  /// No description provided for @reminderDay.
+  ///
+  /// In tr, this message translates to:
+  /// **'Hatırlatma Günü'**
+  String get reminderDay;
+
+  /// No description provided for @reminderTime.
+  ///
+  /// In tr, this message translates to:
+  /// **'Hatırlatma Saati'**
+  String get reminderTime;
+
+  /// No description provided for @reminder.
+  ///
+  /// In tr, this message translates to:
+  /// **'Hatırlatıcı'**
+  String get reminder;
+
+  /// No description provided for @sameDay.
+  ///
+  /// In tr, this message translates to:
+  /// **'Aynı Gün'**
+  String get sameDay;
+
+  /// No description provided for @oneDayBefore.
+  ///
+  /// In tr, this message translates to:
+  /// **'1 Gün Önce'**
+  String get oneDayBefore;
+
+  /// No description provided for @twoDaysBefore.
+  ///
+  /// In tr, this message translates to:
+  /// **'2 Gün Önce'**
+  String get twoDaysBefore;
+
+  /// No description provided for @threeDaysBefore.
+  ///
+  /// In tr, this message translates to:
+  /// **'3 Gün Önce'**
+  String get threeDaysBefore;
+
+  /// No description provided for @oneWeekBefore.
+  ///
+  /// In tr, this message translates to:
+  /// **'1 Hafta Önce'**
+  String get oneWeekBefore;
+
+  /// No description provided for @unknown.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bilinmiyor'**
+  String get unknown;
+
+  /// No description provided for @syncErrorDisabled.
+  ///
+  /// In tr, this message translates to:
+  /// **'Eşitleme ayarı kapalı.'**
+  String get syncErrorDisabled;
+
+  /// No description provided for @syncErrorPremiumRequired.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bulut eşitleme özelliği sadece Premium üyeler içindir.'**
+  String get syncErrorPremiumRequired;
+
+  /// No description provided for @syncSuccess.
+  ///
+  /// In tr, this message translates to:
+  /// **'Senkronizasyon tamamlandı.'**
+  String get syncSuccess;
+
+  /// No description provided for @syncSuccessWithErrors.
+  ///
+  /// In tr, this message translates to:
+  /// **'Senkronizasyon sırasında {errorCount} hata oluştu.'**
+  String syncSuccessWithErrors(num errorCount);
+
+  /// No description provided for @syncErrorProjectPaused.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bulut veritabanı projesi duraklatılmış (Project Paused). Lütfen Supabase panelinizden projeyi tekrar aktifleştirin.'**
+  String get syncErrorProjectPaused;
+
+  /// No description provided for @syncErrorSessionExpired.
+  ///
+  /// In tr, this message translates to:
+  /// **'Oturum süreniz dolmuş olabilir. Lütfen Ayarlar > Oturumu Kapat seçeneğiyle çıkış yapıp tekrar giriş yapın.'**
+  String get syncErrorSessionExpired;
+
+  /// No description provided for @syncErrorNoInternet.
+  ///
+  /// In tr, this message translates to:
+  /// **'İnternet bağlantısı kurulamadı. Lütfen internet bağlantınızı kontrol edin.'**
+  String get syncErrorNoInternet;
+
+  /// No description provided for @syncErrorTablesMissing.
+  ///
+  /// In tr, this message translates to:
+  /// **'Veritabanı tabloları bulunamadı. Lütfen Supabase SQL Editor\'da setup.sql betiğini çalıştırın.'**
+  String get syncErrorTablesMissing;
+
+  /// No description provided for @syncErrorPermissionDenied.
+  ///
+  /// In tr, this message translates to:
+  /// **'Veritabanı erişim yetki hatası (RLS). Lütfen Supabase tablolarında RLS politikalarını doğru yapılandırdığınızdan emin olun.'**
+  String get syncErrorPermissionDenied;
+
+  /// No description provided for @syncErrorUnexpected.
+  ///
+  /// In tr, this message translates to:
+  /// **'Beklenmeyen hata: {error}'**
+  String syncErrorUnexpected(Object error);
+
+  /// No description provided for @syncErrorPostgrest.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bulut Hatası ({code}): {message}'**
+  String syncErrorPostgrest(Object code, Object message);
+
+  /// No description provided for @syncErrorAuth.
+  ///
+  /// In tr, this message translates to:
+  /// **'Kimlik Doğrulama Hatası ({code}): {message}'**
+  String syncErrorAuth(Object code, Object message);
+
+  /// No description provided for @activeVaults.
+  ///
+  /// In tr, this message translates to:
+  /// **'{count, plural, =1{Aktif Kasa} other{Aktif Kasa}}'**
+  String activeVaults(num count);
+
+  /// No description provided for @vaultsUpper.
+  ///
+  /// In tr, this message translates to:
+  /// **'KASALAR'**
+  String get vaultsUpper;
+
+  /// No description provided for @receiptExpense.
+  ///
+  /// In tr, this message translates to:
+  /// **'Fiş Harcaması'**
+  String get receiptExpense;
+
+  /// No description provided for @reasonSmartInput.
+  ///
+  /// In tr, this message translates to:
+  /// **'Hızlı Metin Girişi'**
+  String get reasonSmartInput;
+
+  /// No description provided for @reasonReceiptScan.
+  ///
+  /// In tr, this message translates to:
+  /// **'Fiş Fotoğrafı'**
+  String get reasonReceiptScan;
+
+  /// No description provided for @reasonClipboard.
+  ///
+  /// In tr, this message translates to:
+  /// **'Pano Bildirimi'**
+  String get reasonClipboard;
+
+  /// No description provided for @noteCapturedFromClipboard.
+  ///
+  /// In tr, this message translates to:
+  /// **'Kopyalanan Metinden Yakalandı'**
+  String get noteCapturedFromClipboard;
+
+  /// No description provided for @notificationChannelName.
+  ///
+  /// In tr, this message translates to:
+  /// **'İşlem Hatırlatıcıları'**
+  String get notificationChannelName;
+
+  /// No description provided for @notificationChannelDesc.
+  ///
+  /// In tr, this message translates to:
+  /// **'Periyodik ödemeler ve gelirler için hatırlatıcılar'**
+  String get notificationChannelDesc;
+
+  /// No description provided for @notificationTestChannelName.
+  ///
+  /// In tr, this message translates to:
+  /// **'Test Bildirimleri'**
+  String get notificationTestChannelName;
+
+  /// No description provided for @notificationTestChannelDesc.
+  ///
+  /// In tr, this message translates to:
+  /// **'Finarcast bildirim test kanalı'**
+  String get notificationTestChannelDesc;
+
+  /// No description provided for @notificationTestTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Finarcast Test Bildirimi'**
+  String get notificationTestTitle;
+
+  /// No description provided for @notificationTestBody.
+  ///
+  /// In tr, this message translates to:
+  /// **'Harika! Uygulama içi (foreground) bildirimleriniz sorunsuz çalışıyor.'**
+  String get notificationTestBody;
+
+  /// No description provided for @notificationTestDelayedTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Finarcast Gecikmeli Test'**
+  String get notificationTestDelayedTitle;
+
+  /// No description provided for @notificationTestDelayedBody.
+  ///
+  /// In tr, this message translates to:
+  /// **'Uygulama dışı (background) bildirim testi başarıyla tamamlandı!'**
+  String get notificationTestDelayedBody;
+
+  /// No description provided for @notificationIncomeTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Gelir Hatırlatıcısı: {title}'**
+  String notificationIncomeTitle(Object title);
+
+  /// No description provided for @notificationExpenseTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Ödeme Hatırlatıcısı: {title}'**
+  String notificationExpenseTitle(Object title);
+
+  /// No description provided for @notificationBodyAmount.
+  ///
+  /// In tr, this message translates to:
+  /// **'Tutar: {amount}'**
+  String notificationBodyAmount(Object amount);
+
+  /// No description provided for @notificationBodyDate.
+  ///
+  /// In tr, this message translates to:
+  /// **'Tarih: {date}'**
+  String notificationBodyDate(Object date);
+
+  /// No description provided for @notificationBodyNote.
+  ///
+  /// In tr, this message translates to:
+  /// **'Not: {note}'**
+  String notificationBodyNote(Object note);
+
+  /// No description provided for @aiErrorRateLimit.
+  ///
+  /// In tr, this message translates to:
+  /// **'Günlük Yapay Zeka analiz limitinizi doldurdunuz. Lütfen Premium plana yükseltin veya yarın tekrar deneyin.'**
+  String get aiErrorRateLimit;
+
+  /// No description provided for @aiErrorUnauthorized.
+  ///
+  /// In tr, this message translates to:
+  /// **'Yetkisiz erişim. Lütfen tekrar giriş yapın.'**
+  String get aiErrorUnauthorized;
+
+  /// No description provided for @aiErrorQuota.
+  ///
+  /// In tr, this message translates to:
+  /// **'Yapay Zeka kullanım limitiniz (kota) doldu. Lütfen biraz bekleyip tekrar deneyin.'**
+  String get aiErrorQuota;
+
+  /// No description provided for @aiErrorBusy.
+  ///
+  /// In tr, this message translates to:
+  /// **'Yapay Zeka sunucusu şu an çok yoğun. Lütfen birkaç saniye sonra tekrar deneyin.'**
+  String get aiErrorBusy;
+
+  /// No description provided for @aiErrorApiKey.
+  ///
+  /// In tr, this message translates to:
+  /// **'Yapay Zeka API Anahtarı geçersiz veya bulunamadı. Lütfen ayarlarınızı kontrol edin.'**
+  String get aiErrorApiKey;
+
+  /// No description provided for @aiErrorTimeout.
+  ///
+  /// In tr, this message translates to:
+  /// **'İstek zaman aşımına uğradı. Lütfen internet bağlantınızı kontrol edip tekrar deneyin.'**
+  String get aiErrorTimeout;
+
+  /// No description provided for @aiErrorGeneric.
+  ///
+  /// In tr, this message translates to:
+  /// **'Yapay Zeka analizi başarısız oldu: {error}'**
+  String aiErrorGeneric(Object error);
 }
 
 class _AppLocalizationsDelegate

@@ -7,22 +7,16 @@ part 'app_settings.g.dart';
 class AppSettings {
   Id id = 1; // Tek kayıt, her zaman id=1
 
-  /// Veri saklama süresi (Görünürlük & AI Analizi için - gün cinsinden)
-  /// -1 = Hiçbir zaman arşivleme (sonsuz)
+  /// İşlemlerin kaç gün sonra otomatik olarak arşive kaldırılacağını belirler. -1 değeri otomatik arşivlemeyi devre dışı bırakır.
   int dataRetentionDays = 90;
 
-  /// Veritabanından kalıcı silme süresi (gün cinsinden)
-  /// -1 = Hiçbir zaman kalıcı silme
+  /// Taksiti bitmiş veya tek seferlik olan, süresi geçmiş işlemlerin veritabanından kalıcı olarak (fiziksel olarak) silineceği süreyi belirler (gün cinsinden). -1 değeri kalıcı silmeyi devre dışı bırakır.
   int permanentDeletionDays = -1;
 
-  /// Tema Modu
-  /// 0 = Sistem Varsayılanı
-  /// 1 = Aydınlık (Light)
-  /// 2 = Karanlık (Dark)
+  /// Tema Modu (0: Sistem Varsayılanı, 1: Aydınlık, 2: Karanlık)
   int themeModeIndex = 0;
 
-  /// Arka Plan Renklendirme Stili
-  /// 0 = İkonları Boya, 1 = Zemini Boya, 2 = Sade
+  /// Arayüzün arka plan ve kart boyama stilini belirler (0: İkonları Boya, 1: Zemini Boya, 2: Sade/Minimalist).
   int bgColorStyle = 2;
 
   /// Ana Tema Rengi (Accent Color) — Örn: 0xFF00BCD4
@@ -34,12 +28,8 @@ class AppSettings {
   /// Varsayılan para birimi simgesi (varsayılan: ₺)
   String currencySymbol = '₺';
 
-  /// Kullanıcının bulunduğu ülke (AI analizi için - Örn: "Türkiye")
-  String? countryName;
-
-  /// Tüm uygulama bildirimleri açık mı? (Master Switch)
+  /// Uygulama genelinde yaklaşan işlem bildirimlerinin (hatırlatıcıların) aktif olup olmadığını belirleyen ana anahtardır.
   bool isNotificationsEnabled = true;
-
 
   /// Bulut senkronizasyonu aktif mi?
   bool isSyncEnabled = false;

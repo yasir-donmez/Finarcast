@@ -1,9 +1,11 @@
 import 'dart:async';
 import 'dart:io';
-import 'package:flutter/foundation.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 import '../../../core/services/subscription_service.dart';
+import '../../../core/providers/settings_provider.dart';
+import '../../../l10n/app_localizations.dart';
 import 'draft_service.dart';
 import 'smart_parser_service.dart';
 
@@ -73,23 +75,21 @@ class ShareHandlerService {
     final subService = ref.read(subscriptionServiceProvider);
     if (subService.usedAiCount >= subService.dailyAiLimit) {
       if (onProcessingError != null) {
-        onProcessingError!(
-          subService.isPro ? 'Sınırsız Erişim Limiti' : 'Standart Erişim Limiti',
-          subService.isPro
-              ? 'Sistem güvenliği gereği adil kullanım limitine ulaştınız. Yarın tekrar sınırsız olarak kullanabilirsiniz.'
-              : 'Günlük standart yapay zeka analiz kotanızı doldurdunuz. Sınırsız analiz için Genişletilmiş Erişime geçin.',
-        );
+        onProcessingError!('LIMIT_EXCEEDED', '');
       }
       return;
     }
 
+    final settings = ref.read(settingsProvider);
+    final l10n = await AppLocalizations.delegate.load(Locale(settings.languageCode));
+
     if (onProcessingStarted != null) {
-      onProcessingStarted!('Paylaşılan metin analiz ediliyor...');
+      onProcessingStarted!(l10n.aiAnalyzingExpense);
     }
 
     debugPrint('🔍 Parsing shared text: "$cleanText"');
     try {
-      final draft = await SmartParserService.parseText(cleanText);
+      final draft = await SmartParserService.parseText(cleanText, l10n);
       await DraftService.addDraft(draft);
       await ref.read(subscriptionServiceProvider).incrementAiUsage();
       debugPrint('✅ Shared text processed successfully.');
@@ -101,8 +101,8 @@ class ShareHandlerService {
       if (onProcessingError != null) {
         final errorMsg = e.toString().replaceAll('Exception: ', '');
         onProcessingError!(
-          'Hata',
-          errorMsg.isNotEmpty ? errorMsg : 'İşlem analiz edilirken bir hata oluştu.',
+          l10n.error,
+          errorMsg.isNotEmpty ? errorMsg : l10n.analysisError,
         );
       }
     }
@@ -113,28 +113,26 @@ class ShareHandlerService {
     final subService = ref.read(subscriptionServiceProvider);
     if (subService.usedAiCount >= subService.dailyAiLimit) {
       if (onProcessingError != null) {
-        onProcessingError!(
-          subService.isPro ? 'Sınırsız Erişim Limiti' : 'Standart Erişim Limiti',
-          subService.isPro
-              ? 'Sistem güvenliği gereği adil kullanım limitine ulaştınız. Yarın tekrar sınırsız olarak kullanabilirsiniz.'
-              : 'Günlük standart yapay zeka analiz kotanızı doldurdunuz. Sınırsız analiz için Genişletilmiş Erişime geçin.',
-        );
+        onProcessingError!('LIMIT_EXCEEDED', '');
       }
       return;
     }
+
+    final settings = ref.read(settingsProvider);
+    final l10n = await AppLocalizations.delegate.load(Locale(settings.languageCode));
 
     try {
       final ioFile = File(path);
       if (!await ioFile.exists()) {
         debugPrint('❌ Shared file does not exist: $path');
         if (onProcessingError != null) {
-          onProcessingError!('Hata', 'Paylaşılan dosya bulunamadı.');
+          onProcessingError!(l10n.error, l10n.receiptReadError);
         }
         return;
       }
 
       if (onProcessingStarted != null) {
-        onProcessingStarted!('Fiş taranıyor, bilgiler çıkartılıyor...');
+        onProcessingStarted!(l10n.scanningReceipt);
       }
 
       final bytes = await ioFile.readAsBytes();
@@ -145,13 +143,13 @@ class ShareHandlerService {
       if (extension == 'webp') mimeType = 'image/webp';
 
       debugPrint('🔍 Parsing shared image file: $path ($mimeType)');
-      final draft = await SmartParserService.parseReceiptImage(bytes, mimeType);
+      final draft = await SmartParserService.parseReceiptImage(bytes, mimeType, l10n);
       if (draft != null) {
         if (draft.amount < 0) {
           if (onProcessingError != null) {
             onProcessingError!(
-              'Fiş Okunamadı',
-              draft.note ?? 'Yüklenen görselde herhangi bir fiş veya fatura bilgisi tespit edilemedi.',
+              l10n.receiptUnreadable,
+              draft.note ?? l10n.receiptUnreadableDesc,
             );
           }
           return;
@@ -166,8 +164,8 @@ class ShareHandlerService {
       } else {
         if (onProcessingError != null) {
           onProcessingError!(
-            'Hata',
-            'Fiş okunamadı. Lütfen bilgileri el ile girin veya daha net bir fotoğraf çekin.',
+            l10n.error,
+            l10n.receiptReadError,
           );
         }
       }
@@ -176,8 +174,8 @@ class ShareHandlerService {
       if (onProcessingError != null) {
         final errorMsg = e.toString().replaceAll('Exception: ', '');
         onProcessingError!(
-          'Hata',
-          errorMsg.isNotEmpty ? errorMsg : 'Görsel yüklenirken bir hata oluştu.',
+          l10n.error,
+          errorMsg.isNotEmpty ? errorMsg : l10n.imageUploadError,
         );
       }
     }

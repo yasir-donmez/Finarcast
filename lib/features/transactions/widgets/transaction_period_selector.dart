@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../../core/theme/app_constants.dart';
 import '../../../l10n/app_localizations.dart';
+import '../../../core/utils/string_utils.dart';
 import '../../../shared/widgets/custom_bottom_sheet.dart';
 import '../../../shared/widgets/clickable_action.dart';
 import '../../../shared/widgets/wheel_picker.dart';
@@ -114,7 +115,7 @@ class _TransactionPeriodSelectorState extends State<TransactionPeriodSelector> {
                   ),
                   const SizedBox(width: 12),
                   Text(
-                    l10n.period.toUpperCase(),
+                    l10n.period.toSafeUpperCase(context),
                     style: TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.w900,
@@ -220,7 +221,7 @@ class _TransactionPeriodSelectorState extends State<TransactionPeriodSelector> {
         
         // === BAŞLANGIÇ TARİHİ (TÜM PERİYOTLAR İÇİN - SABİT VE HİÇBİR ZAMAN ANİME EDİLMEZ) ===
         _buildStandardRow(
-          _periodType == 0 ? l10n.selectDate : "Başlangıç Tarihi",
+          _periodType == 0 ? l10n.selectDate : l10n.startDate,
           "${_selectedDateForRecurrence.day} ${_getMonths(l10n)[_selectedDateForRecurrence.month - 1]} ${_selectedDateForRecurrence.year}",
           Icons.calendar_today_rounded,
           () => _showFullDatePicker(l10n),
@@ -272,7 +273,7 @@ class _TransactionPeriodSelectorState extends State<TransactionPeriodSelector> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    l10n.duration.toUpperCase(),
+                                    l10n.duration.toSafeUpperCase(context),
                                     style: TextStyle(
                                       fontSize: 11 * scalingFactor,
                                       fontWeight: FontWeight.w900,
@@ -392,7 +393,7 @@ class _TransactionPeriodSelectorState extends State<TransactionPeriodSelector> {
               ),
               SizedBox(width: 12 * scalingFactor),
               Text(
-                label.toUpperCase(),
+                label.toSafeUpperCase(context),
                 style: TextStyle(
                   fontSize: 11 * scalingFactor,
                   fontWeight: FontWeight.w900,
@@ -437,7 +438,7 @@ class _TransactionPeriodSelectorState extends State<TransactionPeriodSelector> {
         : (_expandedPeriodCategory == category);
 
     final bool isAnyOtherExpanded = _expandedPeriodCategory != null && !isThisExpanded;
-    final String abb = label.isNotEmpty ? label[0].toUpperCase() : "";
+    final String abb = label.isNotEmpty ? label[0].toSafeUpperCase(context) : "";
 
     return ClickableAction(
       onTap: () {
@@ -530,7 +531,6 @@ class _TransactionPeriodSelectorState extends State<TransactionPeriodSelector> {
   }
 
   Widget _buildSubPeriodInlineOptions(String category, AppLocalizations l10n, double scalingFactor) {
-    final isTr = Localizations.localeOf(context).languageCode == 'tr';
     List<Widget> options = [];
     if (category == 'gun') {
       options = [
@@ -544,8 +544,8 @@ class _TransactionPeriodSelectorState extends State<TransactionPeriodSelector> {
         _buildPeriodBtnSheet('1h', 201, scalingFactor),
         _buildPeriodBtnSheet('2h', 202, scalingFactor),
         _buildPeriodBtnSheet('3h', 203, scalingFactor),
-        _buildPeriodBtnSheet(isTr ? 'İçi' : 'Wkd', 250, scalingFactor),
-        _buildPeriodBtnSheet(isTr ? 'Sonu' : 'Wke', 251, scalingFactor),
+        _buildPeriodBtnSheet(l10n.weekdaysShort, 250, scalingFactor),
+        _buildPeriodBtnSheet(l10n.weekendsShort, 251, scalingFactor),
       ];
     } else if (category == 'ay') {
       options = [

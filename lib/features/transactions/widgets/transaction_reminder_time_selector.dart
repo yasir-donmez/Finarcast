@@ -4,6 +4,8 @@ import '../../../shared/widgets/custom_bottom_sheet.dart';
 import '../../../shared/widgets/wheel_picker.dart';
 import '../../../shared/widgets/custom_button.dart';
 import '../../../shared/widgets/clickable_action.dart';
+import '../../../l10n/app_localizations.dart';
+import '../../../core/utils/string_utils.dart';
 
 class TransactionReminderTimeSelector extends StatelessWidget {
   final TimeOfDay selectedTime;
@@ -19,13 +21,14 @@ class TransactionReminderTimeSelector extends StatelessWidget {
 
   void _showTimePickerSheet(BuildContext context) {
     HapticFeedback.mediumImpact();
+    final l10n = AppLocalizations.of(context)!;
     
     int tempHour = selectedTime.hour;
     int tempMinute = selectedTime.minute;
 
     CustomBottomSheet.show(
       context: context,
-      title: 'HATIRLATMA SAATİ',
+      title: l10n.reminderTime,
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -72,7 +75,7 @@ class TransactionReminderTimeSelector extends StatelessWidget {
               Navigator.pop(context);
               HapticFeedback.mediumImpact();
             },
-            label: 'TAMAM',
+            label: l10n.ok,
             activeColor: Theme.of(context).colorScheme.primary,
           ),
           const SizedBox(height: 12),
@@ -83,6 +86,7 @@ class TransactionReminderTimeSelector extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return ClickableAction(
       onTap: () => _showTimePickerSheet(context),
       color: Colors.transparent,
@@ -104,7 +108,7 @@ class TransactionReminderTimeSelector extends StatelessWidget {
               ),
               SizedBox(width: 12 * scalingFactor),
               Text(
-                'HATIRLATMA SAATİ'.toUpperCase(),
+                l10n.reminderTime.toSafeUpperCase(context),
                 style: TextStyle(
                   fontSize: 11 * scalingFactor,
                   fontWeight: FontWeight.w900,

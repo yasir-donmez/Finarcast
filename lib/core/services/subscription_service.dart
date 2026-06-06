@@ -44,9 +44,17 @@ class SubscriptionService extends ChangeNotifier {
       final userId = Supabase.instance.client.auth.currentUser?.id;
       
       if (Platform.isAndroid) {
-        configuration = PurchasesConfiguration(_googleApiKey);
+        if ((_googleApiKey.startsWith('goog_') || _googleApiKey.startsWith('test_')) && _googleApiKey != 'goog_YOUR_GOOGLE_API_KEY') {
+          configuration = PurchasesConfiguration(_googleApiKey);
+        } else {
+          debugPrint('⚠️ [SubscriptionService] Geçersiz Google API Anahtarı! RevenueCat devre dışı bırakılıyor.');
+        }
       } else if (Platform.isIOS) {
-        configuration = PurchasesConfiguration(_appleApiKey);
+        if ((_appleApiKey.startsWith('appl_') || _appleApiKey.startsWith('test_')) && _appleApiKey != 'appl_YOUR_APPLE_API_KEY') {
+          configuration = PurchasesConfiguration(_appleApiKey);
+        } else {
+          debugPrint('⚠️ [SubscriptionService] Geçersiz Apple API Anahtarı! RevenueCat devre dışı bırakılıyor.');
+        }
       }
 
       if (configuration != null) {
@@ -65,6 +73,8 @@ class SubscriptionService extends ChangeNotifier {
         
         // Ürünleri (Offerings) çek
         _offerings = await Purchases.getOfferings();
+      } else {
+        debugPrint('ℹ️ [SubscriptionService] RevenueCat yapılandırılmadı (Geçersiz API Anahtarı).');
       }
     } catch (e) {
       debugPrint('❌ [SubscriptionService] Hata: $e');

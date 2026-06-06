@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
 import 'dart:ui';
-import '../../../core/database/models/exchange_rate.dart';
 
 import '../../../l10n/app_localizations.dart';
+import '../../../core/utils/string_utils.dart';
 import '../../../core/theme/app_constants.dart';
 import '../../../core/utils/currency_utils.dart';
 import '../../../shared/widgets/solid_surface.dart';
 import '../../../shared/widgets/custom_dialog.dart';
-import '../vaults_providers.dart';
 
 
 class IntegratedVaultCard extends StatelessWidget {
@@ -15,7 +14,6 @@ class IntegratedVaultCard extends StatelessWidget {
   final double income;
   final double expense;
   final double balance;
-  final List<TransactionUI> txs;
   final Color activeColor;
   final AppLocalizations l10n;
   final String vaultName;
@@ -24,8 +22,9 @@ class IntegratedVaultCard extends StatelessWidget {
   final bool isCurrent;
   final double? convertedBalance;
   final String? convertedSymbol;
-  final List<ExchangeRate> exchangeRates;
-  final String targetCurrency;
+  final bool hasFlexibleTx;
+  final double minNet;
+  final double maxNet;
 
   const IntegratedVaultCard({
     super.key,
@@ -33,17 +32,17 @@ class IntegratedVaultCard extends StatelessWidget {
     required this.income,
     required this.expense,
     required this.balance,
-    required this.txs,
     required this.activeColor, 
     required this.l10n, 
     required this.vaultName, 
     required this.currencySymbol,
     required this.morphProgress, 
     required this.isCurrent,
+    required this.hasFlexibleTx,
+    required this.minNet,
+    required this.maxNet,
     this.convertedBalance,
     this.convertedSymbol,
-    this.exchangeRates = const [],
-    this.targetCurrency = 'TRY',
   });
 
   @override
@@ -98,8 +97,6 @@ class IntegratedVaultCard extends StatelessWidget {
 
   Widget _buildMorphContent(BuildContext context, bool isDark, double h, double effectiveWidth) {
     final screenWidth = MediaQuery.of(context).size.width;
-    final hasFlexibleTx = txs.any((t) => t.minAmount != null || t.maxAmount != null);
-    final isTr = Localizations.localeOf(context).languageCode == 'tr';
     
     // Animasyon progressleri
     final double contentT = Curves.easeInOutCubic.transform(morphProgress);
@@ -255,7 +252,7 @@ class IntegratedVaultCard extends StatelessWidget {
                         Expanded(
                           child: _buildMiniStat(
                             context,
-                            isTr ? "GELİR / AY" : "${l10n.income.toUpperCase()} / MO",
+                            l10n.incomePerMonthLabel,
                             income,
                             AppColors.getIncome(context),
                           ),
@@ -267,7 +264,7 @@ class IntegratedVaultCard extends StatelessWidget {
                         Expanded(
                           child: _buildMiniStat(
                             context,
-                            isTr ? "GİDER / AY" : "${l10n.expense.toUpperCase()} / MO",
+                            l10n.expensePerMonthLabel,
                             expense,
                             AppColors.getExpense(context),
                           ),
@@ -296,7 +293,7 @@ class IntegratedVaultCard extends StatelessWidget {
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          _buildRangeStats(context, txs, targetCurrency, exchangeRates),
+                          _buildRangeStats(context),
                           const SizedBox(height: 20),
                         ],
                       ),
@@ -341,26 +338,13 @@ class IntegratedVaultCard extends StatelessWidget {
                   color: AppColors.getTextSecondary(context).withValues(alpha: 0.5),
                 ),
                 onPressed: () {
-                  final isTr = Localizations.localeOf(context).languageCode == 'tr';
                   showCustomDialog(
                     context: context,
-                    title: isTr ? "Kasa Rehberi" : "Vault Guide",
-                    content: isTr
-                        ? "📊 Karttaki Veriler Ne Anlama Geliyor?\n\n"
-                          "• Kasa Bakiyesi (Wallet): Kasadaki tüm zamanların kümülatif net bakiyesidir. Kasa başlangıç bakiyesi ve geçmişten bugüne gerçekleşen tüm gelir/gider hareketlerinin toplamıdır.\n\n"
-                          "• Gelir (Bu Ay): Sadece içinde bulunulan cari ay için tahmin edilen toplam geliri gösterir.\n\n"
-                          "• Gider (Bu Ay): Sadece içinde bulunulan cari ay için tahmin edilen toplam gideri gösterir.\n\n"
-                          "💡 Önemli Not:\n"
-                          "Kasa Bakiyesi kümülatif (tüm zamanlar) olduğundan, o ayki Gelir ve Gider farkından farklı çıkması tamamen normaldir."
-                        : "📊 What Do These Numbers Mean?\n\n"
-                          "• Vault Balance (Wallet): The cumulative net balance of the vault of all-time. It is the sum of the initial vault balance and all transactions recorded since inception.\n\n"
-                          "• Income (This Month): The total estimated income for the current calendar month.\n\n"
-                          "• Expense (This Month): The total estimated expense for the current calendar month.\n\n"
-                          "💡 Important Note:\n"
-                          "Since the main balance is cumulative (all-time), it is normal for it to differ from the net difference of this month's income and expense.",
+                    title: l10n.vaultGuideTitle,
+                    content: l10n.vaultGuideContent,
                     actions: [
                       PrecisionDialogAction(
-                        label: isTr ? "Anladım" : "Got it",
+                        label: l10n.gotIt,
                         onTap: () => Navigator.pop(context),
                         isPrimary: true,
                       ),
@@ -382,7 +366,7 @@ class IntegratedVaultCard extends StatelessWidget {
           FittedBox(
             fit: BoxFit.scaleDown,
             child: Text(
-              label.toUpperCase(), 
+              label.toSafeUpperCase(context), 
               style: TextStyle(
                 fontSize: 9, 
                 fontWeight: FontWeight.w900, 
@@ -404,32 +388,7 @@ class IntegratedVaultCard extends StatelessWidget {
     );
   }
 
-  Widget _buildRangeStats(BuildContext context, List<TransactionUI> txs, String targetCurrency, List<ExchangeRate> rates) {
-    final activeTxs = txs.where((t) => !t.isArchived).toList();
-    final now = DateTime.now();
-
-    final minNet = activeTxs.where((t) => t.isIncome).fold<double>(0, (s, t) {
-          final amt = t.minAmount ?? t.amount;
-          final occurrences = t.getOccurrencesInMonth(now.year, now.month);
-          return s + CurrencyUtils.convert(amt * occurrences, t.currency ?? '₺', targetCurrency, rates);
-        }) 
-        - activeTxs.where((t) => !t.isIncome).fold<double>(0, (s, t) {
-          final amt = t.maxAmount ?? t.amount;
-          final occurrences = t.getOccurrencesInMonth(now.year, now.month);
-          return s + CurrencyUtils.convert(amt * occurrences, t.currency ?? '₺', targetCurrency, rates);
-        });
-
-    final maxNet = activeTxs.where((t) => t.isIncome).fold<double>(0, (s, t) {
-          final amt = t.maxAmount ?? t.amount;
-          final occurrences = t.getOccurrencesInMonth(now.year, now.month);
-          return s + CurrencyUtils.convert(amt * occurrences, t.currency ?? '₺', targetCurrency, rates);
-        }) 
-        - activeTxs.where((t) => !t.isIncome).fold<double>(0, (s, t) {
-          final amt = t.minAmount ?? t.amount;
-          final occurrences = t.getOccurrencesInMonth(now.year, now.month);
-          return s + CurrencyUtils.convert(amt * occurrences, t.currency ?? '₺', targetCurrency, rates);
-        });
-    
+  Widget _buildRangeStats(BuildContext context) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceAround,
       children: [

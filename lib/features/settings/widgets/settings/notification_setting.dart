@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/providers/settings_provider.dart';
 import '../../../../core/theme/app_constants.dart';
 import '../../../../shared/widgets/clickable_action.dart';
+import '../../../../shared/widgets/custom_card.dart';
 import '../../../../shared/widgets/custom_switch.dart';
 import '../../../../shared/widgets/custom_animated_icon.dart';
 import '../../../home/home_providers.dart';
@@ -107,12 +108,8 @@ class NotificationSetting extends ConsumerWidget {
               ? Container(
                   width: double.infinity,
                   padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-                  child: Container(
+                  child: CustomCard(
                     padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: AppColors.getInnerSurface(context),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -124,10 +121,9 @@ class NotificationSetting extends ConsumerWidget {
                             height: 1.4,
                           ),
                         ),
-
-                  ],
-                ),
-              ),
+                      ],
+                    ),
+                  ),
             )
               : const SizedBox.shrink(),
         ),

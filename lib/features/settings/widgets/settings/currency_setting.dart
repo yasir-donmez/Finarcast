@@ -97,12 +97,8 @@ class CurrencySetting extends ConsumerWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Container(
+                      CustomCard(
                         padding: const EdgeInsets.all(12),
-                        decoration: BoxDecoration(
-                          color: AppColors.getInnerSurface(context),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
                         child: Text(
                           l10n.currencyDesc,
                           style: TextStyle(
@@ -171,23 +167,21 @@ class CurrencySetting extends ConsumerWidget {
                 onSelectedItemChanged: (index) => tempIndex = index,
                 itemBuilder: (context, index, isSelected) {
                   final symbol = currencies[index];
-                  final langCode = Localizations.localeOf(context).languageCode;
-                  final isTr = langCode == 'tr';
                   String name = "";
                   switch (symbol) {
-                    case '₺': name = isTr ? "Türk Lirası" : "Turkish Lira"; break;
-                    case r'$': name = isTr ? "Amerikan Doları" : "US Dollar"; break;
-                    case '€': name = isTr ? "Euro" : "Euro"; break;
-                    case '£': name = isTr ? "İngiliz Sterlini" : "British Pound"; break;
-                    case '¥': name = isTr ? "Japon Yeni" : "Japanese Yen"; break;
-                    case '₩': name = isTr ? "Kore Wonu" : "Korean Won"; break;
-                    case '元': name = isTr ? "Çin Yuanı" : "Chinese Yuan"; break;
-                    case r'R$': name = isTr ? "Brezilya Reali" : "Brazilian Real"; break;
-                    case 'Fr': name = isTr ? "İsviçre Frangı" : "Swiss Franc"; break;
-                    case 'G': name = isTr ? "Gram Altın" : "Gold (Gram)"; break;
-                    case 'Ag': name = isTr ? "Gümüş (Gram)" : "Silver (Gram)"; break;
-                    case 'SR': name = isTr ? "Suudi Riyali" : "Saudi Riyal"; break;
-                    case 'KD': name = isTr ? "Kuveyt Dinarı" : "Kuwaiti Dinar"; break;
+                    case '₺': name = l10n.currencyTRY; break;
+                    case r'$': name = l10n.currencyUSD; break;
+                    case '€': name = l10n.currencyEUR; break;
+                    case '£': name = l10n.currencyGBP; break;
+                    case '¥': name = l10n.currencyJPY; break;
+                    case '₩': name = l10n.currencyKRW; break;
+                    case '元': name = l10n.currencyCNY; break;
+                    case r'R$': name = l10n.currencyBRL; break;
+                    case 'Fr': name = l10n.currencyCHF; break;
+                    case 'G': name = l10n.currencyGOLD; break;
+                    case 'Ag': name = l10n.currencySILVER; break;
+                    case 'SR': name = l10n.currencySAR; break;
+                    case 'KD': name = l10n.currencyKWD; break;
                   }
 
                   return Center(

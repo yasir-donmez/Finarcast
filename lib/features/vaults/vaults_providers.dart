@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../core/providers/db_providers.dart';
+import '../../core/providers/settings_provider.dart';
 import '../../core/database/database_service.dart';
 import '../../core/database/models/transaction_record.dart';
 import '../../core/database/models/exchange_rate.dart';
@@ -33,8 +34,6 @@ class TransactionUI {
   final DateTime? recurrenceDate;
   final int? recurrenceDuration;
 
-  final bool showOnDashboard;
-  final int dashboardLayoutType;
   final bool isArchived;
   List<String> groupIds = []; // Çoklu kasa desteği
   
@@ -65,8 +64,6 @@ class TransactionUI {
     this.recurrenceDay,
     this.recurrenceDate,
     this.recurrenceDuration,
-    required this.showOnDashboard,
-    this.dashboardLayoutType = 4,
     this.isArchived = false,
     List<String>? groupIds,
     this.isNotificationEnabled = false,
@@ -369,8 +366,6 @@ class TransactionUI {
       recurrenceDay: record.recurrenceDay,
       recurrenceDate: record.recurrenceDate,
       recurrenceDuration: record.recurrenceDuration,
-      showOnDashboard: record.showOnDashboard,
-      dashboardLayoutType: 4,
       isArchived: record.isArchived,
       groupIds: record.vaultIds.map((vId) => 'v_$vId').toList(),
       isNotificationEnabled: record.isNotificationEnabled,
@@ -663,3 +658,156 @@ final unseenNotificationsCountProvider = Provider<int>((ref) {
   }
   return count;
 });
+
+class VaultCardData {
+  final String? vaultId;
+  final double income;
+  final double expense;
+  final double balance;
+  final double? convertedBalance;
+  final String currencySymbol;
+  final String targetCurrency;
+  final bool hasFlexibleTx;
+  final double minNet;
+  final double maxNet;
+
+  VaultCardData({
+    required this.vaultId,
+    required this.income,
+    required this.expense,
+    required this.balance,
+    this.convertedBalance,
+    required this.currencySymbol,
+    required this.targetCurrency,
+    required this.hasFlexibleTx,
+    required this.minNet,
+    required this.maxNet,
+  });
+}
+
+/// Her bir kasa için kart verilerini hesaplayan ve önbelleğe alan provider.
+/// Bu sayede dikey kaydırma (morphProgress) esnasında ağır döngüler ve
+/// para birimi dönüştürme işlemleri her karede tekrar tekrar çalışmaz,
+/// arayüz geçişleri tamamen pürüzsüz (60/120 FPS) hale gelir.
+final vaultCardDataProvider = Provider<Map<String?, VaultCardData>>((ref) {
+  final globalCurrency = ref.watch(settingsProvider).currencySymbol;
+  final rates = ref.watch(exchangeRatesProvider).value ?? [];
+  final allVaults = ref.watch(allVaultsProvider);
+  final allTransactions = ref.watch(vaultTransactionsProvider);
+
+  final Map<String?, VaultCardData> dataMap = {};
+
+  // Deck items (tüm kasalar + gerekirse null yani genel bakiye için)
+  final List<String?> ids = [null, ...allVaults.map((v) => 'v_${v.id}')];
+
+  final now = DateTime.now();
+
+  for (final vaultId in ids) {
+    final vault = allVaults.where((v) => 'v_${v.id}' == vaultId).firstOrNull;
+    final vaultCurrency = vault?.currency ?? 'AUTO';
+    final targetCurrency = vaultCurrency == 'AUTO' ? globalCurrency : vaultCurrency;
+
+    final txs = vaultId == null 
+        ? allTransactions 
+        : allTransactions.where((t) => t.groupIds.contains(vaultId)).toList();
+
+    // 1. Aylık Akış (Gelir/Gider İstatistikleri) - Sadece Arşivlenmemişler
+    final activeTxs = txs.where((t) => !t.isArchived).toList();
+    
+    double income = 0;
+    double expense = 0;
+    
+    for (final t in activeTxs) {
+      final occurrencesThisMonth = t.getOccurrencesInMonth(now.year, now.month);
+      if (occurrencesThisMonth > 0) {
+        final amt = t.getConvertedAmount(targetCurrency, rates) * occurrencesThisMonth;
+        if (t.isIncome) {
+          income += amt;
+        } else {
+          expense += amt;
+        }
+      }
+    }
+
+    // 2. Toplam Bakiye (Geçmişten Bugüne Tüm Hareketler)
+    final double initialBalanceVal;
+    if (vaultId == null) {
+      double sumVaults = 0;
+      for (final v in allVaults) {
+        final vCurrency = v.currency == 'AUTO' ? globalCurrency : v.currency;
+        sumVaults += CurrencyUtils.convert(v.balance, vCurrency, globalCurrency, rates);
+      }
+      initialBalanceVal = sumVaults;
+    } else {
+      initialBalanceVal = vault?.balance ?? 0.0;
+    }
+
+    double balance = initialBalanceVal;
+    for (final t in txs) {
+      final amt = t.getConvertedAmount(targetCurrency, rates) * t.passedOccurrences;
+      if (t.isIncome) {
+        balance += amt;
+      } else {
+        balance -= amt;
+      }
+    }
+
+    // Döviz çevirisi (Görünür sembol ve opsiyonel global bakiye)
+    final currencySymbol = vaultCurrency == 'AUTO' ? globalCurrency : vaultCurrency;
+
+    double? convertedBalance;
+    if (vaultCurrency != 'AUTO' && vaultCurrency != globalCurrency) {
+      convertedBalance = CurrencyUtils.convert(balance, vaultCurrency, globalCurrency, rates);
+    }
+
+    // Esnek işlemler var mı?
+    final hasFlexibleTx = txs.any((t) => t.minAmount != null || t.maxAmount != null);
+
+    // Worst / Best Case (Range Stats)
+    double minNet = 0;
+    double maxNet = 0;
+
+    if (hasFlexibleTx) {
+      double minIncome = 0;
+      double maxIncome = 0;
+      double minExpense = 0;
+      double maxExpense = 0;
+
+      for (final t in activeTxs) {
+        final occurrences = t.getOccurrencesInMonth(now.year, now.month);
+        if (occurrences > 0) {
+          if (t.isIncome) {
+            final minAmt = t.minAmount ?? t.amount;
+            final maxAmt = t.maxAmount ?? t.amount;
+            minIncome += CurrencyUtils.convert(minAmt * occurrences, t.currency ?? '₺', targetCurrency, rates);
+            maxIncome += CurrencyUtils.convert(maxAmt * occurrences, t.currency ?? '₺', targetCurrency, rates);
+          } else {
+            final minAmt = t.minAmount ?? t.amount;
+            final maxAmt = t.maxAmount ?? t.amount;
+            minExpense += CurrencyUtils.convert(minAmt * occurrences, t.currency ?? '₺', targetCurrency, rates);
+            maxExpense += CurrencyUtils.convert(maxAmt * occurrences, t.currency ?? '₺', targetCurrency, rates);
+          }
+        }
+      }
+
+      minNet = minIncome - maxExpense;
+      maxNet = maxIncome - minExpense;
+    }
+
+    dataMap[vaultId] = VaultCardData(
+      vaultId: vaultId,
+      income: income,
+      expense: expense,
+      balance: balance,
+      convertedBalance: convertedBalance,
+      currencySymbol: currencySymbol,
+      targetCurrency: targetCurrency,
+      hasFlexibleTx: hasFlexibleTx,
+      minNet: minNet,
+      maxNet: maxNet,
+    );
+  }
+
+  return dataMap;
+});
+

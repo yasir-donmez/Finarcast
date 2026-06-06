@@ -20,7 +20,6 @@ void main() {
         isIncome: false,
         periodType: 0, // One-time
         date: now,
-        showOnDashboard: true,
       ),
       TransactionUI(
         id: 'test_2',
@@ -33,7 +32,6 @@ void main() {
         periodType: 301, // Monthly
         date: now,
         recurrenceDuration: 3,
-        showOnDashboard: true,
       ),
     ];
 

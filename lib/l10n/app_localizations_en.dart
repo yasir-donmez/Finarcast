@@ -9,16 +9,10 @@ class AppLocalizationsEn extends AppLocalizations {
   AppLocalizationsEn([String locale = 'en']) : super(locale);
 
   @override
-  String get appTitle => 'Finarcast';
-
-  @override
   String get settings => 'Settings';
 
   @override
   String get profile => 'Profile';
-
-  @override
-  String get memberPremium => 'Finarcast Premium Member';
 
   @override
   String get preferences => 'PREFERENCES & APP';
@@ -27,24 +21,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get language => 'Language';
 
   @override
-  String get aiNotifications => 'AI Assistant Alerts';
-
-  @override
-  String get dataAndAiSettings => 'DATA & AI SETTINGS';
-
-  @override
   String get dataRetention => 'Data Retention';
 
   @override
-  String get dataRetentionDesc =>
-      'Expired transactions are archived.\nAI Assistant only uses data within this period.';
-
-  @override
   String get permanentDataDeletion => 'Permanent Deletion';
-
-  @override
-  String get permanentDataDeletionDesc =>
-      'After this period, transactions are permanently deleted from the database.\nThis action cannot be undone.';
 
   @override
   String get oneMonth => '1 Month';
@@ -60,9 +40,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get infinite => 'Forever';
-
-  @override
-  String get dataManagement => 'DATA MANAGEMENT';
 
   @override
   String get driveBackup => 'Drive Backup';
@@ -82,9 +59,6 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get aboutFinarcast =>
       'Finarcast is your AI-powered financial assistant. It analyzes your expenses, helps you set savings goals, and optimizes your financial future.';
-
-  @override
-  String get editProfile => 'Edit Profile';
 
   @override
   String get comingSoon => 'This feature is coming soon!';
@@ -114,34 +88,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get analysis => 'Analysis';
 
   @override
-  String get dailySummary => 'Daily Summary';
-
-  @override
-  String get todaySpending => 'Today\'s Spending';
-
-  @override
-  String get weeklyRemaining => 'Weekly Remaining';
-
-  @override
-  String get recentTransactions => 'Recent Transactions';
-
-  @override
-  String get seeAll => 'See All';
-
-  @override
-  String get myVaults => 'My Vaults';
-
-  @override
   String get totalBalance => 'Total Balance';
 
   @override
   String get addNewVault => 'Add New Vault';
-
-  @override
-  String get setGoal => 'Set Goal';
-
-  @override
-  String get analyze => 'Analyze';
 
   @override
   String get addTransaction => 'Add Transaction';
@@ -162,9 +112,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get description => 'Description';
 
   @override
-  String get selectVault => 'Select Vault';
-
-  @override
   String get done => 'Done';
 
   @override
@@ -175,12 +122,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get newVault => 'New Vault';
-
-  @override
-  String get monthlyIncome => 'Monthly Income';
-
-  @override
-  String get monthlyExpense => 'Monthly Expense';
 
   @override
   String get all => 'All';
@@ -213,13 +154,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get yearly => 'Yearly';
 
   @override
-  String get noTransactions => 'No transactions in this category yet';
-
-  @override
   String get period => 'Period';
-
-  @override
-  String get remainingTime => 'Remaining Time';
 
   @override
   String get week => 'Week';
@@ -237,12 +172,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get category => 'Category';
 
   @override
-  String get transactionName => 'Transaction Name';
-
-  @override
-  String get frequency => 'Frequency';
-
-  @override
   String get themeMode => 'Theme';
 
   @override
@@ -258,28 +187,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get colorTheme => 'Color';
 
   @override
-  String get colorSystem => 'System';
-
-  @override
-  String get market => 'Market';
-
-  @override
   String get food => 'Food';
 
   @override
   String get cleaning => 'Cleaning';
 
   @override
-  String get personalCare => 'Personal Care';
-
-  @override
   String get grocery => 'Grocery/Food';
 
   @override
   String get delivery => 'Delivery';
-
-  @override
-  String get workspace => 'Office/Workspace';
 
   @override
   String get gas => 'Gas/Fuel';
@@ -306,13 +223,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get dayOfMonth => 'Day of Month';
 
   @override
-  String get dayOfYear => 'Day of Year';
-
-  @override
   String get dayOf => 'Day of';
-
-  @override
-  String get recurrencePeriod => 'Recurrence Period';
 
   @override
   String get dining => 'Dining';
@@ -321,19 +232,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get restaurant => 'Restaurant';
 
   @override
-  String get fastFood => 'Fast Food';
-
-  @override
   String get cafe => 'Cafe';
 
   @override
-  String get takeout => 'Takeout';
-
-  @override
   String get rent => 'Rent';
-
-  @override
-  String get homeRent => 'Home Rent';
 
   @override
   String get office => 'Office';
@@ -351,16 +253,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get water => 'Water';
 
   @override
-  String get naturalGas => 'Natural Gas';
-
-  @override
   String get internet => 'Internet';
 
   @override
   String get phone => 'Phone';
-
-  @override
-  String get entertainment => 'Entertainment';
 
   @override
   String get cinema => 'Cinema';
@@ -376,12 +272,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get subscription => 'Subscription';
-
-  @override
-  String get streaming => 'Streaming';
-
-  @override
-  String get musicSubscription => 'Music';
 
   @override
   String get software => 'Software';
@@ -405,9 +295,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get dentist => 'Dentist';
 
   @override
-  String get transportation => 'Transportation';
-
-  @override
   String get taxi => 'Taxi';
 
   @override
@@ -423,19 +310,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get fuel => 'Fuel';
 
   @override
-  String get clothing => 'Clothing';
-
-  @override
-  String get dailyWear => 'Daily Wear';
-
-  @override
   String get shoes => 'Shoes';
-
-  @override
-  String get accessory => 'Accessory';
-
-  @override
-  String get education => 'Education';
 
   @override
   String get course => 'Course';
@@ -447,16 +322,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get school => 'School';
 
   @override
-  String get debtPayment => 'Debt Payment';
-
-  @override
-  String get creditCard => 'Credit Card';
-
-  @override
   String get loan => 'Loan';
-
-  @override
-  String get personalDebt => 'Personal Debt';
 
   @override
   String get credit => 'Credit/Debt';
@@ -476,28 +342,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get salary => 'Salary';
 
   @override
-  String get mainSalary => 'Main Salary';
-
-  @override
   String get bonus => 'Bonus';
 
   @override
   String get dividend => 'Dividend';
 
   @override
-  String get extraIncome => 'Extra Income';
-
-  @override
   String get freelance => 'Freelance';
 
   @override
-  String get partTime => 'Part Time';
-
-  @override
   String get commission => 'Commission';
-
-  @override
-  String get investmentReturn => 'Investment Return';
 
   @override
   String get stock => 'Stock';
@@ -509,46 +363,19 @@ class AppLocalizationsEn extends AppLocalizations {
   String get interest => 'Interest';
 
   @override
-  String get scholarshipLoan => 'Scholarship/Loan';
-
-  @override
   String get scholarship => 'Scholarship';
 
   @override
   String get sale => 'Sale';
 
   @override
-  String get onlineSale => 'Online Sale';
-
-  @override
-  String get physicalSale => 'Physical Sale';
-
-  @override
-  String get rentalIncome => 'Rental Income';
-
-  @override
-  String get officeIncome => 'Office Income';
-
-  @override
   String get gift => 'Gift';
-
-  @override
-  String get vaultOrGroup => 'Vault or Group';
 
   @override
   String get cancel => 'Cancel';
 
   @override
-  String get generalBalance => 'General Balance';
-
-  @override
   String get everyDay => 'Every Day';
-
-  @override
-  String get every2Days => 'Every 2 Days';
-
-  @override
-  String get every3Days => 'Every 3 Days';
 
   @override
   String get everyWeek => 'Every Week';
@@ -566,19 +393,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get threeDays => '3 Days';
 
   @override
-  String get twoWeeks => '2 Weeks';
-
-  @override
-  String get threeWeeks => '3 Weeks';
-
-  @override
   String get flexibleAmount => 'Flexible Amount';
-
-  @override
-  String get singleAmount => 'Single Amount';
-
-  @override
-  String get advancedOptions => 'Advanced Options';
 
   @override
   String get monday => 'Monday';
@@ -641,22 +456,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get selectDate => 'Select Date';
 
   @override
-  String get selectDay => 'Select Day';
-
-  @override
-  String get financialIdentity => 'Your Financial Identity';
-
-  @override
-  String get setTarget => 'Set Target';
-
-  @override
   String get allVaults => 'All Vaults';
-
-  @override
-  String get hidePreselect => 'Hide preselection';
-
-  @override
-  String get showPreselect => 'Show preselection';
 
   @override
   String get items => 'Items';
@@ -668,76 +468,19 @@ class AppLocalizationsEn extends AppLocalizations {
   String get incomes => 'INCOMES';
 
   @override
-  String get doNotTouch => 'Do Not Touch';
-
-  @override
-  String get changeable => 'Changeable';
-
-  @override
-  String get excellent => 'EXCELLENT';
-
-  @override
-  String get analysisResult => 'ANALYSIS RESULT';
-
-  @override
-  String get onTrackMessage => 'You\'re On Track';
-
-  @override
-  String get savingsNeeded => 'Savings Needed';
-
-  @override
   String get currentBalance => 'Current Balance';
-
-  @override
-  String get targetGap => 'Target Gap';
-
-  @override
-  String get currentSurplus => 'Current Surplus';
-
-  @override
-  String get requiredMonthlySavings => 'Required Monthly Savings';
 
   @override
   String get score => 'SCORE';
 
   @override
-  String get currentSavings => 'Your Current Savings';
-
-  @override
-  String get aiSavingsTarget => 'AI Savings Target';
-
-  @override
-  String get remainingGap => 'Remaining Gap';
-
-  @override
-  String get dailyAiQuotaFull => 'Daily AI quota reached';
-
-  @override
-  String get noInternetConnection => 'No internet connection';
-
-  @override
-  String get aiApiError => 'AI API error';
-
-  @override
-  String get aiCoachSuggestion => 'AI COACH SUGGESTION';
-
-  @override
-  String get cutbackPlan => 'CUTBACK PLAN';
-
-  @override
   String get no => 'No';
-
-  @override
-  String get recentAnalyses => 'Recent Analyses';
 
   @override
   String get vault => 'Vault';
 
   @override
   String get vaultDetail => 'Vault Detail';
-
-  @override
-  String get managePanel => 'Manage Panel';
 
   @override
   String get vaultNameHint => 'Vault Name (e.g. Savings)';
@@ -753,15 +496,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get manage => 'Manage';
-
-  @override
-  String get averageMonthlyLoad => 'AVERAGE MONTHLY LOAD';
-
-  @override
-  String get noTransactionsInVault => 'No transactions in this vault.';
-
-  @override
-  String get manageTransactionsInVault => 'Manage Transactions in Vault';
 
   @override
   String get deleteVault => 'Delete Vault';
@@ -824,28 +558,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get everyYearDetailed => 'Every year';
 
   @override
-  String get every2WeeksDetailed => 'Every 2 weeks';
-
-  @override
-  String get every3WeeksDetailed => 'Every 3 weeks';
-
-  @override
-  String get every3MonthsDetailed => 'Every 3 months';
-
-  @override
-  String get every6MonthsDetailed => 'Every 6 months';
-
-  @override
   String get everyDayDetailed => 'Every day';
-
-  @override
-  String get every2DaysDetailed => 'Every 2 days';
-
-  @override
-  String get every3DaysDetailed => 'Every 3 days';
-
-  @override
-  String get allLabel => 'All';
 
   @override
   String get custom => 'Custom';
@@ -854,26 +567,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get status => 'Status';
 
   @override
-  String get approved => 'Approved';
-
-  @override
-  String get rejected => 'Rejected';
-
-  @override
   String get pending => 'Pending';
 
   @override
-  String get visibilityManagement => 'Visibility Management';
-
-  @override
-  String get editTransaction => 'Update transaction details';
-
-  @override
   String get removeFromVault => 'Remove from Vault';
-
-  @override
-  String get removeFromVaultDesc =>
-      'Transaction returns to main vault, not deleted';
 
   @override
   String get permanentDelete => 'Permanent Delete';
@@ -886,140 +583,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get yes => 'Yes';
 
   @override
-  String get groupNameHint => 'Group name...';
-
-  @override
-  String transactionCount(num count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: '$count transactions',
-      one: '1 transaction',
-    );
-    return '$_temp0';
-  }
-
-  @override
-  String get noRemainingTransactions => 'No remaining transactions to add.';
-
-  @override
-  String get editTransactionDesc => 'Update transaction details';
-
-  @override
-  String get visibilityDesc =>
-      'Choose which groups or transactions appear on the home screen.';
-
-  @override
-  String get vaultsAndGroups => 'Vaults & Groups';
-
-  @override
-  String get individualTransactions => 'Individual Transactions';
-
-  @override
-  String get analyzingFinancialIdentity =>
-      'Analyzing your financial identity...';
-
-  @override
-  String get financialIdentityHint =>
-      'Your financial identity will appear here when you perform an analysis.';
-
-  @override
-  String get targetDateLabel => 'Target Date:';
-
-  @override
-  String get scopeLabel => 'Scope:';
-
-  @override
-  String get preselectHint => 'Preselect items (optional)';
-
-  @override
-  String get noItemsToAnalyze =>
-      'No transactions found that would take effect by the selected date.';
-
-  @override
-  String itemsToAnalyze(num count, Object months) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other:
-          '$count items that will take effect by the target date ($months months).',
-      one: '1 item that will take effect by the target date ($months months).',
-    );
-    return '$_temp0';
-  }
-
-  @override
-  String get budgetNotFeasible =>
-      'This goal cannot be fully met with your current flexible budget. Consider extending the duration or increasing income.';
-
-  @override
-  String get financialIdentityUpdated =>
-      'Great! Your financial identity has been updated and the analysis saved.';
-
-  @override
-  String get feedbackMemoized =>
-      'Okay, these preferences have been memorized. Different suggestions will be provided for the next analysis.';
-
-  @override
-  String get excludedCategories => 'Excluded Categories:';
-
-  @override
-  String newFrequency(Object frequency) {
-    return 'New Frequency: $frequency';
-  }
-
-  @override
-  String get doYouLikeThisSuggestion => 'Do you like this suggestion?';
-
-  @override
-  String get yesILikeIt => 'Yes, I Like It';
-
-  @override
-  String targetAmountLabel(Object amount) {
-    return '$amount Target';
-  }
-
-  @override
-  String weeksToTargetLabel(num count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: '$count Weeks',
-      one: '1 Week',
-    );
-    return '$_temp0';
-  }
-
-  @override
-  String monthsToTargetLabel(num count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: '$count Months',
-      one: '1 Month',
-    );
-    return '$_temp0';
-  }
-
-  @override
-  String yearsToTargetLabel(num count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: '$count Years',
-      one: '1 Year',
-    );
-    return '$_temp0';
-  }
-
-  @override
   String get minAmount => 'Min.';
 
   @override
   String get maxAmount => 'Max.';
-
-  @override
-  String get limitedTotal => 'Total';
 
   @override
   String get netBalance => 'Net Balance';
@@ -1031,31 +598,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get worstCase => 'Worst Case';
 
   @override
-  String get layoutAndSorting => 'Layout & Sorting';
-
-  @override
-  String get layout1 => '1-item';
-
-  @override
-  String get layout2 => '2-item';
-
-  @override
-  String get layout3 => '3-item';
-
-  @override
-  String get layout4 => '4-item';
-
-  @override
-  String get moveForward => 'Move Forward';
-
-  @override
-  String get moveBackward => 'Move Backward';
-
-  @override
   String get selectCurrency => 'Select Currency';
-
-  @override
-  String get membershipPlan => 'Membership Plan';
 
   @override
   String get upgrade => 'Upgrade';
@@ -1068,9 +611,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get zero => '0';
-
-  @override
-  String get aiMode => 'AI Mode';
 
   @override
   String get addCustomCategory => 'Add New';
@@ -1092,21 +632,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get library => 'Library';
 
   @override
-  String get dashboardEmpty => 'Dashboard is currently empty.';
-
-  @override
-  String get libraryEmpty => 'Library is currently empty.';
-
-  @override
   String get pageLabel => 'Page';
-
-  @override
-  String get sizeLabel => 'Size';
-
-  @override
-  String widgetAdded(String name) {
-    return '$name added to dashboard!';
-  }
 
   @override
   String get historyTitle => 'Transaction History';
@@ -1116,15 +642,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get giantsTitle => 'Spending Giants';
-
-  @override
-  String get quickActionTitle => 'Quick Action';
-
-  @override
-  String get vaultStatusTitle => 'Vault Statuses';
-
-  @override
-  String get dailyBudgetTitle => 'Daily Budget';
 
   @override
   String get dailyLimit => 'DAILY LIMIT';
@@ -1154,6 +671,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get yesterday => 'Yesterday';
 
   @override
+  String get tomorrow => 'Tomorrow';
+
+  @override
   String daysAgo(int count) {
     return '$count Days Ago';
   }
@@ -1169,10 +689,10 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get historyEmpty => 'Transaction history is empty yet';
+  String get historyEmpty => 'No transaction history yet';
 
   @override
-  String get upcomingPaymentsNotFound => 'No Upcoming Payments Found';
+  String get upcomingPaymentsNotFound => 'No upcoming payments found';
 
   @override
   String get transaction => 'Transaction';
@@ -1181,37 +701,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get membership => 'MEMBERSHIP';
 
   @override
-  String get currentPlan => 'Current Plan';
-
-  @override
-  String get manageSubscription => 'Manage Subscription';
-
-  @override
   String get restorePurchases => 'Restore Purchases';
 
   @override
   String get freePlan => 'Free Plan';
 
   @override
-  String get proPlan => 'Finarcast PRO';
-
-  @override
-  String get upgradeToPro => 'Upgrade to PRO';
-
-  @override
-  String get proFeatures => 'PRO Features';
+  String get upgradeToPro => 'Upgrade to Premium';
 
   @override
   String get unlimitedVaults => 'Unlimited Vaults';
-
-  @override
-  String get aiInsights => 'Advanced AI Insights';
-
-  @override
-  String get prioritySupport => 'Priority Support';
-
-  @override
-  String get subscriptionStatus => 'Subscription Status';
 
   @override
   String get active => 'Active';
@@ -1224,9 +723,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get disabled => 'Disabled';
-
-  @override
-  String get financialOverview => 'FINANCIAL OVERVIEW';
 
   @override
   String get monthlyNetBalance => 'MONTHLY NET BALANCE';
@@ -1268,13 +764,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get yearlyWorst => 'YEARLY WORST';
 
   @override
-  String get noRecurring => 'No recurring transactions';
-
-  @override
   String get perMonth => '/mo';
-
-  @override
-  String get perYear => '/yr';
 
   @override
   String itemCount(int count) {
@@ -1330,10 +820,6 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get authWeakPassword =>
       'Your password is too weak. Please enter a stronger password with at least 6 characters.';
-
-  @override
-  String get authOtpExpired =>
-      'The verification code has expired. Please request a new one.';
 
   @override
   String get authBadCode =>
@@ -1579,7 +1065,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get premiumSyncDesc =>
-      'Cloud Sync feature uses Supabase backup infrastructure and is only available for Premium members.';
+      'Your app settings are synchronized automatically for free. Backing up vault and transaction data to the cloud is exclusive to Premium members.';
 
   @override
   String get showOnPhone => 'Show on Phone';
@@ -1844,4 +1330,690 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get supportEmailCopied =>
       'Could not open email client. Support email (finarcast.support@gmail.com) was copied.';
+
+  @override
+  String get signInMethod => 'Sign-In Method';
+
+  @override
+  String errorGeneric(Object error) {
+    return 'Error: $error';
+  }
+
+  @override
+  String resetFailed(Object error) {
+    return 'Reset failed: $error';
+  }
+
+  @override
+  String get criticalDatabaseError => 'Critical Database Error';
+
+  @override
+  String get criticalDatabaseErrorDesc =>
+      'Unreadable/corrupt data detected in the application database. You can clean the database and restart the application from scratch by clicking the button below.';
+
+  @override
+  String get resetDatabaseAndRestart => 'Reset Database and Restart';
+
+  @override
+  String get errorDetail => 'Error Detail:';
+
+  @override
+  String get unlimitedAccessLimit => 'Unlimited Access Limit';
+
+  @override
+  String get unlimitedAccessLimitDesc =>
+      'You have reached the fair use limit for system security. Please try again later or contact support.';
+
+  @override
+  String get standardAccessLimit => 'Standard Access Limit';
+
+  @override
+  String get standardAccessLimitDesc =>
+      'You have reached your daily standard AI analysis quota. You can upgrade to Premium to unlock limits.';
+
+  @override
+  String get upgradeToExtendedAccess => 'Upgrade to Extended Access';
+
+  @override
+  String get loginRequired => 'Login Required';
+
+  @override
+  String get loginRequiredDesc =>
+      'You must log in or create an account to use the AI assistant and spending inbox.';
+
+  @override
+  String get loginOrSignUp => 'Log In / Sign Up';
+
+  @override
+  String get aiAnalyzingExpense => 'AI is analyzing your expense...';
+
+  @override
+  String get draftAddedToInbox => 'Draft expense added to inbox.';
+
+  @override
+  String get analysisError =>
+      'An error occurred while analyzing the transaction.';
+
+  @override
+  String get scanningReceipt => 'Scanning receipt, extracting information...';
+
+  @override
+  String get receiptUnreadable => 'Receipt Unreadable';
+
+  @override
+  String get receiptUnreadableDesc =>
+      'No receipt or invoice details could be detected in the uploaded image.';
+
+  @override
+  String get receiptAddedToInbox => 'Receipt data successfully added to inbox.';
+
+  @override
+  String get receiptReadError =>
+      'Could not read receipt. Please enter the details manually or take a clearer photo.';
+
+  @override
+  String get imageUploadError => 'An error occurred while uploading image.';
+
+  @override
+  String get draftDeleted => 'Draft expense deleted.';
+
+  @override
+  String get transactionProcessedSuccess =>
+      'Transaction successfully processed to the vault!';
+
+  @override
+  String get transactionApprovalError =>
+      'An error occurred while approving the transaction.';
+
+  @override
+  String get smartScanTitle => 'Smart Scan';
+
+  @override
+  String pendingApprovalCount(int count) {
+    return 'TRANSACTIONS PENDING APPROVAL ($count)';
+  }
+
+  @override
+  String get clearAll => 'Clear All';
+
+  @override
+  String get smartInputHint => 'e.g. Starbucks filter coffee 120 TL yesterday';
+
+  @override
+  String get camera => 'Camera';
+
+  @override
+  String get gallery => 'Gallery';
+
+  @override
+  String get inboxEmpty => 'INBOX IS EMPTY';
+
+  @override
+  String get otherCategory => 'Other';
+
+  @override
+  String get add => 'ADD';
+
+  @override
+  String get todayUpper => 'TODAY';
+
+  @override
+  String get tomorrowUpper => 'TOMORROW';
+
+  @override
+  String daysWithName(int count, String dayName) {
+    return '$count DAYS - $dayName';
+  }
+
+  @override
+  String weeksLater(int count) {
+    return '$count WEEKS LATER';
+  }
+
+  @override
+  String daysCount(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count Days',
+      one: '1 Day',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String weeksCount(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count Weeks',
+      one: '1 Week',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String monthsCount(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count Months',
+      one: '1 Month',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String yearsCount(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count Years',
+      one: '1 Year',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get sharedExpenseAnalyzed =>
+      'Shared expense analyzed and added to inbox!';
+
+  @override
+  String get limitExceeded => 'Limit Exceeded';
+
+  @override
+  String get selectIcon => 'SELECT ICON';
+
+  @override
+  String optionsCount(int count) {
+    return '$count OPTIONS';
+  }
+
+  @override
+  String get invalidAmountError => 'Please enter a valid amount.';
+
+  @override
+  String get maxAmountMustBePositive =>
+      'Maximum amount must be greater than 0.';
+
+  @override
+  String get minMustBeLessThanMax =>
+      'Minimum amount must be less than maximum.';
+
+  @override
+  String get selectAtLeastOneVault =>
+      'Please select at least one vault for the transaction...';
+
+  @override
+  String get exchangeRatesNotLoaded =>
+      'Exchange rates are not loaded. You need to update rates to add/update transactions in different currencies.';
+
+  @override
+  String vaultCurrencyRateNotLoaded(String currency) {
+    return 'Exchange rates are not loaded for the selected vault\'s currency ($currency). You need to update rates.';
+  }
+
+  @override
+  String transactionSaveError(String error) {
+    return 'An error occurred while saving the transaction: $error';
+  }
+
+  @override
+  String get notificationPermissionDenied =>
+      'Notification permission was not granted. Please enable it from settings.';
+
+  @override
+  String get defaultUser => 'User';
+
+  @override
+  String get premiumBadge => 'Premium';
+
+  @override
+  String get email => 'Email';
+
+  @override
+  String get password => 'Password';
+
+  @override
+  String errorOccurred(String error) {
+    return 'An error occurred: $error';
+  }
+
+  @override
+  String aboutVersion(String version) {
+    return '$version • Made with ❤️';
+  }
+
+  @override
+  String comingSoonDesc(String feature) {
+    return 'The $feature feature will be with you very soon.';
+  }
+
+  @override
+  String get noVaultTransactions => 'No Vault Transactions Found';
+
+  @override
+  String get recurring => 'Recurring';
+
+  @override
+  String get thisWeek => 'This Week';
+
+  @override
+  String get thisMonth => 'This Month';
+
+  @override
+  String get thisYear => 'This Year';
+
+  @override
+  String vaultLimitReachedDesc(int count) {
+    return 'You can create up to $count vaults in the free plan. You can switch to Premium to remove limits.';
+  }
+
+  @override
+  String get inAppNotifications => 'In-App Notifications';
+
+  @override
+  String get exchangeRatesNotLoadedVault =>
+      'Exchange rates are not loaded. Vault currency could not be changed.';
+
+  @override
+  String get cannotDeleteVault => 'Cannot Delete Vault';
+
+  @override
+  String get cannotDeleteVaultDesc =>
+      'At least one active vault must remain in the app. You can create another vault and then delete this one.';
+
+  @override
+  String get exchangeRatesNotLoadedNewVault =>
+      'Exchange rates are not loaded. You need to update rates to create a vault in a different currency.';
+
+  @override
+  String get systemNotificationsDisabled =>
+      'SYSTEM NOTIFICATION PERMISSIONS OFF!\nPlease enable notification permissions from your phone settings.';
+
+  @override
+  String get noNotificationHistory => 'No Notification History';
+
+  @override
+  String get noNotificationHistoryDesc =>
+      'There is no history of any transaction alarms triggered previously.';
+
+  @override
+  String paymentDate(String date) {
+    return 'Payment: $date';
+  }
+
+  @override
+  String get loginRequiredForPurchase =>
+      'Please log in or create a free account to complete the purchase.';
+
+  @override
+  String get unlockFinancialPotential =>
+      'Unlock your financial potential 100%.';
+
+  @override
+  String get aiAnalysis => 'AI Analysis';
+
+  @override
+  String get aiAnalysisDesc => 'Unlimited and deep AI analysis.';
+
+  @override
+  String get unlimitedVaultsDesc =>
+      'Create as many vaults and wallets as you want.';
+
+  @override
+  String get cloudSyncDesc =>
+      'Safely back up and synchronize your settings and data.';
+
+  @override
+  String get customThemes => 'Custom Themes';
+
+  @override
+  String get customThemesDesc =>
+      'Exclusive color palettes and background styles.';
+
+  @override
+  String get zeroAds => 'Zero Ads';
+
+  @override
+  String get zeroAdsDesc => 'Uninterrupted and ad-free premium experience.';
+
+  @override
+  String get availablePlans => 'AVAILABLE PLANS';
+
+  @override
+  String get yearlyPremium => 'Yearly Premium';
+
+  @override
+  String get monthlyPremium => 'Monthly Premium';
+
+  @override
+  String get bestValueFreeTrialSubtitle => 'Best value • 7 days free trial';
+
+  @override
+  String get cancelAnytime => 'Cancel anytime';
+
+  @override
+  String get bestValue => 'BEST VALUE';
+
+  @override
+  String get yearlyPremiumSimulated => 'Yearly Premium (Simulated)';
+
+  @override
+  String get monthlyPremiumSimulated => 'Monthly Premium (Simulated)';
+
+  @override
+  String get subscriptionAutoRenewalNote =>
+      'Subscription automatically renews. You can cancel anytime.';
+
+  @override
+  String get sessionNotFound => 'User session not found. Please log in again.';
+
+  @override
+  String get upgradeToPremiumTitle => 'Upgrade to Finarcast Premium';
+
+  @override
+  String get yearlyPremiumSimulatedPrice => '\$39.99 / year';
+
+  @override
+  String get yearlyPremiumSimulatedSubtitle =>
+      '\$3.33/month • 7 days free trial';
+
+  @override
+  String get monthlyPremiumSimulatedPrice => '\$4.99 / month';
+
+  @override
+  String get currencyTRY => 'Turkish Lira';
+
+  @override
+  String get currencyUSD => 'US Dollar';
+
+  @override
+  String get currencyEUR => 'Euro';
+
+  @override
+  String get currencyGBP => 'British Pound';
+
+  @override
+  String get currencyJPY => 'Japanese Yen';
+
+  @override
+  String get currencyKRW => 'Korean Won';
+
+  @override
+  String get currencyCNY => 'Chinese Yuan';
+
+  @override
+  String get currencyBRL => 'Brazilian Real';
+
+  @override
+  String get currencyCHF => 'Swiss Franc';
+
+  @override
+  String get currencyGOLD => 'Gold (Gram)';
+
+  @override
+  String get currencyGOLDOunce => 'Gold (Ounce)';
+
+  @override
+  String get currencySILVER => 'Silver (Gram)';
+
+  @override
+  String get currencySILVEROunce => 'Silver (Ounce)';
+
+  @override
+  String get currencySAR => 'Saudi Riyal';
+
+  @override
+  String get currencyKWD => 'Kuwaiti Dinar';
+
+  @override
+  String get vaultGuideTitle => 'Vault Guide';
+
+  @override
+  String get vaultGuideContent =>
+      '📊 What Do These Numbers Mean?\n\n• Vault Balance (Wallet): The cumulative net balance of the vault of all-time. It is the sum of the initial vault balance and all transactions recorded since inception.\n\n• Income (This Month): The total estimated income for the current calendar month.\n\n• Expense (This Month): The total estimated expense for the current calendar month.\n\n💡 Important Note:\nSince the main balance is cumulative (all-time), it is normal for it to differ from the net difference of this month\'s income and expense.';
+
+  @override
+  String get gotIt => 'Got it';
+
+  @override
+  String get startDate => 'Start Date';
+
+  @override
+  String get daily => 'Daily';
+
+  @override
+  String get weekdays => 'Weekdays';
+
+  @override
+  String get weekends => 'Weekends';
+
+  @override
+  String everyXDays(Object count) {
+    return 'Every $count days';
+  }
+
+  @override
+  String everyXWeeks(Object count) {
+    return 'Every $count weeks';
+  }
+
+  @override
+  String everyXMonths(Object count) {
+    return 'Every $count months';
+  }
+
+  @override
+  String everyXYears(Object count) {
+    return 'Every $count years';
+  }
+
+  @override
+  String get incomePerMonthLabel => 'INCOME / MO';
+
+  @override
+  String get expensePerMonthLabel => 'EXPENSE / MO';
+
+  @override
+  String get transactionNoteHint => 'Leave a note for the transaction...';
+
+  @override
+  String get weekdaysShort => 'Wkd';
+
+  @override
+  String get weekendsShort => 'Wke';
+
+  @override
+  String get reminderDay => 'Reminder Day';
+
+  @override
+  String get reminderTime => 'Reminder Time';
+
+  @override
+  String get reminder => 'Reminder';
+
+  @override
+  String get sameDay => 'Same Day';
+
+  @override
+  String get oneDayBefore => '1 Day Before';
+
+  @override
+  String get twoDaysBefore => '2 Days Before';
+
+  @override
+  String get threeDaysBefore => '3 Days Before';
+
+  @override
+  String get oneWeekBefore => '1 Week Before';
+
+  @override
+  String get unknown => 'Unknown';
+
+  @override
+  String get syncErrorDisabled => 'Sync is disabled.';
+
+  @override
+  String get syncErrorPremiumRequired =>
+      'Cloud sync feature is only for Premium members.';
+
+  @override
+  String get syncSuccess => 'Synchronization completed.';
+
+  @override
+  String syncSuccessWithErrors(num errorCount) {
+    String _temp0 = intl.Intl.pluralLogic(
+      errorCount,
+      locale: localeName,
+      other: '$errorCount errors occurred during synchronization.',
+      one: '1 error occurred during synchronization.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get syncErrorProjectPaused =>
+      'The cloud database project is paused. Please reactivate the project from your Supabase dashboard.';
+
+  @override
+  String get syncErrorSessionExpired =>
+      'Your session may have expired. Please log out from Settings > Log Out and log in again.';
+
+  @override
+  String get syncErrorNoInternet =>
+      'Could not establish an internet connection. Please check your internet connection.';
+
+  @override
+  String get syncErrorTablesMissing =>
+      'Database tables not found. Please run the setup.sql script in the Supabase SQL Editor.';
+
+  @override
+  String get syncErrorPermissionDenied =>
+      'Database access permission error (RLS). Please ensure that you have configured the RLS policies correctly in your Supabase tables.';
+
+  @override
+  String syncErrorUnexpected(Object error) {
+    return 'Unexpected error: $error';
+  }
+
+  @override
+  String syncErrorPostgrest(Object code, Object message) {
+    return 'Cloud Error ($code): $message';
+  }
+
+  @override
+  String syncErrorAuth(Object code, Object message) {
+    return 'Authentication Error ($code): $message';
+  }
+
+  @override
+  String activeVaults(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Active Vaults',
+      one: 'Active Vault',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get vaultsUpper => 'VAULTS';
+
+  @override
+  String get receiptExpense => 'Receipt Expense';
+
+  @override
+  String get reasonSmartInput => 'Quick Text Input';
+
+  @override
+  String get reasonReceiptScan => 'Receipt Photo';
+
+  @override
+  String get reasonClipboard => 'Clipboard Notification';
+
+  @override
+  String get noteCapturedFromClipboard => 'Captured from Clipboard';
+
+  @override
+  String get notificationChannelName => 'Transaction Reminders';
+
+  @override
+  String get notificationChannelDesc =>
+      'Reminders for recurring payments and incomes';
+
+  @override
+  String get notificationTestChannelName => 'Test Notifications';
+
+  @override
+  String get notificationTestChannelDesc =>
+      'Finarcast notification test channel';
+
+  @override
+  String get notificationTestTitle => 'Finarcast Test Notification';
+
+  @override
+  String get notificationTestBody =>
+      'Great! Your in-app (foreground) notifications are working smoothly.';
+
+  @override
+  String get notificationTestDelayedTitle => 'Finarcast Delayed Test';
+
+  @override
+  String get notificationTestDelayedBody =>
+      'Out-of-app (background) notification test successfully completed!';
+
+  @override
+  String notificationIncomeTitle(Object title) {
+    return 'Income Reminder: $title';
+  }
+
+  @override
+  String notificationExpenseTitle(Object title) {
+    return 'Payment Reminder: $title';
+  }
+
+  @override
+  String notificationBodyAmount(Object amount) {
+    return 'Amount: $amount';
+  }
+
+  @override
+  String notificationBodyDate(Object date) {
+    return 'Date: $date';
+  }
+
+  @override
+  String notificationBodyNote(Object note) {
+    return 'Note: $note';
+  }
+
+  @override
+  String get aiErrorRateLimit =>
+      'You have reached your daily AI analysis limit. Please upgrade to Premium or try again tomorrow.';
+
+  @override
+  String get aiErrorUnauthorized => 'Unauthorized access. Please log in again.';
+
+  @override
+  String get aiErrorQuota =>
+      'AI usage limit reached. Please wait a moment and try again.';
+
+  @override
+  String get aiErrorBusy =>
+      'AI server is busy. Please try again in a few seconds.';
+
+  @override
+  String get aiErrorApiKey =>
+      'AI API Key is invalid or not found. Please check your settings.';
+
+  @override
+  String get aiErrorTimeout =>
+      'Request timed out. Please check your internet connection and try again.';
+
+  @override
+  String aiErrorGeneric(Object error) {
+    return 'AI analysis failed: $error';
+  }
 }

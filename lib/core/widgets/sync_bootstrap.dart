@@ -2,11 +2,13 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../providers/settings_provider.dart';
 import '../services/auth_service.dart';
 import '../services/sync_coordinator.dart';
 import '../services/currency_service.dart';
+import '../services/subscription_service.dart';
 
 class SyncBootstrap extends ConsumerStatefulWidget {
   const SyncBootstrap({super.key, required this.child});
@@ -42,10 +44,16 @@ class _SyncBootstrapState extends ConsumerState<SyncBootstrap>
   }
 
   Future<void> _trySync() async {
-    final isSyncEnabled =
-        ref.read(settingsProvider.select((s) => s.isSyncEnabled));
-    if (!isSyncEnabled) return;
+    final isLoggedIn = Supabase.instance.client.auth.currentUser != null;
+    if (!isLoggedIn) return;
     await SyncCoordinator.syncNow();
+    if (mounted) {
+      await ref.read(settingsProvider.notifier).reloadFromDb();
+    }
+  }
+
+  Future<void> _trySyncSettings() async {
+    await SyncCoordinator.syncSettingsOnLoginOrPro();
     if (mounted) {
       await ref.read(settingsProvider.notifier).reloadFromDb();
     }
@@ -60,8 +68,16 @@ class _SyncBootstrapState extends ConsumerState<SyncBootstrap>
       }
     });
 
+    ref.listen<bool>(subscriptionServiceProvider.select((s) => s.isPro),
+        (prev, next) {
+      if (next && prev != next) {
+        unawaited(_trySyncSettings());
+      }
+    });
+
     ref.listen(authStateProvider, (prev, next) {
       if (next.hasValue && next.value!.session != null) {
+        unawaited(_trySyncSettings());
         unawaited(_trySync());
       }
     });

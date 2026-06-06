@@ -9,16 +9,10 @@ class AppLocalizationsDe extends AppLocalizations {
   AppLocalizationsDe([String locale = 'de']) : super(locale);
 
   @override
-  String get appTitle => 'Finarcast';
-
-  @override
-  String get settings => 'Ayarlar';
+  String get settings => 'Einstellungen';
 
   @override
   String get profile => 'Profil';
-
-  @override
-  String get memberPremium => 'Finarcast Premium Mitglied';
 
   @override
   String get preferences => 'PREFERENZEN & APP';
@@ -27,24 +21,10 @@ class AppLocalizationsDe extends AppLocalizations {
   String get language => 'Sprache';
 
   @override
-  String get aiNotifications => 'KI-Assistent-Benachrichtigungen';
-
-  @override
-  String get dataAndAiSettings => 'DATEN & KI-EINSTELLUNGEN';
-
-  @override
   String get dataRetention => 'Aufbewahrungsfrist';
 
   @override
-  String get dataRetentionDesc =>
-      'Abgelaufene Transaktionen werden archiviert.\nDie KI-Persona verwendet nur Daten innerhalb dieses Zeitraums.';
-
-  @override
-  String get permanentDataDeletion => 'Kalıcı Silme';
-
-  @override
-  String get permanentDataDeletionDesc =>
-      'Bu süreden sonra işlemler veritabanından kalıcı olarak silinir.\nBu işlem geri alınamaz.';
+  String get permanentDataDeletion => 'Endgültige Löschung';
 
   @override
   String get oneMonth => '1 Monat';
@@ -62,16 +42,13 @@ class AppLocalizationsDe extends AppLocalizations {
   String get infinite => 'Unendlich';
 
   @override
-  String get dataManagement => 'DATENVERWALTUNG';
-
-  @override
-  String get driveBackup => 'Drive Backup';
+  String get driveBackup => 'Laufwerksicherung';
 
   @override
   String get exportExcel => 'Excel-Export';
 
   @override
-  String get support => 'SUPPORT';
+  String get support => 'UNTERSTÜTZUNG';
 
   @override
   String get contact => 'Kontakt';
@@ -82,9 +59,6 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String get aboutFinarcast =>
       'Finarcast ist Ihr KI-gestützter Finanzassistent. Er analysiert Ihre Ausgaben, hilft Ihnen beim Festlegen von Sparzielen und optimiert Ihre finanzielle Zukunft.';
-
-  @override
-  String get editProfile => 'Profil bearbeiten';
 
   @override
   String get comingSoon => 'Diese Funktion kommt bald!';
@@ -114,34 +88,10 @@ class AppLocalizationsDe extends AppLocalizations {
   String get analysis => 'Analyse';
 
   @override
-  String get dailySummary => 'Tageszusammenfassung';
-
-  @override
-  String get todaySpending => 'Heutige Ausgaben';
-
-  @override
-  String get weeklyRemaining => 'Wöchentlich verbleibend';
-
-  @override
-  String get recentTransactions => 'Letzte Transaktionen';
-
-  @override
-  String get seeAll => 'Alle anzeigen';
-
-  @override
-  String get myVaults => 'Meine Tresore';
-
-  @override
   String get totalBalance => 'Gesamtsaldo';
 
   @override
   String get addNewVault => 'Neuen Tresor hinzufügen';
-
-  @override
-  String get setGoal => 'Ziel setzen';
-
-  @override
-  String get analyze => 'Analysieren';
 
   @override
   String get addTransaction => 'Transaktion hinzufügen';
@@ -156,13 +106,10 @@ class AppLocalizationsDe extends AppLocalizations {
   String get amount => 'Betrag';
 
   @override
-  String get currency => 'Para Birimi';
+  String get currency => 'Währung';
 
   @override
   String get description => 'Beschreibung';
-
-  @override
-  String get selectVault => 'Tresor wählen';
 
   @override
   String get done => 'Fertig';
@@ -175,12 +122,6 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get newVault => 'Neuer Tresor';
-
-  @override
-  String get monthlyIncome => 'Monatliches Einkommen';
-
-  @override
-  String get monthlyExpense => 'Monatliche Ausgaben';
 
   @override
   String get all => 'Alle';
@@ -213,13 +154,7 @@ class AppLocalizationsDe extends AppLocalizations {
   String get yearly => 'Jährlich';
 
   @override
-  String get noTransactions => 'Noch keine Transaktionen in dieser Kategorie';
-
-  @override
   String get period => 'Zeitraum';
-
-  @override
-  String get remainingTime => 'Verbleibende Zeit';
 
   @override
   String get week => 'Woche';
@@ -237,12 +172,6 @@ class AppLocalizationsDe extends AppLocalizations {
   String get category => 'Kategorie';
 
   @override
-  String get transactionName => 'Transaktionsname';
-
-  @override
-  String get frequency => 'Häufigkeit';
-
-  @override
   String get themeMode => 'Design';
 
   @override
@@ -255,13 +184,7 @@ class AppLocalizationsDe extends AppLocalizations {
   String get themeDark => 'Dunkel';
 
   @override
-  String get colorTheme => 'Renk';
-
-  @override
-  String get colorSystem => 'Sistem';
-
-  @override
-  String get market => 'Supermarkt';
+  String get colorTheme => 'Farbe';
 
   @override
   String get food => 'Lebensmittel';
@@ -270,16 +193,10 @@ class AppLocalizationsDe extends AppLocalizations {
   String get cleaning => 'Reinigung';
 
   @override
-  String get personalCare => 'Körperpflege';
-
-  @override
   String get grocery => 'Lebensmittel/Einkauf';
 
   @override
   String get delivery => 'Lieferung';
-
-  @override
-  String get workspace => 'Büro/Arbeitsplatz';
 
   @override
   String get gas => 'Gas/Kraftstoff';
@@ -297,7 +214,7 @@ class AppLocalizationsDe extends AppLocalizations {
   String get minimum => 'Minimum';
 
   @override
-  String get maximum => 'Maximum';
+  String get maximum => 'Maximal';
 
   @override
   String get dayOfWeek => 'Wochentag';
@@ -306,13 +223,7 @@ class AppLocalizationsDe extends AppLocalizations {
   String get dayOfMonth => 'Tag des Monats';
 
   @override
-  String get dayOfYear => 'Tag des Jahres';
-
-  @override
   String get dayOf => 'Tag von';
-
-  @override
-  String get recurrencePeriod => 'Wiederholungszeitraum';
 
   @override
   String get dining => 'Auswärts essen';
@@ -321,19 +232,10 @@ class AppLocalizationsDe extends AppLocalizations {
   String get restaurant => 'Restaurant';
 
   @override
-  String get fastFood => 'Schnellimbiss';
-
-  @override
   String get cafe => 'Café';
 
   @override
-  String get takeout => 'Zum Mitnehmen';
-
-  @override
   String get rent => 'Miete';
-
-  @override
-  String get homeRent => 'Wohnungsmiete';
 
   @override
   String get office => 'Büro';
@@ -351,16 +253,10 @@ class AppLocalizationsDe extends AppLocalizations {
   String get water => 'Wasser';
 
   @override
-  String get naturalGas => 'Erdgas';
-
-  @override
   String get internet => 'Internet';
 
   @override
   String get phone => 'Telefon';
-
-  @override
-  String get entertainment => 'Unterhaltung';
 
   @override
   String get cinema => 'Kino';
@@ -376,12 +272,6 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get subscription => 'Abonnement';
-
-  @override
-  String get streaming => 'Streaming';
-
-  @override
-  String get musicSubscription => 'Musik';
 
   @override
   String get software => 'Software';
@@ -405,9 +295,6 @@ class AppLocalizationsDe extends AppLocalizations {
   String get dentist => 'Zahnarzt';
 
   @override
-  String get transportation => 'Transport';
-
-  @override
   String get taxi => 'Taxi';
 
   @override
@@ -423,19 +310,7 @@ class AppLocalizationsDe extends AppLocalizations {
   String get fuel => 'Kraftstoff';
 
   @override
-  String get clothing => 'Kleidung';
-
-  @override
-  String get dailyWear => 'Alltagskleidung';
-
-  @override
   String get shoes => 'Schuhe';
-
-  @override
-  String get accessory => 'Accessoire';
-
-  @override
-  String get education => 'Bildung';
 
   @override
   String get course => 'Kurs';
@@ -447,16 +322,7 @@ class AppLocalizationsDe extends AppLocalizations {
   String get school => 'Schule';
 
   @override
-  String get debtPayment => 'Schuldenrückzahlung';
-
-  @override
-  String get creditCard => 'Kreditkarte';
-
-  @override
   String get loan => 'Kredit';
-
-  @override
-  String get personalDebt => 'Persönliche Schulden';
 
   @override
   String get credit => 'Kredit/Schulden';
@@ -465,18 +331,15 @@ class AppLocalizationsDe extends AppLocalizations {
   String get other => 'Sonstiges';
 
   @override
-  String get balanceAdjustment => 'Bakiye Düzeltme';
+  String get balanceAdjustment => 'Saldikorrektur';
 
   @override
   String balanceAdjustmentNote(Object newVal, Object oldVal) {
-    return 'Kasa bakiyesi $oldVal değerinden $newVal değerine eşitlendi.';
+    return 'Tresorsaldo von $oldVal auf $newVal angepasst.';
   }
 
   @override
   String get salary => 'Gehalt';
-
-  @override
-  String get mainSalary => 'Hauptgehalt';
 
   @override
   String get bonus => 'Bonus';
@@ -485,19 +348,10 @@ class AppLocalizationsDe extends AppLocalizations {
   String get dividend => 'Dividende';
 
   @override
-  String get extraIncome => 'Zusatzeinkommen';
-
-  @override
   String get freelance => 'Freiberuflich';
 
   @override
-  String get partTime => 'Teilzeit';
-
-  @override
   String get commission => 'Provision';
-
-  @override
-  String get investmentReturn => 'Investitionsrendite';
 
   @override
   String get stock => 'Aktien';
@@ -509,46 +363,19 @@ class AppLocalizationsDe extends AppLocalizations {
   String get interest => 'Zinsen';
 
   @override
-  String get scholarshipLoan => 'Stipendium/Kredit';
-
-  @override
   String get scholarship => 'Stipendium';
 
   @override
   String get sale => 'Verkauf';
 
   @override
-  String get onlineSale => 'Online-Verkauf';
-
-  @override
-  String get physicalSale => 'Physischer Verkauf';
-
-  @override
-  String get rentalIncome => 'Mieteinnahmen';
-
-  @override
-  String get officeIncome => 'Büroeinnahmen';
-
-  @override
   String get gift => 'Geschenk';
-
-  @override
-  String get vaultOrGroup => 'Tresor oder Gruppe';
 
   @override
   String get cancel => 'Abbrechen';
 
   @override
-  String get generalBalance => 'Gesamtsaldo';
-
-  @override
   String get everyDay => 'Jeden Tag';
-
-  @override
-  String get every2Days => 'Alle 2 Tage';
-
-  @override
-  String get every3Days => 'Alle 3 Tage';
 
   @override
   String get everyWeek => 'Jede Woche';
@@ -566,19 +393,7 @@ class AppLocalizationsDe extends AppLocalizations {
   String get threeDays => '3 Tage';
 
   @override
-  String get twoWeeks => '2 Wochen';
-
-  @override
-  String get threeWeeks => '3 Wochen';
-
-  @override
   String get flexibleAmount => 'Flexibler Betrag';
-
-  @override
-  String get singleAmount => 'Einzelner Betrag';
-
-  @override
-  String get advancedOptions => 'Erweiterte Optionen';
 
   @override
   String get monday => 'Montag';
@@ -641,22 +456,7 @@ class AppLocalizationsDe extends AppLocalizations {
   String get selectDate => 'Datum wählen';
 
   @override
-  String get selectDay => 'Tag wählen';
-
-  @override
-  String get financialIdentity => 'Deine Finanzidentität';
-
-  @override
-  String get setTarget => 'Ziel festlegen';
-
-  @override
   String get allVaults => 'Alle Tresore';
-
-  @override
-  String get hidePreselect => 'Vorauswahl ausblenden';
-
-  @override
-  String get showPreselect => 'Vorauswahl anzeigen';
 
   @override
   String get items => 'Posten';
@@ -668,184 +468,97 @@ class AppLocalizationsDe extends AppLocalizations {
   String get incomes => 'EINKOMMEN';
 
   @override
-  String get doNotTouch => 'Nicht anfassen';
-
-  @override
-  String get changeable => 'Veränderbar';
-
-  @override
-  String get excellent => 'AUSGEZEICHNET';
-
-  @override
-  String get analysisResult => 'ANALYSEERGEBNIS';
-
-  @override
-  String get onTrackMessage => 'Du bist auf Kurs';
-
-  @override
-  String get savingsNeeded => 'Sparen erforderlich';
-
-  @override
   String get currentBalance => 'Aktueller Saldo';
-
-  @override
-  String get targetGap => 'Ziellücke';
-
-  @override
-  String get currentSurplus => 'Aktueller Überschuss';
-
-  @override
-  String get requiredMonthlySavings => 'Erforderliche monatliche Ersparnis';
 
   @override
   String get score => 'BEWERTUNG';
 
   @override
-  String get currentSavings => 'Deine aktuellen Ersparnisse';
-
-  @override
-  String get aiSavingsTarget => 'KI-Sparziel';
-
-  @override
-  String get remainingGap => 'Verbleibende Lücke';
-
-  @override
-  String get dailyAiQuotaFull => 'Tägliches KI-Kontingent erreicht';
-
-  @override
-  String get noInternetConnection => 'Keine Internetverbindung';
-
-  @override
-  String get aiApiError => 'KI-API-Fehler';
-
-  @override
-  String get aiCoachSuggestion => 'KI-COACH-EMPFEHLUNG';
-
-  @override
-  String get cutbackPlan => 'SPARPLAN';
-
-  @override
   String get no => 'Nein';
-
-  @override
-  String get recentAnalyses => 'Letzte Analysen';
 
   @override
   String get vault => 'Tresor';
 
   @override
-  String get vaultDetail => 'Kasa Detayı';
+  String get vaultDetail => 'Tresordetail';
 
   @override
-  String get managePanel => 'Paneli Yönet';
+  String get vaultNameHint => 'Tresorname (z. B. Einsparungen)';
 
   @override
-  String get vaultNameHint => 'Kasa Adı (örn. Birikim)';
+  String get initialBalance => 'Anfangsbilanz';
 
   @override
-  String get initialBalance => 'Başlangıç Bakiyesi';
+  String get createVault => 'VAULT ERSTELLEN';
 
   @override
-  String get createVault => 'Kasa Oluştur';
+  String get transactions => 'Transaktionen';
 
   @override
-  String get transactions => 'İşlemler';
+  String get manage => 'Leiten';
 
   @override
-  String get manage => 'Yönet';
-
-  @override
-  String get averageMonthlyLoad => 'AYLIK ORTALAMA YÜK';
-
-  @override
-  String get noTransactionsInVault => 'Bu kasada işlem bulunmuyor.';
-
-  @override
-  String get manageTransactionsInVault => 'Kasadaki İşlemleri Yönet';
-
-  @override
-  String get deleteVault => 'Kasayı Sil';
+  String get deleteVault => 'VAULT LÖSCHEN';
 
   @override
   String deleteVaultConfirm(String name) {
-    return '\"$name\" kasasını silmek istediğinize emin misiniz? Bu işlem geri alınamaz.';
+    return 'Sind Sie sicher, dass Sie den Tresor \" $name \" löschen möchten? Diese Aktion kann nicht rückgängig gemacht werden.';
   }
 
   @override
-  String get gold => 'ALTIN';
+  String get gold => 'GOLD';
 
   @override
-  String get amountNotEntered => 'TUTAR GİRİLMEDİ';
+  String get amountNotEntered => 'NICHT EINGEGEBENER BETRAG';
 
   @override
-  String get addAmountByEditing => 'Düzenleyerek tutar ekleyin';
+  String get addAmountByEditing => 'Betrag durch Bearbeiten hinzufügen';
 
   @override
-  String get added => 'Eklendi';
+  String get added => 'Hinzugefügt';
 
   @override
-  String get endDate => 'Bitiş Tarihi';
+  String get endDate => 'Enddatum';
 
   @override
-  String get occurred => 'Gerçekleşen';
+  String get occurred => 'Stattgefunden';
 
   @override
-  String get remainingCount => 'Kalan Sayısı';
+  String get remainingCount => 'Verbleibende Anzahl';
 
   @override
   String times(num count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count Kez',
-      one: '1 Kez',
+      other: '$count Mal',
+      one: '1 Mal',
     );
     return '$_temp0';
   }
 
   @override
-  String get note => 'Not';
+  String get note => 'Hinweis';
 
   @override
-  String get indefinitely => 'Sürekli';
+  String get indefinitely => 'Unbestimmt';
 
   @override
   String dayOfMonthOrdinal(Object day) {
-    return 'Ayın $day\'i';
+    return 'Tag $day des Monats';
   }
 
   @override
-  String get everyWeekDetailed => 'Her hafta';
+  String get everyWeekDetailed => 'Jede Woche';
 
   @override
-  String get everyMonthDetailed => 'Her ay';
+  String get everyMonthDetailed => 'Jden Monat';
 
   @override
-  String get everyYearDetailed => 'Her yıl';
+  String get everyYearDetailed => 'Jährlich';
 
   @override
-  String get every2WeeksDetailed => '2 haftada bir';
-
-  @override
-  String get every3WeeksDetailed => '3 haftada bir';
-
-  @override
-  String get every3MonthsDetailed => '3 ayda bir';
-
-  @override
-  String get every6MonthsDetailed => '6 ayda bir';
-
-  @override
-  String get everyDayDetailed => 'Her gün';
-
-  @override
-  String get every2DaysDetailed => '2 günde bir';
-
-  @override
-  String get every3DaysDetailed => '3 günde bir';
-
-  @override
-  String get allLabel => 'Alle';
+  String get everyDayDetailed => 'Jeden Tag';
 
   @override
   String get custom => 'Benutzerdefiniert';
@@ -854,25 +567,10 @@ class AppLocalizationsDe extends AppLocalizations {
   String get status => 'Status';
 
   @override
-  String get approved => 'Genehmigt';
-
-  @override
-  String get rejected => 'Abgelehnt';
-
-  @override
   String get pending => 'Ausstehend';
 
   @override
-  String get visibilityManagement => 'Sichtbarkeitsverwaltung';
-
-  @override
-  String get editTransaction => 'Transaktionsdetails aktualisieren';
-
-  @override
   String get removeFromVault => 'Aus Tresor entfernen';
-
-  @override
-  String get removeFromVaultDesc => 'Transaktion kehrt zum Haupttresor zurück';
 
   @override
   String get permanentDelete => 'Dauerhaft löschen';
@@ -884,141 +582,10 @@ class AppLocalizationsDe extends AppLocalizations {
   String get yes => 'Ja';
 
   @override
-  String get groupNameHint => 'Gruppenname...';
-
-  @override
-  String transactionCount(num count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: '$count Transaktionen',
-      one: '1 Transaktion',
-    );
-    return '$_temp0';
-  }
-
-  @override
-  String get noRemainingTransactions =>
-      'Keine weiteren Transaktionen zum Hinzufügen vorhanden.';
-
-  @override
-  String get editTransactionDesc => 'Transaktionsdetails aktualisieren';
-
-  @override
-  String get visibilityDesc =>
-      'Wählen Sie aus, welche Gruppen oder Transaktionen auf dem Startbildschirm angezeigt werden.';
-
-  @override
-  String get vaultsAndGroups => 'Tresore & Gruppen';
-
-  @override
-  String get individualTransactions => 'Einzeltransaktionen';
-
-  @override
-  String get analyzingFinancialIdentity =>
-      'Deine Finanzidentität wird analysiert...';
-
-  @override
-  String get financialIdentityHint =>
-      'Deine Finanzidentität wird hier angezeigt, wenn du eine Analyse durchführst.';
-
-  @override
-  String get targetDateLabel => 'Zieldatum:';
-
-  @override
-  String get scopeLabel => 'Umfang:';
-
-  @override
-  String get preselectHint => 'Elemente vorauswählen (optional)';
-
-  @override
-  String get noItemsToAnalyze =>
-      'Keine Transaktionen gefunden, die bis zum gewählten Datum wirksam wären.';
-
-  @override
-  String itemsToAnalyze(num count, Object months) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other:
-          '$count Posten, die bis zum Zieldatum ($months Monate) wirksam werden.',
-      one: '1 Posten, der bis zum Zieldatum ($months Monate) wirksam wird.',
-    );
-    return '$_temp0';
-  }
-
-  @override
-  String get budgetNotFeasible =>
-      'Dieses Ziel kann mit deinem aktuellen flexiblen Budget nicht vollständig erreicht werden. Erwäge eine Verlängerung der Dauer oder eine Erhöhung des Einkommens.';
-
-  @override
-  String get financialIdentityUpdated =>
-      'Großartig! Deine Finanzidentität wurde aktualisiert und die Analyse gespeichert.';
-
-  @override
-  String get feedbackMemoized =>
-      'In Ordnung, diese Präferenzen wurden gespeichert. Für die nächste Analyse werden andere Vorschläge gemacht.';
-
-  @override
-  String get excludedCategories => 'Ausgeschlossene Kategorien:';
-
-  @override
-  String newFrequency(Object frequency) {
-    return 'Neue Häufigkeit: $frequency';
-  }
-
-  @override
-  String get doYouLikeThisSuggestion => 'Gefällt dir dieser Vorschlag?';
-
-  @override
-  String get yesILikeIt => 'Ja, das gefällt mir';
-
-  @override
-  String targetAmountLabel(Object amount) {
-    return '$amount Ziel';
-  }
-
-  @override
-  String weeksToTargetLabel(num count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: '$count Wochen',
-      one: '1 Woche',
-    );
-    return '$_temp0';
-  }
-
-  @override
-  String monthsToTargetLabel(num count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: '$count Monate',
-      one: '1 Monat',
-    );
-    return '$_temp0';
-  }
-
-  @override
-  String yearsToTargetLabel(num count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: '$count Jahre',
-      one: '1 Jahr',
-    );
-    return '$_temp0';
-  }
-
-  @override
   String get minAmount => 'Min.';
 
   @override
   String get maxAmount => 'Max.';
-
-  @override
-  String get limitedTotal => 'Gesamt';
 
   @override
   String get netBalance => 'Netto-Saldo';
@@ -1030,46 +597,19 @@ class AppLocalizationsDe extends AppLocalizations {
   String get worstCase => 'Worst-Case';
 
   @override
-  String get layoutAndSorting => 'Layout & Sortierung';
-
-  @override
-  String get layout1 => '1er-Layout';
-
-  @override
-  String get layout2 => '2er-Layout';
-
-  @override
-  String get layout3 => '3er-Layout';
-
-  @override
-  String get layout4 => '4er-Layout';
-
-  @override
-  String get moveForward => 'Nach vorne';
-
-  @override
-  String get moveBackward => 'Nach hinten';
-
-  @override
   String get selectCurrency => 'Währung wählen';
 
   @override
-  String get membershipPlan => 'Üyelik Planı';
+  String get upgrade => 'Upgrade';
 
   @override
-  String get upgrade => 'Yükselt';
-
-  @override
-  String get auto => 'OTOMATİK';
+  String get auto => 'AUTO';
 
   @override
   String get max => 'MAX';
 
   @override
   String get zero => '0';
-
-  @override
-  String get aiMode => 'AI Mode';
 
   @override
   String get addCustomCategory => 'Neu hinzufügen';
@@ -1085,759 +625,1408 @@ class AppLocalizationsDe extends AppLocalizations {
       'Möchten Sie diese benutzerdefinierte Kategorie wirklich löschen?';
 
   @override
-  String get dashboard => 'Dashboard';
+  String get dashboard => 'Armaturenbrett';
 
   @override
-  String get library => 'Kütüphane';
+  String get library => 'Bibliothek';
 
   @override
-  String get dashboardEmpty => 'Dashboard şu an boş.';
+  String get pageLabel => 'Seit';
 
   @override
-  String get libraryEmpty => 'Kütüphane şu an boş.';
+  String get historyTitle => 'Transaktionsverlauf';
 
   @override
-  String get pageLabel => 'Sayfa';
+  String get radarTitle => 'Spending-Radar';
 
   @override
-  String get sizeLabel => 'Boyut';
+  String get giantsTitle => 'Ausgabengiganten';
 
   @override
-  String widgetAdded(String name) {
-    return '$name panoya eklendi!';
-  }
+  String get dailyLimit => 'Tageslimite';
 
   @override
-  String get historyTitle => 'İşlem Geçmişi';
+  String get spendableRemaining => 'Verbleibend auszahlbar';
 
   @override
-  String get radarTitle => 'Harcama Radarı';
+  String get giantsWait => 'Warten auf Ausgabenverteilung';
 
   @override
-  String get giantsTitle => 'Harcama Devleri';
+  String get weeklyShort => 'W';
 
   @override
-  String get quickActionTitle => 'Hızlı İşlem';
-
-  @override
-  String get vaultStatusTitle => 'Kasa Durumları';
-
-  @override
-  String get dailyBudgetTitle => 'Günlük Bütçe';
-
-  @override
-  String get dailyLimit => 'GÜNLÜK LİMİT';
-
-  @override
-  String get spendableRemaining => 'Harcanabilir Kalan';
-
-  @override
-  String get giantsWait => 'Harcama Dağılımı Bekleniyor';
-
-  @override
-  String get weeklyShort => 'H';
-
-  @override
-  String get monthlyShort => 'A';
+  String get monthlyShort => 'M';
 
   @override
   String get yearlyShort => 'Y';
 
   @override
-  String get newLabel => 'YENİ';
+  String get newLabel => 'NEU';
 
   @override
-  String get today => 'Bugün';
+  String get today => 'Heute';
 
   @override
-  String get yesterday => 'Dün';
+  String get yesterday => 'Gestern';
+
+  @override
+  String get tomorrow => 'Morgen';
 
   @override
   String daysAgo(int count) {
-    return '$count Gün Önce';
+    return '$count Vor Tagen';
   }
 
   @override
   String weeksAgo(int count) {
-    return '$count Hafta Önce';
+    return '$count Vor Wochen';
   }
 
   @override
   String monthsAgo(int count) {
-    return '$count Ay Önce';
+    return '$count Vor Monaten';
   }
 
   @override
-  String get historyEmpty => 'İşlem Geçmişi Henüz Boş';
+  String get historyEmpty => 'Noch keine Transaktionshistorie';
 
   @override
-  String get upcomingPaymentsNotFound => 'Yaklaşan Ödeme Bulunmadı';
+  String get upcomingPaymentsNotFound => 'Keine anstehenden Zahlungen gefunden';
 
   @override
-  String get transaction => 'İşlem';
+  String get transaction => 'Vorgang';
 
   @override
-  String get membership => 'ÜYELİK';
+  String get membership => 'MITGLIEDER';
 
   @override
-  String get currentPlan => 'Mevcut Plan';
+  String get restorePurchases => 'Käufe wiederherstellen';
 
   @override
-  String get manageSubscription => 'Üyeliği Yönet';
+  String get freePlan => 'Kostenloser Plan';
 
   @override
-  String get restorePurchases => 'Satın Almaları Geri Yükle';
+  String get upgradeToPro => 'Auf Premium upgraden';
 
   @override
-  String get freePlan => 'Ücretsiz Plan';
+  String get unlimitedVaults => 'Unbegrenzte Tresore';
 
   @override
-  String get proPlan => 'Finarcast Premium';
+  String get active => 'Aktiv';
 
   @override
-  String get upgradeToPro => 'Premium\'a Yükselt';
+  String get inactive => 'Inaktiv';
 
   @override
-  String get proFeatures => 'Premium Özellikleri';
+  String get notifications => 'Benachrichtigungen';
 
   @override
-  String get unlimitedVaults => 'Sınırsız Kasa';
+  String get disabled => 'Deaktiviert';
 
   @override
-  String get aiInsights => 'Gelişmiş AI Analizleri';
+  String get monthlyNetBalance => 'MONATLICHER NETTOSALDO';
 
   @override
-  String get prioritySupport => 'Öncelikli Destek';
+  String get savingsRate => 'Ersparnisse';
 
   @override
-  String get subscriptionStatus => 'Üyelik Durumu';
+  String get yearlyProjection => 'JAHRESPROJEKTION';
 
   @override
-  String get active => 'Aktif';
+  String get topExpense => 'TOP-AUSGABEN';
 
   @override
-  String get inactive => 'Aktif Değil';
+  String get topIncome => 'TOP-EINKOMMEN';
 
   @override
-  String get notifications => 'Bildirimler';
+  String get transactionBreakdown => 'TRANSAKTIONSAUFSCHLÜSSELUNG';
 
   @override
-  String get disabled => 'Kapalı';
+  String get incomeCount => 'Erträge';
 
   @override
-  String get financialOverview => 'FİNANSAL ÖZET';
+  String get expenseCount => 'Ausgaben';
 
   @override
-  String get monthlyNetBalance => 'AYLIK NET BAKİYE';
+  String get scenarioAnalysis => 'Scenario analysis';
 
   @override
-  String get savingsRate => 'TASARRUF ORANI';
+  String get monthlyBest => 'MONATLICHE BESTZEIT';
 
   @override
-  String get yearlyProjection => 'YILLIK PROJEKSİYON';
+  String get monthlyWorst => 'MONATLICHES SCHLIMMSTES';
 
   @override
-  String get topExpense => 'EN BÜYÜK GİDER';
+  String get yearlyBest => 'JÄHRLICH BEST';
 
   @override
-  String get topIncome => 'EN BÜYÜK GELİR';
+  String get yearlyWorst => 'JÄHRLICH SCHLECHTESTE';
 
   @override
-  String get transactionBreakdown => 'İŞLEM DAĞILIMI';
-
-  @override
-  String get incomeCount => 'Gelir';
-
-  @override
-  String get expenseCount => 'Gider';
-
-  @override
-  String get scenarioAnalysis => 'SENARYO ANALİZİ';
-
-  @override
-  String get monthlyBest => 'AYLIK EN İYİ';
-
-  @override
-  String get monthlyWorst => 'AYLIK EN KÖTÜ';
-
-  @override
-  String get yearlyBest => 'YILLIK EN İYİ';
-
-  @override
-  String get yearlyWorst => 'YILLIK EN KÖTÜ';
-
-  @override
-  String get noRecurring => 'Tekrarlayan işlem yok';
-
-  @override
-  String get perMonth => '/ay';
-
-  @override
-  String get perYear => '/yıl';
+  String get perMonth => '/Mo';
 
   @override
   String itemCount(int count) {
-    return '$count Kalem';
+    return '$count Artikel';
   }
 
   @override
-  String get authEmailRequired => 'Lütfen e-posta adresinizi girin.';
+  String get authEmailRequired => 'Bitte gib deine E-Mail-Adresse ein.';
 
   @override
-  String get authEmailInvalid => 'Lütfen geçerli bir e-posta adresi girin.';
+  String get authEmailInvalid =>
+      'Bitte geben Sie eine gültige E-Mail-Adresse an.';
 
   @override
-  String get authPasswordRequired => 'Lütfen şifrenizi girin.';
+  String get authPasswordRequired => 'Bitte gib Dein Passwort ein.';
 
   @override
   String get authPasswordTooShort =>
-      'Şifreniz en az 6 karakterden oluşmalıdır.';
+      'Das Passwort muss aus mindestens 6 Zeichen bestehen.';
 
   @override
-  String get authConfirmPasswordRequired => 'Lütfen şifrenizi tekrar girin.';
+  String get authConfirmPasswordRequired =>
+      'Bitte gib Dein Passwort noch einmal ein.';
 
   @override
   String get authPasswordsDoNotMatch =>
-      'Girdiğiniz şifreler birbiriyle eşleşmiyor.';
+      'Die Passwörter, die Sie eingegeben haben, stimmen nicht überein.';
 
   @override
-  String get authUsernameRequired => 'Lütfen bir kullanıcı adı belirleyin.';
+  String get authUsernameRequired =>
+      'Bitte wählen Sie einen anderen Benutzernamen.';
 
   @override
   String get authUsernameTooShort =>
-      'Kullanıcı adı en az 3 karakterden oluşmalıdır.';
+      'Der Benutzername muss mindestens 3 Zeichen lang sein';
 
   @override
   String get authUsernameInvalid =>
-      'Kullanıcı adı yalnızca harf, rakam ve alt çizgi (_) içerebilir.';
+      'Der Benutzername darf nur Buchstaben, Zahlen und Unterstriche (_) enthalten.';
 
   @override
-  String get authUsernameTaken => 'Bu kullanıcı adı zaten alınmış.';
+  String get authUsernameTaken =>
+      'Dieser Nutzername wurde bereits von einer anderen Person verwendet.';
 
   @override
   String get authEmailNotConfirmed =>
-      'E-posta adresiniz henüz doğrulanmamış. Lütfen e-postanıza gönderilen doğrulama kodunu girin veya tekrar kod isteyin.';
+      'Ihre E-Mail-Adresse ist noch nicht verifiziert. Bitte geben Sie den an Ihre E-Mail gesendeten Bestätigungscode ein oder fordern Sie einen neuen an.';
 
   @override
   String get authInvalidCredentials =>
-      'E-posta adresiniz veya şifreniz hatalı.';
+      'E-Mail-Adresse oder Passwort nicht korrekt.';
 
   @override
   String get authEmailExists =>
-      'Bu e-posta adresiyle zaten bir kayıtlı hesap bulunuyor.';
+      'Ein Account mit dieser E-Mail-Adresse existiert bereits.';
 
   @override
   String get authWeakPassword =>
-      'Şifreniz çok zayıf. Lütfen en az 6 karakterli daha güçlü bir şifre girin.';
+      'Ihr Passwort ist zu schwach. Bitte geben Sie ein stärkeres Passwort mit mindestens 6 Zeichen ein.';
 
   @override
-  String get authOtpExpired =>
-      'Doğrulama kodunun süresi dolmuş. Lütfen yeni bir kod isteyin.';
-
-  @override
-  String get authBadCode => 'Girdiğiniz doğrulama kodu hatalı veya geçersiz.';
+  String get authBadCode =>
+      'Der Prüfcode, den Sie eingegeben haben, ist nicht korrekt.';
 
   @override
   String get authSignupDisabled =>
-      'Yeni kullanıcı kaydı şu anda devre dışıdır. Lütfen yöneticiyle iletişime geçin.';
+      '** Die Benutzerregistrierung ist derzeit deaktiviert. Bitte kontaktiere den Seiten-Administrator. **';
 
   @override
   String get authRateLimitExceeded =>
-      'Çok fazla istek gönderildi. E-posta limitini aştınız, lütfen bir süre bekleyip tekrar deneyin.';
+      'Zu viele Anfragen gesendet. E-Mail-Ratenlimit überschritten, bitte versuchen Sie es in Kürze erneut.';
 
   @override
-  String get authOtpRequired => 'Lütfen gelen 6 haneli doğrulama kodunu girin.';
+  String get authOtpRequired =>
+      'Bitte geben Sie den 6-stelligen Verifizierungscode ein.';
 
   @override
-  String get authOtpSent => 'Yeni doğrulama kodu e-postanıza gönderildi.';
+  String get authOtpSent =>
+      'Ein neuer Verifizierungscode wurde an Ihre E-Mail gesendet.';
 
   @override
   String get authRegistrationSuccess =>
-      'Kayıt başarılı! Lütfen e-postanıza gelen doğrulama kodunu girin.';
+      'Registrierung erfolgreich! Bitte geben Sie den an Ihre E-Mail-Adresse gesendeten Bestätigungscode ein.';
 
   @override
-  String get authVerificationCode => 'Doğrulama Kodu';
+  String get authVerificationCode => 'Bestätigungscode';
 
   @override
   String authVerificationDesc(String email) {
-    return 'Kayıt işlemini tamamlamak için $email adresine gönderilen doğrulama kodunu girin.';
+    return 'Gib den Verifizierungscode ein, der an $email gesendet wurde, um die Registrierung abzuschließen.';
   }
 
   @override
-  String get authVerifyCode => 'Kodu Doğrula';
+  String get authVerifyCode => 'Code bestätigen';
 
   @override
   String authResendCodeCountdown(int seconds) {
-    return 'Kodu Tekrar Gönder ($seconds sn)';
+    return 'Code erneut senden ( $seconds s)';
   }
 
   @override
-  String get authResendCode => 'Kodu Tekrar Gönder';
+  String get authResendCode => 'Code erneut senden';
 
   @override
-  String get authGoBack => 'Geri Dön';
+  String get authGoBack => 'Geh zurück';
 
   @override
-  String get authWelcome => 'Hoş Geldiniz';
+  String get authWelcome => 'Willkommen';
 
   @override
   String get authLoginSubtitle =>
-      'Hesabınıza giriş yaparak finanslarınıza hükmedin.';
+      'Übernehmen Sie die Kontrolle über Ihre Finanzen, indem Sie sich in Ihr Konto einloggen.';
 
   @override
-  String get authEmail => 'E-posta';
+  String get authEmail => 'Mail';
 
   @override
-  String get authPassword => 'Şifre';
+  String get authPassword => 'Kennwort';
 
   @override
-  String get authForgotPassword => 'Şifremi Unuttum';
+  String get authForgotPassword => 'Passwort vergessen';
 
   @override
-  String get authLogin => 'Giriş Yap';
+  String get authLogin => 'Anmelden';
 
   @override
-  String get authOr => 'Veya';
+  String get authOr => 'Oder';
 
   @override
-  String get authGoogleSignIn => 'Google ile Devam Et';
+  String get authGoogleSignIn => 'Mit Google fortfahren';
 
   @override
-  String get authNewAccount => 'Yeni Hesap';
+  String get authNewAccount => 'Neues Konto';
 
   @override
   String get authRegisterSubtitle =>
-      'Finarcast dünyasına katılarak limitlerinizi belirleyin.';
+      'Treten Sie der Finarcast-Welt bei und setzen Sie Ihre Grenzen.';
 
   @override
-  String get authUsername => 'Kullanıcı Adı';
+  String get authUsername => 'Benutzername';
 
   @override
-  String get authConfirmPassword => 'Şifre Tekrar';
+  String get authConfirmPassword => 'Passwort bestätigen';
 
   @override
-  String get authRegister => 'Hemen Katıl';
+  String get authRegister => 'Jetzt mitmachen!';
 
   @override
-  String get authNoAccount => 'Hesabınız yok mu?';
+  String get authNoAccount => 'Sie haben noch kein Benutzerkonto?';
 
   @override
-  String get authAlreadyHaveAccount => 'Zaten hesabınız var mı?';
+  String get authAlreadyHaveAccount => 'Haben Sie ein Konto?';
 
   @override
-  String get authRegisterAction => 'Kayıt Ol';
+  String get authRegisterAction => 'Registrieren';
 
   @override
-  String get authLoginAction => 'Giriş Yap';
+  String get authLoginAction => 'Anmelden';
 
   @override
-  String get authContinueAsGuest => 'Misafir Olarak Devam Et';
+  String get authContinueAsGuest => 'Als Gast fortfahren';
 
   @override
-  String get authPasswordReset => 'Şifre Sıfırlama';
+  String get authPasswordReset => 'Passwort zurücksetzen';
 
   @override
   String get authForgotPasswordDesc =>
-      'Şifrenizi sıfırlamak için e-posta adresinizi girin. Size 6 haneli geçici bir kod göndereceğiz.';
+      'Geben Sie Ihre E-Mail-Adresse ein, um Ihr Passwort zurückzusetzen. Wir senden Ihnen einen 6-stelligen Bestätigungscode zu.';
 
   @override
-  String get authSendCode => 'Kod Gönder';
+  String get authSendCode => 'Code Senden';
 
   @override
-  String get authBackToLogin => 'Giriş Ekranına Dön';
+  String get authBackToLogin => 'Zurück zur Anmeldung';
 
   @override
-  String get authVerificationCodeTitle => 'Onay Kodu';
+  String get authVerificationCodeTitle => 'Bestätigungscode';
 
   @override
   String authForgotPasswordOtpDesc(String email) {
-    return '$email adresine gönderilen 6 haneli doğrulama kodunu girin.';
+    return 'Gib den 6-stelligen Verifizierungscode ein, der an $email gesendet wurde .';
   }
 
   @override
-  String get authChangeEmail => 'E-posta Değiştir';
+  String get authChangeEmail => 'E-Mail ändern';
 
   @override
-  String get authNewPasswordTitle => 'Yeni Şifre';
+  String get authNewPasswordTitle => 'Kennwort - Passwort';
 
   @override
   String get authNewPasswordDesc =>
-      'Hesabınız için en az 6 karakterli güvenli bir şifre belirleyin.';
+      'Legen Sie ein sicheres Passwort von mindestens 6 Zeichen für Ihr Konto fest.';
 
   @override
-  String get authNewPassword => 'Yeni Şifre';
+  String get authNewPassword => 'Kennwort - Passwort';
 
   @override
-  String get authConfirmNewPassword => 'Yeni Şifre Tekrar';
+  String get authConfirmNewPassword => 'Neues Passwort bestätigen';
 
   @override
-  String get authUpdatePassword => 'Şifreyi Güncelle';
+  String get authUpdatePassword => 'Passwort aktualisieren';
 
   @override
   String get authPasswordResetSuccess =>
-      'Şifreniz başarıyla sıfırlandı ve giriş yapıldı.';
+      'Ihr Passwort wurde erfolgreich zurückgesetzt und Sie sind angemeldet.';
 
   @override
-  String get authGoogleError => 'Google Giriş Hatası';
+  String get authGoogleError => 'Google Sign-In-Fehler';
 
   @override
   String get authPasswordDifferentError =>
-      'Yeni şifreniz mevcut şifrenizden farklı olmalıdır.';
+      'Das neue Passwort muss sich vom aktuellen Passwort unterscheiden.';
 
   @override
   String get authUserNotFoundError =>
-      'Bu e-posta adresine kayıtlı bir kullanıcı bulunamadı.';
+      'Ein Nutzer mit dieser E-Mail Adresse konnte nicht gefunden werden.';
 
   @override
   String get dataRetentionDetail =>
-      'Bu süre sonunda işlemleriniz ana listeden gizlenerek arşive taşınır. Arşivlenen veriler bakiyenizi etkilemez ve Dashboard\'u temiz tutar.';
+      'Nach diesem Zeitraum werden Ihre Transaktionen aus der Hauptliste ausgeblendet und in das Archiv verschoben. Archivierte Daten haben keinen Einfluss auf Ihr Guthaben und halten das Dashboard sauber.';
 
   @override
-  String get retentionPeriodLabel => 'Saklama Süresi:';
+  String get retentionPeriodLabel => 'Aufbewahrungsfrist';
 
   @override
-  String get premiumRequired => 'Premium Gerekli';
+  String get premiumRequired => 'Premium erforderlich';
 
   @override
   String get premiumRetentionDesc =>
-      'Veri saklama, arşivleme ve otomatik temizleme kuralları sadece Premium üyelerin erişimine açıktır.';
+      'Regeln für die Aufbewahrung, Archivierung und automatische Löschung von Daten sind nur für Premium-Mitglieder verfügbar.';
 
   @override
-  String get later => 'Daha Sonra';
+  String get later => 'Später';
 
   @override
   String get permanentDeletionDetail =>
-      'Dikkat: Bu süre sonunda verileriniz cihazınızdan tamamen silinir ve bir daha geri getirilemez.';
+      'Warnung: Nach diesem Zeitraum werden Ihre Daten vollständig von Ihrem Gerät gelöscht und können nicht wiederhergestellt werden.';
 
   @override
-  String get purgePeriodLabel => 'Temizleme Süresi:';
+  String get purgePeriodLabel => 'Löschfrist:';
 
   @override
-  String get cloudSync => 'Bulut Eşitleme';
+  String get cloudSync => 'Cloud-Sync';
 
   @override
-  String get loginRequiredLabel => 'Giriş gerekli';
+  String get loginRequiredLabel => 'Anmeldung erforderlich';
 
   @override
   String syncToday(String time) {
-    return 'Bugün $time';
+    return 'Heute um $time';
   }
 
   @override
   String syncYesterday(String time) {
-    return 'Dün $time';
+    return 'Gestern um $time';
   }
 
   @override
-  String get noSyncYet => 'Henüz eşitleme yapılmadı';
+  String get noSyncYet => 'Noch keine Synchronisierung durchgeführt';
 
   @override
-  String get syncStatus => 'Senkronizasyon Durumu';
+  String get syncStatus => 'Synchronisierungsstatus';
 
   @override
   String lastSyncLabel(String time) {
-    return 'Son Eşitleme: $time';
+    return 'Letzte Synchronisierung: $time';
   }
 
   @override
   String get syncBackgroundDesc =>
-      'Verileriniz arka planda otomatik olarak buluta yedeklenmektedir.';
+      'Ihre Daten werden automatisch in der Cloud im Hintergrund gesichert.';
 
   @override
   String get syncCloudDesc =>
-      'Verileriniz Supabase bulut altyapısı ile anlık olarak yedeklenir. Uygulamayı silseniz bile hesabınıza giriş yaparak verilerinizi geri getirebilirsiniz.';
+      'Ihre Daten werden sofort mithilfe der Supabase-Cloud-Infrastruktur gesichert. Auch wenn du die App löschst, kannst du deine Daten wiederherstellen, indem du dich einloggst.';
 
   @override
-  String get syncNow => 'ŞİMDİ SENKRONİZE ET';
+  String get syncNow => 'JETZT SYNCHRONISIEREN';
 
   @override
-  String get syncing => 'VERİLER EŞİTLENİYOR...';
+  String get syncing => 'Synchronisierung von Daten...';
 
   @override
   String syncPartialSuccess(String summary) {
-    return 'Kısmi başarı: $summary';
+    return 'Teilerfolg: $summary';
   }
 
   @override
   String syncFailed(String error) {
-    return 'Eşitleme başarısız oldu. $error';
+    return 'Synchronisierung fehlgeschlagen. $error';
   }
 
   @override
   String get syncConnectionError =>
-      'Lütfen internetinizi veya giriş bilgilerinizi kontrol edin.';
+      'Bitte überprüfen Sie Ihre Internetverbindung oder Ihre Anmeldedaten.';
 
   @override
-  String get loginRequiredTitle => 'Giriş Gerekli';
+  String get loginRequiredTitle => 'Anmeldung erforderlich';
 
   @override
   String get loginRequiredSyncDesc =>
-      'Bulut senkronizasyonunu aktifleştirerek verilerinizi yedeklemek için giriş yapmanız gerekmektedir.';
+      'Sie müssen sich anmelden, um Ihre Daten zu sichern, indem Sie die Cloud-Synchronisierung aktivieren.';
 
   @override
   String get premiumSyncDesc =>
-      'Bulut Eşitleme özelliği Supabase yedekleme altyapısını kullanır ve sadece Premium üyelerin erişimine açıktır.';
+      'Die Cloud-Sync-Funktion verwendet die Supabase-Backup-Infrastruktur und ist nur für Premium-Mitglieder verfügbar.';
 
   @override
-  String get showOnPhone => 'Telefonda Göster';
+  String get showOnPhone => 'Auf Telefon anzeigen/verbergen';
 
   @override
-  String get appOnly => 'Sadece Uygulama İçi';
+  String get appOnly => 'Nur App:';
 
   @override
   String get notificationDesc =>
-      'Hatırlatıcıların sadece uygulama içinde mi saklanacağını yoksa telefonunuzun bildirim panelinde de gösterilip gösterilmeyeceğini belirler. Kapalıyken hatırlatıcılar sessizce uygulama içinde kalır.';
+      'Legt fest, ob Erinnerungen nur in der App gespeichert oder auch im Benachrichtigungsfeld Ihres Telefons angezeigt werden. Wenn diese Option deaktiviert ist, bleiben Erinnerungen stumm in der App.';
 
   @override
-  String get selectMainCurrency => 'Ana uygulama birimini seçin.';
+  String get selectMainCurrency => 'Wählen Sie die Hauptwährung der Anwendung.';
 
   @override
   String get currencyDesc =>
-      'Bu birim tüm uygulama genelinde (Dashboard, Kasalar ve İstatistikler) ana para birimi olarak kullanılır. Tüm varlıklarınız bu birime göre hesaplanır.';
+      'Diese Währung wird in der gesamten App als Hauptwährung verwendet (Dashboard, Tresore und Statistiken). Alle Ihre Vermögenswerte werden auf der Grundlage dieser Währung berechnet.';
 
   @override
-  String get changeCurrency => 'Birimi Değiştir';
+  String get changeCurrency => 'Währung ändern';
 
   @override
   String get exchangeRateNotFoundError =>
-      'Seçilen para birimi için döviz kuru bulunamadı. Lütfen internet bağlantınızı kontrol edip tekrar deneyin.';
+      'Für die ausgewählte Währung wurde kein Wechselkurs gefunden. Bitte überprüfen Sie Ihre Internetverbindung und versuchen Sie es erneut.';
 
   @override
   String get exchangeRatesDownloadFailed =>
-      'Döviz kurları indirilemedi. İnternet bağlantınızı kontrol edin.';
+      'Wechselkurse konnten nicht heruntergeladen werden. Überprüfen Sie Ihre Internetverbindung.';
 
   @override
   String get exchangeRatesCheckError =>
-      'Kurlar kontrol edilirken hata oluştu. Lütfen tekrar deneyin.';
+      'Beim Überprüfen der Raten ist ein Fehler aufgetreten. Bitte versuchen Sie es erneut.';
 
   @override
-  String get exchangeRates => 'Döviz Kurları';
+  String get exchangeRates => 'Wechselkurs';
 
   @override
-  String get baseUnitLira => 'Baz Birim: Türk Lirası';
+  String get baseUnitLira => 'Basiseinheit: Türkische Lira';
 
   @override
   String baseUnitLabel(String currency) {
-    return 'Baz Birim: $currency';
+    return 'Basiseinheit: $currency';
   }
 
   @override
   String lastSyncShort(String time) {
-    return 'SON: $time';
+    return 'ZULETZT: $time';
   }
 
   @override
-  String get updateRatesNow => 'KURLARI ŞİMDİ GÜNCELLE';
+  String get updateRatesNow => 'Tarife aktualisieren';
 
   @override
-  String get updatingRates => 'GÜNCELLENİYOR...';
+  String get updatingRates => 'Aktualisierung wird durchgeführt …';
 
   @override
-  String get exchangeRatesUpdated => 'Kurlar başarıyla güncellendi.';
+  String get exchangeRatesUpdated => 'Wechselkurse erfolgreich aktualisiert.';
 
   @override
   String get exchangeRatesUpdateFailed =>
-      'Güncelleme başarısız. İnternet bağlantınızı kontrol edin.';
+      'Aktualisierung fehlgeschlagen. Überprüfen Sie Ihre Internetverbindung.';
 
   @override
-  String get showLess => 'Daha Az Göster';
+  String get showLess => 'Weniger anzeigen';
 
   @override
-  String get showMore => 'Daha Fazla Göster';
+  String get showMore => 'Mehr anzeigen';
 
   @override
   String get styleLabel => 'Stil';
 
   @override
-  String get styleDesc => 'Kartların ve arka planın görünüm stilini seçin';
+  String get styleDesc =>
+      'Wählen Sie den visuellen Stil der Karten und den Hintergrund';
 
   @override
-  String get styleColor => 'Renkli';
+  String get styleColor => 'Farbig';
 
   @override
-  String get styleColorDesc => 'Uyumlu renkler';
+  String get styleColorDesc => 'Harmonische Farben';
 
   @override
-  String get styleSimple => 'Sade';
+  String get styleSimple => 'Einfach';
 
   @override
-  String get styleSimpleDesc => 'Düz tasarım';
+  String get styleSimpleDesc => 'Flat Design';
 
   @override
   String get premiumStyleDesc =>
-      'Renkli görünüm stili sadece Premium üyelerin erişimine açıktır.';
+      'Farbiger Stil ist nur für Premium-Mitglieder verfügbar.';
 
   @override
   String get premiumColorDesc =>
-      'Özel renk temaları ve gelişmiş gradyanlar sadece Premium üyelerin erişimine açıktır.';
+      'Benutzerdefinierte Farbthemen und erweiterte Farbverläufe sind nur für Premium-Mitglieder verfügbar.';
 
   @override
-  String get paletteArctic => 'Kutup';
+  String get paletteArctic => 'Arktis';
 
   @override
-  String get paletteMint => 'Nane';
+  String get paletteMint => 'Minze';
 
   @override
   String get paletteRose => 'Rose';
 
   @override
-  String get paletteLavender => 'Lavanta';
+  String get paletteLavender => 'Lavendel';
 
   @override
-  String get paletteSahara => 'Sahra';
+  String get paletteSahara => 'Sahara';
 
   @override
-  String get paletteSapphire => 'Safir';
+  String get paletteSapphire => 'Saphir';
 
   @override
-  String get paletteBurgundy => 'Bordo';
+  String get paletteBurgundy => 'Burgundrot';
 
   @override
   String get palettePlatinum => 'Platin';
 
   @override
-  String get yearlyDiscount => 'Yıllık (-%33)';
+  String get yearlyDiscount => 'Jährlich (-33%)';
 
   @override
-  String get comparisonTitle => 'KARŞILAŞTIRMA';
+  String get comparisonTitle => 'ZUM VERGLEICH';
 
   @override
-  String get limitVaults => 'Kasa Sayısı';
+  String get limitVaults => 'Tresor-Limit';
 
   @override
-  String get limitAiAnalysis => 'AI İşlem Asistanı';
+  String get limitAiAnalysis => 'KI-Transaktionsassistent';
 
   @override
-  String get limitCloudSync => 'Bulut Eşitleme';
+  String get limitCloudSync => 'Cloud-Sync';
 
   @override
-  String get limitDataRetention => 'Veri Saklama & Silme';
+  String get limitDataRetention => 'Datenaufbewahrung und -bereinigung';
 
   @override
-  String get limitCustomThemes => 'Özel Temalar';
+  String get limitCustomThemes => 'Individuelle Farbschemas';
 
   @override
-  String get limitAdFree => 'Reklamsız Deneyim';
+  String get limitAdFree => 'Werbefreie Version';
 
   @override
-  String get limitVaultsFree => '2 Kasa';
+  String get limitVaultsFree => '2 Gewölbe';
 
   @override
-  String get limitVaultsPro => 'Sınırsız';
+  String get limitVaultsPro => 'Unbegrenzt';
 
   @override
-  String get basicAnalysis => 'Standart';
+  String get basicAnalysis => 'Standard';
 
   @override
-  String get advancedAnalysis => 'Genişletilmiş';
+  String get advancedAnalysis => 'Erweitert';
 
   @override
-  String get limitDataRetentionPro => 'Özelleştirilebilir';
+  String get limitDataRetentionPro => 'Anpassbarer';
 
   @override
-  String get cancelSubscriptionTest => 'Aboneliği İptal Et (Test)';
+  String get cancelSubscriptionTest => 'Abonnement kündigen (Test)';
 
   @override
-  String get yearlyAccess => 'Yıllık Erişim';
+  String get yearlyAccess => 'JAHRESABO';
 
   @override
-  String get monthlyAccess => 'Aylık Erişim';
+  String get monthlyAccess => 'Monats-zugang';
 
   @override
-  String get yearlyPriceDetail => 'Ayda ₺99\'ye gelir';
+  String get yearlyPriceDetail => 'Kosten ₺ 99/Monat';
 
   @override
-  String get monthlyPriceDetail => 'Her ay yenilenir';
+  String get monthlyPriceDetail => 'Erneuert sich monatlich';
 
   @override
   String get loginRequiredPurchaseDesc =>
-      'Satın alma işlemini tamamlamak için lütfen giriş yapın veya ücretsiz bir hesap oluşturun.';
+      'Bitte loggen Sie sich ein oder erstellen Sie ein kostenloses Konto, um den Kauf abzuschließen.';
 
   @override
-  String get loginOrRegister => 'Giriş Yap / Üye Ol';
+  String get loginOrRegister => 'Anmelden';
 
   @override
-  String get privilegesActive => 'Ayrıcalıklar aktif';
+  String get privilegesActive => 'Privilegien aktiv';
 
   @override
-  String get tapToUnlock => 'Sınırları kaldırmak için dokunun';
+  String get tapToUnlock => 'Tippen, um Limits freizusch';
 
   @override
-  String get sectionMembershipAccount => 'Üyelik ve Hesap';
+  String get sectionMembershipAccount => 'Mitgliedskonto';
 
   @override
-  String get sectionAppearanceStyle => 'Görünüm ve Stil';
+  String get sectionAppearanceStyle => 'Aussehen & Stil';
 
   @override
-  String get sectionDataCloud => 'Veri ve Bulut';
+  String get sectionDataCloud => 'Daten-Cloud';
 
   @override
-  String get sectionSessionSecurity => 'Oturum ve Güvenlik';
+  String get sectionSessionSecurity => 'Sitzung / Sicherheit';
 
   @override
-  String get guestUser => 'Misafir Kullanıcı';
+  String get guestUser => 'Gastbenutzer';
 
   @override
-  String get tapToLogin => 'Giriş yapmak veya kayıt olmak için dokunun';
+  String get tapToLogin => 'Tippen, um sich anzumelden oder zu registrieren';
 
   @override
-  String get changePassword => 'Şifre Değiştir';
+  String get changePassword => 'Passwort ändern';
 
   @override
   String get changePasswordDesc =>
-      'Mevcut şifrenizi doğrulayarak yeni bir şifre belirleyin. Şifreniz en az 6 karakter olmalıdır.';
+      'Bestätigen Sie Ihr aktuelles Passwort, um ein neues Passwort festzulegen. Ihr Passwort muss mindestens 6 Zeichen lang sein.';
 
   @override
-  String get currentPasswordHint => 'Mevcut Şifre';
+  String get currentPasswordHint => 'Aktuelles Passwort';
 
   @override
-  String get newPasswordHint => 'Yeni Şifre';
+  String get newPasswordHint => 'Kennwort - Passwort';
 
   @override
-  String get confirmNewPasswordHint => 'Yeni Şifre Tekrar';
+  String get confirmNewPasswordHint => 'Neues Passwort bestätigen';
 
   @override
-  String get currentPasswordRequired => 'Mevcut şifrenizi girmeniz gerekir.';
+  String get currentPasswordRequired =>
+      'Sie müssen Ihr aktuelles Passwort eingeben.';
 
   @override
-  String get updatePassword => 'Şifreyi Güncelle';
+  String get updatePassword => 'Passwort aktualisieren';
 
   @override
-  String get signOut => 'Çıkış Yap';
+  String get signOut => 'Abmelden';
 
   @override
-  String get logout => 'Oturumu Kapat';
+  String get logout => 'Ausloggen';
 
   @override
-  String get logoutConfirm => 'Oturumu kapatmak istediğinize emin misiniz?';
+  String get logoutConfirm => 'Sind Sie sicher, dass Sie sich abmelden wollen?';
 
   @override
-  String get deleteAccount => 'Hesabımı Sil';
+  String get deleteAccount => 'Account löschen';
 
   @override
-  String get deleteAccountPermanently => 'Hesabımı Kalıcı Olarak Sil';
+  String get deleteAccountPermanently => 'Konto löschen';
 
   @override
   String get deleteAccountConfirmDesc =>
-      'Hesabınızı ve buluttaki tüm verilerinizi kalıcı olarak silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.';
+      'Sind Sie sicher, dass Sie Ihr Konto und alle Daten in der Cloud dauerhaft löschen möchten? Diese Aktion kann nicht rückgängig gemacht werden.';
 
   @override
-  String get reset => 'Sıfırla';
+  String get reset => 'Zurücksetzen';
 
   @override
-  String get resetDataTitle => 'Verileri Sıfırla?';
+  String get resetDataTitle => 'Datensätze zurücksetzen';
 
   @override
   String get resetDataDesc =>
-      'Tüm finansal verileriniz ve ayarlarınız kalıcı olarak silinecek. Bu işlem geri alınamaz.';
+      'Alle Ihre Finanzdaten und Einstellungen werden dauerhaft gelöscht. Diese Aktion kann nicht rückgängig gemacht werden.';
 
   @override
-  String get deleteAll => 'Hepsini Sil';
+  String get deleteAll => 'Alle löschen';
 
   @override
-  String get resetSuccess => 'Tüm veriler ve ayarlar başarıyla sıfırlandı.';
+  String get resetSuccess =>
+      'Alle Daten und Einstellungen wurden erfolgreich zurückgesetzt.';
 
   @override
   String get supportEmailCopied =>
-      'E-posta uygulaması açılamadı. Destek adresi (finarcast.support@gmail.com) kopyalandı.';
+      'E-Mail-Client konnte nicht geöffnet werden. Support-E-Mail (finarcast.support@gmail.com) wurde kopiert.';
+
+  @override
+  String get signInMethod => 'Anmeldemethode';
+
+  @override
+  String errorGeneric(Object error) {
+    return 'Fehler: $error';
+  }
+
+  @override
+  String resetFailed(Object error) {
+    return 'Reset fehlgeschlagen: $error';
+  }
+
+  @override
+  String get criticalDatabaseError => 'Kritischer Datenbankfehler';
+
+  @override
+  String get criticalDatabaseErrorDesc =>
+      'Nicht lesbare/beschädigte Daten in der Anwendungsdatenbank erkannt. Sie können die Datenbank bereinigen und die Anwendung von Grund auf neu starten, indem Sie auf die Schaltfläche unten klicken.';
+
+  @override
+  String get resetDatabaseAndRestart =>
+      'Datenbank zurücksetzen und neu starten';
+
+  @override
+  String get errorDetail => 'Fehlerdetail';
+
+  @override
+  String get unlimitedAccessLimit => 'Unbegrenztes Zugriffslimit';
+
+  @override
+  String get unlimitedAccessLimitDesc =>
+      'Sie haben das Fair-Use-Limit für die Systemsicherheit erreicht. Bitte versuchen Sie es später erneut oder wenden Sie sich an den Support.';
+
+  @override
+  String get standardAccessLimit => 'Standard-Zugriffsbeschränkung';
+
+  @override
+  String get standardAccessLimitDesc =>
+      'Sie haben Ihre tägliche Standard-KI-Analysequote erreicht. Du kannst auf Premium upgraden, um Limits freizuschalten.';
+
+  @override
+  String get upgradeToExtendedAccess => 'Upgrade auf erweiterten Zugriff';
+
+  @override
+  String get loginRequired => 'Anmeldung erforderlich';
+
+  @override
+  String get loginRequiredDesc =>
+      'Sie müssen sich anmelden oder ein Konto erstellen, um den KI-Assistenten und den Ausgaben-Posteingang nutzen zu können.';
+
+  @override
+  String get loginOrSignUp => 'Anmelden / Registrieren';
+
+  @override
+  String get aiAnalyzingExpense => 'KI analysiert Ihre Ausgaben...';
+
+  @override
+  String get draftAddedToInbox =>
+      'Ausgabenentwurf zum Posteingang hinzugefügt.';
+
+  @override
+  String get analysisError =>
+      'Beim Analysieren der Transaktion ist ein Fehler aufgetreten.';
+
+  @override
+  String get scanningReceipt =>
+      'Beleg wird gescannt, Informationen werden extrahiert...';
+
+  @override
+  String get receiptUnreadable => 'Beleg nicht lesbar';
+
+  @override
+  String get receiptUnreadableDesc =>
+      'Im hochgeladenen Bild konnten keine Quittungs- oder Rechnungsdetails erkannt werden.';
+
+  @override
+  String get receiptAddedToInbox =>
+      'Belegdaten erfolgreich zum Posteingang hinzugefügt.';
+
+  @override
+  String get receiptReadError =>
+      'Beleg konnte nicht gelesen werden. Bitte geben Sie die Details manuell ein oder machen Sie ein klareres Foto.';
+
+  @override
+  String get imageUploadError => 'Beim Hochladen ist ein Fehler aufgetreten.';
+
+  @override
+  String get draftDeleted => 'Ausgabenentwurf gelöscht.';
+
+  @override
+  String get transactionProcessedSuccess =>
+      'Transaktion erfolgreich zum Tresor verarbeitet!';
+
+  @override
+  String get transactionApprovalError =>
+      'Beim Genehmigen der Transaktion ist ein Fehler aufgetreten.';
+
+  @override
+  String get smartScanTitle => 'Intelligenter Scan';
+
+  @override
+  String pendingApprovalCount(int count) {
+    return 'TRANSAKTIONEN MIT AUSSTEHENDER GENEHMIGUNG ( $count )';
+  }
+
+  @override
+  String get clearAll => 'Alles löschen';
+
+  @override
+  String get smartInputHint => 'z.B. Starbucks Filterkaffee 120 TL gestern';
+
+  @override
+  String get camera => 'Kamera';
+
+  @override
+  String get gallery => 'Galerie';
+
+  @override
+  String get inboxEmpty => 'Ihr Postfach ist leer';
+
+  @override
+  String get otherCategory => 'Anderes';
+
+  @override
+  String get add => 'HINZUFÜGEN';
+
+  @override
+  String get todayUpper => 'HEUTE';
+
+  @override
+  String get tomorrowUpper => 'ZUKUNFT';
+
+  @override
+  String daysWithName(int count, String dayName) {
+    return '$count TAGE - $dayName';
+  }
+
+  @override
+  String weeksLater(int count) {
+    return '$count WOCHEN SPÄTER';
+  }
+
+  @override
+  String daysCount(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count Tage',
+      one: '1 Tag',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String weeksCount(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count Wochen',
+      one: '1 Woche',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String monthsCount(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count Monate',
+      one: '1 Monat',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String yearsCount(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count Jahre',
+      one: '1 Jahr',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get sharedExpenseAnalyzed =>
+      'Gemeinsame Ausgaben analysiert und dem Posteingang hinzugefügt!';
+
+  @override
+  String get limitExceeded => 'Zulässige Grenze überschritten';
+
+  @override
+  String get selectIcon => 'Symbol Auswählen';
+
+  @override
+  String optionsCount(int count) {
+    return '$count OPTIONEN';
+  }
+
+  @override
+  String get invalidAmountError => 'Gib eine Menge ein!';
+
+  @override
+  String get maxAmountMustBePositive => 'Der Betrag muss größer als 0 sein.';
+
+  @override
+  String get minMustBeLessThanMax =>
+      'Der Mindestbetrag muss kleiner als der Höchstbetrag sein.';
+
+  @override
+  String get selectAtLeastOneVault =>
+      'Bitte wählen Sie mindestens einen Tresor für die Transaktion...';
+
+  @override
+  String get exchangeRatesNotLoaded =>
+      'Wechselkurse werden nicht geladen. Sie müssen Preise aktualisieren, um Transaktionen in verschiedenen Währungen hinzuzufügen/zu aktualisieren.';
+
+  @override
+  String vaultCurrencyRateNotLoaded(String currency) {
+    return 'Wechselkurse werden für die ausgewählte Tresorwährung ( $currency ) nicht geladen. Du musst die Preise aktualisieren.';
+  }
+
+  @override
+  String transactionSaveError(String error) {
+    return 'Beim Speichern der Transaktion ist ein Fehler aufgetreten: $error';
+  }
+
+  @override
+  String get notificationPermissionDenied =>
+      'Benachrichtigungsberechtigung wurde nicht erteilt. Bitte aktivieren Sie es in den Einstellungen.';
+
+  @override
+  String get defaultUser => 'Nutzer';
+
+  @override
+  String get premiumBadge => 'Prämie';
+
+  @override
+  String get email => 'Mail';
+
+  @override
+  String get password => 'Kennwort';
+
+  @override
+  String errorOccurred(String error) {
+    return 'Ein Fehler ist aufgetreten: $error';
+  }
+
+  @override
+  String aboutVersion(String version) {
+    return '$version • Hergestellt mit ❤️';
+  }
+
+  @override
+  String comingSoonDesc(String feature) {
+    return 'Die Funktion $feature wird dir in Kürze zur Verfügung stehen.';
+  }
+
+  @override
+  String get noVaultTransactions => 'Keine Tresortransaktionen gefunden';
+
+  @override
+  String get recurring => 'Wiederkehrend';
+
+  @override
+  String get thisWeek => 'Diese Woche';
+
+  @override
+  String get thisMonth => 'Dieser Monat';
+
+  @override
+  String get thisYear => 'Dieses Jahr';
+
+  @override
+  String vaultLimitReachedDesc(int count) {
+    return 'Du kannst bis zu $count Tresore im kostenlosen Plan erstellen. Sie können zu Premium wechseln, um Limits zu entfernen.';
+  }
+
+  @override
+  String get inAppNotifications => 'In-App-Benachrichtigungen';
+
+  @override
+  String get exchangeRatesNotLoadedVault =>
+      'Wechselkurse werden nicht geladen. Die Tresorwährung konnte nicht geändert werden.';
+
+  @override
+  String get cannotDeleteVault => 'Tresor kann nicht gelöscht werden';
+
+  @override
+  String get cannotDeleteVaultDesc =>
+      'Mindestens ein aktiver Tresor muss in der App verbleiben. Sie können einen weiteren Tresor erstellen und diesen dann löschen.';
+
+  @override
+  String get exchangeRatesNotLoadedNewVault =>
+      'Wechselkurse werden nicht geladen. Sie müssen die Kurse aktualisieren, um einen Tresor in einer anderen Währung zu erstellen.';
+
+  @override
+  String get systemNotificationsDisabled =>
+      'SYSTEMBENACHRICHTIGUNGSBERECHTIGUNGEN AUS! Bitte aktivieren Sie die Benachrichtigungsberechtigungen in Ihren Telefoneinstellungen.';
+
+  @override
+  String get noNotificationHistory => 'Kein Benachrichtigungsverlauf';
+
+  @override
+  String get noNotificationHistoryDesc =>
+      'Es gibt keine Historie von zuvor ausgelösten Transaktionsalarmen.';
+
+  @override
+  String paymentDate(String date) {
+    return 'Zahlung: $date';
+  }
+
+  @override
+  String get loginRequiredForPurchase =>
+      'Bitte loggen Sie sich ein oder erstellen Sie ein kostenloses Konto, um den Kauf abzuschließen.';
+
+  @override
+  String get unlockFinancialPotential =>
+      'Erschließen Sie Ihr finanzielles Potenzial zu 100 %.';
+
+  @override
+  String get aiAnalysis => 'KI-Analyse';
+
+  @override
+  String get aiAnalysisDesc => 'Unbegrenzte und tiefgreifende KI-Analyse.';
+
+  @override
+  String get unlimitedVaultsDesc =>
+      'Erstellen Sie so viele Tresore und Wallets, wie Sie möchten.';
+
+  @override
+  String get cloudSyncDesc =>
+      'Sichern und synchronisieren Sie Ihre Daten sicher.';
+
+  @override
+  String get customThemes => 'Individuelle Farbschemas';
+
+  @override
+  String get customThemesDesc => 'Exklusive Farbpaletten und Hintergrundstile.';
+
+  @override
+  String get zeroAds => 'Keine Werbung';
+
+  @override
+  String get zeroAdsDesc =>
+      'Ununterbrochenes und werbefreies Premium-Erlebnis.';
+
+  @override
+  String get availablePlans => 'Verfügbare Pakete';
+
+  @override
+  String get yearlyPremium => 'Jährliche Prämie';
+
+  @override
+  String get monthlyPremium => 'Monatsbeitrag';
+
+  @override
+  String get bestValueFreeTrialSubtitle =>
+      'Bestes Preis-Leistungs-Verhältnis • 7 Tage kostenlos testen';
+
+  @override
+  String get cancelAnytime => 'Jederzeit kündbar';
+
+  @override
+  String get bestValue => 'BESTES PREIS-LEISTUNGS-VERHÄLTNIS';
+
+  @override
+  String get yearlyPremiumSimulated => 'Jährliche Prämie (simuliert)';
+
+  @override
+  String get monthlyPremiumSimulated => 'Monatliche Prämie (simuliert)';
+
+  @override
+  String get subscriptionAutoRenewalNote =>
+      'Das Abonnement verlängert sich automatisch. Du kannst es jederzeit kündigen.';
+
+  @override
+  String get sessionNotFound =>
+      'Benutzersitzung nicht gefunden. Bitte melden Sie sich erneut an.';
+
+  @override
+  String get upgradeToPremiumTitle => 'Upgrade auf Finarcast Premium';
+
+  @override
+  String get yearlyPremiumSimulatedPrice => '39,99 \$ / Jahr';
+
+  @override
+  String get yearlyPremiumSimulatedSubtitle =>
+      '3,33 \$/Monat • 7 Tage kostenlos testen';
+
+  @override
+  String get monthlyPremiumSimulatedPrice => '4,99 \$/ Monat';
+
+  @override
+  String get currencyTRY => 'Türkische Lira';
+
+  @override
+  String get currencyUSD => 'US-Dollar';
+
+  @override
+  String get currencyEUR => 'Euro';
+
+  @override
+  String get currencyGBP => 'Britisches Pfund';
+
+  @override
+  String get currencyJPY => 'Japanischer Yen';
+
+  @override
+  String get currencyKRW => 'Koreanische Won';
+
+  @override
+  String get currencyCNY => 'Chinesischer Yuan';
+
+  @override
+  String get currencyBRL => 'Brasilianischer Real';
+
+  @override
+  String get currencyCHF => 'Schweizer Franken';
+
+  @override
+  String get currencyGOLD => 'Gold (Gramm)';
+
+  @override
+  String get currencyGOLDOunce => 'Goldunze';
+
+  @override
+  String get currencySILVER => 'Silber (Gramm)';
+
+  @override
+  String get currencySILVEROunce => 'Silberunze';
+
+  @override
+  String get currencySAR => 'Saudischer Riyal';
+
+  @override
+  String get currencyKWD => 'Kuwaitischer Dinar';
+
+  @override
+  String get vaultGuideTitle => 'Tresorführer';
+
+  @override
+  String get vaultGuideContent =>
+      '📊 Was bedeuten diese Zahlen? • Tresorsaldo (Wallet): Der kumulative Nettosaldo des Tresors aller Zeiten. Es ist die Summe des anfänglichen Tresorsaldos und aller seit Auflegung erfassten Transaktionen. • Einkommen (diesen Monat): Das geschätzte Gesamteinkommen für den aktuellen Kalendermonat. • Aufwand (in diesem Monat): Der geschätzte Gesamtaufwand für den aktuellen Kalendermonat. 💡 Wichtiger Hinweis: Da der Hauptsaldo kumulativ (all-time) ist, ist es normal, dass er von der Nettodifferenz der Einnahmen und Ausgaben dieses Monats abweicht.';
+
+  @override
+  String get gotIt => 'Verstanden';
+
+  @override
+  String get startDate => 'Startdatum';
+
+  @override
+  String get daily => 'Täglich';
+
+  @override
+  String get weekdays => 'Wochentags';
+
+  @override
+  String get weekends => 'Wochenenden';
+
+  @override
+  String everyXDays(Object count) {
+    return 'Alle $count Tage';
+  }
+
+  @override
+  String everyXWeeks(Object count) {
+    return 'Alle $count Wochen';
+  }
+
+  @override
+  String everyXMonths(Object count) {
+    return 'Alle $count Monate';
+  }
+
+  @override
+  String everyXYears(Object count) {
+    return 'Alle $count Jahre';
+  }
+
+  @override
+  String get incomePerMonthLabel => 'EINKOMMEN / MO';
+
+  @override
+  String get expensePerMonthLabel => 'AUFWAND / MO';
+
+  @override
+  String get transactionNoteHint =>
+      'Hinterlassen Sie eine Notiz für die Transaktion...';
+
+  @override
+  String get weekdaysShort => 'Wo';
+
+  @override
+  String get weekendsShort => 'Wke';
+
+  @override
+  String get reminderDay => 'Erinnerungstag';
+
+  @override
+  String get reminderTime => 'Erinnerung Zeit';
+
+  @override
+  String get reminder => 'Erinnerung';
+
+  @override
+  String get sameDay => 'Am gleichen Tag';
+
+  @override
+  String get oneDayBefore => '1 Tag zuvor';
+
+  @override
+  String get twoDaysBefore => '2 Tage vorher';
+
+  @override
+  String get threeDaysBefore => '3 Tage zuvor';
+
+  @override
+  String get oneWeekBefore => '1 Woche vorher';
+
+  @override
+  String get unknown => 'Unbekannt';
+
+  @override
+  String get syncErrorDisabled => 'Die Synchronisierung ist nicht aktiviert.';
+
+  @override
+  String get syncErrorPremiumRequired =>
+      'Die Cloud-Synchronisierungsfunktion ist nur für Premium-Mitglieder verfügbar.';
+
+  @override
+  String get syncSuccess => 'Synchronisierung abgeschlossen';
+
+  @override
+  String syncSuccessWithErrors(num errorCount) {
+    String _temp0 = intl.Intl.pluralLogic(
+      errorCount,
+      locale: localeName,
+      other: 'Bei der Synchronisierung sind $errorCount Fehler aufgetreten.',
+      one: 'Bei der Synchronisierung ist 1 Fehler aufgetreten.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get syncErrorProjectPaused =>
+      'Das Cloud-Datenbankprojekt wird angehalten. Bitte reaktivieren Sie das Projekt über Ihr Supabase-Dashboard.';
+
+  @override
+  String get syncErrorSessionExpired =>
+      'Ihre Sitzung ist möglicherweise abgelaufen. Bitte melden Sie sich unter Einstellungen > Abmelden ab und erneut an.';
+
+  @override
+  String get syncErrorNoInternet =>
+      'Es konnte keine Internetverbindung hergestellt werden. Bitte überprüfen Sie Ihre Internetverbindung.';
+
+  @override
+  String get syncErrorTablesMissing =>
+      'Datenbanktabellen nicht gefunden. Bitte führen Sie das Skript setup.sql im SQL-Editor der Supabase aus.';
+
+  @override
+  String get syncErrorPermissionDenied =>
+      'Datenbankzugriffsberechtigungsfehler (RLS). Bitte stellen Sie sicher, dass Sie die RLS-Richtlinien in Ihren Supabase-Tabellen korrekt konfiguriert haben.';
+
+  @override
+  String syncErrorUnexpected(Object error) {
+    return 'Unerwarteter Fehler: $error';
+  }
+
+  @override
+  String syncErrorPostgrest(Object code, Object message) {
+    return 'Cloud-Fehler ( $code ): $message';
+  }
+
+  @override
+  String syncErrorAuth(Object code, Object message) {
+    return 'Authentifizierungsfehler ( $code ): $message';
+  }
+
+  @override
+  String activeVaults(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Aktive Tresore',
+      one: 'Aktiver Tresor',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get vaultsUpper => 'Tresore';
+
+  @override
+  String get receiptExpense => 'Quittungsaufwand';
+
+  @override
+  String get reasonSmartInput => 'Schnelle Texteingabe';
+
+  @override
+  String get reasonReceiptScan => 'Belegfoto';
+
+  @override
+  String get reasonClipboard => 'Zwischenablage-Benachrichtigung';
+
+  @override
+  String get noteCapturedFromClipboard => 'Aus der Zwischenablage aufgenommen';
+
+  @override
+  String get notificationChannelName => 'Transaktionserinnerungen';
+
+  @override
+  String get notificationChannelDesc =>
+      'Erinnerungen für wiederkehrende Zahlungen und Einkünfte';
+
+  @override
+  String get notificationTestChannelName => 'Benachrichtigungen testen';
+
+  @override
+  String get notificationTestChannelDesc =>
+      'Finarcast Benachrichtigung Testkanal';
+
+  @override
+  String get notificationTestTitle => 'Finarcast-Testbenachrichtigung';
+
+  @override
+  String get notificationTestBody =>
+      'Großartig! Deine In-App-Benachrichtigungen (im Vordergrund) funktionieren reibungslos.';
+
+  @override
+  String get notificationTestDelayedTitle => 'Verzögerter Finarcast-Test';
+
+  @override
+  String get notificationTestDelayedBody =>
+      'Out-of-App (Hintergrund) Benachrichtigungstest erfolgreich abgeschlossen!';
+
+  @override
+  String notificationIncomeTitle(Object title) {
+    return 'Einkommenserinnerung: $title';
+  }
+
+  @override
+  String notificationExpenseTitle(Object title) {
+    return 'Zahlungserinnerung: $title';
+  }
+
+  @override
+  String notificationBodyAmount(Object amount) {
+    return 'Betrag: $amount';
+  }
+
+  @override
+  String notificationBodyDate(Object date) {
+    return 'Datum: $date';
+  }
+
+  @override
+  String notificationBodyNote(Object note) {
+    return 'Hinweis: $note';
+  }
+
+  @override
+  String get aiErrorRateLimit =>
+      'Sie haben Ihr tägliches KI-Analyse-Limit erreicht. Bitte aktualisieren Sie auf Premium oder versuchen Sie es morgen erneut.';
+
+  @override
+  String get aiErrorUnauthorized =>
+      'Unbefugter Zugriff. Bitte melden Sie sich erneut an.';
+
+  @override
+  String get aiErrorQuota =>
+      'KI-Nutzungslimit erreicht. Bitte warten Sie einen Moment und versuchen Sie es erneut.';
+
+  @override
+  String get aiErrorBusy =>
+      'KI-Server ist ausgelastet. Bitte versuchen Sie es in ein paar Sekunden erneut.';
+
+  @override
+  String get aiErrorApiKey =>
+      'AI-API-Schlüssel ist ungültig oder nicht gefunden. Bitte überprüfen Sie Ihre Einstellungen.';
+
+  @override
+  String get aiErrorTimeout =>
+      'Zeitüberschreitung. Bitte überprüfe deine Internetverbindung und versuche es erneut.';
+
+  @override
+  String aiErrorGeneric(Object error) {
+    return 'KI-Analyse fehlgeschlagen: $error';
+  }
 }

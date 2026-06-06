@@ -11,6 +11,7 @@ import '../../../shared/widgets/glass_surface.dart';
 import '../../../shared/widgets/custom_dialog.dart';
 import '../../../core/services/auth_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../../../l10n/app_localizations.dart';
 
 /// Finarcast "Pro Üyelik" (Paywall) Sayfası.
 class ProUpgradeSheet extends ConsumerWidget {
@@ -24,19 +25,20 @@ class ProUpgradeSheet extends ConsumerWidget {
   }
 
   static void _showLoginRequiredDialog(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
     showCustomDialog(
       context: context,
       accentColor: AppColors.getPrimary(context),
-      title: "Giriş Yapılması Gerekiyor",
-      content: "Satın alma işlemini tamamlamak için lütfen giriş yapın veya ücretsiz bir hesap oluşturun.",
+      title: l10n.loginRequired,
+      content: l10n.loginRequiredForPurchase,
       actions: [
         PrecisionDialogAction(
-          label: "İptal",
+          label: l10n.cancel,
           onTap: () => Navigator.pop(context),
           isPrimary: false,
         ),
         PrecisionDialogAction(
-          label: "Giriş Yap / Üye Ol",
+          label: l10n.loginOrSignUp,
           onTap: () async {
             Navigator.pop(context); // Dialogu kapat
             Navigator.pop(context); // Sheet\'i kapat
@@ -56,6 +58,7 @@ class ProUpgradeSheet extends ConsumerWidget {
     final primaryColor = AppColors.getPrimary(context);
     final secondaryTextColor = AppColors.getTextSecondary(context);
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final l10n = AppLocalizations.of(context)!;
 
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -84,7 +87,7 @@ class ProUpgradeSheet extends ConsumerWidget {
                   ),
                   SizedBox(height: headerSpacing),
                   Text(
-                    'Finarcast Premium\'a Geçin',
+                    l10n.upgradeToPremiumTitle,
                     style: TextStyle(
                       fontSize: isSmallScreen ? 22 : 26, 
                       fontWeight: FontWeight.w900, 
@@ -94,7 +97,7 @@ class ProUpgradeSheet extends ConsumerWidget {
                   ),
                   const SizedBox(height: 6),
                   Text(
-                    'Finansal potansiyelinizi %100 açığa çıkarın.',
+                    l10n.unlockFinancialPotential,
                     style: TextStyle(
                       fontSize: 14, 
                       color: secondaryTextColor.withValues(alpha: isDark ? 0.65 : 0.85),
@@ -107,11 +110,11 @@ class ProUpgradeSheet extends ConsumerWidget {
             ),
 
             // 🚀 Avantajlar Hepsini Göster
-            _buildFeatureItem(context, Icons.analytics_rounded, 'AI Analizleri', 'Sınırsız ve derin yapay zeka analizleri.*', isSmallScreen),
-            _buildFeatureItem(context, Icons.account_balance_wallet_rounded, 'Sınırsız Kasa', 'Dilediğiniz kadar kasa ve cüzdan oluşturun.', isSmallScreen),
-            _buildFeatureItem(context, Icons.sync_rounded, 'Bulut Eşitleme', 'Verilerinizi güvenle yedekleyin ve senkronize edin.', isSmallScreen),
-            _buildFeatureItem(context, Icons.palette_rounded, 'Özel Temalar', 'Ayrıcalıklı renk paletleri ve arka plan stilleri.', isSmallScreen),
-            _buildFeatureItem(context, Icons.block_rounded, 'Sıfır Reklam', 'Kesintisiz ve reklamsız premium deneyim.', isSmallScreen),
+            _buildFeatureItem(context, Icons.analytics_rounded, l10n.aiAnalysis, l10n.aiAnalysisDesc, isSmallScreen),
+            _buildFeatureItem(context, Icons.account_balance_wallet_rounded, l10n.unlimitedVaults, l10n.unlimitedVaultsDesc, isSmallScreen),
+            _buildFeatureItem(context, Icons.sync_rounded, l10n.cloudSync, l10n.cloudSyncDesc, isSmallScreen),
+            _buildFeatureItem(context, Icons.palette_rounded, l10n.customThemes, l10n.customThemesDesc, isSmallScreen),
+            _buildFeatureItem(context, Icons.block_rounded, l10n.zeroAds, l10n.zeroAdsDesc, isSmallScreen),
             
             SizedBox(height: verticalSpacing * 1.5),
             
@@ -121,7 +124,7 @@ class ProUpgradeSheet extends ConsumerWidget {
               child: Padding(
                 padding: const EdgeInsets.only(left: 4),
                 child: Text(
-                  'MEVCUT PLANLAR', 
+                  l10n.availablePlans, 
                   style: TextStyle(
                     fontSize: 10, 
                     fontWeight: FontWeight.w900, 
@@ -146,10 +149,10 @@ class ProUpgradeSheet extends ConsumerWidget {
                   padding: EdgeInsets.only(bottom: isSmallScreen ? 8 : 12),
                   child: _buildPlanCard(
                     context: context,
-                    title: isYearly ? 'Yıllık Premium' : 'Aylık Premium',
+                    title: isYearly ? l10n.yearlyPremium : l10n.monthlyPremium,
                     price: package.storeProduct.priceString,
-                    subtitle: isYearly ? 'En iyi değer • 7 gün ücretsiz' : 'İstediğin zaman iptal et',
-                    badge: isYearly ? 'AVANTAJLI' : null,
+                    subtitle: isYearly ? l10n.bestValueFreeTrialSubtitle : l10n.cancelAnytime,
+                    badge: isYearly ? l10n.bestValue : null,
                     isPopular: isYearly,
                     isSmall: isSmallScreen,
                     onTap: () async {
@@ -170,10 +173,10 @@ class ProUpgradeSheet extends ConsumerWidget {
                 children: [
                   _buildPlanCard(
                     context: context,
-                    title: 'Yıllık Premium (Simüle)',
-                    price: '₺1.190 / yıl',
-                    subtitle: 'Aylık ₺99 • 7 gün ücretsiz',
-                    badge: 'AVANTAJLI',
+                    title: l10n.yearlyPremiumSimulated,
+                    price: l10n.yearlyPremiumSimulatedPrice,
+                    subtitle: l10n.yearlyPremiumSimulatedSubtitle,
+                    badge: l10n.bestValue,
                     isPopular: true,
                     isSmall: isSmallScreen,
                     onTap: () {
@@ -189,9 +192,9 @@ class ProUpgradeSheet extends ConsumerWidget {
                   SizedBox(height: isSmallScreen ? 8 : 12),
                   _buildPlanCard(
                     context: context,
-                    title: 'Aylık Premium (Simüle)',
-                    price: '₺149 / ay',
-                    subtitle: 'İstediğin zaman iptal et',
+                    title: l10n.monthlyPremiumSimulated,
+                    price: l10n.monthlyPremiumSimulatedPrice,
+                    subtitle: l10n.cancelAnytime,
                     isSmall: isSmallScreen,
                     onTap: () {
                       final currentUser = Supabase.instance.client.auth.currentUser;
@@ -208,7 +211,7 @@ class ProUpgradeSheet extends ConsumerWidget {
             
             SizedBox(height: verticalSpacing),
             Text(
-              'Abonelik otomatik olarak yenilenir. İstediğiniz zaman iptal edebilirsiniz.',
+              l10n.subscriptionAutoRenewalNote,
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 10, 

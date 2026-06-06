@@ -115,7 +115,7 @@ class RegisterForm extends StatelessWidget {
             splashRadius: 20,
             icon: Icon(
               obscureConfirmPassword ? Icons.visibility_off_rounded : Icons.visibility_rounded,
-              color: AppColors.getSecondary(context).withValues(alpha: 0.5),
+              color: AppColors.getPrimary(context).withValues(alpha: 0.5),
               size: 20,
             ),
             onPressed: onObscureConfirmPasswordToggle,
@@ -125,7 +125,6 @@ class RegisterForm extends StatelessWidget {
         CustomButton(
           label: l10n.authRegister,
           onTap: onSubmit,
-          activeColor: AppColors.getSecondary(context),
           isLoading: isLoading,
         ),
         SizedBox(height: screenHeight * 0.035),

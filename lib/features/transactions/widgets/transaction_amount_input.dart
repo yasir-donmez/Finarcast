@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:intl/intl.dart';
 import '../../../core/theme/app_constants.dart';
 import '../../../shared/widgets/custom_text_field.dart';
+import '../../../core/utils/string_utils.dart';
 import '../../../l10n/app_localizations.dart';
 
 class TransactionAmountInput extends StatelessWidget {
@@ -87,16 +89,35 @@ class TransactionAmountInput extends StatelessWidget {
           ),
           
           Expanded(
-            child: CustomTextField(
-              controller: amountController,
-              focusNode: amountFocusNode,
-              hintText: "0,00",
-              icon: Icons.attach_money_rounded,
-              keyboardType: const TextInputType.numberWithOptions(decimal: true),
-              inputFormatters: [_TRCurrencyFormatter()],
-              textAlign: TextAlign.center,
-              fontSize: 56,
-              showBackground: false,
+            child: AnimatedBuilder(
+              animation: amountController,
+              builder: (context, child) {
+                final textLength = amountController.text.length;
+                double dynamicFontSize = 56;
+                if (textLength > 12) {
+                  dynamicFontSize = 32;
+                } else if (textLength > 9) {
+                  dynamicFontSize = 38;
+                } else if (textLength > 6) {
+                  dynamicFontSize = 46;
+                }
+
+                return CustomTextField(
+                  controller: amountController,
+                  focusNode: amountFocusNode,
+                  hintText: (() {
+                    final locale = Localizations.localeOf(context).toString();
+                    final format = NumberFormat.decimalPattern(locale);
+                    return "0${format.symbols.DECIMAL_SEP}00";
+                  })(),
+                  icon: Icons.attach_money_rounded,
+                  keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                  inputFormatters: [LocaleCurrencyFormatter(Localizations.localeOf(context).toString())],
+                  textAlign: TextAlign.center,
+                  fontSize: dynamicFontSize,
+                  showBackground: false,
+                );
+              },
             ),
           ),
           
@@ -165,7 +186,7 @@ class TransactionAmountInput extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         Text(
-          label.toUpperCase(),
+          label.toSafeUpperCase(context),
           style: TextStyle(
             fontSize: 10,
             color: AppColors.getPrimary(context).withValues(alpha: 0.7),
@@ -201,10 +222,14 @@ class TransactionAmountInput extends StatelessWidget {
             Expanded(
               child: CustomTextField(
                 controller: controller,
-                hintText: "0,00",
+                hintText: (() {
+                  final locale = Localizations.localeOf(context).toString();
+                  final format = NumberFormat.decimalPattern(locale);
+                  return "0${format.symbols.DECIMAL_SEP}00";
+                })(),
                 icon: Icons.attach_money_rounded,
                 keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                inputFormatters: [_TRCurrencyFormatter()],
+                inputFormatters: [LocaleCurrencyFormatter(Localizations.localeOf(context).toString())],
                 textAlign: TextAlign.center,
                 fontSize: 24,
                 showBackground: false,
@@ -238,35 +263,49 @@ class TransactionAmountInput extends StatelessWidget {
   }
 }
 
-/// Akıllı Türkiye Para Formatı Formattırı
-class _TRCurrencyFormatter extends TextInputFormatter {
+/// Akıllı Bölgesel Para Formatı Formatlayıcısı
+class LocaleCurrencyFormatter extends TextInputFormatter {
+  final String locale;
+
+  LocaleCurrencyFormatter(this.locale);
+
   @override
   TextEditingValue formatEditUpdate(TextEditingValue oldValue, TextEditingValue newValue) {
     if (newValue.text.isEmpty) return newValue;
 
-    // Sadece rakamlar ve virgül kalsın
-    String text = newValue.text.replaceAll(RegExp(r'[^0-9,]'), '');
+    final format = NumberFormat.decimalPattern(locale);
+    final decimalSep = format.symbols.DECIMAL_SEP;
+    final groupSep = format.symbols.GROUP_SEP;
+
+    // Sadece rakamlar, ondalık ayırıcı ve eksi işareti (sadece en başta) kalsın
+    final escapedDecimalSep = RegExp.escape(decimalSep);
+    final hasMinus = newValue.text.startsWith('-');
+    String text = newValue.text.replaceAll(RegExp('[^0-9$escapedDecimalSep]'), '');
     
-    // Sadece bir tane virgüle izin ver
-    if (text.contains(',')) {
-      List<String> parts = text.split(',');
+    // Sadece bir tane ondalık ayırıcıya izin ver
+    if (text.contains(decimalSep)) {
+      List<String> parts = text.split(decimalSep);
       if (parts.length > 2) {
-        text = '${parts[0]},${parts.sublist(1).join('')}';
+        text = '${parts[0]}$decimalSep${parts.sublist(1).join('')}';
       }
     }
 
-    if (text.isEmpty) return newValue.copyWith(text: '');
+    if (text.isEmpty) return newValue.copyWith(text: hasMinus ? '-' : '');
 
-    // Binlik ayırıcıları ekle (Nokta)
-    String integerPart = text.contains(',') ? text.split(',')[0] : text;
-    String decimalPart = text.contains(',') ? text.split(',')[1] : '';
+    // Binlik ayırıcıları ekle
+    String integerPart = text.contains(decimalSep) ? text.split(decimalSep)[0] : text;
+    String decimalPart = text.contains(decimalSep) ? text.split(decimalSep)[1] : '';
 
     final reg = RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))');
-    String formattedInteger = integerPart.replaceAllMapped(reg, (Match m) => '${m[1]}.');
+    String formattedInteger = integerPart.replaceAllMapped(reg, (Match m) => '${m[1]}$groupSep');
 
-    String formatted = decimalPart.isEmpty && !text.contains(',') 
+    String formatted = decimalPart.isEmpty && !text.contains(decimalSep) 
         ? formattedInteger 
-        : '$formattedInteger,$decimalPart';
+        : '$formattedInteger$decimalSep$decimalPart';
+
+    if (hasMinus) {
+      formatted = '-$formatted';
+    }
 
     return newValue.copyWith(
       text: formatted,

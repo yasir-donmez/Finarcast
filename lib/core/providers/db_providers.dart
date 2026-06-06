@@ -7,6 +7,7 @@ import '../utils/currency_utils.dart';
 import '../database/models/vault.dart';
 import '../database/models/exchange_rate.dart';
 import './settings_provider.dart';
+import '../services/subscription_service.dart';
 
 /// === İŞLEM PROVİDER'LARI ===
 
@@ -132,12 +133,7 @@ final netMaxBalanceProvider = Provider<double>((ref) {
 /// Kasaları canlı dinleyen stream provider
 final vaultsStreamProvider = StreamProvider<List<Vault>>((ref) {
   return DatabaseService.watchAllVaults().map(
-    (vaults) => vaults.toList()
-      ..sort((a, b) {
-        final cmp = a.dashboardOrder.compareTo(b.dashboardOrder);
-        if (cmp != 0) return cmp;
-        return a.id.compareTo(b.id);
-      }),
+    (vaults) => vaults.toList()..sort((a, b) => a.id.compareTo(b.id)),
   );
 });
 
@@ -158,5 +154,7 @@ final customCategoriesStreamProvider = StreamProvider<List<CustomCategory>>((ref
 
 /// Özel alt kategorilerin anlık listesi
 final customCategoriesProvider = Provider<List<CustomCategory>>((ref) {
+  final isPro = ref.watch(subscriptionServiceProvider).isPro;
+  if (!isPro) return [];
   return ref.watch(customCategoriesStreamProvider).valueOrNull ?? [];
 });

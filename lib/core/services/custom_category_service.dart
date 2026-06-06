@@ -1,7 +1,9 @@
 import 'package:isar/isar.dart';
 import '../database/database_service.dart';
 import '../database/models/custom_category.dart';
+import '../database/models/transaction_record.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'sync_coordinator.dart';
 import 'dart:convert';
 
 /// Kullanıcının oluşturduğu özel alt kategorileri Isar DB ile saklar.
@@ -35,21 +37,54 @@ class CustomCategoryService {
       ..parentId = parentId
       ..name = name.trim()
       ..iconCode = iconCode
+      ..syncStatus = 1
       ..updatedAt = DateTime.now();
 
     await isar.writeTxn(() async {
       await isar.customCategorys.put(newItem);
     });
     
+    SyncCoordinator.scheduleSync();
     return uniqueId;
   }
 
   /// Belirli bir özel alt kategoriyi siler.
   static Future<void> removeCustomSubcategory(String subcategoryId) async {
     final isar = DatabaseService.isar;
+    final category = await isar.customCategorys.where().uniqueIdEqualTo(subcategoryId).findFirst();
+    if (category == null) return;
+
+    final settings = await DatabaseService.getSettings();
+    final shouldTombstone = settings.isSyncEnabled;
+
     await isar.writeTxn(() async {
-      await isar.customCategorys.where().uniqueIdEqualTo(subcategoryId).deleteFirst();
+      // 1. Kategoriyi sil veya tombstone (silindi olarak işaretle) yap
+      if (shouldTombstone) {
+        category.syncStatus = 2;
+        category.updatedAt = DateTime.now();
+        await isar.customCategorys.put(category);
+      } else {
+        await isar.customCategorys.delete(category.id);
+      }
+
+      // 2. Bu özel kategoriye bağlı tüm işlemleri otomatik olarak ana/parent kategoriye yönlendir
+      final transactions = await isar.transactionRecords
+          .where()
+          .filter()
+          .categoryIdEqualTo(subcategoryId)
+          .findAll();
+
+      if (transactions.isNotEmpty) {
+        for (final tx in transactions) {
+          tx.categoryId = category.parentId;
+          tx.syncStatus = 1; // Değişikliği push edebilmesi için beklemede yap
+          tx.updatedAt = DateTime.now();
+        }
+        await isar.transactionRecords.putAll(transactions);
+      }
     });
+
+    SyncCoordinator.scheduleSync();
   }
 
   /// SharedPreferences'taki eski verileri Isar'a taşır (Sadece 1 kez çalışır).

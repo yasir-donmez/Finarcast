@@ -6,6 +6,7 @@ import '../../../../core/theme/app_constants.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../../shared/widgets/inline_picker.dart';
 import '../../../../shared/widgets/clickable_action.dart';
+import '../../../../shared/widgets/custom_card.dart';
 import '../settings_list_items.dart';
 import '../../../home/home_providers.dart';
 import '../../../../core/services/subscription_service.dart';
@@ -35,12 +36,7 @@ class PurgeSetting extends ConsumerWidget {
     final currentIndex = options.indexWhere((opt) => opt['days'] == permanentDays);
     final currentLabel = currentIndex != -1 ? options[currentIndex]['label'] as String : '--';
 
-    // Çeviri kontrolü (fallback)
-    String title = "Kalıcı Veri Silme";
-    try {
-      // ignore: undefined_getter
-      title = (l10n as dynamic).permanentDataDeletion ?? title;
-    } catch (_) {}
+    final title = l10n.permanentDataDeletion;
 
     final subscription = ref.watch(subscriptionServiceProvider);
     final isPro = subscription.isPro;
@@ -81,9 +77,9 @@ class PurgeSetting extends ConsumerWidget {
                       ),
                       if (!isPro) ...[
                         const SizedBox(height: 2),
-                        const Text(
-                          "Premium",
-                          style: TextStyle(
+                        Text(
+                          l10n.premiumBadge,
+                          style: const TextStyle(
                             color: Colors.amber,
                             fontSize: 12,
                             fontWeight: FontWeight.w600,
@@ -137,16 +133,10 @@ class PurgeSetting extends ConsumerWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Container(
+                      CustomCard(
+                        backgroundColor: expenseColor.withValues(alpha: 0.05),
+                        borderColor: expenseColor.withValues(alpha: 0.1),
                         padding: const EdgeInsets.all(12),
-                        decoration: BoxDecoration(
-                          color: expenseColor.withValues(alpha: 0.05),
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(
-                            color: expenseColor.withValues(alpha: 0.1),
-                            width: 1,
-                          ),
-                        ),
                         child: Row(
                           children: [
                             Icon(Icons.warning_amber_rounded, color: expenseColor, size: 20),

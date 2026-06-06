@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'inline_picker.dart';
+import '../../core/utils/string_utils.dart';
 
 /// Precision Tasarım Sistemi'nin tekerlekli (wheel) seçici alan bileşeni.
 /// SelectorField ile aynı yapıya sahiptir ancak sağ tarafta InlinePicker kullanır.
@@ -37,7 +38,7 @@ class PickerField extends StatelessWidget {
           SizedBox(width: 12 * scalingFactor),
           Expanded(
             child: Text(
-              label.toUpperCase(),
+              label.toSafeUpperCase(context),
               style: TextStyle(
                 fontSize: 11 * scalingFactor,
                 fontWeight: FontWeight.w900,

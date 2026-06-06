@@ -9,16 +9,10 @@ class AppLocalizationsTr extends AppLocalizations {
   AppLocalizationsTr([String locale = 'tr']) : super(locale);
 
   @override
-  String get appTitle => 'Finarcast';
-
-  @override
   String get settings => 'Ayarlar';
 
   @override
   String get profile => 'Profil';
-
-  @override
-  String get memberPremium => 'Finarcast Premium Üyelik';
 
   @override
   String get preferences => 'TERCİHLER & UYGULAMA';
@@ -27,24 +21,10 @@ class AppLocalizationsTr extends AppLocalizations {
   String get language => 'Dil';
 
   @override
-  String get aiNotifications => 'AI Asistan Uyarıları';
-
-  @override
-  String get dataAndAiSettings => 'VERİ & AI AYARLARI';
-
-  @override
   String get dataRetention => 'Veri Saklama';
 
   @override
-  String get dataRetentionDesc =>
-      'Süresi dolan işlemler arşivlenir.\nAI Asistanı yalnızca bu süredeki verileri kullanır.';
-
-  @override
   String get permanentDataDeletion => 'Kalıcı Silme';
-
-  @override
-  String get permanentDataDeletionDesc =>
-      'Bu süreden sonra işlemler veritabanından kalıcı olarak silinir.\nBu işlem geri alınamaz.';
 
   @override
   String get oneMonth => '1 Ay';
@@ -60,9 +40,6 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get infinite => 'Sonsuz';
-
-  @override
-  String get dataManagement => 'VERİ YÖNETİMİ';
 
   @override
   String get driveBackup => 'Drive Yedekleme';
@@ -82,9 +59,6 @@ class AppLocalizationsTr extends AppLocalizations {
   @override
   String get aboutFinarcast =>
       'Finarcast, AI destekli finansal asistanınızdır. Harcamalarınızı analiz eder, tasarruf hedefleri belirlemenize yardımcı olur ve finansal geleceğinizi optimize eder.';
-
-  @override
-  String get editProfile => 'Profil Düzenleme';
 
   @override
   String get comingSoon => 'Bu özellik yakında gelecek!';
@@ -114,34 +88,10 @@ class AppLocalizationsTr extends AppLocalizations {
   String get analysis => 'Analiz';
 
   @override
-  String get dailySummary => 'Günlük Özet';
-
-  @override
-  String get todaySpending => 'Bugünkü Harcama';
-
-  @override
-  String get weeklyRemaining => 'Haftalık Kalan';
-
-  @override
-  String get recentTransactions => 'Son İşlemler';
-
-  @override
-  String get seeAll => 'Tümünü Gör';
-
-  @override
-  String get myVaults => 'Kasalarım';
-
-  @override
   String get totalBalance => 'Toplam Bakiye';
 
   @override
   String get addNewVault => 'Yeni Kasa Ekle';
-
-  @override
-  String get setGoal => 'Hedef Belirle';
-
-  @override
-  String get analyze => 'Analiz Et';
 
   @override
   String get addTransaction => 'Yeni İşlem';
@@ -162,9 +112,6 @@ class AppLocalizationsTr extends AppLocalizations {
   String get description => 'Açıklama';
 
   @override
-  String get selectVault => 'Kasa Seç';
-
-  @override
   String get done => 'Bitti';
 
   @override
@@ -175,12 +122,6 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get newVault => 'Yeni Kasa';
-
-  @override
-  String get monthlyIncome => 'Aylık Gelir';
-
-  @override
-  String get monthlyExpense => 'Aylık Gider';
 
   @override
   String get all => 'Tümü';
@@ -213,13 +154,7 @@ class AppLocalizationsTr extends AppLocalizations {
   String get yearly => 'Yıllık';
 
   @override
-  String get noTransactions => 'Henüz bu kategoride işlem yok';
-
-  @override
   String get period => 'Periyot';
-
-  @override
-  String get remainingTime => 'Kalan Süre';
 
   @override
   String get week => 'Hafta';
@@ -237,12 +172,6 @@ class AppLocalizationsTr extends AppLocalizations {
   String get category => 'Kategori';
 
   @override
-  String get transactionName => 'İşlem Adı';
-
-  @override
-  String get frequency => 'Sıklık';
-
-  @override
   String get themeMode => 'Tema';
 
   @override
@@ -258,28 +187,16 @@ class AppLocalizationsTr extends AppLocalizations {
   String get colorTheme => 'Renk';
 
   @override
-  String get colorSystem => 'Sistem';
-
-  @override
-  String get market => 'Market';
-
-  @override
   String get food => 'Gıda';
 
   @override
   String get cleaning => 'Temizlik';
 
   @override
-  String get personalCare => 'Kişisel Bakım';
-
-  @override
   String get grocery => 'Market/Gıda';
 
   @override
   String get delivery => 'Paket Servis';
-
-  @override
-  String get workspace => 'Ofis/Çalışma Alanı';
 
   @override
   String get gas => 'Doğalgaz/Yakıt';
@@ -297,7 +214,7 @@ class AppLocalizationsTr extends AppLocalizations {
   String get minimum => 'Minimum';
 
   @override
-  String get maximum => 'Maximum';
+  String get maximum => 'Maksimum';
 
   @override
   String get dayOfWeek => 'Haftanın Günü';
@@ -306,13 +223,7 @@ class AppLocalizationsTr extends AppLocalizations {
   String get dayOfMonth => 'Ayın Günü';
 
   @override
-  String get dayOfYear => 'Yılın Günü';
-
-  @override
   String get dayOf => 'Günü';
-
-  @override
-  String get recurrencePeriod => 'Tekrar Periyodu';
 
   @override
   String get dining => 'Yemek';
@@ -321,19 +232,10 @@ class AppLocalizationsTr extends AppLocalizations {
   String get restaurant => 'Restoran';
 
   @override
-  String get fastFood => 'Hızlı Yemek';
-
-  @override
   String get cafe => 'Kafe';
 
   @override
-  String get takeout => 'Paket Servis';
-
-  @override
   String get rent => 'Kira';
-
-  @override
-  String get homeRent => 'Ev Kirası';
 
   @override
   String get office => 'Ofis';
@@ -351,16 +253,10 @@ class AppLocalizationsTr extends AppLocalizations {
   String get water => 'Su';
 
   @override
-  String get naturalGas => 'Doğalgaz';
-
-  @override
   String get internet => 'İnternet';
 
   @override
   String get phone => 'Telefon';
-
-  @override
-  String get entertainment => 'Eğlence';
 
   @override
   String get cinema => 'Sinema';
@@ -376,12 +272,6 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get subscription => 'Abonelik';
-
-  @override
-  String get streaming => 'Dijital Yayın';
-
-  @override
-  String get musicSubscription => 'Müzik';
 
   @override
   String get software => 'Yazılım';
@@ -405,9 +295,6 @@ class AppLocalizationsTr extends AppLocalizations {
   String get dentist => 'Diş Hekimi';
 
   @override
-  String get transportation => 'Ulaşım';
-
-  @override
   String get taxi => 'Taksi';
 
   @override
@@ -423,19 +310,7 @@ class AppLocalizationsTr extends AppLocalizations {
   String get fuel => 'Yakıt';
 
   @override
-  String get clothing => 'Giyim';
-
-  @override
-  String get dailyWear => 'Günlük Giyim';
-
-  @override
   String get shoes => 'Ayakkabı';
-
-  @override
-  String get accessory => 'Aksesuar';
-
-  @override
-  String get education => 'Eğitim';
 
   @override
   String get course => 'Kurs';
@@ -447,16 +322,7 @@ class AppLocalizationsTr extends AppLocalizations {
   String get school => 'Okul';
 
   @override
-  String get debtPayment => 'Borç Ödemesi';
-
-  @override
-  String get creditCard => 'Kredi Kartı';
-
-  @override
   String get loan => 'Kredi';
-
-  @override
-  String get personalDebt => 'Kişisel Borç';
 
   @override
   String get credit => 'Kredi/Borç';
@@ -476,28 +342,16 @@ class AppLocalizationsTr extends AppLocalizations {
   String get salary => 'Maaş';
 
   @override
-  String get mainSalary => 'Ana Maaş';
-
-  @override
   String get bonus => 'Prim/Bonus';
 
   @override
   String get dividend => 'Temettü';
 
   @override
-  String get extraIncome => 'Ek Gelir';
-
-  @override
   String get freelance => 'Serbest Çalışma';
 
   @override
-  String get partTime => 'Yarı Zamanlı';
-
-  @override
   String get commission => 'Komisyon';
-
-  @override
-  String get investmentReturn => 'Yatırım Getirisi';
 
   @override
   String get stock => 'Hisse Senedi';
@@ -509,46 +363,19 @@ class AppLocalizationsTr extends AppLocalizations {
   String get interest => 'Faiz';
 
   @override
-  String get scholarshipLoan => 'Burs/Kredi';
-
-  @override
   String get scholarship => 'Burs';
 
   @override
   String get sale => 'Satış';
 
   @override
-  String get onlineSale => 'Online Satış';
-
-  @override
-  String get physicalSale => 'Fiziksel Satış';
-
-  @override
-  String get rentalIncome => 'Kira Geliri';
-
-  @override
-  String get officeIncome => 'Ofis Geliri';
-
-  @override
   String get gift => 'Hediye';
-
-  @override
-  String get vaultOrGroup => 'Kasa veya Grup';
 
   @override
   String get cancel => 'İptal';
 
   @override
-  String get generalBalance => 'Genel Bakiye';
-
-  @override
   String get everyDay => 'Her Gün';
-
-  @override
-  String get every2Days => '2 Günde Bir';
-
-  @override
-  String get every3Days => '3 Günde Bir';
 
   @override
   String get everyWeek => 'Her Hafta';
@@ -566,19 +393,7 @@ class AppLocalizationsTr extends AppLocalizations {
   String get threeDays => '3 Gün';
 
   @override
-  String get twoWeeks => '2 Hafta';
-
-  @override
-  String get threeWeeks => '3 Hafta';
-
-  @override
   String get flexibleAmount => 'Esnek Tutar';
-
-  @override
-  String get singleAmount => 'Tek Tutar';
-
-  @override
-  String get advancedOptions => 'Gelişmiş Seçenekler';
 
   @override
   String get monday => 'Pazartesi';
@@ -641,22 +456,7 @@ class AppLocalizationsTr extends AppLocalizations {
   String get selectDate => 'Tarih Seç';
 
   @override
-  String get selectDay => 'Gün Seç';
-
-  @override
-  String get financialIdentity => 'Finansal Kimliğin';
-
-  @override
-  String get setTarget => 'Hedef Belirle';
-
-  @override
   String get allVaults => 'Tüm Kasalar';
-
-  @override
-  String get hidePreselect => 'Ön seçimi gizle';
-
-  @override
-  String get showPreselect => 'Ön seçimi göster';
 
   @override
   String get items => 'Kalemler';
@@ -668,76 +468,19 @@ class AppLocalizationsTr extends AppLocalizations {
   String get incomes => 'GELİRLER';
 
   @override
-  String get doNotTouch => 'Dokunulmasın';
-
-  @override
-  String get changeable => 'Değiştirilebilir';
-
-  @override
-  String get excellent => 'MÜKEMMEL';
-
-  @override
-  String get analysisResult => 'ANALİZ SONUCU';
-
-  @override
-  String get onTrackMessage => 'Hedefe Ulaşıyorsun';
-
-  @override
-  String get savingsNeeded => 'Tasarruf Gerekli';
-
-  @override
   String get currentBalance => 'Mevcut Bakiye';
-
-  @override
-  String get targetGap => 'Hedef Açığı';
-
-  @override
-  String get currentSurplus => 'Mevcut Fazlan';
-
-  @override
-  String get requiredMonthlySavings => 'Gereken Aylık Tasarruf';
 
   @override
   String get score => 'SKOR';
 
   @override
-  String get currentSavings => 'Mevcut Birikimlerin';
-
-  @override
-  String get aiSavingsTarget => 'AI Tasarruf Hedefi';
-
-  @override
-  String get remainingGap => 'Kalan Açık';
-
-  @override
-  String get dailyAiQuotaFull => 'Günlük AI kotası doldu';
-
-  @override
-  String get noInternetConnection => 'İnternet bağlantısı yok';
-
-  @override
-  String get aiApiError => 'AI API hatası';
-
-  @override
-  String get aiCoachSuggestion => 'AI KOÇUNUN ÖNERİSİ';
-
-  @override
-  String get cutbackPlan => 'KISINTI PLANI';
-
-  @override
   String get no => 'Hayır';
-
-  @override
-  String get recentAnalyses => 'Son Analizler';
 
   @override
   String get vault => 'Kasa';
 
   @override
   String get vaultDetail => 'Kasa Detayı';
-
-  @override
-  String get managePanel => 'Paneli Yönet';
 
   @override
   String get vaultNameHint => 'Kasa Adı (örn. Birikim)';
@@ -753,15 +496,6 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get manage => 'Yönet';
-
-  @override
-  String get averageMonthlyLoad => 'AYLIK ORTALAMA YÜK';
-
-  @override
-  String get noTransactionsInVault => 'Bu kasada işlem bulunmuyor.';
-
-  @override
-  String get manageTransactionsInVault => 'Kasadaki İşlemleri Yönet';
 
   @override
   String get deleteVault => 'Kasayı Sil';
@@ -824,28 +558,7 @@ class AppLocalizationsTr extends AppLocalizations {
   String get everyYearDetailed => 'Her yıl';
 
   @override
-  String get every2WeeksDetailed => '2 haftada bir';
-
-  @override
-  String get every3WeeksDetailed => '3 haftada bir';
-
-  @override
-  String get every3MonthsDetailed => '3 ayda bir';
-
-  @override
-  String get every6MonthsDetailed => '6 ayda bir';
-
-  @override
   String get everyDayDetailed => 'Her gün';
-
-  @override
-  String get every2DaysDetailed => '2 günde bir';
-
-  @override
-  String get every3DaysDetailed => '3 günde bir';
-
-  @override
-  String get allLabel => 'Hepsi';
 
   @override
   String get custom => 'Özel';
@@ -854,25 +567,10 @@ class AppLocalizationsTr extends AppLocalizations {
   String get status => 'Durum';
 
   @override
-  String get approved => 'Onaylandı';
-
-  @override
-  String get rejected => 'Reddedildi';
-
-  @override
   String get pending => 'Bekliyor';
 
   @override
-  String get visibilityManagement => 'Görünürlük Yönetimi';
-
-  @override
-  String get editTransaction => 'İşlem bilgilerini güncelle';
-
-  @override
   String get removeFromVault => 'Kasadan Çıkar';
-
-  @override
-  String get removeFromVaultDesc => 'İşlem ana kasaya geri döner, silinmez';
 
   @override
   String get permanentDelete => 'Kalıcı Sil';
@@ -884,139 +582,10 @@ class AppLocalizationsTr extends AppLocalizations {
   String get yes => 'Evet';
 
   @override
-  String get groupNameHint => 'Grup adı...';
-
-  @override
-  String transactionCount(num count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: '$count işlem',
-      one: '1 işlem',
-    );
-    return '$_temp0';
-  }
-
-  @override
-  String get noRemainingTransactions => 'Eklenebilecek boş işlem kalmadı.';
-
-  @override
-  String get editTransactionDesc => 'İşlem bilgilerini güncelle';
-
-  @override
-  String get visibilityDesc =>
-      'Ana sayfada hangi grup veya işlemlerin görüneceğini seçin.';
-
-  @override
-  String get vaultsAndGroups => 'Kasalar & Gruplar';
-
-  @override
-  String get individualTransactions => 'Tekil İşlemler';
-
-  @override
-  String get analyzingFinancialIdentity =>
-      'Finansal kimliğin analiz ediliyor...';
-
-  @override
-  String get financialIdentityHint =>
-      'Analiz yaptığında finansal kimliğin burada belirecek.';
-
-  @override
-  String get targetDateLabel => 'Hedef Tarihi:';
-
-  @override
-  String get scopeLabel => 'Kapsam:';
-
-  @override
-  String get preselectHint => 'Kalemler üzerinde ön seçim yap (isteğe bağlı)';
-
-  @override
-  String get noItemsToAnalyze =>
-      'Seçilen tarihe kadar etki edecek işlem bulunamadı.';
-
-  @override
-  String itemsToAnalyze(num count, Object months) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: 'Hedef tarihe ($months ay) kadar etki edecek $count kalem.',
-      one: 'Hedef tarihe ($months ay) kadar etki edecek 1 kalem.',
-    );
-    return '$_temp0';
-  }
-
-  @override
-  String get budgetNotFeasible =>
-      'Bu hedef mevcut esnek bütçenle tam karşılanamıyor. Süreyi uzatmayı veya geliri artırmayı düşünebilirsin.';
-
-  @override
-  String get financialIdentityUpdated =>
-      'Harika! Finansal kimliğin güncellendi ve analiz kaydedildi.';
-
-  @override
-  String get feedbackMemoized =>
-      'Tamam, bu tercihler hafızaya alındı. Bir sonraki analizde farklı öneriler sunulacak.';
-
-  @override
-  String get excludedCategories => 'Hariç Tutulanlar:';
-
-  @override
-  String newFrequency(Object frequency) {
-    return 'Yeni Sıklık: $frequency';
-  }
-
-  @override
-  String get doYouLikeThisSuggestion => 'Bu öneriyi beğendin mi?';
-
-  @override
-  String get yesILikeIt => 'Evet, Beğendim';
-
-  @override
-  String targetAmountLabel(Object amount) {
-    return '$amount Hedef';
-  }
-
-  @override
-  String weeksToTargetLabel(num count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: '$count Hafta',
-      one: '1 Hafta',
-    );
-    return '$_temp0';
-  }
-
-  @override
-  String monthsToTargetLabel(num count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: '$count Ay',
-      one: '1 Ay',
-    );
-    return '$_temp0';
-  }
-
-  @override
-  String yearsToTargetLabel(num count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: '$count Yıl',
-      one: '1 Yıl',
-    );
-    return '$_temp0';
-  }
-
-  @override
   String get minAmount => 'Min.';
 
   @override
-  String get maxAmount => 'Max.';
-
-  @override
-  String get limitedTotal => 'Toplam';
+  String get maxAmount => 'Maks.';
 
   @override
   String get netBalance => 'Net Bakiye';
@@ -1028,31 +597,7 @@ class AppLocalizationsTr extends AppLocalizations {
   String get worstCase => 'En Kötü Senaryo';
 
   @override
-  String get layoutAndSorting => 'Görünüm ve Sıralama';
-
-  @override
-  String get layout1 => '1\'li';
-
-  @override
-  String get layout2 => '2\'li';
-
-  @override
-  String get layout3 => '3\'lü';
-
-  @override
-  String get layout4 => '4\'lü';
-
-  @override
-  String get moveForward => 'Öne Taşı';
-
-  @override
-  String get moveBackward => 'Arkaya Taşı';
-
-  @override
   String get selectCurrency => 'Para Birimi Seçin';
-
-  @override
-  String get membershipPlan => 'Üyelik Planı';
 
   @override
   String get upgrade => 'Yükselt';
@@ -1065,9 +610,6 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get zero => '0';
-
-  @override
-  String get aiMode => 'AI Modu';
 
   @override
   String get addCustomCategory => 'Yeni Ekle';
@@ -1089,21 +631,7 @@ class AppLocalizationsTr extends AppLocalizations {
   String get library => 'Kütüphane';
 
   @override
-  String get dashboardEmpty => 'Dashboard şu an boş.';
-
-  @override
-  String get libraryEmpty => 'Kütüphane şu an boş.';
-
-  @override
   String get pageLabel => 'Sayfa';
-
-  @override
-  String get sizeLabel => 'Boyut';
-
-  @override
-  String widgetAdded(String name) {
-    return '$name panoya eklendi!';
-  }
 
   @override
   String get historyTitle => 'İşlem Geçmişi';
@@ -1113,15 +641,6 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get giantsTitle => 'Harcama Devleri';
-
-  @override
-  String get quickActionTitle => 'Hızlı İşlem';
-
-  @override
-  String get vaultStatusTitle => 'Kasa Durumları';
-
-  @override
-  String get dailyBudgetTitle => 'Günlük Bütçe';
 
   @override
   String get dailyLimit => 'GÜNLÜK LİMİT';
@@ -1151,6 +670,9 @@ class AppLocalizationsTr extends AppLocalizations {
   String get yesterday => 'Dün';
 
   @override
+  String get tomorrow => 'Yarın';
+
+  @override
   String daysAgo(int count) {
     return '$count Gün Önce';
   }
@@ -1166,10 +688,10 @@ class AppLocalizationsTr extends AppLocalizations {
   }
 
   @override
-  String get historyEmpty => 'İşlem Geçmişi Henüz Boş';
+  String get historyEmpty => 'Henüz işlem geçmişi yok';
 
   @override
-  String get upcomingPaymentsNotFound => 'Yaklaşan Ödeme Bulunmadı';
+  String get upcomingPaymentsNotFound => 'Yaklaşan ödeme bulunamadı';
 
   @override
   String get transaction => 'İşlem';
@@ -1178,37 +700,16 @@ class AppLocalizationsTr extends AppLocalizations {
   String get membership => 'ÜYELİK';
 
   @override
-  String get currentPlan => 'Mevcut Plan';
-
-  @override
-  String get manageSubscription => 'Üyeliği Yönet';
-
-  @override
   String get restorePurchases => 'Satın Almaları Geri Yükle';
 
   @override
   String get freePlan => 'Ücretsiz Plan';
 
   @override
-  String get proPlan => 'Finarcast Premium';
-
-  @override
   String get upgradeToPro => 'Premium\'a Yükselt';
 
   @override
-  String get proFeatures => 'Premium Özellikleri';
-
-  @override
   String get unlimitedVaults => 'Sınırsız Kasa';
-
-  @override
-  String get aiInsights => 'Gelişmiş AI Analizleri';
-
-  @override
-  String get prioritySupport => 'Öncelikli Destek';
-
-  @override
-  String get subscriptionStatus => 'Üyelik Durumu';
 
   @override
   String get active => 'Aktif';
@@ -1221,9 +722,6 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get disabled => 'Kapalı';
-
-  @override
-  String get financialOverview => 'FİNANSAL ÖZET';
 
   @override
   String get monthlyNetBalance => 'AYLIK NET BAKİYE';
@@ -1265,13 +763,7 @@ class AppLocalizationsTr extends AppLocalizations {
   String get yearlyWorst => 'YILLIK EN KÖTÜ';
 
   @override
-  String get noRecurring => 'Tekrarlayan işlem yok';
-
-  @override
   String get perMonth => '/ay';
-
-  @override
-  String get perYear => '/yıl';
 
   @override
   String itemCount(int count) {
@@ -1327,10 +819,6 @@ class AppLocalizationsTr extends AppLocalizations {
   @override
   String get authWeakPassword =>
       'Şifreniz çok zayıf. Lütfen en az 6 karakterli daha güçlü bir şifre girin.';
-
-  @override
-  String get authOtpExpired =>
-      'Doğrulama kodunun süresi dolmuş. Lütfen yeni bir kod isteyin.';
 
   @override
   String get authBadCode => 'Girdiğiniz doğrulama kodu hatalı veya geçersiz.';
@@ -1574,7 +1062,7 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get premiumSyncDesc =>
-      'Bulut Eşitleme özelliği Supabase yedekleme altyapısını kullanır ve sadece Premium üyelerin erişimine açıktır.';
+      'Uygulama ayarlarınız ücretsiz olarak otomatik eşitlenmektedir. Kasa ve işlem verilerinizin buluta yedeklenmesi ise Premium üyelere özeldir.';
 
   @override
   String get showOnPhone => 'Telefonda Göster';
@@ -1838,4 +1326,683 @@ class AppLocalizationsTr extends AppLocalizations {
   @override
   String get supportEmailCopied =>
       'E-posta uygulaması açılamadı. Destek adresi (finarcast.support@gmail.com) kopyalandı.';
+
+  @override
+  String get signInMethod => 'Giriş Yöntemi';
+
+  @override
+  String errorGeneric(Object error) {
+    return 'Hata: $error';
+  }
+
+  @override
+  String resetFailed(Object error) {
+    return 'Sıfırlama başarısız oldu: $error';
+  }
+
+  @override
+  String get criticalDatabaseError => 'Kritik Veritabanı Hatası';
+
+  @override
+  String get criticalDatabaseErrorDesc =>
+      'Uygulama veritabanında okunamayan/bozuk veriler tespit edildi. Aşağıdaki butona basarak veritabanını temizleyip uygulamayı sıfırdan başlatabilirsiniz.';
+
+  @override
+  String get resetDatabaseAndRestart =>
+      'Veritabanını Sıfırla ve Yeniden Başlat';
+
+  @override
+  String get errorDetail => 'Hata Ayrıntısı:';
+
+  @override
+  String get unlimitedAccessLimit => 'Sınırsız Erişim Limiti';
+
+  @override
+  String get unlimitedAccessLimitDesc =>
+      'Sistem güvenliği gereği adil kullanım limitine ulaştınız. Lütfen daha sonra tekrar deneyin veya desteğe başvurun.';
+
+  @override
+  String get standardAccessLimit => 'Standart Erişim Limiti';
+
+  @override
+  String get standardAccessLimitDesc =>
+      'Günlük standart yapay zeka analiz kotanızı doldurdunuz. Sınırları kaldırmak için Premium\'a yükseltebilirsiniz.';
+
+  @override
+  String get upgradeToExtendedAccess => 'Genişletilmiş Erişime Geç';
+
+  @override
+  String get loginRequired => 'Giriş Yapılması Gerekiyor';
+
+  @override
+  String get loginRequiredDesc =>
+      'Yapay zeka asistanını ve harcama sepetini kullanabilmek için giriş yapmanız veya hesap oluşturmanız gerekmektedir.';
+
+  @override
+  String get loginOrSignUp => 'Giriş Yap / Üye Ol';
+
+  @override
+  String get aiAnalyzingExpense => 'Yapay zeka harcamanızı çözümlüyor...';
+
+  @override
+  String get draftAddedToInbox => 'Taslak harcama gelen kutusuna eklendi.';
+
+  @override
+  String get analysisError => 'İşlem analiz edilirken bir hata oluştu.';
+
+  @override
+  String get scanningReceipt => 'Fiş taranıyor, bilgiler çıkartılıyor...';
+
+  @override
+  String get receiptUnreadable => 'Fiş Okunamadı';
+
+  @override
+  String get receiptUnreadableDesc =>
+      'Yüklenen görselde herhangi bir fiş veya fatura bilgisi tespit edilemedi.';
+
+  @override
+  String get receiptAddedToInbox =>
+      'Fiş verileri başarıyla gelen kutusuna eklendi.';
+
+  @override
+  String get receiptReadError =>
+      'Fiş okunamadı. Lütfen bilgileri el ile girin veya daha net bir fotoğraf çekin.';
+
+  @override
+  String get imageUploadError => 'Görsel yüklenirken bir hata oluştu.';
+
+  @override
+  String get draftDeleted => 'Taslak harcama silindi.';
+
+  @override
+  String get transactionProcessedSuccess => 'İşlem kasaya başarıyla işlendi!';
+
+  @override
+  String get transactionApprovalError => 'İşlem onaylanırken bir hata oluştu.';
+
+  @override
+  String get smartScanTitle => 'Smart Scan';
+
+  @override
+  String pendingApprovalCount(int count) {
+    return 'ONAY BEKLEYEN İŞLEMLER ($count)';
+  }
+
+  @override
+  String get clearAll => 'Tümünü Temizle';
+
+  @override
+  String get smartInputHint => 'Örn: Dün Starbucks filtre kahve 120 TL';
+
+  @override
+  String get camera => 'Kamera';
+
+  @override
+  String get gallery => 'Galeri';
+
+  @override
+  String get inboxEmpty => 'GELEN KUTUNUZ BOŞ';
+
+  @override
+  String get otherCategory => 'Diğer';
+
+  @override
+  String get add => 'EKLE';
+
+  @override
+  String get todayUpper => 'BUGÜN';
+
+  @override
+  String get tomorrowUpper => 'YARIN';
+
+  @override
+  String daysWithName(int count, String dayName) {
+    return '$count GÜN - $dayName';
+  }
+
+  @override
+  String weeksLater(int count) {
+    return '$count HAFTA SONRA';
+  }
+
+  @override
+  String daysCount(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count Gün',
+      one: '1 Gün',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String weeksCount(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count Hafta',
+      one: '1 Hafta',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String monthsCount(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count Ay',
+      one: '1 Ay',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String yearsCount(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count Yıl',
+      one: '1 Yıl',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get sharedExpenseAnalyzed =>
+      'Paylaşılan harcama analiz edildi ve sepete eklendi!';
+
+  @override
+  String get limitExceeded => 'Limit Aşıldı';
+
+  @override
+  String get selectIcon => 'İKON SEÇİN';
+
+  @override
+  String optionsCount(int count) {
+    return '$count SEÇENEK';
+  }
+
+  @override
+  String get invalidAmountError => 'Lütfen geçerli bir tutar girin.';
+
+  @override
+  String get maxAmountMustBePositive =>
+      'Maksimum tutar 0\'dan büyük olmalıdır.';
+
+  @override
+  String get minMustBeLessThanMax =>
+      'Minimum tutar maksimumdan küçük olmalıdır.';
+
+  @override
+  String get selectAtLeastOneVault =>
+      'Lütfen işlem için en az bir kasa seçin...';
+
+  @override
+  String get exchangeRatesNotLoaded =>
+      'Döviz kurları yüklü değil. Farklı para biriminde işlem eklemek/güncellemek için kurları güncellemeniz gerekir.';
+
+  @override
+  String vaultCurrencyRateNotLoaded(String currency) {
+    return 'Seçili kasanın para birimi ($currency) için döviz kurları yüklü değil. Kurları güncellemeniz gerekir.';
+  }
+
+  @override
+  String transactionSaveError(String error) {
+    return 'İşlem kaydedilirken bir hata oluştu: $error';
+  }
+
+  @override
+  String get notificationPermissionDenied =>
+      'Bildirim izni verilmedi. Lütfen ayarlardan açın.';
+
+  @override
+  String get defaultUser => 'Kullanıcı';
+
+  @override
+  String get premiumBadge => 'Premium';
+
+  @override
+  String get email => 'E-posta';
+
+  @override
+  String get password => 'Şifre';
+
+  @override
+  String errorOccurred(String error) {
+    return 'Hata oluştu: $error';
+  }
+
+  @override
+  String aboutVersion(String version) {
+    return '$version • Made with ❤️';
+  }
+
+  @override
+  String comingSoonDesc(String feature) {
+    return '$feature özelliği çok yakında sizlerle olacak.';
+  }
+
+  @override
+  String get noVaultTransactions => 'Kasa İşlemi Bulunmadı';
+
+  @override
+  String get recurring => 'Abonelikler';
+
+  @override
+  String get thisWeek => 'Bu Hafta';
+
+  @override
+  String get thisMonth => 'Bu Ay';
+
+  @override
+  String get thisYear => 'Bu Yıl';
+
+  @override
+  String vaultLimitReachedDesc(int count) {
+    return 'Ücretsiz planda en fazla $count kasa oluşturabilirsiniz. Sınırları kaldırmak için Premium\'a geçebilirsiniz.';
+  }
+
+  @override
+  String get inAppNotifications => 'Uygulama İçi Bildirimler';
+
+  @override
+  String get exchangeRatesNotLoadedVault =>
+      'Döviz kurları yüklü değil. Kasa para birimi değiştirilemedi.';
+
+  @override
+  String get cannotDeleteVault => 'Kasa Silinemez';
+
+  @override
+  String get cannotDeleteVaultDesc =>
+      'Uygulamada en az bir aktif kasa bulunmalıdır. Başka kasa oluşturup bunu sonra silebilirsiniz.';
+
+  @override
+  String get exchangeRatesNotLoadedNewVault =>
+      'Döviz kurları yüklü değil. Farklı para biriminde kasa oluşturmak için kurları güncellemeniz gerekir.';
+
+  @override
+  String get systemNotificationsDisabled =>
+      'SİSTEM BİLDİRİM İZİNLERİ KAPALI!\nLütfen telefon ayarlarınızdan bildirim izinlerini etkinleştirin.';
+
+  @override
+  String get noNotificationHistory => 'Geçmiş Bildirim Yok';
+
+  @override
+  String get noNotificationHistoryDesc =>
+      'Daha önce tetiklenmiş herhangi bir işlem alarmı geçmişi bulunmuyor.';
+
+  @override
+  String paymentDate(String date) {
+    return 'Ödeme: $date';
+  }
+
+  @override
+  String get loginRequiredForPurchase =>
+      'Satın alma işlemini tamamlamak için lütfen giriş yapın veya ücretsiz bir hesap oluşturun.';
+
+  @override
+  String get unlockFinancialPotential =>
+      'Finansal potansiyelinizi %100 açığa çıkarın.';
+
+  @override
+  String get aiAnalysis => 'AI Analizleri';
+
+  @override
+  String get aiAnalysisDesc => 'Sınırsız ve derin yapay zeka analizleri.';
+
+  @override
+  String get unlimitedVaultsDesc =>
+      'Dilediğiniz kadar kasa ve cüzdan oluşturun.';
+
+  @override
+  String get cloudSyncDesc =>
+      'Ayarlarınızı ve verilerinizi güvenle yedekleyin ve senkronize edin.';
+
+  @override
+  String get customThemes => 'Özel Temalar';
+
+  @override
+  String get customThemesDesc =>
+      'Ayrıcalıklı renk paletleri ve arka plan stilleri.';
+
+  @override
+  String get zeroAds => 'Sıfır Reklam';
+
+  @override
+  String get zeroAdsDesc => 'Kesintisiz ve reklamsız premium deneyim.';
+
+  @override
+  String get availablePlans => 'MEVCUT PLANLAR';
+
+  @override
+  String get yearlyPremium => 'Yıllık Premium';
+
+  @override
+  String get monthlyPremium => 'Aylık Premium';
+
+  @override
+  String get bestValueFreeTrialSubtitle => 'En iyi değer • 7 gün ücretsiz';
+
+  @override
+  String get cancelAnytime => 'İstediğin zaman iptal et';
+
+  @override
+  String get bestValue => 'AVANTAJLI';
+
+  @override
+  String get yearlyPremiumSimulated => 'Yıllık Premium (Simüle)';
+
+  @override
+  String get monthlyPremiumSimulated => 'Aylık Premium (Simüle)';
+
+  @override
+  String get subscriptionAutoRenewalNote =>
+      'Abonelik otomatik olarak yenilenir. İstediğiniz zaman iptal edebilirsiniz.';
+
+  @override
+  String get sessionNotFound =>
+      'Kullanıcı oturumu bulunamadı. Lütfen tekrar giriş yapın.';
+
+  @override
+  String get upgradeToPremiumTitle => 'Finarcast Premium\'a Geçin';
+
+  @override
+  String get yearlyPremiumSimulatedPrice => '₺1.190 / yıl';
+
+  @override
+  String get yearlyPremiumSimulatedSubtitle => 'Aylık ₺99 • 7 gün ücretsiz';
+
+  @override
+  String get monthlyPremiumSimulatedPrice => '₺149 / ay';
+
+  @override
+  String get currencyTRY => 'Türk Lirası';
+
+  @override
+  String get currencyUSD => 'Amerikan Doları';
+
+  @override
+  String get currencyEUR => 'Euro';
+
+  @override
+  String get currencyGBP => 'İngiliz Sterlini';
+
+  @override
+  String get currencyJPY => 'Japon Yeni';
+
+  @override
+  String get currencyKRW => 'Kore Wonu';
+
+  @override
+  String get currencyCNY => 'Çin Yuanı';
+
+  @override
+  String get currencyBRL => 'Brezilya Reali';
+
+  @override
+  String get currencyCHF => 'İsviçre Frangı';
+
+  @override
+  String get currencyGOLD => 'Gram Altın';
+
+  @override
+  String get currencyGOLDOunce => 'Ons Altın';
+
+  @override
+  String get currencySILVER => 'Gümüş (Gram)';
+
+  @override
+  String get currencySILVEROunce => 'Gümüş (Ons)';
+
+  @override
+  String get currencySAR => 'Suudi Riyali';
+
+  @override
+  String get currencyKWD => 'Kuveyt Dinarı';
+
+  @override
+  String get vaultGuideTitle => 'Kasa Rehberi';
+
+  @override
+  String get vaultGuideContent =>
+      '📊 Karttaki Veriler Ne Anlama Geliyor?\n\n• Kasa Bakiyesi (Wallet): Kasadaki tüm zamanların kümülatif net bakiyesidir. Kasa başlangıç bakiyesi ve geçmişten bugüne gerçekleşen tüm gelir/gider hareketlerinin toplamıdır.\n\n• Gelir (Bu Ay): Sadece içinde bulunulan cari ay için tahmin edilen toplam geliri gösterir.\n\n• Gider (Bu Ay): Sadece içinde bulunulan cari ay için tahmin edilen toplam gideri gösterir.\n\n💡 Önemli Not:\nKasa Bakiyesi kümülatif (tüm zamanlar) olduğundan, o ayki Gelir ve Gider farkından farklı çıkması tamamen normaldir.';
+
+  @override
+  String get gotIt => 'Anladım';
+
+  @override
+  String get startDate => 'Başlangıç Tarihi';
+
+  @override
+  String get daily => 'Günlük';
+
+  @override
+  String get weekdays => 'Hafta İçi';
+
+  @override
+  String get weekends => 'Hafta Sonu';
+
+  @override
+  String everyXDays(Object count) {
+    return '$count günde bir';
+  }
+
+  @override
+  String everyXWeeks(Object count) {
+    return '$count haftada bir';
+  }
+
+  @override
+  String everyXMonths(Object count) {
+    return '$count ayda bir';
+  }
+
+  @override
+  String everyXYears(Object count) {
+    return '$count yılda bir';
+  }
+
+  @override
+  String get incomePerMonthLabel => 'GELİR / AY';
+
+  @override
+  String get expensePerMonthLabel => 'GİDER / AY';
+
+  @override
+  String get transactionNoteHint => 'İşleme dair not bırakın...';
+
+  @override
+  String get weekdaysShort => 'İçi';
+
+  @override
+  String get weekendsShort => 'Sonu';
+
+  @override
+  String get reminderDay => 'Hatırlatma Günü';
+
+  @override
+  String get reminderTime => 'Hatırlatma Saati';
+
+  @override
+  String get reminder => 'Hatırlatıcı';
+
+  @override
+  String get sameDay => 'Aynı Gün';
+
+  @override
+  String get oneDayBefore => '1 Gün Önce';
+
+  @override
+  String get twoDaysBefore => '2 Gün Önce';
+
+  @override
+  String get threeDaysBefore => '3 Gün Önce';
+
+  @override
+  String get oneWeekBefore => '1 Hafta Önce';
+
+  @override
+  String get unknown => 'Bilinmiyor';
+
+  @override
+  String get syncErrorDisabled => 'Eşitleme ayarı kapalı.';
+
+  @override
+  String get syncErrorPremiumRequired =>
+      'Bulut eşitleme özelliği sadece Premium üyeler içindir.';
+
+  @override
+  String get syncSuccess => 'Senkronizasyon tamamlandı.';
+
+  @override
+  String syncSuccessWithErrors(num errorCount) {
+    return 'Senkronizasyon sırasında $errorCount hata oluştu.';
+  }
+
+  @override
+  String get syncErrorProjectPaused =>
+      'Bulut veritabanı projesi duraklatılmış (Project Paused). Lütfen Supabase panelinizden projeyi tekrar aktifleştirin.';
+
+  @override
+  String get syncErrorSessionExpired =>
+      'Oturum süreniz dolmuş olabilir. Lütfen Ayarlar > Oturumu Kapat seçeneğiyle çıkış yapıp tekrar giriş yapın.';
+
+  @override
+  String get syncErrorNoInternet =>
+      'İnternet bağlantısı kurulamadı. Lütfen internet bağlantınızı kontrol edin.';
+
+  @override
+  String get syncErrorTablesMissing =>
+      'Veritabanı tabloları bulunamadı. Lütfen Supabase SQL Editor\'da setup.sql betiğini çalıştırın.';
+
+  @override
+  String get syncErrorPermissionDenied =>
+      'Veritabanı erişim yetki hatası (RLS). Lütfen Supabase tablolarında RLS politikalarını doğru yapılandırdığınızdan emin olun.';
+
+  @override
+  String syncErrorUnexpected(Object error) {
+    return 'Beklenmeyen hata: $error';
+  }
+
+  @override
+  String syncErrorPostgrest(Object code, Object message) {
+    return 'Bulut Hatası ($code): $message';
+  }
+
+  @override
+  String syncErrorAuth(Object code, Object message) {
+    return 'Kimlik Doğrulama Hatası ($code): $message';
+  }
+
+  @override
+  String activeVaults(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Aktif Kasa',
+      one: 'Aktif Kasa',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get vaultsUpper => 'KASALAR';
+
+  @override
+  String get receiptExpense => 'Fiş Harcaması';
+
+  @override
+  String get reasonSmartInput => 'Hızlı Metin Girişi';
+
+  @override
+  String get reasonReceiptScan => 'Fiş Fotoğrafı';
+
+  @override
+  String get reasonClipboard => 'Pano Bildirimi';
+
+  @override
+  String get noteCapturedFromClipboard => 'Kopyalanan Metinden Yakalandı';
+
+  @override
+  String get notificationChannelName => 'İşlem Hatırlatıcıları';
+
+  @override
+  String get notificationChannelDesc =>
+      'Periyodik ödemeler ve gelirler için hatırlatıcılar';
+
+  @override
+  String get notificationTestChannelName => 'Test Bildirimleri';
+
+  @override
+  String get notificationTestChannelDesc => 'Finarcast bildirim test kanalı';
+
+  @override
+  String get notificationTestTitle => 'Finarcast Test Bildirimi';
+
+  @override
+  String get notificationTestBody =>
+      'Harika! Uygulama içi (foreground) bildirimleriniz sorunsuz çalışıyor.';
+
+  @override
+  String get notificationTestDelayedTitle => 'Finarcast Gecikmeli Test';
+
+  @override
+  String get notificationTestDelayedBody =>
+      'Uygulama dışı (background) bildirim testi başarıyla tamamlandı!';
+
+  @override
+  String notificationIncomeTitle(Object title) {
+    return 'Gelir Hatırlatıcısı: $title';
+  }
+
+  @override
+  String notificationExpenseTitle(Object title) {
+    return 'Ödeme Hatırlatıcısı: $title';
+  }
+
+  @override
+  String notificationBodyAmount(Object amount) {
+    return 'Tutar: $amount';
+  }
+
+  @override
+  String notificationBodyDate(Object date) {
+    return 'Tarih: $date';
+  }
+
+  @override
+  String notificationBodyNote(Object note) {
+    return 'Not: $note';
+  }
+
+  @override
+  String get aiErrorRateLimit =>
+      'Günlük Yapay Zeka analiz limitinizi doldurdunuz. Lütfen Premium plana yükseltin veya yarın tekrar deneyin.';
+
+  @override
+  String get aiErrorUnauthorized =>
+      'Yetkisiz erişim. Lütfen tekrar giriş yapın.';
+
+  @override
+  String get aiErrorQuota =>
+      'Yapay Zeka kullanım limitiniz (kota) doldu. Lütfen biraz bekleyip tekrar deneyin.';
+
+  @override
+  String get aiErrorBusy =>
+      'Yapay Zeka sunucusu şu an çok yoğun. Lütfen birkaç saniye sonra tekrar deneyin.';
+
+  @override
+  String get aiErrorApiKey =>
+      'Yapay Zeka API Anahtarı geçersiz veya bulunamadı. Lütfen ayarlarınızı kontrol edin.';
+
+  @override
+  String get aiErrorTimeout =>
+      'İstek zaman aşımına uğradı. Lütfen internet bağlantınızı kontrol edip tekrar deneyin.';
+
+  @override
+  String aiErrorGeneric(Object error) {
+    return 'Yapay Zeka analizi başarısız oldu: $error';
+  }
 }

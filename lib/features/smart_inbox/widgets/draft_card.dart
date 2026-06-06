@@ -47,6 +47,7 @@ class _DismissibleDraftCardState extends State<DismissibleDraftCard>
   bool _dismissed = false;
   bool _hasTriggeredStartHaptic = false;
   bool _hasTriggeredThresholdHaptic = false;
+  double _cardWidth = 300.0;
 
   // %20 genişliği aşarsa dismiss olur
   static const double _dismissThreshold = 0.20;
@@ -85,8 +86,7 @@ class _DismissibleDraftCardState extends State<DismissibleDraftCard>
       _dragExtent += details.primaryDelta!;
     });
 
-    final width = context.size?.width ?? 300;
-    final ratio = _dragExtent.abs() / width;
+    final ratio = _dragExtent.abs() / _cardWidth;
 
     // Trigger light haptic when swipe first reveals the background
     if (!_hasTriggeredStartHaptic && _dragExtent.abs() > 8) {
@@ -107,13 +107,12 @@ class _DismissibleDraftCardState extends State<DismissibleDraftCard>
   void _onDragEnd(DragEndDetails details) {
     if (_dismissed) return;
 
-    final width = context.size?.width ?? 300;
-    final ratio = _dragExtent.abs() / width;
+    final ratio = _dragExtent.abs() / _cardWidth;
     final velocity = details.primaryVelocity ?? 0;
 
     // Eşiği geç veya hızlı fırlat → dismiss
     if (ratio > _dismissThreshold || velocity.abs() > 1200) {
-      final target = _dragExtent > 0 ? width * 1.2 : -width * 1.2;
+      final target = _dragExtent > 0 ? _cardWidth * 1.2 : -_cardWidth * 1.2;
       _dismissed = true;
 
       _animation = Tween(begin: _dragExtent, end: target).animate(
@@ -138,58 +137,62 @@ class _DismissibleDraftCardState extends State<DismissibleDraftCard>
 
   @override
   Widget build(BuildContext context) {
-    final width = MediaQuery.of(context).size.width;
-    // progress: 0.0 (hiç çekilmedi) → 1.0 (tam çekildi)
-    final progress = (_dragExtent.abs() / width).clamp(0.0, 1.0);
-    final isLeftToRight = _dragExtent > 0;
-    final showBackground = _dragExtent.abs() > 2;
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        _cardWidth = constraints.maxWidth;
+        // progress: 0.0 (hiç çekilmedi) → 1.0 (tam çekildi)
+        final progress = (_dragExtent.abs() / _cardWidth).clamp(0.0, 1.0);
+        final isLeftToRight = _dragExtent > 0;
+        final showBackground = _dragExtent.abs() > 2;
 
-    return Stack(
-      children: [
-        // Arka plan (swipe yönüne göre)
-        if (showBackground)
-          Positioned.fill(
-            child: _buildSwipeBackground(
-              isLeftToRight: isLeftToRight,
-              progress: progress,
-            ),
-          ),
+        return Stack(
+          children: [
+            // Arka plan (swipe yönüne göre)
+            if (showBackground)
+              Positioned.fill(
+                child: _buildSwipeBackground(
+                  isLeftToRight: isLeftToRight,
+                  progress: progress,
+                ),
+              ),
 
-        // Kart (sürüklenen)
-        Transform.translate(
-          offset: Offset(_dragExtent, 0),
-          child: GestureDetector(
-            onHorizontalDragStart: _onDragStart,
-            onHorizontalDragUpdate: _onDragUpdate,
-            onHorizontalDragEnd: _onDragEnd,
-            onTapDown: (_) {
-              setState(() {
-                _scale = 0.98;
-              });
-            },
-            onTapUp: (_) {
-              setState(() {
-                _scale = 1.0;
-              });
-            },
-            onTapCancel: () {
-              setState(() {
-                _scale = 1.0;
-              });
-            },
-            onTap: () {
-              HapticFeedback.lightImpact();
-              widget.onEdit();
-            },
-            child: AnimatedScale(
-              scale: _scale,
-              duration: const Duration(milliseconds: 100),
-              curve: Curves.easeInOut,
-              child: _buildDraftCard(context),
+            // Kart (sürüklenen)
+            Transform.translate(
+              offset: Offset(_dragExtent, 0),
+              child: GestureDetector(
+                onHorizontalDragStart: _onDragStart,
+                onHorizontalDragUpdate: _onDragUpdate,
+                onHorizontalDragEnd: _onDragEnd,
+                onTapDown: (_) {
+                  setState(() {
+                    _scale = 0.98;
+                  });
+                },
+                onTapUp: (_) {
+                  setState(() {
+                    _scale = 1.0;
+                  });
+                },
+                onTapCancel: () {
+                  setState(() {
+                    _scale = 1.0;
+                  });
+                },
+                onTap: () {
+                  HapticFeedback.lightImpact();
+                  widget.onEdit();
+                },
+                child: AnimatedScale(
+                  scale: _scale,
+                  duration: const Duration(milliseconds: 100),
+                  curve: Curves.easeInOut,
+                  child: _buildDraftCard(context),
+                ),
+              ),
             ),
-          ),
-        ),
-      ],
+          ],
+        );
+      },
     );
   }
 
@@ -216,19 +219,23 @@ class _DismissibleDraftCardState extends State<DismissibleDraftCard>
     final slideProgress = (progress / 0.25).clamp(0.0, 1.0);
     final xOffset = 30.0 * (1.0 - slideProgress) * slideSign;
 
-    final bool isThresholdReached = progress >= 0.20;
+    final bool isThresholdReached = _hasTriggeredThresholdHaptic;
     
-    final Color bgColor = isThresholdReached
-        ? color.withValues(alpha: 0.20)
-        : Colors.transparent;
+    // Proportional fade-in before threshold, solid active color at/after threshold
+    final double bgAlpha = isThresholdReached
+        ? 0.22
+        : (progress / _dismissThreshold).clamp(0.0, 1.0) * 0.08;
         
-    final Color borderColor = isThresholdReached
-        ? color.withValues(alpha: 0.40)
-        : Colors.transparent;
+    final double borderAlpha = isThresholdReached
+        ? 0.45
+        : (progress / _dismissThreshold).clamp(0.0, 1.0) * 0.12;
+
+    final Color bgColor = color.withValues(alpha: bgAlpha);
+    final Color borderColor = color.withValues(alpha: borderAlpha);
 
     return AnimatedContainer(
-      duration: const Duration(milliseconds: 150),
-      curve: Curves.easeOutCubic,
+      duration: const Duration(milliseconds: 80),
+      curve: Curves.easeOutQuad,
       margin: const EdgeInsets.only(bottom: 10),
       decoration: BoxDecoration(
         color: bgColor,
@@ -251,8 +258,8 @@ class _DismissibleDraftCardState extends State<DismissibleDraftCard>
                 ..rotateY(angle),
               alignment: Alignment.center,
               child: AnimatedScale(
-                scale: progress >= 0.20 ? 1.15 : 1.0,
-                duration: const Duration(milliseconds: 250),
+                scale: isThresholdReached ? 1.15 : 1.0,
+                duration: const Duration(milliseconds: 120),
                 curve: Curves.easeOutCubic,
                 child: Opacity(
                   opacity: rotationProgress,
@@ -302,7 +309,7 @@ class _DismissibleDraftCardState extends State<DismissibleDraftCard>
       if (parentCatName != null) break;
     }
 
-    final String finalCatName = parentCatName ?? 'Diğer';
+    final String finalCatName = parentCatName ?? AppLocalizations.of(context)!.otherCategory;
     final categoryAccentColor = AppColors.getAccentDeep(context, catColor);
     final Widget categoryHeaderWidget;
     if (subCatName != null) {
@@ -349,8 +356,8 @@ class _DismissibleDraftCardState extends State<DismissibleDraftCard>
 
     final String? cardNote = () {
       if (widget.draft.title.isNotEmpty &&
-          widget.draft.title != 'Boş Taslak' &&
-          widget.draft.title != 'Fiş Harcaması' &&
+          widget.draft.title != '__EMPTY_DRAFT__' &&
+          widget.draft.title != '__RECEIPT_EXPENSE__' &&
           widget.draft.title != finalCatName &&
           widget.draft.title != subCatName) {
         return widget.draft.note != null && widget.draft.note!.isNotEmpty
@@ -371,6 +378,8 @@ class _DismissibleDraftCardState extends State<DismissibleDraftCard>
     }
 
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final screenHeight = MediaQuery.of(context).size.height;
+    final sf = (screenHeight / 812.0).clamp(0.85, 1.0);
     final typeColor = widget.draft.isIncome
         ? AppColors.getIncome(context)
         : AppColors.getExpense(context);
@@ -397,15 +406,29 @@ class _DismissibleDraftCardState extends State<DismissibleDraftCard>
               children: [
                 // 1. Arka Plan Watermark (Filigran) İkonu
                 Positioned(
-                  right: -10,
-                  bottom: -10,
+                  right: -15 * sf,
+                  bottom: -10 * sf,
                   child: IgnorePointer(
                     child: Transform.rotate(
                       angle: -math.pi / 7, // ~25 derece eğim
-                      child: Icon(
-                        catIcon,
-                        size: 80,
-                        color: catColor.withValues(alpha: isDark ? 0.04 : 0.05),
+                      child: ShaderMask(
+                        shaderCallback: (bounds) {
+                          return LinearGradient(
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                            colors: [
+                              catColor.withValues(alpha: isDark ? 0.16 : 0.09),
+                              catColor.withValues(alpha: 0.0),
+                            ],
+                            stops: const [0.35, 1.0],
+                          ).createShader(bounds);
+                        },
+                        blendMode: BlendMode.srcIn,
+                        child: Icon(
+                          catIcon,
+                          size: 105 * sf,
+                          color: Colors.white,
+                        ),
                       ),
                     ),
                   ),
@@ -543,7 +566,7 @@ class _DismissibleDraftCardState extends State<DismissibleDraftCard>
                                 ),
                                 const SizedBox(width: 2.5),
                                 Text(
-                                  '${widget.draft.notificationReminderDays == 0 ? "Bugün" : "${widget.draft.notificationReminderDays}g"} ${widget.draft.notificationHour.toString().padLeft(2, '0')}:${widget.draft.notificationMinute.toString().padLeft(2, '0')}',
+                                  '${widget.draft.notificationReminderDays == 0 ? AppLocalizations.of(context)!.today : "${widget.draft.notificationReminderDays}g"} ${widget.draft.notificationHour.toString().padLeft(2, '0')}:${widget.draft.notificationMinute.toString().padLeft(2, '0')}',
                                   style: TextStyle(
                                     fontSize: 7.5,
                                     fontWeight: FontWeight.w900,

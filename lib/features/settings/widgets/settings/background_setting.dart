@@ -60,9 +60,9 @@ class BackgroundSetting extends ConsumerWidget {
                     ),
                     if (!isPro) ...[
                       const SizedBox(height: 2),
-                      const Text(
-                        "Premium",
-                        style: TextStyle(
+                      Text(
+                        l10n.premiumBadge,
+                        style: const TextStyle(
                           color: Colors.amber,
                           fontSize: 12,
                           fontWeight: FontWeight.w600,

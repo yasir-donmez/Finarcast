@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'l10n/app_localizations.dart';
@@ -91,6 +92,8 @@ void main() async {
       MaterialApp(
         debugShowCheckedModeBanner: false,
         theme: ThemeData.dark(),
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
         home: DatabaseCrashScreen(error: e, stackTrace: stack),
       ),
     );
@@ -169,13 +172,24 @@ class FinarcastApp extends ConsumerWidget {
               final isSystemDark = brightness == Brightness.dark;
               final isDark = themeMode == ThemeMode.dark || (themeMode == ThemeMode.system && isSystemDark);
               
-              return AnimatedContainer(
-                duration: const Duration(milliseconds: 250),
-                curve: Curves.easeInOut,
-                color: isDark ? AppColors.darkBackground : AppColors.lightBackground,
-                child: Material(
-                  color: Colors.transparent,
-                  child: child,
+              final systemBgColor = isDark ? AppColors.darkBackground : AppColors.lightBackground;
+
+              return AnnotatedRegion<SystemUiOverlayStyle>(
+                value: SystemUiOverlayStyle(
+                  statusBarColor: Colors.transparent,
+                  statusBarIconBrightness: isDark ? Brightness.light : Brightness.dark,
+                  statusBarBrightness: isDark ? Brightness.dark : Brightness.light,
+                  systemNavigationBarColor: systemBgColor,
+                  systemNavigationBarIconBrightness: isDark ? Brightness.light : Brightness.dark,
+                ),
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 250),
+                  curve: Curves.easeInOut,
+                  color: systemBgColor,
+                  child: Material(
+                    color: Colors.transparent,
+                    child: child,
+                  ),
                 ),
               );
             },
@@ -185,21 +199,55 @@ class FinarcastApp extends ConsumerWidget {
                 final authState = ref.watch(authStateProvider);
                 final isGuest = ref.watch(guestModeProvider);
                 
-                return authState.when(
+                final Widget activeScreen = authState.when(
                   data: (state) {
                     if (state.session != null || isGuest) {
-                      return const SyncBootstrap(child: MainScaffold());
+                      return const SyncBootstrap(
+                        key: ValueKey('main_scaffold'),
+                        child: MainScaffold(),
+                      );
                     }
-                    return const AuthScreen();
+                    return const AuthScreen(
+                      key: ValueKey('auth_screen'),
+                    );
                   },
                   loading: () => const Scaffold(
+                    key: ValueKey('loading_screen'),
                     backgroundColor: Colors.transparent, // Builder'daki renk görünecek
                     body: Center(child: CircularProgressIndicator()),
                   ),
                   error: (e, st) => Scaffold(
+                    key: ValueKey('error_screen'),
                     backgroundColor: Colors.transparent,
-                    body: Center(child: Text('Hata: $e')),
+                    body: Center(
+                      child: Text(
+                        AppLocalizations.of(context) != null
+                            ? AppLocalizations.of(context)!.errorGeneric(e.toString())
+                            : 'Hata: $e',
+                      ),
+                    ),
                   ),
+                );
+
+                return AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 400),
+                  switchInCurve: Curves.easeInOutCubic,
+                  switchOutCurve: Curves.easeInOutCubic,
+                  transitionBuilder: (Widget child, Animation<double> animation) {
+                    return FadeTransition(
+                      opacity: animation,
+                      child: ScaleTransition(
+                        scale: Tween<double>(begin: 0.96, end: 1.0).animate(
+                          CurvedAnimation(
+                            parent: animation,
+                            curve: Curves.easeInOutCubic,
+                          ),
+                        ),
+                        child: child,
+                      ),
+                    );
+                  },
+                  child: activeScreen,
                 );
               },
             ),
@@ -267,7 +315,11 @@ class _DatabaseCrashScreenState extends State<DatabaseCrashScreen> {
         setState(() {
           _isResetting = false;
         });
-        CustomNotification.error(context, 'Sıfırlama başarısız oldu: $e');
+        final l10n = AppLocalizations.of(context);
+        final errorMsg = l10n != null 
+            ? l10n.resetFailed(e.toString())
+            : 'Sıfırlama başarısız oldu: $e';
+        CustomNotification.error(context, errorMsg);
       }
     }
   }
@@ -295,9 +347,9 @@ class _DatabaseCrashScreenState extends State<DatabaseCrashScreen> {
                 ),
               ),
               const SizedBox(height: 24),
-              const Text(
-                'Kritik Veritabanı Hatası',
-                style: TextStyle(
+              Text(
+                AppLocalizations.of(context)?.criticalDatabaseError ?? 'Kritik Veritabanı Hatası',
+                style: const TextStyle(
                   color: Colors.white,
                   fontSize: 22,
                   fontWeight: FontWeight.w900,
@@ -305,10 +357,11 @@ class _DatabaseCrashScreenState extends State<DatabaseCrashScreen> {
                 ),
               ),
               const SizedBox(height: 12),
-              const Text(
-                'Uygulama veritabanında okunamayan/bozuk veriler tespit edildi. Aşağıdaki butona basarak veritabanını temizleyip uygulamayı sıfırdan başlatabilirsiniz.',
+              Text(
+                AppLocalizations.of(context)?.criticalDatabaseErrorDesc ??
+                    'Uygulama veritabanında okunamayan/bozuk veriler tespit edildi. Aşağıdaki butona basarak veritabanını temizleyip uygulamayı sıfırdan başlatabilirsiniz.',
                 textAlign: TextAlign.center,
-                style: TextStyle(
+                style: const TextStyle(
                   color: Colors.grey,
                   fontSize: 14,
                   height: 1.5,
@@ -324,9 +377,10 @@ class _DatabaseCrashScreenState extends State<DatabaseCrashScreen> {
                   child: ElevatedButton.icon(
                     onPressed: _resetDatabase,
                     icon: const Icon(Icons.refresh_rounded, color: Colors.white),
-                    label: const Text(
-                      'Veritabanını Sıfırla ve Yeniden Başlat',
-                      style: TextStyle(
+                    label: Text(
+                      AppLocalizations.of(context)?.resetDatabaseAndRestart ??
+                          'Veritabanını Sıfırla ve Yeniden Başlat',
+                      style: const TextStyle(
                         fontSize: 15,
                         fontWeight: FontWeight.bold,
                         color: Colors.white,
@@ -342,11 +396,11 @@ class _DatabaseCrashScreenState extends State<DatabaseCrashScreen> {
                   ),
                 ),
               const SizedBox(height: 32),
-              const Align(
+              Align(
                 alignment: Alignment.centerLeft,
                 child: Text(
-                  'Hata Ayrıntısı:',
-                  style: TextStyle(
+                  AppLocalizations.of(context)?.errorDetail ?? 'Hata Ayrıntısı:',
+                  style: const TextStyle(
                     color: Colors.grey,
                     fontWeight: FontWeight.bold,
                     fontSize: 13,

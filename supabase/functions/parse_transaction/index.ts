@@ -331,7 +331,7 @@ function buildReceiptPrompt(customCategories: any[]): string {
 Sen bir fatura ve fiş analiz yapay zekasısın. Gönderilen fiş görselini inceleyerek harcama bilgilerini çıkar.
 
 Kurallar:
-1. Fişin kesildiği işletme adını (başlık), toplam tutarı (amount), fiş üzerindeki tarihi (date) ve kategoriyi belirle.
+1. Fişin kesildiği işletme adını (başlık), toplam tutarı (amount), fiş üzerindeki tarihi (date) ve kategoriyi belirle. Fişin kesildiği işletme adını (başlık) belirlerken resmi şirket unvanlarını (örn. 'TİC. A.Ş.', 'LTD. ŞTİ.', 'A.Ş.', 'A. S.', 'LTD. STI.') veya şube isimlerini temizle. Sadece bilinen marka/işletme adını sade ve kısa bir şekilde yaz (örn: 'ŞOK MARKETLER TİC. A.Ş.' veya 'ŞOK MARKET' yerine sadece 'Şok', 'MİGROS TİCARET A.Ş.' yerine sadece 'Migros', 'STARBUCKS KAHVE SANA' yerine sadece 'Starbucks').
 2. Tarihi bulamazsan bugünün tarihini kullan. Tarih formatı YYYY-MM-DD olmalı.
 3. Kategori olarak aşağıdaki ID'lerden en uygun olanını seç. Eğer fiş içeriği spesifik bir alt kategoriye tam uymuyorsa, doğrudan ana kategori ID'sini seç (örn: \`exp_grocery\`, \`exp_dining\` vb.):
    - exp_grocery (Market) -> Alt: exp_grocery_food, exp_grocery_cleaning, exp_grocery_personal, exp_grocery_pet
@@ -342,7 +342,7 @@ Kurallar:
    - exp_trans (Ulaşım) -> Alt: exp_trans_travel
    - exp_other (Diğer) -> Alt: exp_other_general
 ${customText}
-4. Fişteki ürünleri karmaşık kodlar, barkod sayıları, detaylı marka-model bilgileri gibi kirliliklerden arındırarak çok kısa, sade ve anlaşılır bir alışveriş özeti halinde "note" alanına yaz.
+4. Fişteki ürünleri karmaşık kodlar, barkod sayıları, detaylı marka-model bilgileri gibi kirliliklerden arındırarak çok kısa, sade ve anlaşılır bir alışveriş özeti halinde, yan yana tek satırda aralarına virgül koyarak ve her ürünün başına madde işareti (•) ekleyerek (varsa adet, kg, litre, gram gibi miktar/nicelik bilgilerini de ekleyerek, örn. '• 2 adet Süt, • 1 kg Nohut, • 1.5 L Kola') "note" alanına yaz.
 5. EĞER YÜKLENEN GÖRSEL GEÇERLİ BİR FİŞ VEYA FATURA DEĞİLSE ya da görselden hiçbir harcama/fiş bilgisi okunamıyorsa, "amount" değerini tam olarak -1.0 yap, "title" alanına "Okunamadı" yaz ve "note" alanına bunun nedenini detaylıca Türkçe olarak açıkla.
 6. Sadece JSON formatında, kod blokları (markdown \`\`\`) olmadan şu şemaya göre yanıt dön:
 {

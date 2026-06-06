@@ -233,25 +233,40 @@ class _SpendingGiantsWidgetState extends ConsumerState<SpendingGiantsWidget> wit
     return {'currentStart': currentStart, 'currentEnd': currentEnd, 'prevStart': prevStart, 'prevEnd': prevEnd};
   }
 
+  String _getMainCategoryId(String? categoryId) {
+    if (categoryId == null || categoryId.isEmpty) return 'Diğer';
+    String baseId = categoryId;
+    if (categoryId.contains('_custom_')) {
+      baseId = categoryId.split('_custom_')[0];
+    }
+    final parts = baseId.split('_');
+    if (parts.length >= 2) {
+      return '${parts[0]}_${parts[1]}';
+    }
+    return baseId;
+  }
+
   List<_AnalyticGiant> _getAnalyticGiants(List<TransactionRecord> currentTxs, List<TransactionRecord> prevTxs, String symbol, List<ExchangeRate> rates) {
     if (currentTxs.isEmpty) return [];
     final Map<String, double> currentSums = {};
     double currentTotal = 0;
     for (final tx in currentTxs) {
       final val = tx.getConvertedAmount(symbol, rates);
-      currentSums[tx.categoryId ?? 'Diğer'] = (currentSums[tx.categoryId ?? 'Diğer'] ?? 0) + val;
+      final mainCat = _getMainCategoryId(tx.categoryId);
+      currentSums[mainCat] = (currentSums[mainCat] ?? 0) + val;
       currentTotal += val;
     }
     final Map<String, double> prevSums = {};
     double prevTotal = 0;
     for (final tx in prevTxs) {
       final val = tx.getConvertedAmount(symbol, rates);
-      prevSums[tx.categoryId ?? 'Diğer'] = (prevSums[tx.categoryId ?? 'Diğer'] ?? 0) + val;
+      final mainCat = _getMainCategoryId(tx.categoryId);
+      prevSums[mainCat] = (prevSums[mainCat] ?? 0) + val;
       prevTotal += val;
     }
     final List<_AnalyticGiant> giants = [];
     final sortedCategories = currentSums.entries.toList()..sort((a, b) => b.value.compareTo(a.value));
-    for (final entry in sortedCategories.take(5)) {
+    for (final entry in sortedCategories.take(4)) {
       final catId = entry.key;
       final currentAmount = entry.value;
       final prevAmount = prevSums[catId] ?? 0;
@@ -320,72 +335,65 @@ class _TripleOverlapPainter extends CustomPainter {
     final center = Offset(size.width / 2, size.height / 2);
     final maxRadius = (math.min(size.width, size.height) / 2) - 8;
     
-    // Temel değerler
-    double currentBaseStroke = 11.5;
-    double currentBaseSpacing = 5.0;
-    double currentBaseCore = 3.5;
+    const double strokeWidth = 16.0;
+    const double spacing = 2.0;
+    const double coreWidth = 3.5;
 
     for (int i = 0; i < giants.length; i++) {
       final g = giants[i];
       
-      // Dinamik daraltma (Merkeze gittikçe incelme)
-      final double sWidth = (currentBaseStroke - (i * 1.2)).clamp(4.0, 12.0);
-      final double cWidth = (currentBaseCore - (i * 0.4)).clamp(1.5, 4.0);
-      // Yarıçap hesaplama
-      double currentRadius = maxRadius;
-      for (int j = 0; j < i; j++) {
-        currentRadius -= (currentBaseStroke - (j * 1.2)).clamp(4.0, 12.0) + (currentBaseSpacing - (j * 0.4)).clamp(2.0, 6.0);
-      }
-      
-      if (currentRadius < 10) break; // Çok küçükse çizme
+      final double currentRadius = maxRadius - i * (strokeWidth + spacing);
+      if (currentRadius < strokeWidth) break;
 
       final Color catColor = CategoryUtils.getCategoryColor(
         categoryId: g.categoryId,
         customCategories: customCategories,
       );
-      final Rect arcRect = Rect.fromCircle(center: center, radius: currentRadius);
-      
-      // Dinamik Gap (Her halkada aynı boşluk mesafesi)
-      final double gapAngle = 4.0 / currentRadius;
 
-      // --- YARDIMCI ÇİZİM FONKSİYONU ---
-      void drawSegmentedArc(double percentage, Paint paint) {
-        final double totalSweep = (percentage / 100) * 2 * math.pi * animationValue;
-        for (int q = 0; q < 4; q++) {
-          final double qStart = q * (math.pi / 2);
-          if (totalSweep > qStart) {
-            final double startAngle = -math.pi / 2 + qStart + gapAngle;
-            double sweepAngle = math.min(totalSweep - qStart, math.pi / 2) - (gapAngle * 2);
-            if (sweepAngle > 0) {
-              canvas.drawArc(arcRect, startAngle, sweepAngle, false, paint);
-            }
-          }
-        }
+      // 1. ZEMİN TRACK (Sönük arka plan halkası)
+      final trackPaint = Paint()
+        ..color = catColor.withValues(alpha: 0.15)
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = strokeWidth
+        ..strokeCap = StrokeCap.round;
+      
+      canvas.drawCircle(center, currentRadius, trackPaint);
+
+      // 2. ŞU ANKİ DÖNEM (Düz renkli ana halka)
+      final double sweepAngle = 2 * math.pi * (g.percentage / 100.0) * animationValue;
+      if (sweepAngle > 0) {
+        final currentPaint = Paint()
+          ..color = catColor
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = strokeWidth
+          ..strokeCap = StrokeCap.round;
+        
+        canvas.drawArc(
+          Rect.fromCircle(center: center, radius: currentRadius),
+          -math.pi / 2,
+          sweepAngle,
+          false,
+          currentPaint,
+        );
       }
 
-      // 1. KATMAN: ZEMİN
-      final trackPaint = Paint()
-        ..color = catColor.withValues(alpha: 0.05)
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = sWidth
-        ..strokeCap = StrokeCap.round;
-      drawSegmentedArc(100.0, trackPaint);
-
-      // 2. KATMAN: ŞU ANKİ DÖNEM
-      final currentPaint = Paint()
-        ..color = catColor.withValues(alpha: 0.3)
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = sWidth
-        ..strokeCap = StrokeCap.round;
-      drawSegmentedArc(g.percentage, currentPaint);
-
-      // 3. KATMAN: GEÇEN DÖNEM (PARLAK ÇEKİRDEK)
-      final prevPaint = Paint()
-        ..color = catColor.withValues(alpha: 1.0)
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = cWidth
-        ..strokeCap = StrokeCap.round;
-      drawSegmentedArc(g.prevPercentage, prevPaint);
+      // 3. GEÇEN DÖNEM (İnce beyaz parlak çekirdek)
+      final double prevSweepAngle = 2 * math.pi * (g.prevPercentage / 100.0) * animationValue;
+      if (prevSweepAngle > 0) {
+        final prevPaint = Paint()
+          ..color = Colors.white.withValues(alpha: 0.5)
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = coreWidth
+          ..strokeCap = StrokeCap.round;
+        
+        canvas.drawArc(
+          Rect.fromCircle(center: center, radius: currentRadius),
+          -math.pi / 2,
+          prevSweepAngle,
+          false,
+          prevPaint,
+        );
+      }
     }
   }
 

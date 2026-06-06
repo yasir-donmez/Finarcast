@@ -27,58 +27,23 @@ const VaultSchema = CollectionSchema(
       name: r'currency',
       type: IsarType.string,
     ),
-    r'dashboardLayoutType': PropertySchema(
-      id: 2,
-      name: r'dashboardLayoutType',
-      type: IsarType.long,
-    ),
-    r'dashboardOrder': PropertySchema(
-      id: 3,
-      name: r'dashboardOrder',
-      type: IsarType.long,
-    ),
-    r'iconCode': PropertySchema(
-      id: 4,
-      name: r'iconCode',
-      type: IsarType.string,
-    ),
-    r'isIncludedInTotal': PropertySchema(
-      id: 5,
-      name: r'isIncludedInTotal',
-      type: IsarType.bool,
-    ),
-    r'maxLimit': PropertySchema(
-      id: 6,
-      name: r'maxLimit',
-      type: IsarType.double,
-    ),
-    r'minLimit': PropertySchema(
-      id: 7,
-      name: r'minLimit',
-      type: IsarType.double,
-    ),
     r'name': PropertySchema(
-      id: 8,
+      id: 2,
       name: r'name',
       type: IsarType.string,
     ),
     r'remoteId': PropertySchema(
-      id: 9,
+      id: 3,
       name: r'remoteId',
       type: IsarType.string,
     ),
-    r'showOnDashboard': PropertySchema(
-      id: 10,
-      name: r'showOnDashboard',
-      type: IsarType.bool,
-    ),
     r'syncStatus': PropertySchema(
-      id: 11,
+      id: 4,
       name: r'syncStatus',
       type: IsarType.long,
     ),
     r'updatedAt': PropertySchema(
-      id: 12,
+      id: 5,
       name: r'updatedAt',
       type: IsarType.dateTime,
     )
@@ -144,12 +109,6 @@ int _vaultEstimateSize(
 ) {
   var bytesCount = offsets.last;
   bytesCount += 3 + object.currency.length * 3;
-  {
-    final value = object.iconCode;
-    if (value != null) {
-      bytesCount += 3 + value.length * 3;
-    }
-  }
   bytesCount += 3 + object.name.length * 3;
   {
     final value = object.remoteId;
@@ -168,17 +127,10 @@ void _vaultSerialize(
 ) {
   writer.writeDouble(offsets[0], object.balance);
   writer.writeString(offsets[1], object.currency);
-  writer.writeLong(offsets[2], object.dashboardLayoutType);
-  writer.writeLong(offsets[3], object.dashboardOrder);
-  writer.writeString(offsets[4], object.iconCode);
-  writer.writeBool(offsets[5], object.isIncludedInTotal);
-  writer.writeDouble(offsets[6], object.maxLimit);
-  writer.writeDouble(offsets[7], object.minLimit);
-  writer.writeString(offsets[8], object.name);
-  writer.writeString(offsets[9], object.remoteId);
-  writer.writeBool(offsets[10], object.showOnDashboard);
-  writer.writeLong(offsets[11], object.syncStatus);
-  writer.writeDateTime(offsets[12], object.updatedAt);
+  writer.writeString(offsets[2], object.name);
+  writer.writeString(offsets[3], object.remoteId);
+  writer.writeLong(offsets[4], object.syncStatus);
+  writer.writeDateTime(offsets[5], object.updatedAt);
 }
 
 Vault _vaultDeserialize(
@@ -190,18 +142,11 @@ Vault _vaultDeserialize(
   final object = Vault();
   object.balance = reader.readDouble(offsets[0]);
   object.currency = reader.readString(offsets[1]);
-  object.dashboardLayoutType = reader.readLong(offsets[2]);
-  object.dashboardOrder = reader.readLong(offsets[3]);
-  object.iconCode = reader.readStringOrNull(offsets[4]);
   object.id = id;
-  object.isIncludedInTotal = reader.readBool(offsets[5]);
-  object.maxLimit = reader.readDoubleOrNull(offsets[6]);
-  object.minLimit = reader.readDoubleOrNull(offsets[7]);
-  object.name = reader.readString(offsets[8]);
-  object.remoteId = reader.readStringOrNull(offsets[9]);
-  object.showOnDashboard = reader.readBool(offsets[10]);
-  object.syncStatus = reader.readLong(offsets[11]);
-  object.updatedAt = reader.readDateTime(offsets[12]);
+  object.name = reader.readString(offsets[2]);
+  object.remoteId = reader.readStringOrNull(offsets[3]);
+  object.syncStatus = reader.readLong(offsets[4]);
+  object.updatedAt = reader.readDateTime(offsets[5]);
   return object;
 }
 
@@ -217,26 +162,12 @@ P _vaultDeserializeProp<P>(
     case 1:
       return (reader.readString(offset)) as P;
     case 2:
-      return (reader.readLong(offset)) as P;
-    case 3:
-      return (reader.readLong(offset)) as P;
-    case 4:
-      return (reader.readStringOrNull(offset)) as P;
-    case 5:
-      return (reader.readBool(offset)) as P;
-    case 6:
-      return (reader.readDoubleOrNull(offset)) as P;
-    case 7:
-      return (reader.readDoubleOrNull(offset)) as P;
-    case 8:
       return (reader.readString(offset)) as P;
-    case 9:
+    case 3:
       return (reader.readStringOrNull(offset)) as P;
-    case 10:
-      return (reader.readBool(offset)) as P;
-    case 11:
+    case 4:
       return (reader.readLong(offset)) as P;
-    case 12:
+    case 5:
       return (reader.readDateTime(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -784,259 +715,6 @@ extension VaultQueryFilter on QueryBuilder<Vault, Vault, QFilterCondition> {
     });
   }
 
-  QueryBuilder<Vault, Vault, QAfterFilterCondition> dashboardLayoutTypeEqualTo(
-      int value) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'dashboardLayoutType',
-        value: value,
-      ));
-    });
-  }
-
-  QueryBuilder<Vault, Vault, QAfterFilterCondition>
-      dashboardLayoutTypeGreaterThan(
-    int value, {
-    bool include = false,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        include: include,
-        property: r'dashboardLayoutType',
-        value: value,
-      ));
-    });
-  }
-
-  QueryBuilder<Vault, Vault, QAfterFilterCondition> dashboardLayoutTypeLessThan(
-    int value, {
-    bool include = false,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.lessThan(
-        include: include,
-        property: r'dashboardLayoutType',
-        value: value,
-      ));
-    });
-  }
-
-  QueryBuilder<Vault, Vault, QAfterFilterCondition> dashboardLayoutTypeBetween(
-    int lower,
-    int upper, {
-    bool includeLower = true,
-    bool includeUpper = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.between(
-        property: r'dashboardLayoutType',
-        lower: lower,
-        includeLower: includeLower,
-        upper: upper,
-        includeUpper: includeUpper,
-      ));
-    });
-  }
-
-  QueryBuilder<Vault, Vault, QAfterFilterCondition> dashboardOrderEqualTo(
-      int value) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'dashboardOrder',
-        value: value,
-      ));
-    });
-  }
-
-  QueryBuilder<Vault, Vault, QAfterFilterCondition> dashboardOrderGreaterThan(
-    int value, {
-    bool include = false,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        include: include,
-        property: r'dashboardOrder',
-        value: value,
-      ));
-    });
-  }
-
-  QueryBuilder<Vault, Vault, QAfterFilterCondition> dashboardOrderLessThan(
-    int value, {
-    bool include = false,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.lessThan(
-        include: include,
-        property: r'dashboardOrder',
-        value: value,
-      ));
-    });
-  }
-
-  QueryBuilder<Vault, Vault, QAfterFilterCondition> dashboardOrderBetween(
-    int lower,
-    int upper, {
-    bool includeLower = true,
-    bool includeUpper = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.between(
-        property: r'dashboardOrder',
-        lower: lower,
-        includeLower: includeLower,
-        upper: upper,
-        includeUpper: includeUpper,
-      ));
-    });
-  }
-
-  QueryBuilder<Vault, Vault, QAfterFilterCondition> iconCodeIsNull() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(const FilterCondition.isNull(
-        property: r'iconCode',
-      ));
-    });
-  }
-
-  QueryBuilder<Vault, Vault, QAfterFilterCondition> iconCodeIsNotNull() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(const FilterCondition.isNotNull(
-        property: r'iconCode',
-      ));
-    });
-  }
-
-  QueryBuilder<Vault, Vault, QAfterFilterCondition> iconCodeEqualTo(
-    String? value, {
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'iconCode',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<Vault, Vault, QAfterFilterCondition> iconCodeGreaterThan(
-    String? value, {
-    bool include = false,
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        include: include,
-        property: r'iconCode',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<Vault, Vault, QAfterFilterCondition> iconCodeLessThan(
-    String? value, {
-    bool include = false,
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.lessThan(
-        include: include,
-        property: r'iconCode',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<Vault, Vault, QAfterFilterCondition> iconCodeBetween(
-    String? lower,
-    String? upper, {
-    bool includeLower = true,
-    bool includeUpper = true,
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.between(
-        property: r'iconCode',
-        lower: lower,
-        includeLower: includeLower,
-        upper: upper,
-        includeUpper: includeUpper,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<Vault, Vault, QAfterFilterCondition> iconCodeStartsWith(
-    String value, {
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.startsWith(
-        property: r'iconCode',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<Vault, Vault, QAfterFilterCondition> iconCodeEndsWith(
-    String value, {
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.endsWith(
-        property: r'iconCode',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<Vault, Vault, QAfterFilterCondition> iconCodeContains(
-      String value,
-      {bool caseSensitive = true}) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.contains(
-        property: r'iconCode',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<Vault, Vault, QAfterFilterCondition> iconCodeMatches(
-      String pattern,
-      {bool caseSensitive = true}) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.matches(
-        property: r'iconCode',
-        wildcard: pattern,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<Vault, Vault, QAfterFilterCondition> iconCodeIsEmpty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'iconCode',
-        value: '',
-      ));
-    });
-  }
-
-  QueryBuilder<Vault, Vault, QAfterFilterCondition> iconCodeIsNotEmpty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        property: r'iconCode',
-        value: '',
-      ));
-    });
-  }
-
   QueryBuilder<Vault, Vault, QAfterFilterCondition> idEqualTo(Id value) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
@@ -1085,172 +763,6 @@ extension VaultQueryFilter on QueryBuilder<Vault, Vault, QFilterCondition> {
         includeLower: includeLower,
         upper: upper,
         includeUpper: includeUpper,
-      ));
-    });
-  }
-
-  QueryBuilder<Vault, Vault, QAfterFilterCondition> isIncludedInTotalEqualTo(
-      bool value) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'isIncludedInTotal',
-        value: value,
-      ));
-    });
-  }
-
-  QueryBuilder<Vault, Vault, QAfterFilterCondition> maxLimitIsNull() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(const FilterCondition.isNull(
-        property: r'maxLimit',
-      ));
-    });
-  }
-
-  QueryBuilder<Vault, Vault, QAfterFilterCondition> maxLimitIsNotNull() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(const FilterCondition.isNotNull(
-        property: r'maxLimit',
-      ));
-    });
-  }
-
-  QueryBuilder<Vault, Vault, QAfterFilterCondition> maxLimitEqualTo(
-    double? value, {
-    double epsilon = Query.epsilon,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'maxLimit',
-        value: value,
-        epsilon: epsilon,
-      ));
-    });
-  }
-
-  QueryBuilder<Vault, Vault, QAfterFilterCondition> maxLimitGreaterThan(
-    double? value, {
-    bool include = false,
-    double epsilon = Query.epsilon,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        include: include,
-        property: r'maxLimit',
-        value: value,
-        epsilon: epsilon,
-      ));
-    });
-  }
-
-  QueryBuilder<Vault, Vault, QAfterFilterCondition> maxLimitLessThan(
-    double? value, {
-    bool include = false,
-    double epsilon = Query.epsilon,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.lessThan(
-        include: include,
-        property: r'maxLimit',
-        value: value,
-        epsilon: epsilon,
-      ));
-    });
-  }
-
-  QueryBuilder<Vault, Vault, QAfterFilterCondition> maxLimitBetween(
-    double? lower,
-    double? upper, {
-    bool includeLower = true,
-    bool includeUpper = true,
-    double epsilon = Query.epsilon,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.between(
-        property: r'maxLimit',
-        lower: lower,
-        includeLower: includeLower,
-        upper: upper,
-        includeUpper: includeUpper,
-        epsilon: epsilon,
-      ));
-    });
-  }
-
-  QueryBuilder<Vault, Vault, QAfterFilterCondition> minLimitIsNull() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(const FilterCondition.isNull(
-        property: r'minLimit',
-      ));
-    });
-  }
-
-  QueryBuilder<Vault, Vault, QAfterFilterCondition> minLimitIsNotNull() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(const FilterCondition.isNotNull(
-        property: r'minLimit',
-      ));
-    });
-  }
-
-  QueryBuilder<Vault, Vault, QAfterFilterCondition> minLimitEqualTo(
-    double? value, {
-    double epsilon = Query.epsilon,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'minLimit',
-        value: value,
-        epsilon: epsilon,
-      ));
-    });
-  }
-
-  QueryBuilder<Vault, Vault, QAfterFilterCondition> minLimitGreaterThan(
-    double? value, {
-    bool include = false,
-    double epsilon = Query.epsilon,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        include: include,
-        property: r'minLimit',
-        value: value,
-        epsilon: epsilon,
-      ));
-    });
-  }
-
-  QueryBuilder<Vault, Vault, QAfterFilterCondition> minLimitLessThan(
-    double? value, {
-    bool include = false,
-    double epsilon = Query.epsilon,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.lessThan(
-        include: include,
-        property: r'minLimit',
-        value: value,
-        epsilon: epsilon,
-      ));
-    });
-  }
-
-  QueryBuilder<Vault, Vault, QAfterFilterCondition> minLimitBetween(
-    double? lower,
-    double? upper, {
-    bool includeLower = true,
-    bool includeUpper = true,
-    double epsilon = Query.epsilon,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.between(
-        property: r'minLimit',
-        lower: lower,
-        includeLower: includeLower,
-        upper: upper,
-        includeUpper: includeUpper,
-        epsilon: epsilon,
       ));
     });
   }
@@ -1529,16 +1041,6 @@ extension VaultQueryFilter on QueryBuilder<Vault, Vault, QFilterCondition> {
     });
   }
 
-  QueryBuilder<Vault, Vault, QAfterFilterCondition> showOnDashboardEqualTo(
-      bool value) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'showOnDashboard',
-        value: value,
-      ));
-    });
-  }
-
   QueryBuilder<Vault, Vault, QAfterFilterCondition> syncStatusEqualTo(
       int value) {
     return QueryBuilder.apply(this, (query) {
@@ -1675,78 +1177,6 @@ extension VaultQuerySortBy on QueryBuilder<Vault, Vault, QSortBy> {
     });
   }
 
-  QueryBuilder<Vault, Vault, QAfterSortBy> sortByDashboardLayoutType() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'dashboardLayoutType', Sort.asc);
-    });
-  }
-
-  QueryBuilder<Vault, Vault, QAfterSortBy> sortByDashboardLayoutTypeDesc() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'dashboardLayoutType', Sort.desc);
-    });
-  }
-
-  QueryBuilder<Vault, Vault, QAfterSortBy> sortByDashboardOrder() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'dashboardOrder', Sort.asc);
-    });
-  }
-
-  QueryBuilder<Vault, Vault, QAfterSortBy> sortByDashboardOrderDesc() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'dashboardOrder', Sort.desc);
-    });
-  }
-
-  QueryBuilder<Vault, Vault, QAfterSortBy> sortByIconCode() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'iconCode', Sort.asc);
-    });
-  }
-
-  QueryBuilder<Vault, Vault, QAfterSortBy> sortByIconCodeDesc() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'iconCode', Sort.desc);
-    });
-  }
-
-  QueryBuilder<Vault, Vault, QAfterSortBy> sortByIsIncludedInTotal() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'isIncludedInTotal', Sort.asc);
-    });
-  }
-
-  QueryBuilder<Vault, Vault, QAfterSortBy> sortByIsIncludedInTotalDesc() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'isIncludedInTotal', Sort.desc);
-    });
-  }
-
-  QueryBuilder<Vault, Vault, QAfterSortBy> sortByMaxLimit() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'maxLimit', Sort.asc);
-    });
-  }
-
-  QueryBuilder<Vault, Vault, QAfterSortBy> sortByMaxLimitDesc() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'maxLimit', Sort.desc);
-    });
-  }
-
-  QueryBuilder<Vault, Vault, QAfterSortBy> sortByMinLimit() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'minLimit', Sort.asc);
-    });
-  }
-
-  QueryBuilder<Vault, Vault, QAfterSortBy> sortByMinLimitDesc() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'minLimit', Sort.desc);
-    });
-  }
-
   QueryBuilder<Vault, Vault, QAfterSortBy> sortByName() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'name', Sort.asc);
@@ -1768,18 +1198,6 @@ extension VaultQuerySortBy on QueryBuilder<Vault, Vault, QSortBy> {
   QueryBuilder<Vault, Vault, QAfterSortBy> sortByRemoteIdDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'remoteId', Sort.desc);
-    });
-  }
-
-  QueryBuilder<Vault, Vault, QAfterSortBy> sortByShowOnDashboard() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'showOnDashboard', Sort.asc);
-    });
-  }
-
-  QueryBuilder<Vault, Vault, QAfterSortBy> sortByShowOnDashboardDesc() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'showOnDashboard', Sort.desc);
     });
   }
 
@@ -1833,42 +1251,6 @@ extension VaultQuerySortThenBy on QueryBuilder<Vault, Vault, QSortThenBy> {
     });
   }
 
-  QueryBuilder<Vault, Vault, QAfterSortBy> thenByDashboardLayoutType() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'dashboardLayoutType', Sort.asc);
-    });
-  }
-
-  QueryBuilder<Vault, Vault, QAfterSortBy> thenByDashboardLayoutTypeDesc() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'dashboardLayoutType', Sort.desc);
-    });
-  }
-
-  QueryBuilder<Vault, Vault, QAfterSortBy> thenByDashboardOrder() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'dashboardOrder', Sort.asc);
-    });
-  }
-
-  QueryBuilder<Vault, Vault, QAfterSortBy> thenByDashboardOrderDesc() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'dashboardOrder', Sort.desc);
-    });
-  }
-
-  QueryBuilder<Vault, Vault, QAfterSortBy> thenByIconCode() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'iconCode', Sort.asc);
-    });
-  }
-
-  QueryBuilder<Vault, Vault, QAfterSortBy> thenByIconCodeDesc() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'iconCode', Sort.desc);
-    });
-  }
-
   QueryBuilder<Vault, Vault, QAfterSortBy> thenById() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'id', Sort.asc);
@@ -1878,42 +1260,6 @@ extension VaultQuerySortThenBy on QueryBuilder<Vault, Vault, QSortThenBy> {
   QueryBuilder<Vault, Vault, QAfterSortBy> thenByIdDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'id', Sort.desc);
-    });
-  }
-
-  QueryBuilder<Vault, Vault, QAfterSortBy> thenByIsIncludedInTotal() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'isIncludedInTotal', Sort.asc);
-    });
-  }
-
-  QueryBuilder<Vault, Vault, QAfterSortBy> thenByIsIncludedInTotalDesc() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'isIncludedInTotal', Sort.desc);
-    });
-  }
-
-  QueryBuilder<Vault, Vault, QAfterSortBy> thenByMaxLimit() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'maxLimit', Sort.asc);
-    });
-  }
-
-  QueryBuilder<Vault, Vault, QAfterSortBy> thenByMaxLimitDesc() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'maxLimit', Sort.desc);
-    });
-  }
-
-  QueryBuilder<Vault, Vault, QAfterSortBy> thenByMinLimit() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'minLimit', Sort.asc);
-    });
-  }
-
-  QueryBuilder<Vault, Vault, QAfterSortBy> thenByMinLimitDesc() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'minLimit', Sort.desc);
     });
   }
 
@@ -1938,18 +1284,6 @@ extension VaultQuerySortThenBy on QueryBuilder<Vault, Vault, QSortThenBy> {
   QueryBuilder<Vault, Vault, QAfterSortBy> thenByRemoteIdDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'remoteId', Sort.desc);
-    });
-  }
-
-  QueryBuilder<Vault, Vault, QAfterSortBy> thenByShowOnDashboard() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'showOnDashboard', Sort.asc);
-    });
-  }
-
-  QueryBuilder<Vault, Vault, QAfterSortBy> thenByShowOnDashboardDesc() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'showOnDashboard', Sort.desc);
     });
   }
 
@@ -1992,43 +1326,6 @@ extension VaultQueryWhereDistinct on QueryBuilder<Vault, Vault, QDistinct> {
     });
   }
 
-  QueryBuilder<Vault, Vault, QDistinct> distinctByDashboardLayoutType() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addDistinctBy(r'dashboardLayoutType');
-    });
-  }
-
-  QueryBuilder<Vault, Vault, QDistinct> distinctByDashboardOrder() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addDistinctBy(r'dashboardOrder');
-    });
-  }
-
-  QueryBuilder<Vault, Vault, QDistinct> distinctByIconCode(
-      {bool caseSensitive = true}) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addDistinctBy(r'iconCode', caseSensitive: caseSensitive);
-    });
-  }
-
-  QueryBuilder<Vault, Vault, QDistinct> distinctByIsIncludedInTotal() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addDistinctBy(r'isIncludedInTotal');
-    });
-  }
-
-  QueryBuilder<Vault, Vault, QDistinct> distinctByMaxLimit() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addDistinctBy(r'maxLimit');
-    });
-  }
-
-  QueryBuilder<Vault, Vault, QDistinct> distinctByMinLimit() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addDistinctBy(r'minLimit');
-    });
-  }
-
   QueryBuilder<Vault, Vault, QDistinct> distinctByName(
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
@@ -2040,12 +1337,6 @@ extension VaultQueryWhereDistinct on QueryBuilder<Vault, Vault, QDistinct> {
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'remoteId', caseSensitive: caseSensitive);
-    });
-  }
-
-  QueryBuilder<Vault, Vault, QDistinct> distinctByShowOnDashboard() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addDistinctBy(r'showOnDashboard');
     });
   }
 
@@ -2081,42 +1372,6 @@ extension VaultQueryProperty on QueryBuilder<Vault, Vault, QQueryProperty> {
     });
   }
 
-  QueryBuilder<Vault, int, QQueryOperations> dashboardLayoutTypeProperty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r'dashboardLayoutType');
-    });
-  }
-
-  QueryBuilder<Vault, int, QQueryOperations> dashboardOrderProperty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r'dashboardOrder');
-    });
-  }
-
-  QueryBuilder<Vault, String?, QQueryOperations> iconCodeProperty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r'iconCode');
-    });
-  }
-
-  QueryBuilder<Vault, bool, QQueryOperations> isIncludedInTotalProperty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r'isIncludedInTotal');
-    });
-  }
-
-  QueryBuilder<Vault, double?, QQueryOperations> maxLimitProperty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r'maxLimit');
-    });
-  }
-
-  QueryBuilder<Vault, double?, QQueryOperations> minLimitProperty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r'minLimit');
-    });
-  }
-
   QueryBuilder<Vault, String, QQueryOperations> nameProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'name');
@@ -2126,12 +1381,6 @@ extension VaultQueryProperty on QueryBuilder<Vault, Vault, QQueryProperty> {
   QueryBuilder<Vault, String?, QQueryOperations> remoteIdProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'remoteId');
-    });
-  }
-
-  QueryBuilder<Vault, bool, QQueryOperations> showOnDashboardProperty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r'showOnDashboard');
     });
   }
 

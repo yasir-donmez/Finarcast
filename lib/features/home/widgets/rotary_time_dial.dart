@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/app_constants.dart';
 import '../home_providers.dart';
+import '../../../l10n/app_localizations.dart';
 
 /// Finarcast'in "Zaman Makinesi" vizyonu olan Rotary Dial (Fiziksel Kadran)
 /// Progressive Time Scale (Giderek Hızlanan Zaman) mekanizması ile birleşti.
@@ -126,27 +127,28 @@ class _RotaryTimeDialState extends ConsumerState<RotaryTimeDial> with SingleTick
     return AppColors.getPrimary(context);
   }
 
-  String _getTimeLabel(double currentAngle) {
-    if (currentAngle <= 0.01) return "Bugün";
+  String _getTimeLabel(double currentAngle, AppLocalizations l10n) {
+    if (currentAngle <= 0.01) return l10n.today;
     double turns = currentAngle / (2 * pi);
     if (turns <= 1.0) {
       int days = (turns * 7).round();
-      return days == 0 ? "Bugün" : "$days Gün";
+      return days == 0 ? l10n.today : l10n.daysCount(days);
     } else if (turns <= 2.0) {
       int weeks = 1 + ((turns - 1.0) * 3).round();
-      return weeks >= 4 ? "1 Ay" : "$weeks Hafta";
+      return weeks >= 4 ? l10n.oneMonth : l10n.weeksCount(weeks);
     } else if (turns <= 3.0) {
       int months = 1 + ((turns - 2.0) * 11).round();
-      return months >= 12 ? "1 Yıl" : "$months Ay";
+      return months >= 12 ? l10n.oneYear : l10n.monthsCount(months);
     } else {
       int years = 1 + ((turns - 3.0) * 9).round();
-      return "$years Yıl";
+      return l10n.yearsCount(years);
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final timeLabel = _getTimeLabel(_currentAngle);
+    final l10n = AppLocalizations.of(context)!;
+    final timeLabel = _getTimeLabel(_currentAngle, l10n);
     final activeColor = _getFixedColor();
 
     return Column(

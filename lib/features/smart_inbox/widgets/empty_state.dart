@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/app_constants.dart';
-import '../../home/home_providers.dart';
 import '../../../shared/widgets/inset_container.dart';
+import '../../../l10n/app_localizations.dart';
 
 class SmartInboxEmptyState extends ConsumerStatefulWidget {
   const SmartInboxEmptyState({super.key});
@@ -14,9 +14,6 @@ class SmartInboxEmptyState extends ConsumerStatefulWidget {
 class _SmartInboxEmptyStateState extends ConsumerState<SmartInboxEmptyState> {
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final activeColor = ref.watch(rotaryColorProvider);
-
     return Center(
       child: SingleChildScrollView(
         physics: const BouncingScrollPhysics(),
@@ -44,17 +41,17 @@ class _SmartInboxEmptyStateState extends ConsumerState<SmartInboxEmptyState> {
               child: Icon(
                 Icons.auto_awesome_rounded,
                 size: 40,
-                color: activeColor.withValues(alpha: isDark ? 0.35 : 0.5),
+                color: AppColors.getTextSecondary(context).withValues(alpha: 0.4),
               ),
             ),
             const SizedBox(height: 24),
 
             // Kasalar sayfasıyla aynı sade ve şık yazı stili
             Text(
-              Localizations.localeOf(context).languageCode == 'tr' ? 'GELEN KUTUNUZ BOŞ' : 'INBOX IS EMPTY',
+              AppLocalizations.of(context)!.inboxEmpty,
               textAlign: TextAlign.center,
               style: TextStyle(
-                color: AppColors.getTextSecondary(context).withValues(alpha: isDark ? 0.4 : 0.7),
+                color: AppColors.getTextSecondary(context).withValues(alpha: 0.7),
                 fontSize: 13,
                 fontWeight: FontWeight.w900,
                 letterSpacing: 2,

@@ -52,151 +52,211 @@ class TransactionCategoryData {
     final isTr = locale == 'tr';
     
     final Map<String, Map<String, String>> names = {
+      // ==========================================
       // GİDERLER (EXPENSES)
-      'exp_grocery': {'tr': 'Market', 'en': 'Grocery'},
-      'exp_grocery_food': {'tr': 'Gıda', 'en': 'Food'},
-      'exp_grocery_cleaning': {'tr': 'Temizlik', 'en': 'Cleaning'},
-      'exp_grocery_personal': {'tr': 'Kişisel Bakım', 'en': 'Personal Care'},
-      'exp_grocery_pet': {'tr': 'Evcil Hayvan', 'en': 'Pet Care'},
-      
-      'exp_dining': {'tr': 'Dışarıda Yemek', 'en': 'Dining'},
-      'exp_dining_restaurant': {'tr': 'Restoran', 'en': 'Restaurant'},
-      'exp_dining_fastfood': {'tr': 'Fast Food', 'en': 'Fast Food'},
-      'exp_dining_cafe': {'tr': 'Kafe', 'en': 'Cafe'},
-      'exp_dining_delivery': {'tr': 'Eve Sipariş', 'en': 'Delivery'},
-      
-      'exp_rent': {'tr': 'Kira', 'en': 'Rent'},
+      // ==========================================
+      // Barınma
+      'exp_rent': {'tr': 'Barınma', 'en': 'Housing'},
       'exp_rent_home': {'tr': 'Ev Kirası', 'en': 'Home Rent'},
       'exp_rent_office': {'tr': 'Ofis Kirası', 'en': 'Office Rent'},
-      'exp_rent_storage': {'tr': 'Depo', 'en': 'Storage'},
+      'exp_rent_mortgage': {'tr': 'Konut Kredisi', 'en': 'Mortgage'},
+      'exp_rent_maintenance': {'tr': 'Tadilat', 'en': 'Maintenance'},
+      'exp_rent_storage': {'tr': 'Depolama', 'en': 'Storage'},
       
-      'exp_bill': {'tr': 'Fatura', 'en': 'Bill'},
+      // Faturalar
+      'exp_bill': {'tr': 'Faturalar', 'en': 'Bills'},
       'exp_bill_electricity': {'tr': 'Elektrik', 'en': 'Electricity'},
       'exp_bill_water': {'tr': 'Su', 'en': 'Water'},
       'exp_bill_gas': {'tr': 'Doğalgaz', 'en': 'Gas'},
       'exp_bill_internet': {'tr': 'İnternet', 'en': 'Internet'},
       'exp_bill_phone': {'tr': 'Telefon', 'en': 'Phone'},
       'exp_bill_dues': {'tr': 'Aidat', 'en': 'Dues'},
+      'exp_bill_tv': {'tr': 'Televizyon', 'en': 'TV'},
       
-      'exp_home': {'tr': 'Ev', 'en': 'Home'},
-      'exp_home_furniture': {'tr': 'Dekorasyon', 'en': 'Decoration'},
-      'exp_home_maintenance': {'tr': 'Tadilat', 'en': 'Maintenance'},
-      'exp_home_supplies': {'tr': 'Ev Alışverişi', 'en': 'Houseware'},
-      'exp_home_garden': {'tr': 'Bahçe', 'en': 'Garden'},
+      // Market
+      'exp_grocery': {'tr': 'Market', 'en': 'Grocery'},
+      'exp_grocery_food': {'tr': 'Gıda', 'en': 'Food'},
+      'exp_grocery_cleaning': {'tr': 'Temizlik', 'en': 'Cleaning'},
+      'exp_grocery_drink': {'tr': 'İçecek', 'en': 'Drink'},
+      'exp_grocery_pet': {'tr': 'Evcil Hayvan', 'en': 'Pet Care'},
+      'exp_grocery_hygiene': {'tr': 'Kişisel Hijyen', 'en': 'Personal Hygiene'},
       
-      'exp_fun': {'tr': 'Eğlence', 'en': 'Entertainment'},
-      'exp_fun_cinema': {'tr': 'Sinema', 'en': 'Cinema'},
-      'exp_fun_concert': {'tr': 'Konser', 'en': 'Concert'},
-      'exp_fun_event': {'tr': 'Etkinlik', 'en': 'Event'},
-      'exp_fun_hobby': {'tr': 'Hobi', 'en': 'Hobby'},
+      // Yemek
+      'exp_dining': {'tr': 'Yemek', 'en': 'Dining'},
+      'exp_dining_restaurant': {'tr': 'Restoran', 'en': 'Restaurant'},
+      'exp_dining_cafe': {'tr': 'Kafe', 'en': 'Cafe'},
+      'exp_dining_fastfood': {'tr': 'Hızlı Yemek', 'en': 'Fast Food'},
+      'exp_dining_delivery': {'tr': 'Eve Sipariş', 'en': 'Delivery'},
+      'exp_dining_canteen': {'tr': 'Kantin', 'en': 'Canteen'},
       
-      'exp_sub': {'tr': 'Abonelik', 'en': 'Subscription'},
-      'exp_sub_stream': {'tr': 'Dizi/Film', 'en': 'Streaming'},
-      'exp_sub_music': {'tr': 'Müzik', 'en': 'Music'},
-      'exp_sub_software': {'tr': 'Yazılım', 'en': 'Software'},
-      'exp_sub_gym': {'tr': 'Spor Salonu', 'en': 'Gym'},
-      
-      'exp_health': {'tr': 'Sağlık', 'en': 'Health'},
-      'exp_health_doctor': {'tr': 'Muayene', 'en': 'Doctor'},
-      'exp_health_medicine': {'tr': 'İlaç', 'en': 'Medicine'},
-      'exp_health_surgery': {'tr': 'Operasyon', 'en': 'Surgery'},
-      'exp_health_dentist': {'tr': 'Diş', 'en': 'Dentist'},
-      
-      'exp_trans': {'tr': 'Ulaşım', 'en': 'Transport'},
-      'exp_trans_taxi': {'tr': 'Taksi', 'en': 'Taxi'},
+      // Ulaşım
+      'exp_trans': {'tr': 'Ulaşım', 'en': 'Transportation'},
       'exp_trans_bus': {'tr': 'Toplu Taşıma', 'en': 'Public Transit'},
-      'exp_trans_train': {'tr': 'Tren', 'en': 'Train'},
-      'exp_trans_flight': {'tr': 'Uçak', 'en': 'Flight'},
-      'exp_trans_travel': {'tr': 'Seyahat', 'en': 'Travel'},
+      'exp_trans_taxi': {'tr': 'Taksi', 'en': 'Taxi'},
+      'exp_trans_intercity': {'tr': 'Şehirlerarası Ulaşım', 'en': 'Intercity Transit'},
+      'exp_trans_scooter': {'tr': 'Mikromobilite', 'en': 'Micromobility'},
       
+      // Araç
       'exp_car': {'tr': 'Araç', 'en': 'Vehicle'},
       'exp_car_fuel': {'tr': 'Akaryakıt', 'en': 'Fuel'},
       'exp_car_maintenance': {'tr': 'Bakım', 'en': 'Maintenance'},
-      'exp_car_insurance': {'tr': 'Sigorta', 'en': 'Insurance'},
       'exp_car_parking': {'tr': 'Otopark', 'en': 'Parking'},
+      'exp_car_wash': {'tr': 'Oto Yıkama', 'en': 'Car Wash'},
+      'exp_car_toll': {'tr': 'Geçiş Ücreti', 'en': 'Tolls'},
+      'exp_car_insurance': {'tr': 'Araç Sigortası', 'en': 'Car Insurance'},
+      'exp_car_tax': {'tr': 'Araç Vergisi', 'en': 'Car Tax'},
+      'exp_car_rental': {'tr': 'Araç Kiralama', 'en': 'Car Rental'},
       
+      // Giyim
       'exp_cloth': {'tr': 'Giyim', 'en': 'Clothing'},
-      'exp_cloth_daily': {'tr': 'Günlük', 'en': 'Daily Wear'},
+      'exp_cloth_daily': {'tr': 'Günlük Giyim', 'en': 'Daily Wear'},
       'exp_cloth_shoes': {'tr': 'Ayakkabı', 'en': 'Shoes'},
       'exp_cloth_acc': {'tr': 'Aksesuar', 'en': 'Accessory'},
+      'exp_cloth_tailor': {'tr': 'Terzi', 'en': 'Tailor'},
       
-      'exp_beauty': {'tr': 'Güzellik', 'en': 'Beauty'},
+      // Kişisel Bakım
+      'exp_beauty': {'tr': 'Kişisel Bakım', 'en': 'Personal Care'},
       'exp_beauty_salon': {'tr': 'Kuaför', 'en': 'Hairdresser'},
       'exp_beauty_cosmetics': {'tr': 'Kozmetik', 'en': 'Cosmetics'},
       'exp_beauty_spa': {'tr': 'Spa', 'en': 'Spa'},
       
+      // Sağlık
+      'exp_health': {'tr': 'Sağlık', 'en': 'Health'},
+      'exp_health_doctor': {'tr': 'Muayene', 'en': 'Doctor'},
+      'exp_health_medicine': {'tr': 'İlaç', 'en': 'Medicine'},
+      'exp_health_dentist': {'tr': 'Diş', 'en': 'Dentist'},
+      'exp_health_surgery': {'tr': 'Ameliyat', 'en': 'Surgery'},
+      'exp_health_optics': {'tr': 'Gözlük', 'en': 'Optics'},
+      'exp_health_veterinary': {'tr': 'Veteriner', 'en': 'Veterinary'},
+      'exp_health_therapy': {'tr': 'Terapi', 'en': 'Therapy'},
+      'exp_health_supplements': {'tr': 'Destek Gıda', 'en': 'Supplements'},
+      
+      // Abonelikler
+      'exp_sub': {'tr': 'Abonelikler', 'en': 'Subscriptions'},
+      'exp_sub_stream': {'tr': 'Dizi', 'en': 'Streaming'},
+      'exp_sub_music': {'tr': 'Müzik', 'en': 'Music'},
+      'exp_sub_gym': {'tr': 'Spor Salonu', 'en': 'Gym'},
+      'exp_sub_software': {'tr': 'Yazılım', 'en': 'Software'},
+      'exp_sub_publishing': {'tr': 'Yayın', 'en': 'Publishing'},
+      
+      // Eğlence
+      'exp_fun': {'tr': 'Eğlence', 'en': 'Entertainment'},
+      'exp_fun_cinema': {'tr': 'Sinema', 'en': 'Cinema'},
+      'exp_fun_concert': {'tr': 'Konser', 'en': 'Concert'},
+      'exp_fun_event': {'tr': 'Etkinlik', 'en': 'Event'},
+      'exp_fun_game': {'tr': 'Oyun', 'en': 'Gaming'},
+      'exp_fun_hobby': {'tr': 'Hobi', 'en': 'Hobby'},
+      'exp_fun_gambling': {'tr': 'Şans Oyunları', 'en': 'Gambling'},
+      
+      // Eğitim
       'exp_edu': {'tr': 'Eğitim', 'en': 'Education'},
+      'exp_edu_school': {'tr': 'Okul', 'en': 'School'},
       'exp_edu_course': {'tr': 'Kurs', 'en': 'Course'},
       'exp_edu_book': {'tr': 'Kitap', 'en': 'Book'},
-      'exp_edu_school': {'tr': 'Okul', 'en': 'School'},
+      'exp_edu_stationery': {'tr': 'Kırtasiye', 'en': 'Stationery'},
+      'exp_edu_exams': {'tr': 'Sınavlar', 'en': 'Exams'},
       
+      // Aile
       'exp_family': {'tr': 'Aile', 'en': 'Family'},
       'exp_family_baby': {'tr': 'Bebek', 'en': 'Baby'},
       'exp_family_toy': {'tr': 'Oyuncak', 'en': 'Toy'},
       'exp_family_allowance': {'tr': 'Harçlık', 'en': 'Allowance'},
+      'exp_family_daycare': {'tr': 'Kreş', 'en': 'Daycare'},
       
+      // Alışveriş
+      'exp_shopping': {'tr': 'Alışveriş', 'en': 'Shopping'},
+      'exp_shopping_tech': {'tr': 'Teknoloji', 'en': 'Tech'},
+      'exp_shopping_furniture': {'tr': 'Mobilya', 'en': 'Furniture'},
+      'exp_shopping_decor': {'tr': 'Ev Tekstili', 'en': 'Decor'},
+      'exp_shopping_kitchen': {'tr': 'Mutfak', 'en': 'Kitchenware'},
+      'exp_shopping_gift': {'tr': 'Hediye', 'en': 'Gift'},
+      'exp_shopping_general': {'tr': 'Genel', 'en': 'General'},
+      
+      // Seyahat
+      'exp_travel': {'tr': 'Seyahat', 'en': 'Travel'},
+      'exp_travel_hotel': {'tr': 'Konaklama', 'en': 'Hotel'},
+      'exp_travel_flight': {'tr': 'Ulaşım Bileti', 'en': 'Tickets'},
+      'exp_travel_tour': {'tr': 'Turistik Gezi', 'en': 'Tour'},
+      'exp_travel_visa': {'tr': 'Vize', 'en': 'Visa'},
+      
+      // Borç
       'exp_debt': {'tr': 'Borç', 'en': 'Debt'},
       'exp_debt_credit_card': {'tr': 'Kredi Kartı', 'en': 'Credit Card'},
       'exp_debt_loan': {'tr': 'Kredi', 'en': 'Loan'},
-      'exp_debt_personal': {'tr': 'Şahsi Borç', 'en': 'Personal Debt'},
+      'exp_debt_personal': {'tr': 'Borç Ödeme', 'en': 'Personal Debt'},
       
-      'exp_tax': {'tr': 'Vergi', 'en': 'Tax'},
+      // Vergiler
+      'exp_tax': {'tr': 'Vergiler', 'en': 'Taxes'},
       'exp_tax_income': {'tr': 'Gelir Vergisi', 'en': 'Income Tax'},
-      'exp_tax_fine': {'tr': 'Ceza', 'en': 'Fine'},
+      'exp_tax_fine': {'tr': 'Cezalar', 'en': 'Fines'},
       'exp_tax_fee': {'tr': 'Harçlar', 'en': 'Fees'},
       
-      'exp_invest': {'tr': 'Yatırım', 'en': 'Investment'},
-      'exp_invest_gold': {'tr': 'Altın', 'en': 'Gold'},
-      'exp_invest_stock': {'tr': 'Hisse Senedi', 'en': 'Stock'},
-      'exp_invest_crypto': {'tr': 'Kripto', 'en': 'Crypto'},
-      'exp_invest_savings': {'tr': 'Birikim', 'en': 'Savings'},
-      
-      'exp_other': {'tr': 'Diğer', 'en': 'Other'},
-      'exp_other_general': {'tr': 'Diğer Giderler', 'en': 'Other'},
+      // Diğer Giderler
+      'exp_other': {'tr': 'Diğer Giderler', 'en': 'Other Expenses'},
+      'exp_other_general': {'tr': 'Genel Gider', 'en': 'General'},
       'exp_other_donation': {'tr': 'Bağış', 'en': 'Donation'},
-      'exp_other_insurance': {'tr': 'Sigorta', 'en': 'Insurance'},
-      
+      'exp_other_tip': {'tr': 'Bahşiş', 'en': 'Tip'},
+
+      // ==========================================
       // GELİRLER (INCOMES)
+      // ==========================================
+      // Maaş
       'inc_salary': {'tr': 'Maaş', 'en': 'Salary'},
-      'inc_salary_main': {'tr': 'Maaş', 'en': 'Main Salary'},
+      'inc_salary_main': {'tr': 'Ana Maaş', 'en': 'Main Salary'},
       'inc_salary_bonus': {'tr': 'Prim', 'en': 'Bonus'},
-      'inc_salary_dividend': {'tr': 'Temettü', 'en': 'Dividend'},
+      'inc_salary_dividend': {'tr': 'Kâr Payı', 'en': 'Dividend'},
       'inc_salary_pension': {'tr': 'Emeklilik', 'en': 'Pension'},
+      'inc_salary_severance': {'tr': 'Tazminat', 'en': 'Severance'},
       
+      // Ek Gelir
       'inc_extra': {'tr': 'Ek Gelir', 'en': 'Side Income'},
       'inc_extra_freelance': {'tr': 'Freelance', 'en': 'Freelance'},
       'inc_extra_parttime': {'tr': 'Yarı Zamanlı', 'en': 'Part Time'},
       'inc_extra_commission': {'tr': 'Komisyon', 'en': 'Commission'},
+      'inc_extra_content': {'tr': 'İçerik Üreticiliği', 'en': 'Content Creation'},
       
-      'inc_invest': {'tr': 'Yatırım', 'en': 'Investment'},
-      'inc_invest_stock': {'tr': 'Hisse Senedi', 'en': 'Stock Gains'},
-      'inc_invest_crypto': {'tr': 'Kripto', 'en': 'Crypto Gains'},
+      // Yatırım Geliri
+      'inc_invest': {'tr': 'Yatırım Geliri', 'en': 'Investment Income'},
+      'inc_invest_stock': {'tr': 'Hisse Senedi', 'en': 'Stock'},
+      'inc_invest_crypto': {'tr': 'Kripto', 'en': 'Crypto'},
       'inc_invest_interest': {'tr': 'Faiz', 'en': 'Interest'},
       'inc_invest_gold': {'tr': 'Döviz Kârı', 'en': 'Forex'},
-      'inc_invest_property': {'tr': 'Gayrimenkul', 'en': 'Property Sale'},
+      'inc_invest_bond': {'tr': 'Tahvil', 'en': 'Bond'},
       
+      // Kira Geliri
+      'inc_rent': {'tr': 'Kira Geliri', 'en': 'Rental Income'},
+      'inc_rent_home': {'tr': 'Konut Kirası', 'en': 'Home Rent'},
+      'inc_rent_office': {'tr': 'İş Yeri Kirası', 'en': 'Office Rent'},
+      'inc_rent_car': {'tr': 'Araç Kirası', 'en': 'Car Rent'},
+      'inc_rent_equipment': {'tr': 'Ekipman Kirası', 'en': 'Equipment Rent'},
+      
+      // Burs
       'inc_scholarship': {'tr': 'Burs', 'en': 'Scholarship'},
-      'inc_scholarship_award': {'tr': 'Burs', 'en': 'Scholarship'},
-      'inc_scholarship_loan': {'tr': 'Kredi', 'en': 'Student Loan'},
-      'inc_scholarship_gov': {'tr': 'Destek', 'en': 'Support'},
+      'inc_scholarship_award': {'tr': 'Öğrenim Bursu', 'en': 'Scholarship'},
+      'inc_scholarship_loan': {'tr': 'Öğrenim Kredisi', 'en': 'Student Loan'},
+      'inc_scholarship_gov': {'tr': 'Sosyal Yardım', 'en': 'Support'},
+      'inc_scholarship_grant': {'tr': 'Proje Desteği', 'en': 'Project Grant'},
       
-      'inc_sale': {'tr': 'Satış', 'en': 'Sale'},
-      'inc_sale_online': {'tr': 'Çevrimiçi', 'en': 'Online Sale'},
-      'inc_sale_physical': {'tr': 'İkinci El', 'en': 'Second Hand'},
+      // Satış
+      'inc_sale': {'tr': 'Satış', 'en': 'Sales'},
+      'inc_sale_online': {'tr': 'Online Satış', 'en': 'Online Sale'},
+      'inc_sale_physical': {'tr': 'İkinci El Satış', 'en': 'Second Hand'},
+      'inc_sale_vehicle': {'tr': 'Araç Satışı', 'en': 'Vehicle Sale'},
+      'inc_sale_property': {'tr': 'Gayrimenkul Satışı', 'en': 'Real Estate Sale'},
       
-      'inc_rent': {'tr': 'Kira', 'en': 'Rental'},
-      'inc_rent_home': {'tr': 'Konut Kira', 'en': 'Home Rent'},
-      'inc_rent_office': {'tr': 'İş Yeri', 'en': 'Office Rent'},
-      'inc_rent_car': {'tr': 'Araç Kira', 'en': 'Car Rent'},
-      
+      // Hediye
       'inc_gift': {'tr': 'Hediye', 'en': 'Gift'},
-      'inc_gift_general': {'tr': 'Hediye', 'en': 'Gift'},
+      'inc_gift_general': {'tr': 'Nakit Hediye', 'en': 'Gift'},
       'inc_gift_award': {'tr': 'Ödül', 'en': 'Award'},
+      'inc_gift_inheritance': {'tr': 'Miras', 'en': 'Inheritance'},
+      'inc_gift_alimony': {'tr': 'Nafaka', 'en': 'Alimony'},
       
-      'inc_other': {'tr': 'Diğer', 'en': 'Other'},
-      'inc_other_general': {'tr': 'Diğer Gelirler', 'en': 'Other'},
+      // Diğer Gelirler
+      'inc_other': {'tr': 'Diğer Gelirler', 'en': 'Other Incomes'},
+      'inc_other_general': {'tr': 'Genel Gelir', 'en': 'Other'},
       'inc_other_refund': {'tr': 'İade', 'en': 'Refund'},
       'inc_other_lottery': {'tr': 'Şans Oyunları', 'en': 'Lottery'},
+      'inc_other_collection': {'tr': 'Borç Tahsilatı', 'en': 'Debt Collection'},
     };
     
     final localized = names[id];
@@ -207,62 +267,6 @@ class TransactionCategoryData {
   }
 
   static List<Map<String, dynamic>> getExpenseCategories(BuildContext context, AppLocalizations l10n) => [
-    {
-      'id': 'exp_grocery',
-      'name': getCategoryName(context, 'exp_grocery'),
-      'icon': IconUtils.getIcon('exp_grocery'),
-      'color': IconUtils.getColor('exp_grocery'),
-      'subModels': [
-        {
-          'id': 'exp_grocery_food',
-          'name': getCategoryName(context, 'exp_grocery_food'),
-          'icon': IconUtils.getIcon('exp_grocery_food'),
-        },
-        {
-          'id': 'exp_grocery_cleaning',
-          'name': getCategoryName(context, 'exp_grocery_cleaning'),
-          'icon': IconUtils.getIcon('exp_grocery_cleaning'),
-        },
-        {
-          'id': 'exp_grocery_personal',
-          'name': getCategoryName(context, 'exp_grocery_personal'),
-          'icon': IconUtils.getIcon('exp_grocery_personal'),
-        },
-        {
-          'id': 'exp_grocery_pet',
-          'name': getCategoryName(context, 'exp_grocery_pet'),
-          'icon': IconUtils.getIcon('exp_grocery_pet'),
-        },
-      ],
-    },
-    {
-      'id': 'exp_dining',
-      'name': getCategoryName(context, 'exp_dining'),
-      'icon': IconUtils.getIcon('exp_dining'),
-      'color': IconUtils.getColor('exp_dining'),
-      'subModels': [
-        {
-          'id': 'exp_dining_restaurant',
-          'name': getCategoryName(context, 'exp_dining_restaurant'),
-          'icon': IconUtils.getIcon('exp_dining_restaurant'),
-        },
-        {
-          'id': 'exp_dining_fastfood',
-          'name': getCategoryName(context, 'exp_dining_fastfood'),
-          'icon': IconUtils.getIcon('exp_dining_fastfood'),
-        },
-        {
-          'id': 'exp_dining_cafe',
-          'name': getCategoryName(context, 'exp_dining_cafe'),
-          'icon': IconUtils.getIcon('exp_dining_cafe'),
-        },
-        {
-          'id': 'exp_dining_delivery',
-          'name': getCategoryName(context, 'exp_dining_delivery'),
-          'icon': IconUtils.getIcon('exp_dining_delivery'),
-        },
-      ],
-    },
     {
       'id': 'exp_rent',
       'name': getCategoryName(context, 'exp_rent'),
@@ -278,6 +282,16 @@ class TransactionCategoryData {
           'id': 'exp_rent_office',
           'name': getCategoryName(context, 'exp_rent_office'),
           'icon': IconUtils.getIcon('exp_rent_office'),
+        },
+        {
+          'id': 'exp_rent_mortgage',
+          'name': getCategoryName(context, 'exp_rent_mortgage'),
+          'icon': IconUtils.getIcon('exp_rent_mortgage'),
+        },
+        {
+          'id': 'exp_rent_maintenance',
+          'name': getCategoryName(context, 'exp_rent_maintenance'),
+          'icon': IconUtils.getIcon('exp_rent_maintenance'),
         },
         {
           'id': 'exp_rent_storage',
@@ -322,117 +336,76 @@ class TransactionCategoryData {
           'name': getCategoryName(context, 'exp_bill_dues'),
           'icon': IconUtils.getIcon('exp_bill_dues'),
         },
-      ],
-    },
-    {
-      'id': 'exp_home',
-      'name': getCategoryName(context, 'exp_home'),
-      'icon': IconUtils.getIcon('exp_home'),
-      'color': IconUtils.getColor('exp_home'),
-      'subModels': [
         {
-          'id': 'exp_home_furniture',
-          'name': getCategoryName(context, 'exp_home_furniture'),
-          'icon': IconUtils.getIcon('exp_home_furniture'),
-        },
-        {
-          'id': 'exp_home_maintenance',
-          'name': getCategoryName(context, 'exp_home_maintenance'),
-          'icon': IconUtils.getIcon('exp_home_maintenance'),
-        },
-        {
-          'id': 'exp_home_supplies',
-          'name': getCategoryName(context, 'exp_home_supplies'),
-          'icon': IconUtils.getIcon('exp_home_supplies'),
-        },
-        {
-          'id': 'exp_home_garden',
-          'name': getCategoryName(context, 'exp_home_garden'),
-          'icon': IconUtils.getIcon('exp_home_garden'),
+          'id': 'exp_bill_tv',
+          'name': getCategoryName(context, 'exp_bill_tv'),
+          'icon': IconUtils.getIcon('exp_bill_tv'),
         },
       ],
     },
     {
-      'id': 'exp_fun',
-      'name': getCategoryName(context, 'exp_fun'),
-      'icon': IconUtils.getIcon('exp_fun'),
-      'color': IconUtils.getColor('exp_fun'),
+      'id': 'exp_grocery',
+      'name': getCategoryName(context, 'exp_grocery'),
+      'icon': IconUtils.getIcon('exp_grocery'),
+      'color': IconUtils.getColor('exp_grocery'),
       'subModels': [
         {
-          'id': 'exp_fun_cinema',
-          'name': getCategoryName(context, 'exp_fun_cinema'),
-          'icon': IconUtils.getIcon('exp_fun_cinema'),
+          'id': 'exp_grocery_food',
+          'name': getCategoryName(context, 'exp_grocery_food'),
+          'icon': IconUtils.getIcon('exp_grocery_food'),
         },
         {
-          'id': 'exp_fun_concert',
-          'name': getCategoryName(context, 'exp_fun_concert'),
-          'icon': IconUtils.getIcon('exp_fun_concert'),
+          'id': 'exp_grocery_cleaning',
+          'name': getCategoryName(context, 'exp_grocery_cleaning'),
+          'icon': IconUtils.getIcon('exp_grocery_cleaning'),
         },
         {
-          'id': 'exp_fun_event',
-          'name': getCategoryName(context, 'exp_fun_event'),
-          'icon': IconUtils.getIcon('exp_fun_event'),
+          'id': 'exp_grocery_drink',
+          'name': getCategoryName(context, 'exp_grocery_drink'),
+          'icon': IconUtils.getIcon('exp_grocery_drink'),
         },
         {
-          'id': 'exp_fun_hobby',
-          'name': getCategoryName(context, 'exp_fun_hobby'),
-          'icon': IconUtils.getIcon('exp_fun_hobby'),
+          'id': 'exp_grocery_pet',
+          'name': getCategoryName(context, 'exp_grocery_pet'),
+          'icon': IconUtils.getIcon('exp_grocery_pet'),
+        },
+        {
+          'id': 'exp_grocery_hygiene',
+          'name': getCategoryName(context, 'exp_grocery_hygiene'),
+          'icon': IconUtils.getIcon('exp_grocery_hygiene'),
         },
       ],
     },
     {
-      'id': 'exp_sub',
-      'name': getCategoryName(context, 'exp_sub'),
-      'icon': IconUtils.getIcon('exp_sub'),
-      'color': IconUtils.getColor('exp_sub'),
+      'id': 'exp_dining',
+      'name': getCategoryName(context, 'exp_dining'),
+      'icon': IconUtils.getIcon('exp_dining'),
+      'color': IconUtils.getColor('exp_dining'),
       'subModels': [
         {
-          'id': 'exp_sub_stream',
-          'name': getCategoryName(context, 'exp_sub_stream'),
-          'icon': IconUtils.getIcon('exp_sub_stream'),
+          'id': 'exp_dining_restaurant',
+          'name': getCategoryName(context, 'exp_dining_restaurant'),
+          'icon': IconUtils.getIcon('exp_dining_restaurant'),
         },
         {
-          'id': 'exp_sub_music',
-          'name': getCategoryName(context, 'exp_sub_music'),
-          'icon': IconUtils.getIcon('exp_sub_music'),
+          'id': 'exp_dining_cafe',
+          'name': getCategoryName(context, 'exp_dining_cafe'),
+          'icon': IconUtils.getIcon('exp_dining_cafe'),
         },
         {
-          'id': 'exp_sub_software',
-          'name': getCategoryName(context, 'exp_sub_software'),
-          'icon': IconUtils.getIcon('exp_sub_software'),
+          'id': 'exp_dining_fastfood',
+          'name': getCategoryName(context, 'exp_dining_fastfood'),
+          'icon': IconUtils.getIcon('exp_dining_fastfood'),
         },
         {
-          'id': 'exp_sub_gym',
-          'name': getCategoryName(context, 'exp_sub_gym'),
-          'icon': IconUtils.getIcon('exp_sub_gym'),
-        },
-      ],
-    },
-    {
-      'id': 'exp_health',
-      'name': getCategoryName(context, 'exp_health'),
-      'icon': IconUtils.getIcon('exp_health'),
-      'color': IconUtils.getColor('exp_health'),
-      'subModels': [
-        {
-          'id': 'exp_health_doctor',
-          'name': getCategoryName(context, 'exp_health_doctor'),
-          'icon': IconUtils.getIcon('exp_health_doctor'),
+          'id': 'exp_dining_delivery',
+          'name': getCategoryName(context, 'exp_dining_delivery'),
+          'icon': IconUtils.getIcon('exp_dining_delivery'),
         },
         {
-          'id': 'exp_health_medicine',
-          'name': getCategoryName(context, 'exp_health_medicine'),
-          'icon': IconUtils.getIcon('exp_health_medicine'),
-        },
-        {
-          'id': 'exp_health_surgery',
-          'name': getCategoryName(context, 'exp_health_surgery'),
-          'icon': IconUtils.getIcon('exp_health_surgery'),
-        },
-        {
-          'id': 'exp_health_dentist',
-          'name': getCategoryName(context, 'exp_health_dentist'),
-          'icon': IconUtils.getIcon('exp_health_dentist'),
+          'id': 'exp_dining_canteen',
+          'name': getCategoryName(context, 'exp_dining_canteen'),
+          'icon': IconUtils.getIcon('exp_dining_canteen'),
         },
       ],
     },
@@ -443,29 +416,24 @@ class TransactionCategoryData {
       'color': IconUtils.getColor('exp_trans'),
       'subModels': [
         {
-          'id': 'exp_trans_taxi',
-          'name': getCategoryName(context, 'exp_trans_taxi'),
-          'icon': IconUtils.getIcon('exp_trans_taxi'),
-        },
-        {
           'id': 'exp_trans_bus',
           'name': getCategoryName(context, 'exp_trans_bus'),
           'icon': IconUtils.getIcon('exp_trans_bus'),
         },
         {
-          'id': 'exp_trans_train',
-          'name': getCategoryName(context, 'exp_trans_train'),
-          'icon': IconUtils.getIcon('exp_trans_train'),
+          'id': 'exp_trans_taxi',
+          'name': getCategoryName(context, 'exp_trans_taxi'),
+          'icon': IconUtils.getIcon('exp_trans_taxi'),
         },
         {
-          'id': 'exp_trans_flight',
-          'name': getCategoryName(context, 'exp_trans_flight'),
-          'icon': IconUtils.getIcon('exp_trans_flight'),
+          'id': 'exp_trans_intercity',
+          'name': getCategoryName(context, 'exp_trans_intercity'),
+          'icon': IconUtils.getIcon('exp_trans_intercity'),
         },
         {
-          'id': 'exp_trans_travel',
-          'name': getCategoryName(context, 'exp_trans_travel'),
-          'icon': IconUtils.getIcon('exp_trans_travel'),
+          'id': 'exp_trans_scooter',
+          'name': getCategoryName(context, 'exp_trans_scooter'),
+          'icon': IconUtils.getIcon('exp_trans_scooter'),
         },
       ],
     },
@@ -486,14 +454,34 @@ class TransactionCategoryData {
           'icon': IconUtils.getIcon('exp_car_maintenance'),
         },
         {
+          'id': 'exp_car_parking',
+          'name': getCategoryName(context, 'exp_car_parking'),
+          'icon': IconUtils.getIcon('exp_car_parking'),
+        },
+        {
+          'id': 'exp_car_wash',
+          'name': getCategoryName(context, 'exp_car_wash'),
+          'icon': IconUtils.getIcon('exp_car_wash'),
+        },
+        {
+          'id': 'exp_car_toll',
+          'name': getCategoryName(context, 'exp_car_toll'),
+          'icon': IconUtils.getIcon('exp_car_toll'),
+        },
+        {
           'id': 'exp_car_insurance',
           'name': getCategoryName(context, 'exp_car_insurance'),
           'icon': IconUtils.getIcon('exp_car_insurance'),
         },
         {
-          'id': 'exp_car_parking',
-          'name': getCategoryName(context, 'exp_car_parking'),
-          'icon': IconUtils.getIcon('exp_car_parking'),
+          'id': 'exp_car_tax',
+          'name': getCategoryName(context, 'exp_car_tax'),
+          'icon': IconUtils.getIcon('exp_car_tax'),
+        },
+        {
+          'id': 'exp_car_rental',
+          'name': getCategoryName(context, 'exp_car_rental'),
+          'icon': IconUtils.getIcon('exp_car_rental'),
         },
       ],
     },
@@ -517,6 +505,11 @@ class TransactionCategoryData {
           'id': 'exp_cloth_acc',
           'name': getCategoryName(context, 'exp_cloth_acc'),
           'icon': IconUtils.getIcon('exp_cloth_acc'),
+        },
+        {
+          'id': 'exp_cloth_tailor',
+          'name': getCategoryName(context, 'exp_cloth_tailor'),
+          'icon': IconUtils.getIcon('exp_cloth_tailor'),
         },
       ],
     },
@@ -544,11 +537,135 @@ class TransactionCategoryData {
       ],
     },
     {
+      'id': 'exp_health',
+      'name': getCategoryName(context, 'exp_health'),
+      'icon': IconUtils.getIcon('exp_health'),
+      'color': IconUtils.getColor('exp_health'),
+      'subModels': [
+        {
+          'id': 'exp_health_doctor',
+          'name': getCategoryName(context, 'exp_health_doctor'),
+          'icon': IconUtils.getIcon('exp_health_doctor'),
+        },
+        {
+          'id': 'exp_health_medicine',
+          'name': getCategoryName(context, 'exp_health_medicine'),
+          'icon': IconUtils.getIcon('exp_health_medicine'),
+        },
+        {
+          'id': 'exp_health_dentist',
+          'name': getCategoryName(context, 'exp_health_dentist'),
+          'icon': IconUtils.getIcon('exp_health_dentist'),
+        },
+        {
+          'id': 'exp_health_surgery',
+          'name': getCategoryName(context, 'exp_health_surgery'),
+          'icon': IconUtils.getIcon('exp_health_surgery'),
+        },
+        {
+          'id': 'exp_health_optics',
+          'name': getCategoryName(context, 'exp_health_optics'),
+          'icon': IconUtils.getIcon('exp_health_optics'),
+        },
+        {
+          'id': 'exp_health_veterinary',
+          'name': getCategoryName(context, 'exp_health_veterinary'),
+          'icon': IconUtils.getIcon('exp_health_veterinary'),
+        },
+        {
+          'id': 'exp_health_therapy',
+          'name': getCategoryName(context, 'exp_health_therapy'),
+          'icon': IconUtils.getIcon('exp_health_therapy'),
+        },
+        {
+          'id': 'exp_health_supplements',
+          'name': getCategoryName(context, 'exp_health_supplements'),
+          'icon': IconUtils.getIcon('exp_health_supplements'),
+        },
+      ],
+    },
+    {
+      'id': 'exp_sub',
+      'name': getCategoryName(context, 'exp_sub'),
+      'icon': IconUtils.getIcon('exp_sub'),
+      'color': IconUtils.getColor('exp_sub'),
+      'subModels': [
+        {
+          'id': 'exp_sub_stream',
+          'name': getCategoryName(context, 'exp_sub_stream'),
+          'icon': IconUtils.getIcon('exp_sub_stream'),
+        },
+        {
+          'id': 'exp_sub_music',
+          'name': getCategoryName(context, 'exp_sub_music'),
+          'icon': IconUtils.getIcon('exp_sub_music'),
+        },
+        {
+          'id': 'exp_sub_gym',
+          'name': getCategoryName(context, 'exp_sub_gym'),
+          'icon': IconUtils.getIcon('exp_sub_gym'),
+        },
+        {
+          'id': 'exp_sub_software',
+          'name': getCategoryName(context, 'exp_sub_software'),
+          'icon': IconUtils.getIcon('exp_sub_software'),
+        },
+        {
+          'id': 'exp_sub_publishing',
+          'name': getCategoryName(context, 'exp_sub_publishing'),
+          'icon': IconUtils.getIcon('exp_sub_publishing'),
+        },
+      ],
+    },
+    {
+      'id': 'exp_fun',
+      'name': getCategoryName(context, 'exp_fun'),
+      'icon': IconUtils.getIcon('exp_fun'),
+      'color': IconUtils.getColor('exp_fun'),
+      'subModels': [
+        {
+          'id': 'exp_fun_cinema',
+          'name': getCategoryName(context, 'exp_fun_cinema'),
+          'icon': IconUtils.getIcon('exp_fun_cinema'),
+        },
+        {
+          'id': 'exp_fun_concert',
+          'name': getCategoryName(context, 'exp_fun_concert'),
+          'icon': IconUtils.getIcon('exp_fun_concert'),
+        },
+        {
+          'id': 'exp_fun_event',
+          'name': getCategoryName(context, 'exp_fun_event'),
+          'icon': IconUtils.getIcon('exp_fun_event'),
+        },
+        {
+          'id': 'exp_fun_game',
+          'name': getCategoryName(context, 'exp_fun_game'),
+          'icon': IconUtils.getIcon('exp_fun_game'),
+        },
+        {
+          'id': 'exp_fun_hobby',
+          'name': getCategoryName(context, 'exp_fun_hobby'),
+          'icon': IconUtils.getIcon('exp_fun_hobby'),
+        },
+        {
+          'id': 'exp_fun_gambling',
+          'name': getCategoryName(context, 'exp_fun_gambling'),
+          'icon': IconUtils.getIcon('exp_fun_gambling'),
+        },
+      ],
+    },
+    {
       'id': 'exp_edu',
       'name': getCategoryName(context, 'exp_edu'),
       'icon': IconUtils.getIcon('exp_edu'),
       'color': IconUtils.getColor('exp_edu'),
       'subModels': [
+        {
+          'id': 'exp_edu_school',
+          'name': getCategoryName(context, 'exp_edu_school'),
+          'icon': IconUtils.getIcon('exp_edu_school'),
+        },
         {
           'id': 'exp_edu_course',
           'name': getCategoryName(context, 'exp_edu_course'),
@@ -560,9 +677,14 @@ class TransactionCategoryData {
           'icon': IconUtils.getIcon('exp_edu_book'),
         },
         {
-          'id': 'exp_edu_school',
-          'name': getCategoryName(context, 'exp_edu_school'),
-          'icon': IconUtils.getIcon('exp_edu_school'),
+          'id': 'exp_edu_stationery',
+          'name': getCategoryName(context, 'exp_edu_stationery'),
+          'icon': IconUtils.getIcon('exp_edu_stationery'),
+        },
+        {
+          'id': 'exp_edu_exams',
+          'name': getCategoryName(context, 'exp_edu_exams'),
+          'icon': IconUtils.getIcon('exp_edu_exams'),
         },
       ],
     },
@@ -586,6 +708,77 @@ class TransactionCategoryData {
           'id': 'exp_family_allowance',
           'name': getCategoryName(context, 'exp_family_allowance'),
           'icon': IconUtils.getIcon('exp_family_allowance'),
+        },
+        {
+          'id': 'exp_family_daycare',
+          'name': getCategoryName(context, 'exp_family_daycare'),
+          'icon': IconUtils.getIcon('exp_family_daycare'),
+        },
+      ],
+    },
+    {
+      'id': 'exp_shopping',
+      'name': getCategoryName(context, 'exp_shopping'),
+      'icon': IconUtils.getIcon('exp_shopping'),
+      'color': IconUtils.getColor('exp_shopping'),
+      'subModels': [
+        {
+          'id': 'exp_shopping_tech',
+          'name': getCategoryName(context, 'exp_shopping_tech'),
+          'icon': IconUtils.getIcon('exp_shopping_tech'),
+        },
+        {
+          'id': 'exp_shopping_furniture',
+          'name': getCategoryName(context, 'exp_shopping_furniture'),
+          'icon': IconUtils.getIcon('exp_shopping_furniture'),
+        },
+        {
+          'id': 'exp_shopping_decor',
+          'name': getCategoryName(context, 'exp_shopping_decor'),
+          'icon': IconUtils.getIcon('exp_shopping_decor'),
+        },
+        {
+          'id': 'exp_shopping_kitchen',
+          'name': getCategoryName(context, 'exp_shopping_kitchen'),
+          'icon': IconUtils.getIcon('exp_shopping_kitchen'),
+        },
+        {
+          'id': 'exp_shopping_gift',
+          'name': getCategoryName(context, 'exp_shopping_gift'),
+          'icon': IconUtils.getIcon('exp_shopping_gift'),
+        },
+        {
+          'id': 'exp_shopping_general',
+          'name': getCategoryName(context, 'exp_shopping_general'),
+          'icon': IconUtils.getIcon('exp_shopping_general'),
+        },
+      ],
+    },
+    {
+      'id': 'exp_travel',
+      'name': getCategoryName(context, 'exp_travel'),
+      'icon': IconUtils.getIcon('exp_travel'),
+      'color': IconUtils.getColor('exp_travel'),
+      'subModels': [
+        {
+          'id': 'exp_travel_hotel',
+          'name': getCategoryName(context, 'exp_travel_hotel'),
+          'icon': IconUtils.getIcon('exp_travel_hotel'),
+        },
+        {
+          'id': 'exp_travel_flight',
+          'name': getCategoryName(context, 'exp_travel_flight'),
+          'icon': IconUtils.getIcon('exp_travel_flight'),
+        },
+        {
+          'id': 'exp_travel_tour',
+          'name': getCategoryName(context, 'exp_travel_tour'),
+          'icon': IconUtils.getIcon('exp_travel_tour'),
+        },
+        {
+          'id': 'exp_travel_visa',
+          'name': getCategoryName(context, 'exp_travel_visa'),
+          'icon': IconUtils.getIcon('exp_travel_visa'),
         },
       ],
     },
@@ -636,34 +829,6 @@ class TransactionCategoryData {
       ],
     },
     {
-      'id': 'exp_invest',
-      'name': getCategoryName(context, 'exp_invest'),
-      'icon': IconUtils.getIcon('exp_invest'),
-      'color': IconUtils.getColor('exp_invest'),
-      'subModels': [
-        {
-          'id': 'exp_invest_gold',
-          'name': getCategoryName(context, 'exp_invest_gold'),
-          'icon': IconUtils.getIcon('exp_invest_gold'),
-        },
-        {
-          'id': 'exp_invest_stock',
-          'name': getCategoryName(context, 'exp_invest_stock'),
-          'icon': IconUtils.getIcon('exp_invest_stock'),
-        },
-        {
-          'id': 'exp_invest_crypto',
-          'name': getCategoryName(context, 'exp_invest_crypto'),
-          'icon': IconUtils.getIcon('exp_invest_crypto'),
-        },
-        {
-          'id': 'exp_invest_savings',
-          'name': getCategoryName(context, 'exp_invest_savings'),
-          'icon': IconUtils.getIcon('exp_invest_savings'),
-        },
-      ],
-    },
-    {
       'id': 'exp_other',
       'name': getCategoryName(context, 'exp_other'),
       'icon': IconUtils.getIcon('exp_other'),
@@ -680,9 +845,9 @@ class TransactionCategoryData {
           'icon': IconUtils.getIcon('exp_other_donation'),
         },
         {
-          'id': 'exp_other_insurance',
-          'name': getCategoryName(context, 'exp_other_insurance'),
-          'icon': IconUtils.getIcon('exp_other_insurance'),
+          'id': 'exp_other_tip',
+          'name': getCategoryName(context, 'exp_other_tip'),
+          'icon': IconUtils.getIcon('exp_other_tip'),
         },
       ],
     },
@@ -715,6 +880,11 @@ class TransactionCategoryData {
           'name': getCategoryName(context, 'inc_salary_pension'),
           'icon': IconUtils.getIcon('inc_salary_pension'),
         },
+        {
+          'id': 'inc_salary_severance',
+          'name': getCategoryName(context, 'inc_salary_severance'),
+          'icon': IconUtils.getIcon('inc_salary_severance'),
+        },
       ],
     },
     {
@@ -737,6 +907,11 @@ class TransactionCategoryData {
           'id': 'inc_extra_commission',
           'name': getCategoryName(context, 'inc_extra_commission'),
           'icon': IconUtils.getIcon('inc_extra_commission'),
+        },
+        {
+          'id': 'inc_extra_content',
+          'name': getCategoryName(context, 'inc_extra_content'),
+          'icon': IconUtils.getIcon('inc_extra_content'),
         },
       ],
     },
@@ -767,50 +942,9 @@ class TransactionCategoryData {
           'icon': IconUtils.getIcon('inc_invest_gold'),
         },
         {
-          'id': 'inc_invest_property',
-          'name': getCategoryName(context, 'inc_invest_property'),
-          'icon': IconUtils.getIcon('inc_invest_property'),
-        },
-      ],
-    },
-    {
-      'id': 'inc_scholarship',
-      'name': getCategoryName(context, 'inc_scholarship'),
-      'icon': IconUtils.getIcon('inc_scholarship'),
-      'color': IconUtils.getColor('inc_scholarship'),
-      'subModels': [
-        {
-          'id': 'inc_scholarship_award',
-          'name': getCategoryName(context, 'inc_scholarship_award'),
-          'icon': IconUtils.getIcon('inc_scholarship_award'),
-        },
-        {
-          'id': 'inc_scholarship_loan',
-          'name': getCategoryName(context, 'inc_scholarship_loan'),
-          'icon': IconUtils.getIcon('inc_scholarship_loan'),
-        },
-        {
-          'id': 'inc_scholarship_gov',
-          'name': getCategoryName(context, 'inc_scholarship_gov'),
-          'icon': IconUtils.getIcon('inc_scholarship_gov'),
-        },
-      ],
-    },
-    {
-      'id': 'inc_sale',
-      'name': getCategoryName(context, 'inc_sale'),
-      'icon': IconUtils.getIcon('inc_sale'),
-      'color': IconUtils.getColor('inc_sale'),
-      'subModels': [
-        {
-          'id': 'inc_sale_online',
-          'name': getCategoryName(context, 'inc_sale_online'),
-          'icon': IconUtils.getIcon('inc_sale_online'),
-        },
-        {
-          'id': 'inc_sale_physical',
-          'name': getCategoryName(context, 'inc_sale_physical'),
-          'icon': IconUtils.getIcon('inc_sale_physical'),
+          'id': 'inc_invest_bond',
+          'name': getCategoryName(context, 'inc_invest_bond'),
+          'icon': IconUtils.getIcon('inc_invest_bond'),
         },
       ],
     },
@@ -835,6 +969,67 @@ class TransactionCategoryData {
           'name': getCategoryName(context, 'inc_rent_car'),
           'icon': IconUtils.getIcon('inc_rent_car'),
         },
+        {
+          'id': 'inc_rent_equipment',
+          'name': getCategoryName(context, 'inc_rent_equipment'),
+          'icon': IconUtils.getIcon('inc_rent_equipment'),
+        },
+      ],
+    },
+    {
+      'id': 'inc_scholarship',
+      'name': getCategoryName(context, 'inc_scholarship'),
+      'icon': IconUtils.getIcon('inc_scholarship'),
+      'color': IconUtils.getColor('inc_scholarship'),
+      'subModels': [
+        {
+          'id': 'inc_scholarship_award',
+          'name': getCategoryName(context, 'inc_scholarship_award'),
+          'icon': IconUtils.getIcon('inc_scholarship_award'),
+        },
+        {
+          'id': 'inc_scholarship_loan',
+          'name': getCategoryName(context, 'inc_scholarship_loan'),
+          'icon': IconUtils.getIcon('inc_scholarship_loan'),
+        },
+        {
+          'id': 'inc_scholarship_gov',
+          'name': getCategoryName(context, 'inc_scholarship_gov'),
+          'icon': IconUtils.getIcon('inc_scholarship_gov'),
+        },
+        {
+          'id': 'inc_scholarship_grant',
+          'name': getCategoryName(context, 'inc_scholarship_grant'),
+          'icon': IconUtils.getIcon('inc_scholarship_grant'),
+        },
+      ],
+    },
+    {
+      'id': 'inc_sale',
+      'name': getCategoryName(context, 'inc_sale'),
+      'icon': IconUtils.getIcon('inc_sale'),
+      'color': IconUtils.getColor('inc_sale'),
+      'subModels': [
+        {
+          'id': 'inc_sale_online',
+          'name': getCategoryName(context, 'inc_sale_online'),
+          'icon': IconUtils.getIcon('inc_sale_online'),
+        },
+        {
+          'id': 'inc_sale_physical',
+          'name': getCategoryName(context, 'inc_sale_physical'),
+          'icon': IconUtils.getIcon('inc_sale_physical'),
+        },
+        {
+          'id': 'inc_sale_vehicle',
+          'name': getCategoryName(context, 'inc_sale_vehicle'),
+          'icon': IconUtils.getIcon('inc_sale_vehicle'),
+        },
+        {
+          'id': 'inc_sale_property',
+          'name': getCategoryName(context, 'inc_sale_property'),
+          'icon': IconUtils.getIcon('inc_sale_property'),
+        },
       ],
     },
     {
@@ -852,6 +1047,16 @@ class TransactionCategoryData {
           'id': 'inc_gift_award',
           'name': getCategoryName(context, 'inc_gift_award'),
           'icon': IconUtils.getIcon('inc_gift_award'),
+        },
+        {
+          'id': 'inc_gift_inheritance',
+          'name': getCategoryName(context, 'inc_gift_inheritance'),
+          'icon': IconUtils.getIcon('inc_gift_inheritance'),
+        },
+        {
+          'id': 'inc_gift_alimony',
+          'name': getCategoryName(context, 'inc_gift_alimony'),
+          'icon': IconUtils.getIcon('inc_gift_alimony'),
         },
       ],
     },
@@ -875,6 +1080,11 @@ class TransactionCategoryData {
           'id': 'inc_other_lottery',
           'name': getCategoryName(context, 'inc_other_lottery'),
           'icon': IconUtils.getIcon('inc_other_lottery'),
+        },
+        {
+          'id': 'inc_other_collection',
+          'name': getCategoryName(context, 'inc_other_collection'),
+          'icon': IconUtils.getIcon('inc_other_collection'),
         },
       ],
     },

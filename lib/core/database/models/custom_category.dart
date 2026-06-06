@@ -13,6 +13,8 @@ class CustomCategory {
   late String name;
   late int iconCode;
   
-  // Gelecekteki senkronizasyon için
-  DateTime? updatedAt;
+  @Index()
+  int syncStatus = 0; // 0: synced, 1: pending, 2: deleted
+
+  DateTime updatedAt = DateTime.now();
 }

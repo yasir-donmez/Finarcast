@@ -9,16 +9,10 @@ class AppLocalizationsZh extends AppLocalizations {
   AppLocalizationsZh([String locale = 'zh']) : super(locale);
 
   @override
-  String get appTitle => 'Finarcast';
-
-  @override
-  String get settings => 'Ayarlar';
+  String get settings => '设置';
 
   @override
   String get profile => '个人资料';
-
-  @override
-  String get memberPremium => 'Finarcast 高级会员';
 
   @override
   String get preferences => '偏好与应用';
@@ -27,22 +21,10 @@ class AppLocalizationsZh extends AppLocalizations {
   String get language => '语言';
 
   @override
-  String get aiNotifications => 'AI 助手警报';
-
-  @override
-  String get dataAndAiSettings => '数据与 AI 设置';
-
-  @override
   String get dataRetention => '数据保留期限';
 
   @override
-  String get dataRetentionDesc => '过期的交易将被归档。\nAI 角色仅使用此期间内的数据。';
-
-  @override
   String get permanentDataDeletion => '永久数据删除期限';
-
-  @override
-  String get permanentDataDeletionDesc => '在此期限之后，交易将从数据库中永久删除。\n此操作无法撤销。';
 
   @override
   String get oneMonth => '1个月';
@@ -58,9 +40,6 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get infinite => '永久';
-
-  @override
-  String get dataManagement => '数据管理';
 
   @override
   String get driveBackup => 'Drive 备份';
@@ -80,9 +59,6 @@ class AppLocalizationsZh extends AppLocalizations {
   @override
   String get aboutFinarcast =>
       'Finarcast 是您的 AI 驱动财务助手。它分析您的支出，帮助您设定储蓄目标，并优化您的财务未来。';
-
-  @override
-  String get editProfile => '编辑个人资料';
 
   @override
   String get comingSoon => '此功能即将推出！';
@@ -112,34 +88,10 @@ class AppLocalizationsZh extends AppLocalizations {
   String get analysis => '分析';
 
   @override
-  String get dailySummary => '每日摘要';
-
-  @override
-  String get todaySpending => '今日支出';
-
-  @override
-  String get weeklyRemaining => '本周剩余';
-
-  @override
-  String get recentTransactions => '最近交易';
-
-  @override
-  String get seeAll => '查看全部';
-
-  @override
-  String get myVaults => '我的金库';
-
-  @override
   String get totalBalance => '总余额';
 
   @override
   String get addNewVault => '添加新金库';
-
-  @override
-  String get setGoal => '设定目标';
-
-  @override
-  String get analyze => '分析';
 
   @override
   String get addTransaction => '添加交易';
@@ -160,9 +112,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get description => '描述';
 
   @override
-  String get selectVault => '选择金库';
-
-  @override
   String get done => '完成';
 
   @override
@@ -173,12 +122,6 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get newVault => '新金库';
-
-  @override
-  String get monthlyIncome => '月收入';
-
-  @override
-  String get monthlyExpense => '月支出';
 
   @override
   String get all => '全部';
@@ -211,13 +154,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get yearly => '每年';
 
   @override
-  String get noTransactions => '此类别暂无交易';
-
-  @override
   String get period => '周期';
-
-  @override
-  String get remainingTime => '剩余时间';
 
   @override
   String get week => '周';
@@ -235,12 +172,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get category => '类别';
 
   @override
-  String get transactionName => '交易名称';
-
-  @override
-  String get frequency => '频率';
-
-  @override
   String get themeMode => '主题';
 
   @override
@@ -253,13 +184,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get themeDark => '深色模式';
 
   @override
-  String get colorTheme => 'Renk';
-
-  @override
-  String get colorSystem => 'Sistem';
-
-  @override
-  String get market => '市场';
+  String get colorTheme => '颜色';
 
   @override
   String get food => '食物';
@@ -268,16 +193,10 @@ class AppLocalizationsZh extends AppLocalizations {
   String get cleaning => '清洁';
 
   @override
-  String get personalCare => '个人护理';
-
-  @override
   String get grocery => '杂货/食品';
 
   @override
   String get delivery => '外送';
-
-  @override
-  String get workspace => '办公/空间';
 
   @override
   String get gas => '燃气/燃料';
@@ -304,13 +223,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get dayOfMonth => '月中某天';
 
   @override
-  String get dayOfYear => '年中某天';
-
-  @override
   String get dayOf => '日期';
-
-  @override
-  String get recurrencePeriod => '循环周期';
 
   @override
   String get dining => '餐饮';
@@ -319,19 +232,10 @@ class AppLocalizationsZh extends AppLocalizations {
   String get restaurant => '餐厅';
 
   @override
-  String get fastFood => '快餐';
-
-  @override
   String get cafe => '咖啡馆';
 
   @override
-  String get takeout => '外卖';
-
-  @override
   String get rent => '租金';
-
-  @override
-  String get homeRent => '房租';
 
   @override
   String get office => '办公室';
@@ -349,16 +253,10 @@ class AppLocalizationsZh extends AppLocalizations {
   String get water => '水费';
 
   @override
-  String get naturalGas => '天然气费';
-
-  @override
   String get internet => '网费';
 
   @override
   String get phone => '话费';
-
-  @override
-  String get entertainment => '娱乐';
 
   @override
   String get cinema => '电影院';
@@ -374,12 +272,6 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get subscription => '订阅';
-
-  @override
-  String get streaming => '流媒体';
-
-  @override
-  String get musicSubscription => '音乐';
 
   @override
   String get software => '软件';
@@ -403,9 +295,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get dentist => '牙医';
 
   @override
-  String get transportation => '交通';
-
-  @override
   String get taxi => '出租车';
 
   @override
@@ -421,19 +310,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get fuel => '燃料';
 
   @override
-  String get clothing => '服装';
-
-  @override
-  String get dailyWear => '日常穿着';
-
-  @override
   String get shoes => '鞋子';
-
-  @override
-  String get accessory => '配件';
-
-  @override
-  String get education => '教育';
 
   @override
   String get course => '课程';
@@ -445,16 +322,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get school => '学校';
 
   @override
-  String get debtPayment => '偿还债务';
-
-  @override
-  String get creditCard => '信用卡';
-
-  @override
   String get loan => '贷款';
-
-  @override
-  String get personalDebt => '个人债务';
 
   @override
   String get credit => '信贷/债务';
@@ -463,18 +331,15 @@ class AppLocalizationsZh extends AppLocalizations {
   String get other => '其他';
 
   @override
-  String get balanceAdjustment => 'Bakiye Düzeltme';
+  String get balanceAdjustment => '平衡调整';
 
   @override
   String balanceAdjustmentNote(Object newVal, Object oldVal) {
-    return 'Kasa bakiyesi $oldVal değerinden $newVal değerine eşitlendi.';
+    return '金库余额从 $oldVal 调整为 $newVal 。';
   }
 
   @override
   String get salary => '工资';
-
-  @override
-  String get mainSalary => '基本工资';
 
   @override
   String get bonus => '奖金';
@@ -483,19 +348,10 @@ class AppLocalizationsZh extends AppLocalizations {
   String get dividend => '分红';
 
   @override
-  String get extraIncome => '额外收入';
-
-  @override
   String get freelance => '自由职业';
 
   @override
-  String get partTime => '兼职';
-
-  @override
   String get commission => '佣金';
-
-  @override
-  String get investmentReturn => '投资回报';
 
   @override
   String get stock => '股票';
@@ -507,46 +363,19 @@ class AppLocalizationsZh extends AppLocalizations {
   String get interest => '利息';
 
   @override
-  String get scholarshipLoan => '奖学金/贷款';
-
-  @override
   String get scholarship => '奖学金';
 
   @override
   String get sale => '销售';
 
   @override
-  String get onlineSale => '网上销售';
-
-  @override
-  String get physicalSale => '实体销售';
-
-  @override
-  String get rentalIncome => '租金收入';
-
-  @override
-  String get officeIncome => '办公室收入';
-
-  @override
   String get gift => '礼物';
-
-  @override
-  String get vaultOrGroup => '金库或小组';
 
   @override
   String get cancel => '取消';
 
   @override
-  String get generalBalance => '总余额';
-
-  @override
   String get everyDay => '每天';
-
-  @override
-  String get every2Days => '每2天';
-
-  @override
-  String get every3Days => '每3天';
 
   @override
   String get everyWeek => '每周';
@@ -564,19 +393,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get threeDays => '3天';
 
   @override
-  String get twoWeeks => '2周';
-
-  @override
-  String get threeWeeks => '3周';
-
-  @override
   String get flexibleAmount => '弹性金额';
-
-  @override
-  String get singleAmount => '固定金额';
-
-  @override
-  String get advancedOptions => '高级选项';
 
   @override
   String get monday => '星期一';
@@ -639,22 +456,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get selectDate => '选择日期';
 
   @override
-  String get selectDay => '选择日期';
-
-  @override
-  String get financialIdentity => '您的财务身份';
-
-  @override
-  String get setTarget => '设定目标';
-
-  @override
   String get allVaults => '所有金库';
-
-  @override
-  String get hidePreselect => '隐藏预选';
-
-  @override
-  String get showPreselect => '显示预选';
 
   @override
   String get items => '项目';
@@ -666,184 +468,97 @@ class AppLocalizationsZh extends AppLocalizations {
   String get incomes => '收入';
 
   @override
-  String get doNotTouch => '不改动';
-
-  @override
-  String get changeable => '可调整';
-
-  @override
-  String get excellent => '优秀';
-
-  @override
-  String get analysisResult => '分析结果';
-
-  @override
-  String get onTrackMessage => '进展顺利';
-
-  @override
-  String get savingsNeeded => '所需储蓄';
-
-  @override
   String get currentBalance => '当前余额';
-
-  @override
-  String get targetGap => '目标差距';
-
-  @override
-  String get currentSurplus => '当前盈余';
-
-  @override
-  String get requiredMonthlySavings => '每月所需储蓄';
 
   @override
   String get score => '评分';
 
   @override
-  String get currentSavings => '您的当前储蓄';
-
-  @override
-  String get aiSavingsTarget => 'AI 储蓄目标';
-
-  @override
-  String get remainingGap => '剩余差距';
-
-  @override
-  String get dailyAiQuotaFull => '今日 AI 配额已达上限';
-
-  @override
-  String get noInternetConnection => '无网络连接';
-
-  @override
-  String get aiApiError => 'AI API 错误';
-
-  @override
-  String get aiCoachSuggestion => 'AI 教练建议';
-
-  @override
-  String get cutbackPlan => '削减计划';
-
-  @override
   String get no => '否';
-
-  @override
-  String get recentAnalyses => '最近分析';
 
   @override
   String get vault => '金库';
 
   @override
-  String get vaultDetail => 'Kasa Detayı';
+  String get vaultDetail => '保险库详细信息';
 
   @override
-  String get managePanel => 'Paneli Yönet';
+  String get vaultNameHint => '保管库名称（例如储蓄）';
 
   @override
-  String get vaultNameHint => 'Kasa Adı (örn. Birikim)';
+  String get initialBalance => '初始余额';
 
   @override
-  String get initialBalance => 'Başlangıç Bakiyesi';
+  String get createVault => '创建保管库';
 
   @override
-  String get createVault => 'Kasa Oluştur';
+  String get transactions => '交易';
 
   @override
-  String get transactions => 'İşlemler';
+  String get manage => '管理';
 
   @override
-  String get manage => 'Yönet';
-
-  @override
-  String get averageMonthlyLoad => 'AYLIK ORTALAMA YÜK';
-
-  @override
-  String get noTransactionsInVault => 'Bu kasada işlem bulunmuyor.';
-
-  @override
-  String get manageTransactionsInVault => 'Kasadaki İşlemleri Yönet';
-
-  @override
-  String get deleteVault => 'Kasayı Sil';
+  String get deleteVault => '删除保管库';
 
   @override
   String deleteVaultConfirm(String name) {
-    return '\"$name\" kasasını silmek istediğinize emin misiniz? Bu işlem geri alınamaz.';
+    return '您确定要删除“$name”保管库吗？此操作无法撤消。';
   }
 
   @override
-  String get gold => 'ALTIN';
+  String get gold => '金子';
 
   @override
-  String get amountNotEntered => 'TUTAR GİRİLMEDİ';
+  String get amountNotEntered => '未输入金额';
 
   @override
-  String get addAmountByEditing => 'Düzenleyerek tutar ekleyin';
+  String get addAmountByEditing => '通过编辑添加金额';
 
   @override
-  String get added => 'Eklendi';
+  String get added => '额外';
 
   @override
-  String get endDate => 'Bitiş Tarihi';
+  String get endDate => '结束日期';
 
   @override
-  String get occurred => 'Gerçekleşen';
+  String get occurred => '发生过';
 
   @override
-  String get remainingCount => 'Kalan Sayısı';
+  String get remainingCount => '剩余数量';
 
   @override
   String times(num count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count Kez',
-      one: '1 Kez',
+      other: '$count 次',
+      one: '1 次',
     );
     return '$_temp0';
   }
 
   @override
-  String get note => 'Not';
+  String get note => '笔记';
 
   @override
-  String get indefinitely => 'Sürekli';
+  String get indefinitely => '无限期';
 
   @override
   String dayOfMonthOrdinal(Object day) {
-    return 'Ayın $day\'i';
+    return '每月第 $day 天';
   }
 
   @override
-  String get everyWeekDetailed => 'Her hafta';
+  String get everyWeekDetailed => '每周';
 
   @override
-  String get everyMonthDetailed => 'Her ay';
+  String get everyMonthDetailed => '每个月';
 
   @override
-  String get everyYearDetailed => 'Her yıl';
+  String get everyYearDetailed => '每年';
 
   @override
-  String get every2WeeksDetailed => '2 haftada bir';
-
-  @override
-  String get every3WeeksDetailed => '3 haftada bir';
-
-  @override
-  String get every3MonthsDetailed => '3 ayda bir';
-
-  @override
-  String get every6MonthsDetailed => '6 ayda bir';
-
-  @override
-  String get everyDayDetailed => 'Her gün';
-
-  @override
-  String get every2DaysDetailed => '2 günde bir';
-
-  @override
-  String get every3DaysDetailed => '3 günde bir';
-
-  @override
-  String get allLabel => '全部';
+  String get everyDayDetailed => '每天';
 
   @override
   String get custom => '自定义';
@@ -852,25 +567,10 @@ class AppLocalizationsZh extends AppLocalizations {
   String get status => '状态';
 
   @override
-  String get approved => '已批准';
-
-  @override
-  String get rejected => '已拒绝';
-
-  @override
   String get pending => '待处理';
 
   @override
-  String get visibilityManagement => '可见性管理';
-
-  @override
-  String get editTransaction => '更新交易详情';
-
-  @override
   String get removeFromVault => '从金库中移除';
-
-  @override
-  String get removeFromVaultDesc => '交易将返回主金库，不会被删除';
 
   @override
   String get permanentDelete => '永久删除';
@@ -882,127 +582,10 @@ class AppLocalizationsZh extends AppLocalizations {
   String get yes => '是';
 
   @override
-  String get groupNameHint => '小组名称...';
-
-  @override
-  String transactionCount(num count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: '$count 笔交易',
-    );
-    return '$_temp0';
-  }
-
-  @override
-  String get noRemainingTransactions => '没有剩余交易可添加。';
-
-  @override
-  String get editTransactionDesc => '更新交易详情';
-
-  @override
-  String get visibilityDesc => '选择哪些小组或交易显示在主屏幕上。';
-
-  @override
-  String get vaultsAndGroups => '金库与小组';
-
-  @override
-  String get individualTransactions => '个人交易';
-
-  @override
-  String get analyzingFinancialIdentity => '正在分析您的财务身份...';
-
-  @override
-  String get financialIdentityHint => '进行分析后，您的财务身份将显示在这里。';
-
-  @override
-  String get targetDateLabel => '目标日期：';
-
-  @override
-  String get scopeLabel => '范围：';
-
-  @override
-  String get preselectHint => '预选项目（可选）';
-
-  @override
-  String get noItemsToAnalyze => '未找到在选定日期前生效的交易。';
-
-  @override
-  String itemsToAnalyze(num count, Object months) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: '在目标日期（$months个月）前生效的 $count 个项目。',
-    );
-    return '$_temp0';
-  }
-
-  @override
-  String get budgetNotFeasible => '目前的弹性预算无法完全实现此目标。请考虑延长持续时间或增加收入。';
-
-  @override
-  String get financialIdentityUpdated => '太棒了！您的财务身份已更新，分析已保存。';
-
-  @override
-  String get feedbackMemoized => '好的，这些偏好已被记录。下次分析时将提供不同的建议。';
-
-  @override
-  String get excludedCategories => '排除的类别：';
-
-  @override
-  String newFrequency(Object frequency) {
-    return '新频率：$frequency';
-  }
-
-  @override
-  String get doYouLikeThisSuggestion => '你喜欢这个建议吗？';
-
-  @override
-  String get yesILikeIt => '是的，我喜欢';
-
-  @override
-  String targetAmountLabel(Object amount) {
-    return '$amount 目标';
-  }
-
-  @override
-  String weeksToTargetLabel(num count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: '$count 周',
-    );
-    return '$_temp0';
-  }
-
-  @override
-  String monthsToTargetLabel(num count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: '$count 个月',
-    );
-    return '$_temp0';
-  }
-
-  @override
-  String yearsToTargetLabel(num count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: '$count 年',
-    );
-    return '$_temp0';
-  }
-
-  @override
   String get minAmount => '最小';
 
   @override
   String get maxAmount => '最大';
-
-  @override
-  String get limitedTotal => '总计';
 
   @override
   String get netBalance => '净余额';
@@ -1014,31 +597,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get worstCase => '最坏情况';
 
   @override
-  String get layoutAndSorting => '布局与排序';
-
-  @override
-  String get layout1 => '1列';
-
-  @override
-  String get layout2 => '2列';
-
-  @override
-  String get layout3 => '3列';
-
-  @override
-  String get layout4 => '4列';
-
-  @override
-  String get moveForward => '前进';
-
-  @override
-  String get moveBackward => '后退';
-
-  @override
   String get selectCurrency => '选择货币';
-
-  @override
-  String get membershipPlan => '会员计划';
 
   @override
   String get upgrade => '升级';
@@ -1053,9 +612,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get zero => '0';
 
   @override
-  String get aiMode => 'AI 模式';
-
-  @override
   String get addCustomCategory => '新增';
 
   @override
@@ -1068,759 +624,1318 @@ class AppLocalizationsZh extends AppLocalizations {
   String get deleteCustomCategoryConfirm => '确定要删除这个自定义分类吗？';
 
   @override
-  String get dashboard => 'Dashboard';
+  String get dashboard => '仪表板';
 
   @override
-  String get library => 'Kütüphane';
+  String get library => '图书馆';
 
   @override
-  String get dashboardEmpty => 'Dashboard şu an boş.';
+  String get pageLabel => '页';
 
   @override
-  String get libraryEmpty => 'Kütüphane şu an boş.';
+  String get historyTitle => '交易记录';
 
   @override
-  String get pageLabel => 'Sayfa';
+  String get radarTitle => '支出雷达';
 
   @override
-  String get sizeLabel => 'Boyut';
+  String get giantsTitle => '消费巨头';
 
   @override
-  String widgetAdded(String name) {
-    return '$name panoya eklendi!';
-  }
+  String get dailyLimit => '每日限额';
 
   @override
-  String get historyTitle => 'İşlem Geçmişi';
+  String get spendableRemaining => '可消费剩余';
 
   @override
-  String get radarTitle => 'Harcama Radarı';
+  String get giantsWait => '等待支出分配';
 
   @override
-  String get giantsTitle => 'Harcama Devleri';
+  String get weeklyShort => '瓦';
 
   @override
-  String get quickActionTitle => 'Hızlı İşlem';
+  String get monthlyShort => '中号';
 
   @override
-  String get vaultStatusTitle => 'Kasa Durumları';
+  String get yearlyShort => '是';
 
   @override
-  String get dailyBudgetTitle => 'Günlük Bütçe';
+  String get newLabel => '新的';
 
   @override
-  String get dailyLimit => 'GÜNLÜK LİMİT';
+  String get today => '今天';
 
   @override
-  String get spendableRemaining => 'Harcanabilir Kalan';
+  String get yesterday => '昨天';
 
   @override
-  String get giantsWait => 'Harcama Dağılımı Bekleniyor';
-
-  @override
-  String get weeklyShort => 'H';
-
-  @override
-  String get monthlyShort => 'A';
-
-  @override
-  String get yearlyShort => 'Y';
-
-  @override
-  String get newLabel => 'YENİ';
-
-  @override
-  String get today => 'Bugün';
-
-  @override
-  String get yesterday => 'Dün';
+  String get tomorrow => '明天';
 
   @override
   String daysAgo(int count) {
-    return '$count Gün Önce';
+    return '$count 天前';
   }
 
   @override
   String weeksAgo(int count) {
-    return '$count Hafta Önce';
+    return '$count 几周前';
   }
 
   @override
   String monthsAgo(int count) {
-    return '$count Ay Önce';
+    return '$count 几个月前';
   }
 
   @override
-  String get historyEmpty => 'İşlem Geçmişi Henüz Boş';
+  String get historyEmpty => '还没有交易记录';
 
   @override
-  String get upcomingPaymentsNotFound => 'Yaklaşan Ödeme Bulunmadı';
+  String get upcomingPaymentsNotFound => '未找到即将付款';
 
   @override
-  String get transaction => 'İşlem';
+  String get transaction => '交易';
 
   @override
-  String get membership => 'ÜYELİK';
+  String get membership => '会员资格';
 
   @override
-  String get currentPlan => 'Mevcut Plan';
+  String get restorePurchases => '恢复购买';
 
   @override
-  String get manageSubscription => 'Üyeliği Yönet';
+  String get freePlan => '免费计划';
 
   @override
-  String get restorePurchases => 'Satın Almaları Geri Yükle';
+  String get upgradeToPro => '升级至高级版';
 
   @override
-  String get freePlan => 'Ücretsiz Plan';
+  String get unlimitedVaults => '无限金库';
 
   @override
-  String get proPlan => 'Finarcast Premium';
+  String get active => '积极的';
 
   @override
-  String get upgradeToPro => 'Premium\'a Yükselt';
+  String get inactive => '不活跃';
 
   @override
-  String get proFeatures => 'Premium Özellikleri';
+  String get notifications => '通知';
 
   @override
-  String get unlimitedVaults => 'Sınırsız Kasa';
+  String get disabled => '残疾人';
 
   @override
-  String get aiInsights => 'Gelişmiş AI Analizleri';
+  String get monthlyNetBalance => '每月净余额';
 
   @override
-  String get prioritySupport => 'Öncelikli Destek';
+  String get savingsRate => '储蓄率';
 
   @override
-  String get subscriptionStatus => 'Üyelik Durumu';
+  String get yearlyProjection => '年度预测';
 
   @override
-  String get active => 'Aktif';
+  String get topExpense => '最高支出';
 
   @override
-  String get inactive => 'Aktif Değil';
+  String get topIncome => '最高收入';
 
   @override
-  String get notifications => 'Bildirimler';
+  String get transactionBreakdown => '交易明细';
 
   @override
-  String get disabled => 'Kapalı';
+  String get incomeCount => '收入';
 
   @override
-  String get financialOverview => 'FİNANSAL ÖZET';
+  String get expenseCount => '费用';
 
   @override
-  String get monthlyNetBalance => 'AYLIK NET BAKİYE';
+  String get scenarioAnalysis => '情景分析';
 
   @override
-  String get savingsRate => 'TASARRUF ORANI';
+  String get monthlyBest => '每月最佳';
 
   @override
-  String get yearlyProjection => 'YILLIK PROJEKSİYON';
+  String get monthlyWorst => '每月最差';
 
   @override
-  String get topExpense => 'EN BÜYÜK GİDER';
+  String get yearlyBest => '年度最佳';
 
   @override
-  String get topIncome => 'EN BÜYÜK GELİR';
+  String get yearlyWorst => '年度最差';
 
   @override
-  String get transactionBreakdown => 'İŞLEM DAĞILIMI';
-
-  @override
-  String get incomeCount => 'Gelir';
-
-  @override
-  String get expenseCount => 'Gider';
-
-  @override
-  String get scenarioAnalysis => 'SENARYO ANALİZİ';
-
-  @override
-  String get monthlyBest => 'AYLIK EN İYİ';
-
-  @override
-  String get monthlyWorst => 'AYLIK EN KÖTÜ';
-
-  @override
-  String get yearlyBest => 'YILLIK EN İYİ';
-
-  @override
-  String get yearlyWorst => 'YILLIK EN KÖTÜ';
-
-  @override
-  String get noRecurring => 'Tekrarlayan işlem yok';
-
-  @override
-  String get perMonth => '/ay';
-
-  @override
-  String get perYear => '/yıl';
+  String get perMonth => '/月';
 
   @override
   String itemCount(int count) {
-    return '$count Kalem';
+    return '$count 项目';
   }
 
   @override
-  String get authEmailRequired => 'Lütfen e-posta adresinizi girin.';
+  String get authEmailRequired => '请输入您的电子邮件地址。';
 
   @override
-  String get authEmailInvalid => 'Lütfen geçerli bir e-posta adresi girin.';
+  String get authEmailInvalid => '请输入有效的电子邮件地址。';
 
   @override
-  String get authPasswordRequired => 'Lütfen şifrenizi girin.';
+  String get authPasswordRequired => '请输入您的密码。';
 
   @override
-  String get authPasswordTooShort =>
-      'Şifreniz en az 6 karakterden oluşmalıdır.';
+  String get authPasswordTooShort => '您的密码必须至少包含 6 个字符。';
 
   @override
-  String get authConfirmPasswordRequired => 'Lütfen şifrenizi tekrar girin.';
+  String get authConfirmPasswordRequired => '请重新输入您的密码。';
 
   @override
-  String get authPasswordsDoNotMatch =>
-      'Girdiğiniz şifreler birbiriyle eşleşmiyor.';
+  String get authPasswordsDoNotMatch => '您输入的密码不匹配。';
 
   @override
-  String get authUsernameRequired => 'Lütfen bir kullanıcı adı belirleyin.';
+  String get authUsernameRequired => '请选择一个用户名。';
 
   @override
-  String get authUsernameTooShort =>
-      'Kullanıcı adı en az 3 karakterden oluşmalıdır.';
+  String get authUsernameTooShort => '用户名必须至少包含 3 个字符。';
 
   @override
-  String get authUsernameInvalid =>
-      'Kullanıcı adı yalnızca harf, rakam ve alt çizgi (_) içerebilir.';
+  String get authUsernameInvalid => '用户名只能包含字母、数字和下划线（_）。';
 
   @override
-  String get authUsernameTaken => 'Bu kullanıcı adı zaten alınmış.';
+  String get authUsernameTaken => '该用户名已被占用。';
 
   @override
-  String get authEmailNotConfirmed =>
-      'E-posta adresiniz henüz doğrulanmamış. Lütfen e-postanıza gönderilen doğrulama kodunu girin veya tekrar kod isteyin.';
+  String get authEmailNotConfirmed => '您的电子邮件地址尚未验证。请输入发送到您的电子邮件的验证码或请求新的验证码。';
 
   @override
-  String get authInvalidCredentials =>
-      'E-posta adresiniz veya şifreniz hatalı.';
+  String get authInvalidCredentials => '您的电子邮件地址或密码不正确。';
 
   @override
-  String get authEmailExists =>
-      'Bu e-posta adresiyle zaten bir kayıtlı hesap bulunuyor.';
+  String get authEmailExists => '使用此电子邮件地址的帐户已存在。';
 
   @override
-  String get authWeakPassword =>
-      'Şifreniz çok zayıf. Lütfen en az 6 karakterli daha güçlü bir şifre girin.';
+  String get authWeakPassword => '您的密码太弱了。请输入至少 6 个字符的更强密码。';
 
   @override
-  String get authOtpExpired =>
-      'Doğrulama kodunun süresi dolmuş. Lütfen yeni bir kod isteyin.';
+  String get authBadCode => '您输入的验证码不正确或无效。';
 
   @override
-  String get authBadCode => 'Girdiğiniz doğrulama kodu hatalı veya geçersiz.';
+  String get authSignupDisabled => '目前禁止新用户注册。请联系管理员。';
 
   @override
-  String get authSignupDisabled =>
-      'Yeni kullanıcı kaydı şu anda devre dışıdır. Lütfen yöneticiyle iletişime geçin.';
+  String get authRateLimitExceeded => '发送的请求过多。超出电子邮件速率限制，请稍后重试。';
 
   @override
-  String get authRateLimitExceeded =>
-      'Çok fazla istek gönderildi. E-posta limitini aştınız, lütfen bir süre bekleyip tekrar deneyin.';
+  String get authOtpRequired => '请输入6位验证码。';
 
   @override
-  String get authOtpRequired => 'Lütfen gelen 6 haneli doğrulama kodunu girin.';
+  String get authOtpSent => '新的验证码已发送至您的电子邮件。';
 
   @override
-  String get authOtpSent => 'Yeni doğrulama kodu e-postanıza gönderildi.';
+  String get authRegistrationSuccess => '注册成功！请输入发送至您邮箱的验证码。';
 
   @override
-  String get authRegistrationSuccess =>
-      'Kayıt başarılı! Lütfen e-postanıza gelen doğrulama kodunu girin.';
-
-  @override
-  String get authVerificationCode => 'Doğrulama Kodu';
+  String get authVerificationCode => '验证码';
 
   @override
   String authVerificationDesc(String email) {
-    return 'Kayıt işlemini tamamlamak için $email adresine gönderilen doğrulama kodunu girin.';
+    return '输入发送至$email的验证码以完成注册。';
   }
 
   @override
-  String get authVerifyCode => 'Kodu Doğrula';
+  String get authVerifyCode => '验证码';
 
   @override
   String authResendCodeCountdown(int seconds) {
-    return 'Kodu Tekrar Gönder ($seconds sn)';
+    return '重新发送代码（$seconds s）';
   }
 
   @override
-  String get authResendCode => 'Kodu Tekrar Gönder';
+  String get authResendCode => '重新发送代码';
 
   @override
-  String get authGoBack => 'Geri Dön';
+  String get authGoBack => '回去';
 
   @override
-  String get authWelcome => 'Hoş Geldiniz';
+  String get authWelcome => '欢迎';
 
   @override
-  String get authLoginSubtitle =>
-      'Hesabınıza giriş yaparak finanslarınıza hükmedin.';
+  String get authLoginSubtitle => '通过登录您的帐户来控制您的财务。';
 
   @override
-  String get authEmail => 'E-posta';
+  String get authEmail => '电子邮件';
 
   @override
-  String get authPassword => 'Şifre';
+  String get authPassword => '密码';
 
   @override
-  String get authForgotPassword => 'Şifremi Unuttum';
+  String get authForgotPassword => '忘记密码';
 
   @override
-  String get authLogin => 'Giriş Yap';
+  String get authLogin => '登入';
 
   @override
-  String get authOr => 'Veya';
+  String get authOr => '或者';
 
   @override
-  String get authGoogleSignIn => 'Google ile Devam Et';
+  String get authGoogleSignIn => '继续使用谷歌';
 
   @override
-  String get authNewAccount => 'Yeni Hesap';
+  String get authNewAccount => '新账户';
 
   @override
-  String get authRegisterSubtitle =>
-      'Finarcast dünyasına katılarak limitlerinizi belirleyin.';
+  String get authRegisterSubtitle => '加入 Finarcast 世界并设定您的极限。';
 
   @override
-  String get authUsername => 'Kullanıcı Adı';
+  String get authUsername => '用户名';
 
   @override
-  String get authConfirmPassword => 'Şifre Tekrar';
+  String get authConfirmPassword => '确认密码';
 
   @override
-  String get authRegister => 'Hemen Katıl';
+  String get authRegister => '立即加入';
 
   @override
-  String get authNoAccount => 'Hesabınız yok mu?';
+  String get authNoAccount => '没有帐户？';
 
   @override
-  String get authAlreadyHaveAccount => 'Zaten hesabınız var mı?';
+  String get authAlreadyHaveAccount => '已经有帐户？';
 
   @override
-  String get authRegisterAction => 'Kayıt Ol';
+  String get authRegisterAction => '报名';
 
   @override
-  String get authLoginAction => 'Giriş Yap';
+  String get authLoginAction => '登入';
 
   @override
-  String get authContinueAsGuest => 'Misafir Olarak Devam Et';
+  String get authContinueAsGuest => '继续以访客身份';
 
   @override
-  String get authPasswordReset => 'Şifre Sıfırlama';
+  String get authPasswordReset => '重置密码';
 
   @override
-  String get authForgotPasswordDesc =>
-      'Şifrenizi sıfırlamak için e-posta adresinizi girin. Size 6 haneli geçici bir kod göndereceğiz.';
+  String get authForgotPasswordDesc => '输入您的电子邮件地址以重置密码。我们将向您发送 6 位验证码。';
 
   @override
-  String get authSendCode => 'Kod Gönder';
+  String get authSendCode => '发送代码';
 
   @override
-  String get authBackToLogin => 'Giriş Ekranına Dön';
+  String get authBackToLogin => '返回登录';
 
   @override
-  String get authVerificationCodeTitle => 'Onay Kodu';
+  String get authVerificationCodeTitle => '验证码';
 
   @override
   String authForgotPasswordOtpDesc(String email) {
-    return '$email adresine gönderilen 6 haneli doğrulama kodunu girin.';
+    return '输入发送至 $email 的 6 位验证码。';
   }
 
   @override
-  String get authChangeEmail => 'E-posta Değiştir';
+  String get authChangeEmail => '更改电子邮件';
 
   @override
-  String get authNewPasswordTitle => 'Yeni Şifre';
+  String get authNewPasswordTitle => '新密码';
 
   @override
-  String get authNewPasswordDesc =>
-      'Hesabınız için en az 6 karakterli güvenli bir şifre belirleyin.';
+  String get authNewPasswordDesc => '为您的帐户设置至少 6 个字符的安全密码。';
 
   @override
-  String get authNewPassword => 'Yeni Şifre';
+  String get authNewPassword => '新密码';
 
   @override
-  String get authConfirmNewPassword => 'Yeni Şifre Tekrar';
+  String get authConfirmNewPassword => '确认新密码';
 
   @override
-  String get authUpdatePassword => 'Şifreyi Güncelle';
+  String get authUpdatePassword => '更新密码';
 
   @override
-  String get authPasswordResetSuccess =>
-      'Şifreniz başarıyla sıfırlandı ve giriş yapıldı.';
+  String get authPasswordResetSuccess => '您的密码已成功重置并且您已登录。';
 
   @override
-  String get authGoogleError => 'Google Giriş Hatası';
+  String get authGoogleError => '谷歌登录错误';
 
   @override
-  String get authPasswordDifferentError =>
-      'Yeni şifreniz mevcut şifrenizden farklı olmalıdır.';
+  String get authPasswordDifferentError => '您的新密码必须与当前密码不同。';
 
   @override
-  String get authUserNotFoundError =>
-      'Bu e-posta adresine kayıtlı bir kullanıcı bulunamadı.';
+  String get authUserNotFoundError => '未发现使用此电子邮件地址注册的用户。';
 
   @override
   String get dataRetentionDetail =>
-      'Bu süre sonunda işlemleriniz ana listeden gizlenerek arşive taşınır. Arşivlenen veriler bakiyenizi etkilemez ve Dashboard\'u temiz tutar.';
+      '在此期限之后，您的交易将从主列表中隐藏并移至存档。存档数据不会影响您的余额并保持仪表板干净。';
 
   @override
-  String get retentionPeriodLabel => 'Saklama Süresi:';
+  String get retentionPeriodLabel => '保留期限：';
 
   @override
-  String get premiumRequired => 'Premium Gerekli';
+  String get premiumRequired => '需要保费';
 
   @override
-  String get premiumRetentionDesc =>
-      'Veri saklama, arşivleme ve otomatik temizleme kuralları sadece Premium üyelerin erişimine açıktır.';
+  String get premiumRetentionDesc => '数据保留、存档和自动删除规则仅适用于高级会员。';
 
   @override
-  String get later => 'Daha Sonra';
+  String get later => '之后';
 
   @override
-  String get permanentDeletionDetail =>
-      'Dikkat: Bu süre sonunda verileriniz cihazınızdan tamamen silinir ve bir daha geri getirilemez.';
+  String get permanentDeletionDetail => '警告：在此期限之后，您的数据将从您的设备中完全删除且无法恢复。';
 
   @override
-  String get purgePeriodLabel => 'Temizleme Süresi:';
+  String get purgePeriodLabel => '删除期限：';
 
   @override
-  String get cloudSync => 'Bulut Eşitleme';
+  String get cloudSync => '云同步';
 
   @override
-  String get loginRequiredLabel => 'Giriş gerekli';
+  String get loginRequiredLabel => '需要登录';
 
   @override
   String syncToday(String time) {
-    return 'Bugün $time';
+    return '今天在 $time';
   }
 
   @override
   String syncYesterday(String time) {
-    return 'Dün $time';
+    return '昨天在 $time';
   }
 
   @override
-  String get noSyncYet => 'Henüz eşitleme yapılmadı';
+  String get noSyncYet => '尚未执行同步';
 
   @override
-  String get syncStatus => 'Senkronizasyon Durumu';
+  String get syncStatus => '同步状态';
 
   @override
   String lastSyncLabel(String time) {
-    return 'Son Eşitleme: $time';
+    return '上次同步：$time';
   }
 
   @override
-  String get syncBackgroundDesc =>
-      'Verileriniz arka planda otomatik olarak buluta yedeklenmektedir.';
+  String get syncBackgroundDesc => '您的数据会在后台自动备份到云端。';
 
   @override
   String get syncCloudDesc =>
-      'Verileriniz Supabase bulut altyapısı ile anlık olarak yedeklenir. Uygulamayı silseniz bile hesabınıza giriş yaparak verilerinizi geri getirebilirsiniz.';
+      '使用 Supabase 云基础设施立即备份您的数据。即使您删除了应用程序，也可以通过登录来恢复数据。';
 
   @override
-  String get syncNow => 'ŞİMDİ SENKRONİZE ET';
+  String get syncNow => '立即同步';
 
   @override
-  String get syncing => 'VERİLER EŞİTLENİYOR...';
+  String get syncing => '正在同步数据...';
 
   @override
   String syncPartialSuccess(String summary) {
-    return 'Kısmi başarı: $summary';
+    return '部分成功：$summary';
   }
 
   @override
   String syncFailed(String error) {
-    return 'Eşitleme başarısız oldu. $error';
+    return '同步失败。 $error';
   }
 
   @override
-  String get syncConnectionError =>
-      'Lütfen internetinizi veya giriş bilgilerinizi kontrol edin.';
+  String get syncConnectionError => '请检查您的互联网连接或登录详细信息。';
 
   @override
-  String get loginRequiredTitle => 'Giriş Gerekli';
+  String get loginRequiredTitle => '需要登录';
 
   @override
-  String get loginRequiredSyncDesc =>
-      'Bulut senkronizasyonunu aktifleştirerek verilerinizi yedeklemek için giriş yapmanız gerekmektedir.';
+  String get loginRequiredSyncDesc => '您必须登录才能通过启用云同步来备份数据。';
 
   @override
-  String get premiumSyncDesc =>
-      'Bulut Eşitleme özelliği Supabase yedekleme altyapısını kullanır ve sadece Premium üyelerin erişimine açıktır.';
+  String get premiumSyncDesc => '云同步功能使用 Supabase 备份基础架构，仅适用于高级会员。';
 
   @override
-  String get showOnPhone => 'Telefonda Göster';
+  String get showOnPhone => '在手机上显示';
 
   @override
-  String get appOnly => 'Sadece Uygulama İçi';
+  String get appOnly => '仅限应用程序';
 
   @override
   String get notificationDesc =>
-      'Hatırlatıcıların sadece uygulama içinde mi saklanacağını yoksa telefonunuzun bildirim panelinde de gösterilip gösterilmeyeceğini belirler. Kapalıyken hatırlatıcılar sessizce uygulama içinde kalır.';
+      '确定提醒是仅保留在应用程序中还是也显示在手机的通知面板中。关闭后，提醒会默默地保留在应用程序中。';
 
   @override
-  String get selectMainCurrency => 'Ana uygulama birimini seçin.';
+  String get selectMainCurrency => '选择主要应用货币。';
 
   @override
-  String get currencyDesc =>
-      'Bu birim tüm uygulama genelinde (Dashboard, Kasalar ve İstatistikler) ana para birimi olarak kullanılır. Tüm varlıklarınız bu birime göre hesaplanır.';
+  String get currencyDesc => '该货币用作整个应用程序（仪表板、保险库和统计信息）的主要货币。您的所有资产都是根据该货币计算的。';
 
   @override
-  String get changeCurrency => 'Birimi Değiştir';
+  String get changeCurrency => '更改货币';
 
   @override
-  String get exchangeRateNotFoundError =>
-      'Seçilen para birimi için döviz kuru bulunamadı. Lütfen internet bağlantınızı kontrol edip tekrar deneyin.';
+  String get exchangeRateNotFoundError => '未找到所选货币的汇率。请检查您的互联网连接，然后重试。';
 
   @override
-  String get exchangeRatesDownloadFailed =>
-      'Döviz kurları indirilemedi. İnternet bağlantınızı kontrol edin.';
+  String get exchangeRatesDownloadFailed => '无法下载汇率。检查您的互联网连接。';
 
   @override
-  String get exchangeRatesCheckError =>
-      'Kurlar kontrol edilirken hata oluştu. Lütfen tekrar deneyin.';
+  String get exchangeRatesCheckError => '检查费率时发生错误。请再试一次。';
 
   @override
-  String get exchangeRates => 'Döviz Kurları';
+  String get exchangeRates => '汇率';
 
   @override
-  String get baseUnitLira => 'Baz Birim: Türk Lirası';
+  String get baseUnitLira => '基本单位：土耳其里拉';
 
   @override
   String baseUnitLabel(String currency) {
-    return 'Baz Birim: $currency';
+    return '基本单位：$currency';
   }
 
   @override
   String lastSyncShort(String time) {
-    return 'SON: $time';
+    return '最后：$time';
   }
 
   @override
-  String get updateRatesNow => 'KURLARI ŞİMDİ GÜNCELLE';
+  String get updateRatesNow => '立即更新价格';
 
   @override
-  String get updatingRates => 'GÜNCELLENİYOR...';
+  String get updatingRates => '正在更新...';
 
   @override
-  String get exchangeRatesUpdated => 'Kurlar başarıyla güncellendi.';
+  String get exchangeRatesUpdated => '汇率更新成功。';
 
   @override
-  String get exchangeRatesUpdateFailed =>
-      'Güncelleme başarısız. İnternet bağlantınızı kontrol edin.';
+  String get exchangeRatesUpdateFailed => '更新失败。检查您的互联网连接。';
 
   @override
-  String get showLess => 'Daha Az Göster';
+  String get showLess => '显示较少';
 
   @override
-  String get showMore => 'Daha Fazla Göster';
+  String get showMore => '显示更多';
 
   @override
-  String get styleLabel => 'Stil';
+  String get styleLabel => '风格';
 
   @override
-  String get styleDesc => 'Kartların ve arka planın görünüm stilini seçin';
+  String get styleDesc => '选择卡片和背景的视觉风格';
 
   @override
-  String get styleColor => 'Renkli';
+  String get styleColor => '有色';
 
   @override
-  String get styleColorDesc => 'Uyumlu renkler';
+  String get styleColorDesc => '和谐的色彩';
 
   @override
-  String get styleSimple => 'Sade';
+  String get styleSimple => '简单的';
 
   @override
-  String get styleSimpleDesc => 'Düz tasarım';
+  String get styleSimpleDesc => '平面设计';
 
   @override
-  String get premiumStyleDesc =>
-      'Renkli görünüm stili sadece Premium üyelerin erişimine açıktır.';
+  String get premiumStyleDesc => '彩色款式仅适用于高级会员。';
 
   @override
-  String get premiumColorDesc =>
-      'Özel renk temaları ve gelişmiş gradyanlar sadece Premium üyelerin erişimine açıktır.';
+  String get premiumColorDesc => '自定义颜色主题和高级渐变仅适用于高级会员。';
 
   @override
-  String get paletteArctic => 'Kutup';
+  String get paletteArctic => '北极';
 
   @override
-  String get paletteMint => 'Nane';
+  String get paletteMint => '薄荷';
 
   @override
-  String get paletteRose => 'Rose';
+  String get paletteRose => '玫瑰';
 
   @override
-  String get paletteLavender => 'Lavanta';
+  String get paletteLavender => '薰衣草';
 
   @override
-  String get paletteSahara => 'Sahra';
+  String get paletteSahara => '撒哈拉';
 
   @override
-  String get paletteSapphire => 'Safir';
+  String get paletteSapphire => '蓝宝石';
 
   @override
-  String get paletteBurgundy => 'Bordo';
+  String get paletteBurgundy => '勃艮第';
 
   @override
-  String get palettePlatinum => 'Platin';
+  String get palettePlatinum => '铂';
 
   @override
-  String get yearlyDiscount => 'Yıllık (-%33)';
+  String get yearlyDiscount => '每年（-33%）';
 
   @override
-  String get comparisonTitle => 'KARŞILAŞTIRMA';
+  String get comparisonTitle => '比较';
 
   @override
-  String get limitVaults => 'Kasa Sayısı';
+  String get limitVaults => '保险库限制';
 
   @override
-  String get limitAiAnalysis => 'AI İşlem Asistanı';
+  String get limitAiAnalysis => '人工智能交易助手';
 
   @override
-  String get limitCloudSync => 'Bulut Eşitleme';
+  String get limitCloudSync => '云同步';
 
   @override
-  String get limitDataRetention => 'Veri Saklama & Silme';
+  String get limitDataRetention => '数据保留和清除';
 
   @override
-  String get limitCustomThemes => 'Özel Temalar';
+  String get limitCustomThemes => '自定义主题';
 
   @override
-  String get limitAdFree => 'Reklamsız Deneyim';
+  String get limitAdFree => '无广告体验';
 
   @override
-  String get limitVaultsFree => '2 Kasa';
+  String get limitVaultsFree => '2 个避难所';
 
   @override
-  String get limitVaultsPro => 'Sınırsız';
+  String get limitVaultsPro => '无限';
 
   @override
-  String get basicAnalysis => 'Standart';
+  String get basicAnalysis => '标准';
 
   @override
-  String get advancedAnalysis => 'Genişletilmiş';
+  String get advancedAnalysis => '扩展';
 
   @override
-  String get limitDataRetentionPro => 'Özelleştirilebilir';
+  String get limitDataRetentionPro => '可定制';
 
   @override
-  String get cancelSubscriptionTest => 'Aboneliği İptal Et (Test)';
+  String get cancelSubscriptionTest => '取消订阅（测试）';
 
   @override
-  String get yearlyAccess => 'Yıllık Erişim';
+  String get yearlyAccess => '每年访问';
 
   @override
-  String get monthlyAccess => 'Aylık Erişim';
+  String get monthlyAccess => '每月访问';
 
   @override
-  String get yearlyPriceDetail => 'Ayda ₺99\'ye gelir';
+  String get yearlyPriceDetail => '费用₺99/月';
 
   @override
-  String get monthlyPriceDetail => 'Her ay yenilenir';
+  String get monthlyPriceDetail => '每月续订';
 
   @override
-  String get loginRequiredPurchaseDesc =>
-      'Satın alma işlemini tamamlamak için lütfen giriş yapın veya ücretsiz bir hesap oluşturun.';
+  String get loginRequiredPurchaseDesc => '请登录或创建一个免费帐户以完成购买。';
 
   @override
-  String get loginOrRegister => 'Giriş Yap / Üye Ol';
+  String get loginOrRegister => '登录/注册';
 
   @override
-  String get privilegesActive => 'Ayrıcalıklar aktif';
+  String get privilegesActive => '权限活跃';
 
   @override
-  String get tapToUnlock => 'Sınırları kaldırmak için dokunun';
+  String get tapToUnlock => '点击解锁限制';
 
   @override
-  String get sectionMembershipAccount => 'Üyelik ve Hesap';
+  String get sectionMembershipAccount => '会员及账户';
 
   @override
-  String get sectionAppearanceStyle => 'Görünüm ve Stil';
+  String get sectionAppearanceStyle => '外观风格';
 
   @override
-  String get sectionDataCloud => 'Veri ve Bulut';
+  String get sectionDataCloud => '数据与云';
 
   @override
-  String get sectionSessionSecurity => 'Oturum ve Güvenlik';
+  String get sectionSessionSecurity => '会话与安全';
 
   @override
-  String get guestUser => 'Misafir Kullanıcı';
+  String get guestUser => '访客用户';
 
   @override
-  String get tapToLogin => 'Giriş yapmak veya kayıt olmak için dokunun';
+  String get tapToLogin => '点击登录或注册';
 
   @override
-  String get changePassword => 'Şifre Değiştir';
+  String get changePassword => '更改密码';
 
   @override
-  String get changePasswordDesc =>
-      'Mevcut şifrenizi doğrulayarak yeni bir şifre belirleyin. Şifreniz en az 6 karakter olmalıdır.';
+  String get changePasswordDesc => '确认您当前的密码以设置新密码。您的密码必须至少包含 6 个字符。';
 
   @override
-  String get currentPasswordHint => 'Mevcut Şifre';
+  String get currentPasswordHint => '当前密码';
 
   @override
-  String get newPasswordHint => 'Yeni Şifre';
+  String get newPasswordHint => '新密码';
 
   @override
-  String get confirmNewPasswordHint => 'Yeni Şifre Tekrar';
+  String get confirmNewPasswordHint => '确认新密码';
 
   @override
-  String get currentPasswordRequired => 'Mevcut şifrenizi girmeniz gerekir.';
+  String get currentPasswordRequired => '您必须输入当前密码。';
 
   @override
-  String get updatePassword => 'Şifreyi Güncelle';
+  String get updatePassword => '更新密码';
 
   @override
-  String get signOut => 'Çıkış Yap';
+  String get signOut => '登出';
 
   @override
-  String get logout => 'Oturumu Kapat';
+  String get logout => '退出';
 
   @override
-  String get logoutConfirm => 'Oturumu kapatmak istediğinize emin misiniz?';
+  String get logoutConfirm => '您确定要退出吗？';
 
   @override
-  String get deleteAccount => 'Hesabımı Sil';
+  String get deleteAccount => '删除帐户';
 
   @override
-  String get deleteAccountPermanently => 'Hesabımı Kalıcı Olarak Sil';
+  String get deleteAccountPermanently => '永久删除帐户';
 
   @override
-  String get deleteAccountConfirmDesc =>
-      'Hesabınızı ve buluttaki tüm verilerinizi kalıcı olarak silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.';
+  String get deleteAccountConfirmDesc => '您确定要永久删除您的帐户和云中的所有数据吗？此操作无法撤消。';
 
   @override
-  String get reset => 'Sıfırla';
+  String get reset => '重置';
 
   @override
-  String get resetDataTitle => 'Verileri Sıfırla?';
+  String get resetDataTitle => '重置数据？';
 
   @override
-  String get resetDataDesc =>
-      'Tüm finansal verileriniz ve ayarlarınız kalıcı olarak silinecek. Bu işlem geri alınamaz.';
+  String get resetDataDesc => '您的所有财务数据和设置都将被永久删除。此操作无法撤消。';
 
   @override
-  String get deleteAll => 'Hepsini Sil';
+  String get deleteAll => '全部删除';
 
   @override
-  String get resetSuccess => 'Tüm veriler ve ayarlar başarıyla sıfırlandı.';
+  String get resetSuccess => '所有数据和设置均已成功重置。';
 
   @override
   String get supportEmailCopied =>
-      'E-posta uygulaması açılamadı. Destek adresi (finarcast.support@gmail.com) kopyalandı.';
+      '无法打开电子邮件客户端。支持电子邮件 (finarcast.support@gmail.com) 已复制。';
+
+  @override
+  String get signInMethod => '登录方式';
+
+  @override
+  String errorGeneric(Object error) {
+    return '错误：$error';
+  }
+
+  @override
+  String resetFailed(Object error) {
+    return '重置失败：$error';
+  }
+
+  @override
+  String get criticalDatabaseError => '严重数据库错误';
+
+  @override
+  String get criticalDatabaseErrorDesc =>
+      '在应用程序数据库中检测到不可读/损坏的数据。您可以通过单击下面的按钮清理数据库并从头开始重新启动应用程序。';
+
+  @override
+  String get resetDatabaseAndRestart => '重置数据库并重新启动';
+
+  @override
+  String get errorDetail => '错误详细信息：';
+
+  @override
+  String get unlimitedAccessLimit => '无限制访问限制';
+
+  @override
+  String get unlimitedAccessLimitDesc => '您已达到系统安全的合理使用限制。请稍后重试或联系支持人员。';
+
+  @override
+  String get standardAccessLimit => '标准访问限制';
+
+  @override
+  String get standardAccessLimitDesc => '您已达到每日标准 AI 分析配额。您可以升级到高级版以解锁限制。';
+
+  @override
+  String get upgradeToExtendedAccess => '升级到扩展访问';
+
+  @override
+  String get loginRequired => '需要登录';
+
+  @override
+  String get loginRequiredDesc => '您必须登录或创建账户才能使用AI助手和消费收件箱。';
+
+  @override
+  String get loginOrSignUp => '登录/注册';
+
+  @override
+  String get aiAnalyzingExpense => '人工智能正在分析你的开支......';
+
+  @override
+  String get draftAddedToInbox => '草稿费用已添加到收件箱。';
+
+  @override
+  String get analysisError => '分析交易时发生错误。';
+
+  @override
+  String get scanningReceipt => '扫描收据、提取信息...';
+
+  @override
+  String get receiptUnreadable => '收据无法读取';
+
+  @override
+  String get receiptUnreadableDesc => '在上传的图像中找不到收据或发票详细信息。';
+
+  @override
+  String get receiptAddedToInbox => '收据数据已成功添加到收件箱。';
+
+  @override
+  String get receiptReadError => '无法读取收据。请手动输入详细信息或拍摄更清晰的照片。';
+
+  @override
+  String get imageUploadError => '上传图片时发生错误。';
+
+  @override
+  String get draftDeleted => '费用草稿已删除。';
+
+  @override
+  String get transactionProcessedSuccess => '交易已成功处理至金库！';
+
+  @override
+  String get transactionApprovalError => '批准交易时发生错误。';
+
+  @override
+  String get smartScanTitle => '智能扫描';
+
+  @override
+  String pendingApprovalCount(int count) {
+    return '交易等待批准 ($count)';
+  }
+
+  @override
+  String get clearAll => '全部清除';
+
+  @override
+  String get smartInputHint => '例如昨天星巴克滴滤咖啡 120 TL';
+
+  @override
+  String get camera => '相机';
+
+  @override
+  String get gallery => '画廊';
+
+  @override
+  String get inboxEmpty => '收件箱为空';
+
+  @override
+  String get otherCategory => '其他';
+
+  @override
+  String get add => '添加';
+
+  @override
+  String get todayUpper => '今天';
+
+  @override
+  String get tomorrowUpper => '明天';
+
+  @override
+  String daysWithName(int count, String dayName) {
+    return '$count 天 - $dayName';
+  }
+
+  @override
+  String weeksLater(int count) {
+    return '$count 几周后';
+  }
+
+  @override
+  String daysCount(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count 天',
+      one: '1 天',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String weeksCount(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count 周',
+      one: '1周',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String monthsCount(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count 月',
+      one: '1个月',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String yearsCount(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count 年',
+      one: '1年',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get sharedExpenseAnalyzed => '分析共享费用并添加到收件箱！';
+
+  @override
+  String get limitExceeded => '超出限制';
+
+  @override
+  String get selectIcon => '选择图标';
+
+  @override
+  String optionsCount(int count) {
+    return '$count 选项';
+  }
+
+  @override
+  String get invalidAmountError => '请输入有效金额。';
+
+  @override
+  String get maxAmountMustBePositive => '最大金额必须大于 0。';
+
+  @override
+  String get minMustBeLessThanMax => '最小金额必须小于最大金额。';
+
+  @override
+  String get selectAtLeastOneVault => '请至少选择一个保管库进行交易...';
+
+  @override
+  String get exchangeRatesNotLoaded => '未加载汇率。您需要更新费率以添加/更新不同货币的交易。';
+
+  @override
+  String vaultCurrencyRateNotLoaded(String currency) {
+    return '不会加载所选保管库货币 ( $currency ) 的汇率。您需要更新费率。';
+  }
+
+  @override
+  String transactionSaveError(String error) {
+    return '保存交易时发生错误：$error';
+  }
+
+  @override
+  String get notificationPermissionDenied => '未授予通知许可。请从设置中启用它。';
+
+  @override
+  String get defaultUser => '用户';
+
+  @override
+  String get premiumBadge => '优质的';
+
+  @override
+  String get email => '电子邮件';
+
+  @override
+  String get password => '密码';
+
+  @override
+  String errorOccurred(String error) {
+    return '发生错误：$error';
+  }
+
+  @override
+  String aboutVersion(String version) {
+    return '$version • 用❤️ 制作';
+  }
+
+  @override
+  String comingSoonDesc(String feature) {
+    return '$feature 功能很快就会与您见面。';
+  }
+
+  @override
+  String get noVaultTransactions => '未找到保险库交易';
+
+  @override
+  String get recurring => '再次发生的';
+
+  @override
+  String get thisWeek => '本星期';
+
+  @override
+  String get thisMonth => '本月';
+
+  @override
+  String get thisYear => '今年';
+
+  @override
+  String vaultLimitReachedDesc(int count) {
+    return '您可以在免费计划中创建最多 $count 个保管库。您可以切换到高级版以消除限制。';
+  }
+
+  @override
+  String get inAppNotifications => '应用内通知';
+
+  @override
+  String get exchangeRatesNotLoadedVault => '未加载汇率。保管库货币无法更改。';
+
+  @override
+  String get cannotDeleteVault => '无法删除保管库';
+
+  @override
+  String get cannotDeleteVaultDesc =>
+      '应用程序中必须至少保留一个活动保管库。您可以创建另一个保管库，然后删除此保管库。';
+
+  @override
+  String get exchangeRatesNotLoadedNewVault => '未加载汇率。您需要更新费率才能以不同的货币创建保管库。';
+
+  @override
+  String get systemNotificationsDisabled => '系统通知权限关闭！ 请从您的手机设置中启用通知权限。';
+
+  @override
+  String get noNotificationHistory => '无通知历史记录';
+
+  @override
+  String get noNotificationHistoryDesc => '之前没有触发任何交易警报的历史记录。';
+
+  @override
+  String paymentDate(String date) {
+    return '付款：$date';
+  }
+
+  @override
+  String get loginRequiredForPurchase => '请登录或创建一个免费帐户以完成购买。';
+
+  @override
+  String get unlockFinancialPotential => '100% 释放您的财务潜力。';
+
+  @override
+  String get aiAnalysis => '人工智能分析';
+
+  @override
+  String get aiAnalysisDesc => '无限且深入的人工智能分析。';
+
+  @override
+  String get unlimitedVaultsDesc => '创建任意数量的金库和钱包。';
+
+  @override
+  String get cloudSyncDesc => '安全备份和同步您的数据。';
+
+  @override
+  String get customThemes => '自定义主题';
+
+  @override
+  String get customThemesDesc => '独特的调色板和背景样式。';
+
+  @override
+  String get zeroAds => '零广告';
+
+  @override
+  String get zeroAdsDesc => '不间断、无广告的优质体验。';
+
+  @override
+  String get availablePlans => '可用计划';
+
+  @override
+  String get yearlyPremium => '每年保费';
+
+  @override
+  String get monthlyPremium => '每月保费';
+
+  @override
+  String get bestValueFreeTrialSubtitle => '最超值 • 7 天免费试用';
+
+  @override
+  String get cancelAnytime => '随时取消';
+
+  @override
+  String get bestValue => '最超值';
+
+  @override
+  String get yearlyPremiumSimulated => '每年保费（模拟）';
+
+  @override
+  String get monthlyPremiumSimulated => '每月保费（模拟）';
+
+  @override
+  String get subscriptionAutoRenewalNote => '订阅自动续订。您可以随时取消。';
+
+  @override
+  String get sessionNotFound => '未找到用户会话。请重新登录。';
+
+  @override
+  String get upgradeToPremiumTitle => '升级到 Finarcast Premium';
+
+  @override
+  String get yearlyPremiumSimulatedPrice => '\$39.99 / 年';
+
+  @override
+  String get yearlyPremiumSimulatedSubtitle => '3.33 美元/月 • 7 天免费试用';
+
+  @override
+  String get monthlyPremiumSimulatedPrice => '4.99 美元/月';
+
+  @override
+  String get currencyTRY => '土耳其里拉';
+
+  @override
+  String get currencyUSD => '美元';
+
+  @override
+  String get currencyEUR => '欧元';
+
+  @override
+  String get currencyGBP => '英镑';
+
+  @override
+  String get currencyJPY => '日圆';
+
+  @override
+  String get currencyKRW => '韩元';
+
+  @override
+  String get currencyCNY => '人民币';
+
+  @override
+  String get currencyBRL => '巴西雷亚尔';
+
+  @override
+  String get currencyCHF => '瑞士法郎';
+
+  @override
+  String get currencyGOLD => '金（克）';
+
+  @override
+  String get currencyGOLDOunce => '黄金（盎司）';
+
+  @override
+  String get currencySILVER => '银（克）';
+
+  @override
+  String get currencySILVEROunce => '银（盎司）';
+
+  @override
+  String get currencySAR => '沙特里亚尔';
+
+  @override
+  String get currencyKWD => '科威特第纳尔';
+
+  @override
+  String get vaultGuideTitle => '避难所指南';
+
+  @override
+  String get vaultGuideContent =>
+      '📊 这些数字意味着什么？ • 金库余额（钱包）：金库历史累计净余额。它是初始金库余额和自成立以来记录的所有交易的总和。 • 收入（本月）：当前日历月的预计总收入。 • 费用（本月）：当前日历月的预计总费用。 💡重要提示： 由于主要余额是累积的（历史），因此与本月收入和支出的净差额不同是正常的。';
+
+  @override
+  String get gotIt => '知道了';
+
+  @override
+  String get startDate => '开始日期';
+
+  @override
+  String get daily => '日常的';
+
+  @override
+  String get weekdays => '平日';
+
+  @override
+  String get weekends => '周末';
+
+  @override
+  String everyXDays(Object count) {
+    return '每 $count 天';
+  }
+
+  @override
+  String everyXWeeks(Object count) {
+    return '每 $count 周';
+  }
+
+  @override
+  String everyXMonths(Object count) {
+    return '每 $count 个月';
+  }
+
+  @override
+  String everyXYears(Object count) {
+    return '每 $count 年';
+  }
+
+  @override
+  String get incomePerMonthLabel => '收入/月';
+
+  @override
+  String get expensePerMonthLabel => '费用/月';
+
+  @override
+  String get transactionNoteHint => '留下交易备注...';
+
+  @override
+  String get weekdaysShort => '周数';
+
+  @override
+  String get weekendsShort => '周';
+
+  @override
+  String get reminderDay => '提醒日';
+
+  @override
+  String get reminderTime => '提醒时间';
+
+  @override
+  String get reminder => '提醒';
+
+  @override
+  String get sameDay => '同一天';
+
+  @override
+  String get oneDayBefore => '1 天前';
+
+  @override
+  String get twoDaysBefore => '2 天前';
+
+  @override
+  String get threeDaysBefore => '3 天前';
+
+  @override
+  String get oneWeekBefore => '1 周前';
+
+  @override
+  String get unknown => '未知';
+
+  @override
+  String get syncErrorDisabled => '同步已禁用。';
+
+  @override
+  String get syncErrorPremiumRequired => '云同步功能仅适用于高级会员。';
+
+  @override
+  String get syncSuccess => '同步完成。';
+
+  @override
+  String syncSuccessWithErrors(num errorCount) {
+    String _temp0 = intl.Intl.pluralLogic(
+      errorCount,
+      locale: localeName,
+      other: '同步期间发生 $errorCount 错误。',
+      one: '同步期间发生 1 个错误。',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get syncErrorProjectPaused => '云数据库项目已暂停。请从 Supabase 仪表板重新激活该项目。';
+
+  @override
+  String get syncErrorSessionExpired => '您的会话可能已过期。请从“设置”>“注销”中注销并重新登录。';
+
+  @override
+  String get syncErrorNoInternet => '无法建立互联网连接。请检查您的互联网连接。';
+
+  @override
+  String get syncErrorTablesMissing =>
+      '未找到数据库表。请在 Supabase SQL 编辑器中运行 setup.sql 脚本。';
+
+  @override
+  String get syncErrorPermissionDenied =>
+      '数据库访问权限错误 (RLS)。请确保您已在 Supabase 表中正确配置 RLS 策略。';
+
+  @override
+  String syncErrorUnexpected(Object error) {
+    return '意外错误：$error';
+  }
+
+  @override
+  String syncErrorPostgrest(Object code, Object message) {
+    return '云错误（$code）：$message';
+  }
+
+  @override
+  String syncErrorAuth(Object code, Object message) {
+    return '身份验证错误（$code）：$message';
+  }
+
+  @override
+  String activeVaults(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '活动金库',
+      one: '活跃金库',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get vaultsUpper => '跳马';
+
+  @override
+  String get receiptExpense => '收据费用';
+
+  @override
+  String get reasonSmartInput => '快速文本输入';
+
+  @override
+  String get reasonReceiptScan => '收据照片';
+
+  @override
+  String get reasonClipboard => '剪贴板通知';
+
+  @override
+  String get noteCapturedFromClipboard => '从剪贴板捕获';
+
+  @override
+  String get notificationChannelName => '交易提醒';
+
+  @override
+  String get notificationChannelDesc => '经常性付款和收入提醒';
+
+  @override
+  String get notificationTestChannelName => '测试通知';
+
+  @override
+  String get notificationTestChannelDesc => 'Finarcast 通知测试通道';
+
+  @override
+  String get notificationTestTitle => 'Finarcast 测试通知';
+
+  @override
+  String get notificationTestBody => '伟大的！您的应用内（前台）通知运行顺利。';
+
+  @override
+  String get notificationTestDelayedTitle => 'Finarcast 延迟测试';
+
+  @override
+  String get notificationTestDelayedBody => '应用程序外（后台）通知测试已成功完成！';
+
+  @override
+  String notificationIncomeTitle(Object title) {
+    return '收入提醒：$title';
+  }
+
+  @override
+  String notificationExpenseTitle(Object title) {
+    return '付款提醒：$title';
+  }
+
+  @override
+  String notificationBodyAmount(Object amount) {
+    return '金额：$amount';
+  }
+
+  @override
+  String notificationBodyDate(Object date) {
+    return '日期：$date';
+  }
+
+  @override
+  String notificationBodyNote(Object note) {
+    return '注：$note';
+  }
+
+  @override
+  String get aiErrorRateLimit => '您已达到每日 AI 分析限制。请升级到高级版或明天重试。';
+
+  @override
+  String get aiErrorUnauthorized => '未经授权的访问。请重新登录。';
+
+  @override
+  String get aiErrorQuota => '已达到 AI 使用限制。请稍等片刻，然后重试。';
+
+  @override
+  String get aiErrorBusy => 'AI服务器正忙。请几秒钟后重试。';
+
+  @override
+  String get aiErrorApiKey => 'AI API 密钥无效或未找到。请检查您的设置。';
+
+  @override
+  String get aiErrorTimeout => '请求超时。请检查您的互联网连接，然后重试。';
+
+  @override
+  String aiErrorGeneric(Object error) {
+    return 'AI 分析失败：$error';
+  }
 }

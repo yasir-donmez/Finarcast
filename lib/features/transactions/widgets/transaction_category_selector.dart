@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../core/theme/app_constants.dart';
 import '../../../l10n/app_localizations.dart';
+import '../../../shared/widgets/custom_animated_icon.dart';
 
 class TransactionCategorySelector extends StatelessWidget {
   final List<Map<String, dynamic>> categories;
@@ -10,6 +11,7 @@ class TransactionCategorySelector extends StatelessWidget {
   final Function(int categoryIndex, int subIndex, int expandedIndex) onChanged;
   final Function(String parentCategoryId)? onAddCustomSubcategory;
   final Function(String subcategoryId)? onRemoveCustomSubcategory;
+  final bool isPro;
 
   const TransactionCategorySelector({
     super.key,
@@ -20,6 +22,7 @@ class TransactionCategorySelector extends StatelessWidget {
     required this.onChanged,
     this.onAddCustomSubcategory,
     this.onRemoveCustomSubcategory,
+    this.isPro = true,
   });
 
   @override
@@ -116,23 +119,18 @@ class TransactionCategorySelector extends StatelessWidget {
                                     : (isDark ? Colors.white : Colors.black).withValues(alpha: 0.05),
                                 width: 1.5,
                               ),
-                              boxShadow: isSelected
-                                  ? [
-                                      BoxShadow(
-                                        color: catColor.withValues(alpha: 0.2),
-                                        blurRadius: 15,
-                                        spreadRadius: -2,
-                                      ),
-                                    ]
-                                  : [],
+                              boxShadow: const [],
                             ),
-                            child: Icon(
-                              displayIcon,
-                              color: isSelected
-                                  ? AppColors.getAccentDeep(context, catColor)
-                                  : AppColors.getTextSecondary(context).withValues(alpha: 0.5),
-                              size: isSelected ? 28 : 24,
-                            ),
+                             child: CustomAnimatedIcon(
+                               activeIcon: displayIcon,
+                               inactiveIcon: cat['icon'] as IconData,
+                               isActive: showSubInfo,
+                               color: isSelected
+                                   ? AppColors.getAccentDeep(context, catColor)
+                                   : AppColors.getTextSecondary(context).withValues(alpha: 0.5),
+                               size: isSelected ? 28 : 24,
+                               duration: const Duration(milliseconds: 600),
+                             ),
                           ),
                         ),
                       ),
@@ -157,7 +155,7 @@ class TransactionCategorySelector extends StatelessWidget {
                       SizedBox(
                         height: 16,
                         child: AnimatedRotation(
-                          turns: isExpandedLocal ? 0.5 : 0.0,
+                          turns: isExpandedLocal ? 1.0 : 0.5,
                           duration: const Duration(milliseconds: 300),
                           curve: Curves.easeInOutCubic,
                           child: Icon(
@@ -191,6 +189,7 @@ class TransactionCategorySelector extends StatelessWidget {
                     child: ListView.builder(
                       scrollDirection: Axis.horizontal,
                       physics: const BouncingScrollPhysics(),
+                      clipBehavior: Clip.none,
                       padding: const EdgeInsets.symmetric(horizontal: AppSizes.paddingMedium),
                       // +1 for the "Add New" button at the end
                       itemCount: subModels.length + (onAddCustomSubcategory != null ? 1 : 0),
@@ -199,43 +198,71 @@ class TransactionCategorySelector extends StatelessWidget {
 
                         // Son eleman = "＋ Yeni Ekle" butonu
                         if (onAddCustomSubcategory != null && subIndex == subModels.length) {
-                          return Padding(
-                            padding: const EdgeInsets.only(right: 8),
-                            child: GestureDetector(
-                              onTap: () => onAddCustomSubcategory!(selectedCat['id'] as String),
-                              child: AnimatedContainer(
-                                duration: const Duration(milliseconds: 200),
-                                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                                decoration: BoxDecoration(
-                                  color: parentColor.withValues(alpha: 0.08),
-                                  borderRadius: BorderRadius.circular(AppSizes.radiusRound),
-                                  border: Border.all(
-                                    color: parentColor.withValues(alpha: 0.25),
-                                    width: 1,
-                                    style: BorderStyle.solid,
-                                  ),
-                                ),
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Icon(
-                                      Icons.add_rounded,
-                                      size: 14,
-                                      color: parentColor,
-                                    ),
-                                    const SizedBox(width: 4),
-                                    Text(
-                                      l10n.addCustomCategory,
-                                      style: TextStyle(
-                                        fontSize: 11,
-                                        fontWeight: FontWeight.w700,
-                                        color: parentColor,
-                                      ),
-                                    ),
-                                  ],
+                          Widget addButton = GestureDetector(
+                            onTap: () => onAddCustomSubcategory!(selectedCat['id'] as String),
+                            child: AnimatedContainer(
+                              duration: const Duration(milliseconds: 200),
+                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                              decoration: BoxDecoration(
+                                color: parentColor.withValues(alpha: 0.08),
+                                borderRadius: BorderRadius.circular(AppSizes.radiusRound),
+                                border: Border.all(
+                                  color: parentColor.withValues(alpha: 0.25),
+                                  width: 1,
+                                  style: BorderStyle.solid,
                                 ),
                               ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(
+                                    Icons.add_rounded,
+                                    size: 14,
+                                    color: parentColor,
+                                  ),
+                                  const SizedBox(width: 4),
+                                  Text(
+                                    l10n.addCustomCategory,
+                                    style: TextStyle(
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.w700,
+                                      color: parentColor,
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ),
+                          );
+
+                          if (!isPro) {
+                            addButton = Stack(
+                              fit: StackFit.passthrough,
+                              clipBehavior: Clip.none,
+                              children: [
+                                addButton,
+                                Positioned(
+                                  top: -2,
+                                  right: -2,
+                                  child: Container(
+                                    padding: const EdgeInsets.all(2.5),
+                                    decoration: const BoxDecoration(
+                                      color: Color(0xFFFFB300), // Altın sarısı
+                                      shape: BoxShape.circle,
+                                    ),
+                                    child: const Icon(
+                                      Icons.star_rounded,
+                                      color: Colors.white,
+                                      size: 8,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            );
+                          }
+
+                          return Padding(
+                            padding: const EdgeInsets.only(right: 8),
+                            child: addButton,
                           );
                         }
 

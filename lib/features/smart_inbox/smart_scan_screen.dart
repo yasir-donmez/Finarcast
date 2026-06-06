@@ -21,6 +21,7 @@ import 'providers/smart_inbox_providers.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../core/services/auth_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../../l10n/app_localizations.dart';
 
 // Modular Widgets
 import 'widgets/empty_state.dart';
@@ -69,15 +70,16 @@ class _SmartScanScreenState extends ConsumerState<SmartScanScreen> with WidgetsB
   }
 
   void _showAiLimitDialog(BuildContext context, bool isPro) {
+    final l10n = AppLocalizations.of(context)!;
     if (isPro) {
       showCustomDialog(
         context: context,
         accentColor: const Color(0xFFFFB300), // Altın rengi
-        title: "Sınırsız Erişim Limiti",
-        content: "Sistem güvenliği gereği adil kullanım limitine ulaştınız. Yarın tekrar sınırsız olarak kullanabilirsiniz.",
+        title: l10n.unlimitedAccessLimit,
+        content: l10n.unlimitedAccessLimitDesc,
         actions: [
           PrecisionDialogAction(
-            label: "Kapat",
+            label: l10n.close,
             onTap: () => Navigator.pop(context),
             isPrimary: true,
           ),
@@ -87,16 +89,16 @@ class _SmartScanScreenState extends ConsumerState<SmartScanScreen> with WidgetsB
       showCustomDialog(
         context: context,
         accentColor: const Color(0xFFFFB300), // Altın rengi
-        title: "Standart Erişim Limiti",
-        content: "Günlük standart yapay zeka analiz kotanızı doldurdunuz. Sınırsız analiz için Genişletilmiş Erişime geçin.",
+        title: l10n.standardAccessLimit,
+        content: l10n.standardAccessLimitDesc,
         actions: [
           PrecisionDialogAction(
-            label: "Daha Sonra",
+            label: l10n.later,
             onTap: () => Navigator.pop(context),
             isPrimary: false,
           ),
           PrecisionDialogAction(
-            label: "Genişletilmiş Erişime Geç",
+            label: l10n.upgradeToExtendedAccess,
             onTap: () {
               Navigator.pop(context);
               ProUpgradeSheet.show(context);
@@ -109,19 +111,20 @@ class _SmartScanScreenState extends ConsumerState<SmartScanScreen> with WidgetsB
   }
 
   void _showLoginRequiredDialog(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     showCustomDialog(
       context: context,
       accentColor: AppColors.primary,
-      title: "Giriş Yapılması Gerekiyor",
-      content: "Yapay zeka asistanını ve harcama sepetini kullanabilmek için ücretsiz bir Finarcast hesabı oluşturmanız veya giriş yapmanız gerekmektedir.",
+      title: l10n.loginRequired,
+      content: l10n.loginRequiredDesc,
       actions: [
         PrecisionDialogAction(
-          label: "İptal",
+          label: l10n.cancel,
           onTap: () => Navigator.pop(context),
           isPrimary: false,
         ),
         PrecisionDialogAction(
-          label: "Giriş Yap / Üye Ol",
+          label: l10n.loginOrSignUp,
           onTap: () async {
             Navigator.pop(context);
             final prefs = await SharedPreferences.getInstance();
@@ -139,6 +142,7 @@ class _SmartScanScreenState extends ConsumerState<SmartScanScreen> with WidgetsB
     final text = _inputController.text.trim();
     if (text.isEmpty) return;
 
+    final l10n = AppLocalizations.of(context)!;
     final currentUser = Supabase.instance.client.auth.currentUser;
     if (currentUser == null) {
       _showLoginRequiredDialog(context);
@@ -151,22 +155,22 @@ class _SmartScanScreenState extends ConsumerState<SmartScanScreen> with WidgetsB
       return;
     }
 
-    ref.read(smartInboxLoadingProvider.notifier).state = 'Yapay zeka harcamanızı çözümlüyor...';
+    ref.read(smartInboxLoadingProvider.notifier).state = l10n.aiAnalyzingExpense;
 
     try {
-      final draft = await SmartParserService.parseText(text);
+      final draft = await SmartParserService.parseText(text, l10n);
       await ref.read(smartInboxDraftsProvider.notifier).addDraft(draft);
       await ref.read(subscriptionServiceProvider).incrementAiUsage();
       _inputController.clear();
       
       if (mounted) {
-        CustomNotification.success(context, 'Taslak harcama gelen kutusuna eklendi.');
+        CustomNotification.success(context, l10n.draftAddedToInbox);
       }
       HapticFeedback.heavyImpact();
     } catch (e) {
       if (mounted) {
         final errorMsg = e.toString().replaceAll('Exception: ', '');
-        CustomNotification.error(context, errorMsg.isNotEmpty ? errorMsg : 'İşlem analiz edilirken bir hata oluştu.');
+        CustomNotification.error(context, errorMsg.isNotEmpty ? errorMsg : l10n.analysisError);
       }
     } finally {
       ref.read(smartInboxLoadingProvider.notifier).state = null;
@@ -175,6 +179,7 @@ class _SmartScanScreenState extends ConsumerState<SmartScanScreen> with WidgetsB
 
   /// Fiş / Fatura okuma (OCR)
   Future<void> _pickAndParseReceipt(ImageSource source) async {
+    final l10n = AppLocalizations.of(context)!;
     final currentUser = Supabase.instance.client.auth.currentUser;
     if (currentUser == null) {
       _showLoginRequiredDialog(context);
@@ -191,7 +196,7 @@ class _SmartScanScreenState extends ConsumerState<SmartScanScreen> with WidgetsB
       final XFile? image = await _imagePicker.pickImage(source: source, imageQuality: 85);
       if (image == null) return;
 
-      ref.read(smartInboxLoadingProvider.notifier).state = 'Fiş taranıyor, bilgiler çıkartılıyor...';
+      ref.read(smartInboxLoadingProvider.notifier).state = l10n.scanningReceipt;
 
       final bytes = await image.readAsBytes();
       final extension = image.path.split('.').last.toLowerCase();
@@ -199,7 +204,7 @@ class _SmartScanScreenState extends ConsumerState<SmartScanScreen> with WidgetsB
       if (extension == 'png') mimeType = 'image/png';
       if (extension == 'webp') mimeType = 'image/webp';
 
-      final draft = await SmartParserService.parseReceiptImage(bytes, mimeType);
+      final draft = await SmartParserService.parseReceiptImage(bytes, mimeType, l10n);
       
       if (draft != null) {
         if (draft.amount < 0) {
@@ -207,11 +212,11 @@ class _SmartScanScreenState extends ConsumerState<SmartScanScreen> with WidgetsB
             showCustomDialog(
               context: context,
               accentColor: AppColors.error,
-              title: "Fiş Okunamadı",
-              content: draft.note ?? "Yüklenen görselde herhangi bir fiş veya fatura bilgisi tespit edilemedi.",
+              title: l10n.receiptUnreadable,
+              content: draft.note ?? l10n.receiptUnreadableDesc,
               actions: [
                 PrecisionDialogAction(
-                  label: "Kapat",
+                  label: l10n.close,
                   onTap: () => Navigator.pop(context),
                   isPrimary: true,
                 ),
@@ -224,19 +229,19 @@ class _SmartScanScreenState extends ConsumerState<SmartScanScreen> with WidgetsB
         await ref.read(smartInboxDraftsProvider.notifier).addDraft(draft);
         await ref.read(subscriptionServiceProvider).incrementAiUsage();
         if (mounted) {
-          CustomNotification.success(context, 'Fiş verileri başarıyla gelen kutusuna eklendi.');
+          CustomNotification.success(context, l10n.receiptAddedToInbox);
         }
         HapticFeedback.heavyImpact();
       } else {
         if (mounted) {
-          CustomNotification.error(context, 'Fiş okunamadı. Lütfen bilgileri el ile girin veya daha net bir fotoğraf çekin.');
+          CustomNotification.error(context, l10n.receiptReadError);
         }
       }
     } catch (e) {
       debugPrint('❌ OCR Hatası: $e');
       if (mounted) {
         final errorMsg = e.toString().replaceAll('Exception: ', '');
-        CustomNotification.error(context, errorMsg.isNotEmpty ? errorMsg : 'Görsel yüklenirken bir hata oluştu.');
+        CustomNotification.error(context, errorMsg.isNotEmpty ? errorMsg : l10n.imageUploadError);
       }
     } finally {
       ref.read(smartInboxLoadingProvider.notifier).state = null;
@@ -245,18 +250,20 @@ class _SmartScanScreenState extends ConsumerState<SmartScanScreen> with WidgetsB
 
   /// Taslağı sil
   Future<void> _deleteDraft(String id) async {
+    final l10n = AppLocalizations.of(context)!;
     setState(() {
       _selectedVaultIdForDraft.remove(id);
     });
     await ref.read(smartInboxDraftsProvider.notifier).deleteDraft(id);
     if (mounted) {
-      CustomNotification.info(context, 'Taslak harcama silindi.');
+      CustomNotification.info(context, l10n.draftDeleted);
     }
     HapticFeedback.lightImpact();
   }
 
   /// Taslağı onaylayıp kasaya gönder
   Future<void> _approveDraft(String id) async {
+    final l10n = AppLocalizations.of(context)!;
     final drafts = ref.read(smartInboxDraftsProvider);
     final vaults = ref.read(allVaultsProvider);
     final defaultVaultId = vaults.isNotEmpty ? vaults.first.id : -1;
@@ -265,7 +272,7 @@ class _SmartScanScreenState extends ConsumerState<SmartScanScreen> with WidgetsB
 
     // Get category name for the draft
     final draftIndex = drafts.indexWhere((d) => d.id == id);
-    String categoryName = 'Diğer';
+    String categoryName = l10n.otherCategory;
     if (draftIndex != -1) {
       final draft = drafts[draftIndex];
       final customCategories = ref.read(customCategoriesProvider);
@@ -285,24 +292,29 @@ class _SmartScanScreenState extends ConsumerState<SmartScanScreen> with WidgetsB
     if (success) {
       await ref.read(smartInboxDraftsProvider.notifier).loadDrafts();
       if (mounted) {
-        CustomNotification.success(context, 'İşlem kasaya başarıyla işlendi!');
+        CustomNotification.success(context, l10n.transactionProcessedSuccess);
       }
       HapticFeedback.heavyImpact();
     } else {
       await ref.read(smartInboxDraftsProvider.notifier).loadDrafts();
       if (mounted) {
-        CustomNotification.error(context, 'İşlem onaylanırken bir hata oluştu.');
+        CustomNotification.error(context, l10n.transactionApprovalError);
       }
     }
   }
 
   /// Detaylı harcama sayfasına yönlendir (✏️ Edit)
   void _navigateToDetailedAdd(DraftTransaction draft) {
+    final l10n = AppLocalizations.of(context)!;
+    final displayTitle = draft.title == '__EMPTY_DRAFT__'
+        ? ''
+        : (draft.title == '__RECEIPT_EXPENSE__' ? l10n.receiptExpense : draft.title);
+
     Navigator.push(
       context,
       SlideUpPageRoute(
         child: TransactionBuilderScreen(
-          initialName: draft.title,
+          initialName: displayTitle,
           initialAmount: draft.amount,
           initialMinAmount: draft.minAmount,
           initialMaxAmount: draft.maxAmount,
@@ -423,7 +435,7 @@ class _SmartScanScreenState extends ConsumerState<SmartScanScreen> with WidgetsB
                 left: 20,
                 top: topPadding + 10,
                 child: Text(
-                  Localizations.localeOf(context).languageCode == 'tr' ? 'Smart Scan' : 'Smart Scan',
+                  AppLocalizations.of(context)!.smartScanTitle,
                   style: const TextStyle(
                     fontSize: 32,
                     fontWeight: FontWeight.w900,
@@ -477,7 +489,7 @@ class _SmartScanScreenState extends ConsumerState<SmartScanScreen> with WidgetsB
             child: Row(
               children: [
                 Text(
-                  'ONAY BEKLEYEN İŞLEMLER (${drafts.length})',
+                  AppLocalizations.of(context)!.pendingApprovalCount(drafts.length),
                   style: TextStyle(
                     fontSize: 11,
                     fontWeight: FontWeight.w900,
@@ -495,7 +507,7 @@ class _SmartScanScreenState extends ConsumerState<SmartScanScreen> with WidgetsB
                     });
                   },
                   child: Text(
-                    'Tümünü Temizle',
+                    AppLocalizations.of(context)!.clearAll,
                     style: TextStyle(
                       fontSize: 11,
                       color: AppColors.getExpense(context),

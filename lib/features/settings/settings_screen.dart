@@ -76,7 +76,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
 
     final authService = ref.watch(authServiceProvider);
     final user = authService.currentUser;
-    final subscription = ref.watch(subscriptionServiceProvider);
 
     return SafeArea(
       bottom: false,
@@ -189,7 +188,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                         } else if (email.isNotEmpty) {
                           displayNameVal = email.split('@').first;
                         } else {
-                          displayNameVal = "Kullanıcı";
+                          displayNameVal = l10n.defaultUser;
                         }
 
                         return Column(
@@ -222,51 +221,13 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                                     ),
                                     const SizedBox(width: 16),
                                     Expanded(
-                                      child: Row(
-                                        children: [
-                                          Text(
-                                            displayNameVal,
-                                            style: TextStyle(
-                                              fontSize: 16,
-                                              fontWeight: FontWeight.w700,
-                                              color: AppColors.getTextPrimary(context),
-                                            ),
-                                          ),
-                                          if (subscription.isPro) ...[
-                                            const SizedBox(width: 8),
-                                            Container(
-                                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                                              decoration: BoxDecoration(
-                                                color: activeColor.withValues(alpha: 0.1),
-                                                borderRadius: BorderRadius.circular(10),
-                                                border: Border.all(
-                                                  color: activeColor.withValues(alpha: 0.15),
-                                                  width: 0.5,
-                                                ),
-                                              ),
-                                              child: Row(
-                                                mainAxisSize: MainAxisSize.min,
-                                                children: [
-                                                  Icon(
-                                                    Icons.stars_rounded,
-                                                    color: activeColor,
-                                                    size: 10,
-                                                  ),
-                                                  const SizedBox(width: 4),
-                                                  Text(
-                                                    "PREMIUM",
-                                                    style: TextStyle(
-                                                      color: activeColor,
-                                                      fontSize: 9,
-                                                      fontWeight: FontWeight.w900,
-                                                      letterSpacing: 0.5,
-                                                    ),
-                                                  ),
-                                                ],
-                                              ),
-                                            ),
-                                          ],
-                                        ],
+                                      child: Text(
+                                        displayNameVal,
+                                        style: TextStyle(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.w700,
+                                          color: AppColors.getTextPrimary(context),
+                                        ),
                                       ),
                                     ),
                                     AnimatedRotation(
@@ -300,7 +261,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                                                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                                 children: [
                                                   Text(
-                                                    "E-posta",
+                                                    l10n.email,
                                                     style: TextStyle(
                                                       fontSize: 14,
                                                       fontWeight: FontWeight.w600,
@@ -317,50 +278,91 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                                                   ),
                                                 ],
                                               ),
-                                              const SizedBox(height: 18),
-                                              // Şifre Detayı (Tıklanabilir Şifre Sıfırlama)
-                                              ClickableAction(
-                                                onTap: () {
-                                                  _showPasswordResetDialog(context, email, authService, l10n);
-                                                },
-                                                borderRadius: BorderRadius.circular(8),
-                                                child: Padding(
-                                                  padding: const EdgeInsets.symmetric(vertical: 4),
-                                                  child: Row(
-                                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                              () {
+                                                final provider = user.appMetadata['provider'] as String? ?? 'email';
+                                                final isEmailUser = provider == 'email';
+                                                if (isEmailUser) {
+                                                  return Column(
+                                                    mainAxisSize: MainAxisSize.min,
                                                     children: [
-                                                      Text(
-                                                        "Şifre",
-                                                        style: TextStyle(
-                                                          fontSize: 14,
-                                                          fontWeight: FontWeight.w600,
-                                                          color: AppColors.getTextSecondary(context).withValues(alpha: 0.55),
+                                                      const SizedBox(height: 18),
+                                                      // Şifre Detayı (Tıklanabilir Şifre Sıfırlama)
+                                                      ClickableAction(
+                                                        onTap: () {
+                                                          _showPasswordResetDialog(context, email, authService, l10n);
+                                                        },
+                                                        borderRadius: BorderRadius.circular(8),
+                                                        child: Padding(
+                                                          padding: const EdgeInsets.symmetric(vertical: 4),
+                                                          child: Row(
+                                                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                                            children: [
+                                                              Text(
+                                                                l10n.password,
+                                                                style: TextStyle(
+                                                                  fontSize: 14,
+                                                                  fontWeight: FontWeight.w600,
+                                                                  color: AppColors.getTextSecondary(context).withValues(alpha: 0.55),
+                                                                ),
+                                                              ),
+                                                              Row(
+                                                                mainAxisSize: MainAxisSize.min,
+                                                                children: [
+                                                                  Text(
+                                                                    "••••••••",
+                                                                    style: TextStyle(
+                                                                      fontSize: 14,
+                                                                      fontWeight: FontWeight.w700,
+                                                                      color: AppColors.getTextPrimary(context),
+                                                                      letterSpacing: 1.5,
+                                                                    ),
+                                                                  ),
+                                                                  const SizedBox(width: 8),
+                                                                  Icon(
+                                                                    Icons.arrow_outward_rounded,
+                                                                    color: activeColor.withValues(alpha: 0.6),
+                                                                    size: 14,
+                                                                  ),
+                                                                ],
+                                                              ),
+                                                            ],
+                                                          ),
                                                         ),
                                                       ),
+                                                    ],
+                                                  );
+                                                } else {
+                                                  final providerName = provider == 'google' ? 'Google' : provider[0].toUpperCase() + provider.substring(1);
+                                                  return Column(
+                                                    mainAxisSize: MainAxisSize.min,
+                                                    children: [
+                                                      const SizedBox(height: 18),
+                                                      // Giriş Yöntemi Detayı
                                                       Row(
-                                                        mainAxisSize: MainAxisSize.min,
+                                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                                         children: [
                                                           Text(
-                                                            "••••••••",
+                                                            l10n.signInMethod,
+                                                            style: TextStyle(
+                                                              fontSize: 14,
+                                                              fontWeight: FontWeight.w600,
+                                                              color: AppColors.getTextSecondary(context).withValues(alpha: 0.55),
+                                                            ),
+                                                          ),
+                                                          Text(
+                                                            providerName,
                                                             style: TextStyle(
                                                               fontSize: 14,
                                                               fontWeight: FontWeight.w700,
                                                               color: AppColors.getTextPrimary(context),
-                                                              letterSpacing: 1.5,
                                                             ),
-                                                          ),
-                                                          const SizedBox(width: 8),
-                                                          Icon(
-                                                            Icons.arrow_outward_rounded,
-                                                            color: activeColor.withValues(alpha: 0.6),
-                                                            size: 14,
                                                           ),
                                                         ],
                                                       ),
                                                     ],
-                                                  ),
-                                                ),
-                                              ),
+                                                  );
+                                                }
+                                              }(),
                                             ],
                                           ),
                                         ),
@@ -493,7 +495,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                               title: l10n.logout,
                               content: l10n.logoutConfirm,
                               actions: [
-                                                PrecisionDialogAction(
+                                PrecisionDialogAction(
                                   label: l10n.cancel,
                                   onTap: () => Navigator.pop(context),
                                   isPrimary: false,
@@ -519,12 +521,17 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                                       ref.invalidate(settingsProvider);
                                       ref.invalidate(subscriptionServiceProvider);
 
+                                      // Navigator üzerindeki tüm katmanları temizle (dialog, sayfa vb.)
+                                      if (context.mounted) {
+                                        Navigator.of(context).popUntil((route) => route.isFirst);
+                                      }
+ 
                                       // 4. En son oturumu kapat (bu işlem UI'ı değiştirecektir)
                                       await ref.read(authServiceProvider).signOut();
                                     } catch (e) {
                                       debugPrint("Çıkış yaparken hata: $e");
                                       if (context.mounted) {
-                                        CustomNotification.error(context, 'Hata oluştu: ${e.toString()}');
+                                        CustomNotification.error(context, l10n.errorOccurred(e.toString()));
                                       }
                                     }
                                   },
@@ -606,6 +613,11 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                                       ref.invalidate(settingsProvider);
                                       ref.invalidate(subscriptionServiceProvider);
 
+                                      // Navigator üzerindeki tüm katmanları temizle (dialog, sayfa vb.)
+                                      if (context.mounted) {
+                                        Navigator.of(context).popUntil((route) => route.isFirst);
+                                      }
+ 
                                       // 4. Hesabı ve oturumu sil (bu işlem UI'ı değiştirecektir)
                                       await ref.read(authServiceProvider).deleteAccount();
                                       
@@ -615,7 +627,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                                     } catch (e) {
                                       debugPrint("Hesap silinirken hata: $e");
                                       if (context.mounted) {
-                                        CustomNotification.error(context, 'Hata oluştu: ${e.toString()}');
+                                        CustomNotification.error(context, l10n.errorOccurred(e.toString()));
                                       }
                                     }
                                   },
@@ -900,7 +912,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           ),
           const SizedBox(height: 32),
           Text(
-            "v1.0.0 • Made with ❤️",
+            l10n.aboutVersion("v1.0.0"),
             style: TextStyle(
               color: AppColors.getTextSecondary(context).withValues(alpha: 0.5),
               fontSize: 12,
@@ -917,7 +929,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     showCustomDialog(
       context: context,
       title: l10n.comingSoon,
-      content: "$feature özelliği çok yakında sizlerle olacak.",
+      content: l10n.comingSoonDesc(feature),
       actions: [
         PrecisionDialogAction(
           label: l10n.ok,
