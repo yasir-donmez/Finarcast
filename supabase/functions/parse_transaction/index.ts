@@ -247,7 +247,7 @@ Kurallar:
    - notificationHour: Hatırlatılacak saat (24 saatlik formatta tamsayı, 0-23 arası). Varsayılan olarak 9 döndür.
    - notificationMinute: Hatırlatacak dakika (0-59 arası tamsayı). Varsayılan olarak 0 döndür.
 9. Kasa/Hesap Belirteci (vaultName): Kullanıcı belirli bir kasa/hesap belirtiyorsa (örn: "ortak kasa", "maaş hesabı", "ana kasa"), bu kasa ismini metinden aynen çıkarıp döndür. Yoksa null döndür.
-10. Tekrarlama/Periyot (periodType): İşlem tekrarlı/periyodik ise şu formüle göre bir tamsayı döndür: `birim * 100 + aralık`.
+10. Tekrarlama/Periyot (periodType): İşlem tekrarlı/periyodik ise şu formüle göre bir tamsayı döndür: 'birim * 100 + aralık'.
     - Birimler (unit): 1 = Gün, 2 = Hafta, 3 = Ay, 4 = Yıl.
     - Aralık (interval): Tekrarlama sıklığı (örn: her 1 birimde bir, her 2 birimde bir vb.).
     - Örnek kodlar: 
