@@ -85,7 +85,7 @@ class SmartParserService {
         notificationHour: data['notificationHour'] ?? 9,
         notificationMinute: data['notificationMinute'] ?? 0,
         vaultName: data['vaultName'],
-        periodType: data['periodType'] ?? 0,
+        periodType: _mapAiPeriodType(data['periodType'] ?? 0),
         remainingInstallments: data['remainingInstallments'],
         recurrenceDay: data['recurrenceDay'],
         recurrenceDuration: data['recurrenceDuration'],
@@ -93,6 +93,27 @@ class SmartParserService {
     } catch (e) {
       debugPrint('❌ [SmartParserService] AI Parse hatası: $e');
       throw _handleException(e, l10n);
+    }
+  }
+
+  static int _mapAiPeriodType(int aiType) {
+    // Eğer yapay zeka doğrudan 100 ile 499 arasında geçerli bir veri tabanı kodu döndürdüyse doğrudan kabul et
+    if (aiType >= 100 && aiType <= 499) {
+      return aiType;
+    }
+    switch (aiType) {
+      case 8: // Günlük (eski)
+        return 101;
+      case 1: // Haftalık (eski)
+        return 201;
+      case 4: // İki haftada bir (eski)
+        return 202;
+      case 2: // Aylık (eski)
+        return 301;
+      case 3: // Yıllık (eski)
+        return 401;
+      default:
+        return 0;
     }
   }
 

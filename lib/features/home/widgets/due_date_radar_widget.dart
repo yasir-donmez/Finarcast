@@ -5,7 +5,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'home_widget.dart';
 import '../../../core/providers/db_providers.dart';
 import '../../../core/database/models/transaction_record.dart';
+import '../../../core/database/models/recurring_template.dart';
 import '../../../core/database/models/custom_category.dart';
+import '../../../core/domain/recurrence_engine.dart';
 import '../../../core/utils/currency_utils.dart';
 import '../../../core/utils/category_utils.dart';
 import '../../../core/theme/app_constants.dart';
@@ -14,16 +16,18 @@ import '../../../l10n/app_localizations.dart';
 
 final upcomingTransactionsProvider = Provider.family<List<TransactionRecord>, String?>((ref, selectedVaultId) {
   final transactions = ref.watch(allTransactionsProvider);
+  final templates = ref.watch(allTemplatesProvider);
   
-  List<TransactionRecord> vaultFilteredTxs = transactions;
+  final projected = _getUpcomingItems(dbTransactions: transactions, templates: templates);
+
   if (selectedVaultId != null && selectedVaultId.startsWith('v_')) {
     final filterVaultId = int.tryParse(selectedVaultId.replaceFirst('v_', ''));
     if (filterVaultId != null) {
-      vaultFilteredTxs = transactions.where((tx) => tx.vaultIds.contains(filterVaultId)).toList();
+      return projected.where((tx) => tx.vaultId == filterVaultId).toList();
     }
   }
 
-  return _getUpcomingItems(vaultFilteredTxs);
+  return projected;
 });
 
 class DueDateRadarWidget extends ConsumerStatefulWidget {
@@ -373,113 +377,78 @@ class _DueDateRadarWidgetState extends ConsumerState<DueDateRadarWidget> {
 
 }
 
-List<TransactionRecord> _getUpcomingItems(List<TransactionRecord> transactions) {
+List<TransactionRecord> _getUpcomingItems({
+  required List<TransactionRecord> dbTransactions,
+  required List<RecurringTemplate> templates,
+}) {
   final now = DateTime.now();
   final today = DateTime(now.year, now.month, now.day);
   final limit = today.add(const Duration(days: 365));
   
   final List<TransactionRecord> projectedItems = [];
 
-  for (var tx in transactions) {
+  // 1. Veritabanındaki gelecekteki işlemleri filtrele
+  for (var tx in dbTransactions) {
     if (tx.isArchived) continue;
+    if (tx.status == 2) continue; // Skipped olanları gösterme
 
-    // 1. Tek Seferlik İşlemler
-    if (tx.periodType == 0) {
-      if (tx.date.isAfter(today.subtract(const Duration(hours: 1))) && tx.date.isBefore(limit)) {
-        projectedItems.add(tx);
-      }
-      continue;
+    final isFuture = tx.date.isAfter(today.subtract(const Duration(hours: 1)));
+    if (isFuture && tx.date.isBefore(limit)) {
+      projectedItems.add(tx);
     }
+  }
 
-    // 2. Periyodik İşlemler (Projeksiyon)
-    // ÖNCELİK: recurrenceDate (Çapa Tarihi). Yoksa normal tarihi kullan.
-    DateTime anchorDate = tx.recurrenceDate ?? tx.date;
-    DateTime currentOccurrence = DateTime(anchorDate.year, anchorDate.month, anchorDate.day, anchorDate.hour, anchorDate.minute);
-    
-    // Başlangıç tarihini bugüne veya en yakın gelecekteki durağına çek
-    if (currentOccurrence.isBefore(today)) {
-      while (currentOccurrence.isBefore(today)) {
-        currentOccurrence = _getNextOccurrence(currentOccurrence, tx.periodType);
-        if (currentOccurrence.isAfter(limit.add(const Duration(days: 3650)))) break;
+  // Veritabanındaki mevcut tekrarlı işlem anahtarlarını çıkaralım
+  final Set<String> existingOccurrenceKeys = dbTransactions
+      .where((tx) => tx.templateId != null && tx.occurrenceKey.isNotEmpty)
+      .map((tx) => tx.occurrenceKey)
+      .toSet();
+
+  // 2. Aktif şablonlardan geleceğe yönelik projeksiyon yap
+  for (var template in templates) {
+    if (template.isPaused || template.isArchived) continue;
+    if (template.periodType == 0) continue;
+
+    final dates = RecurrenceEngine.occurrenceDates(
+      template.recurrenceRule,
+      limit,
+    );
+
+    for (final date in dates) {
+      if (date.isBefore(today) || date.isAtSameMomentAs(today)) {
+        continue;
       }
-    }
 
-    // 1 Yıllık pencere içindeki tüm tekrarları ekle
-    int occurrencesProjected = 0;
-    
-    // Toplam limit hesabı:
-    int? maxOccurrences;
-    if (tx.remainingInstallments != null && tx.remainingInstallments! > 0) {
-      maxOccurrences = tx.remainingInstallments;
-    } else if (tx.recurrenceDuration != null && tx.recurrenceDuration! > 0) {
-      DateTime pastOccurrence = DateTime(anchorDate.year, anchorDate.month, anchorDate.day, anchorDate.hour, anchorDate.minute);
-      int passedCount = 0;
-      while (pastOccurrence.isBefore(today)) {
-        pastOccurrence = _getNextOccurrence(pastOccurrence, tx.periodType);
-        passedCount++;
+      final idStr = template.remoteId ?? template.id.toString();
+      final yyyyMMdd = '${date.year}${date.month.toString().padLeft(2, '0')}${date.day.toString().padLeft(2, '0')}';
+      final occurrenceKey = '${idStr}_$yyyyMMdd';
+
+      if (existingOccurrenceKeys.contains(occurrenceKey)) {
+        continue;
       }
-      maxOccurrences = math.max(0, tx.recurrenceDuration! - (passedCount - 1));
-    }
 
-    while (currentOccurrence.isBefore(limit)) {
-      if (maxOccurrences != null && occurrencesProjected >= maxOccurrences) break;
+      final installment = RecurrenceEngine.installmentNumber(template.recurrenceRule, date);
 
       final projectedTx = TransactionRecord()
-        ..id = tx.id
-        ..title = tx.title
-        ..amount = tx.amount
-        ..minAmount = tx.minAmount
-        ..maxAmount = tx.maxAmount
-        ..isIncome = tx.isIncome
-        ..categoryId = tx.categoryId
-        ..iconCode = tx.iconCode
-        ..currency = tx.currency
-        ..periodType = tx.periodType
-        ..date = currentOccurrence;
-        
+        ..templateId = template.id
+        ..occurrenceKey = occurrenceKey
+        ..title = template.title
+        ..amount = template.amount
+        ..minAmount = template.minAmount
+        ..maxAmount = template.maxAmount
+        ..isIncome = template.isIncome
+        ..categoryId = template.categoryId
+        ..iconCode = template.iconCode
+        ..currency = template.currency
+        ..date = DateTime(date.year, date.month, date.day, template.notificationHour, template.notificationMinute)
+        ..occurrenceDate = date
+        ..installmentNumber = installment
+        ..totalInstallments = template.totalInstallments
+        ..vaultId = template.vaultId;
+
       projectedItems.add(projectedTx);
-      
-      currentOccurrence = _getNextOccurrence(currentOccurrence, tx.periodType);
-      occurrencesProjected++;
-      if (occurrencesProjected > 100) break;
     }
   }
 
   return projectedItems..sort((a, b) => a.date.compareTo(b.date));
-}
-
-DateTime _getNextOccurrence(DateTime current, int periodType) {
-  if (periodType == 250) {
-    int addDays = 1;
-    if (current.weekday == DateTime.friday) {
-      addDays = 3;
-    } else if (current.weekday == DateTime.saturday) {
-      addDays = 2;
-    }
-    return current.add(Duration(days: addDays));
-  } else if (periodType == 251) {
-    int addDays = 1;
-    if (current.weekday == DateTime.sunday) {
-      addDays = 6;
-    } else if (current.weekday >= DateTime.monday && current.weekday <= DateTime.friday) {
-      addDays = DateTime.saturday - current.weekday;
-    }
-    return current.add(Duration(days: addDays));
-  } else {
-    final unit = periodType ~/ 100;
-    final interval = periodType % 100;
-    if (interval > 0) {
-      switch (unit) {
-        case 1:
-          return current.add(Duration(days: interval));
-        case 2:
-          return current.add(Duration(days: interval * 7));
-        case 3:
-          return DateTime(current.year, current.month + interval, current.day, current.hour, current.minute);
-        case 4:
-          return DateTime(current.year + interval, current.month, current.day, current.hour, current.minute);
-      }
-    }
-  }
-  return current.add(const Duration(days: 30));
 }

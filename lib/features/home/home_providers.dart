@@ -2,8 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/providers/db_providers.dart';
 import '../../core/providers/settings_provider.dart';
-import '../../core/utils/currency_utils.dart';
-import '../vaults/vaults_providers.dart';
+import '../../core/services/balance_service.dart';
 
 /// Zaman makinesi tekerleği çevrildiğinde eklenen sanal (gelecek) bakiye bonusu
 final simulationBonusProvider = StateProvider<double>((ref) => 0.0);
@@ -14,10 +13,6 @@ final homeMainBalanceVaultIdProvider = StateProvider<String?>((ref) => null);
 /// Seçili kasa filtresine göre gerçek bakiyeyi hesaplar (Ana ekran için)
 final homeRealBalanceProvider = Provider<double>((ref) {
   final vaultId = ref.watch(homeMainBalanceVaultIdProvider);
-  final rates = ref.watch(exchangeRatesProvider).value ?? [];
-  final targetCurrency = ref.watch(settingsProvider).currencySymbol;
-  final now = DateTime.now();
-
   if (vaultId == null) {
     return ref.watch(netBalanceProvider);
   }
@@ -29,33 +24,21 @@ final homeRealBalanceProvider = Provider<double>((ref) {
 
   final allVaults = ref.watch(allVaultsProvider);
   final vault = allVaults.where((v) => v.id == rawVaultId).firstOrNull;
-  final vaultCurrency = vault?.currency ?? 'AUTO';
-  final vaultInitialBalance = vault != null
-      ? CurrencyUtils.convert(vault.balance, vaultCurrency == 'AUTO' ? targetCurrency : vaultCurrency, targetCurrency, rates)
-      : 0.0;
-
-  final allTx = ref.watch(allTransactionsProvider);
-  final filteredTx = allTx.where((t) => t.vaultIds.contains(rawVaultId) && (t.date.isBefore(now) || t.date.isAtSameMomentAs(now)));
-
-  double balance = vaultInitialBalance;
-  for (final t in filteredTx) {
-    final amt = t.getConvertedAmount(targetCurrency, rates);
-    if (t.isIncome) {
-      balance += amt;
-    } else {
-      balance -= amt;
-    }
+  if (vault == null) {
+    return ref.watch(netBalanceProvider);
   }
-  return balance;
+
+  return BalanceService.calculateVaultBalance(
+    vault: vault,
+    records: ref.watch(allTransactionsProvider),
+    targetCurrency: ref.watch(settingsProvider).currencySymbol,
+    rates: ref.watch(exchangeRatesProvider).value ?? [],
+  );
 });
 
 /// Seçili kasa filtresine göre esnek bütçe alt limitini hesaplar
 final homeMinBalanceProvider = Provider<double>((ref) {
   final vaultId = ref.watch(homeMainBalanceVaultIdProvider);
-  final rates = ref.watch(exchangeRatesProvider).value ?? [];
-  final targetCurrency = ref.watch(settingsProvider).currencySymbol;
-  final now = DateTime.now();
-
   if (vaultId == null) {
     return ref.watch(netMinBalanceProvider);
   }
@@ -67,34 +50,21 @@ final homeMinBalanceProvider = Provider<double>((ref) {
 
   final allVaults = ref.watch(allVaultsProvider);
   final vault = allVaults.where((v) => v.id == rawVaultId).firstOrNull;
-  final vaultCurrency = vault?.currency ?? 'AUTO';
-  final vaultInitialBalance = vault != null
-      ? CurrencyUtils.convert(vault.balance, vaultCurrency == 'AUTO' ? targetCurrency : vaultCurrency, targetCurrency, rates)
-      : 0.0;
-
-  final allTx = ref.watch(allTransactionsProvider);
-  final filteredTx = allTx.where((t) => t.vaultIds.contains(rawVaultId) && (t.date.isBefore(now) || t.date.isAtSameMomentAs(now)));
-
-  double balance = vaultInitialBalance;
-  for (final t in filteredTx) {
-    if (t.isIncome) {
-      final val = t.minAmount ?? t.amount;
-      balance += CurrencyUtils.convert(val, t.currency ?? '₺', targetCurrency, rates);
-    } else {
-      final val = t.maxAmount ?? t.amount;
-      balance -= CurrencyUtils.convert(val, t.currency ?? '₺', targetCurrency, rates);
-    }
+  if (vault == null) {
+    return ref.watch(netMinBalanceProvider);
   }
-  return balance;
+
+  return BalanceService.calculateVaultMinBalance(
+    vault: vault,
+    records: ref.watch(allTransactionsProvider),
+    targetCurrency: ref.watch(settingsProvider).currencySymbol,
+    rates: ref.watch(exchangeRatesProvider).value ?? [],
+  );
 });
 
 /// Seçili kasa filtresine göre esnek bütçe üst limitini hesaplar
 final homeMaxBalanceProvider = Provider<double>((ref) {
   final vaultId = ref.watch(homeMainBalanceVaultIdProvider);
-  final rates = ref.watch(exchangeRatesProvider).value ?? [];
-  final targetCurrency = ref.watch(settingsProvider).currencySymbol;
-  final now = DateTime.now();
-
   if (vaultId == null) {
     return ref.watch(netMaxBalanceProvider);
   }
@@ -106,25 +76,16 @@ final homeMaxBalanceProvider = Provider<double>((ref) {
 
   final allVaults = ref.watch(allVaultsProvider);
   final vault = allVaults.where((v) => v.id == rawVaultId).firstOrNull;
-  final vaultCurrency = vault?.currency ?? 'AUTO';
-  final vaultInitialBalance = vault != null
-      ? CurrencyUtils.convert(vault.balance, vaultCurrency == 'AUTO' ? targetCurrency : vaultCurrency, targetCurrency, rates)
-      : 0.0;
-
-  final allTx = ref.watch(allTransactionsProvider);
-  final filteredTx = allTx.where((t) => t.vaultIds.contains(rawVaultId) && (t.date.isBefore(now) || t.date.isAtSameMomentAs(now)));
-
-  double balance = vaultInitialBalance;
-  for (final t in filteredTx) {
-    if (t.isIncome) {
-      final val = t.maxAmount ?? t.amount;
-      balance += CurrencyUtils.convert(val, t.currency ?? '₺', targetCurrency, rates);
-    } else {
-      final val = t.minAmount ?? t.amount;
-      balance -= CurrencyUtils.convert(val, t.currency ?? '₺', targetCurrency, rates);
-    }
+  if (vault == null) {
+    return ref.watch(netMaxBalanceProvider);
   }
-  return balance;
+
+  return BalanceService.calculateVaultMaxBalance(
+    vault: vault,
+    records: ref.watch(allTransactionsProvider),
+    targetCurrency: ref.watch(settingsProvider).currencySymbol,
+    rates: ref.watch(exchangeRatesProvider).value ?? [],
+  );
 });
 
 /// Ekranda gösterilecek toplam bakiye: Gerçek Bakiye (DB) + Zaman Makinesi Bonusu
@@ -134,7 +95,7 @@ final displayBalanceProvider = Provider<double>((ref) {
   return realBalance + bonus;
 });
 
-/// Renklerin artık sadece Ayarlar'dan gelmesini sağlayan Provider (Zaman çarkından bağımsızlaştırıldı)
+/// Renklerin artık sadece Ayarlar'dan gelmesini sağlayan Provider
 final rotaryColorProvider = Provider<Color>((ref) {
   final accentColor = ref.watch(settingsProvider.select((s) => s.accentColorValue));
   if (accentColor == 0) {
@@ -146,22 +107,20 @@ final rotaryColorProvider = Provider<Color>((ref) {
 /// Zaman makinesinin şu an hangi "Ay/Yıl" ofsetinde olduğunu tutar (0 = Bugün)
 final timeOffsetProvider = StateProvider<int>((ref) => 0);
 
-/// Tüm periyodik işlemlerın günlük bazda net değişim hızını (velocity) hesaplayan Provider.
-/// Bu, Zaman Makinesi'nin ne kadar hızlı artıp azalacağını belirler.
+/// Tüm periyodik işlemlerin günlük bazda net değişim hızını (velocity) hesaplayan Provider.
 final dailyVelocityProvider = Provider<double>((ref) {
-  final transactions = ref.watch(vaultTransactionsProvider);
+  final templates = ref.watch(allTemplatesProvider);
   final rates = ref.watch(exchangeRatesProvider).value ?? [];
   final globalCurrency = ref.watch(settingsProvider).currencySymbol;
   
   double dailyNet = 0;
 
-  for (final t in transactions) {
-    if (t.periodType == 0) continue; // Tek seferlik işlemler simülasyona dahil edilmez
+  for (final t in templates) {
+    if (t.isPaused || t.isArchived) continue;
 
     // monthlyEquivalent'i günlüğe çeviriyoruz (30.44 gün ortalama)
-    // Önce global birime çeviriyoruz
     double monthlyConv = t.getConvertedMonthlyEquivalent(globalCurrency, rates);
-    double dailyEffect = monthlyConv / 30;
+    double dailyEffect = monthlyConv / 30.44;
     
     if (t.isIncome) {
       dailyNet += dailyEffect;

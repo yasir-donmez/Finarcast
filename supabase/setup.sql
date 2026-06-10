@@ -12,6 +12,35 @@ create table if not exists public.vaults (
   updated_at timestamptz not null default now()
 );
 
+create table if not exists public.recurring_templates (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references auth.users(id) on delete cascade,
+  title text not null default '',
+  is_income boolean not null default false,
+  category_id text,
+  icon_code text,
+  amount double precision not null default 0,
+  min_amount double precision,
+  max_amount double precision,
+  period_type int not null default 301,
+  recurrence_day int,
+  recurrence_date timestamptz,
+  total_installments int,
+  start_date timestamptz not null default now(),
+  note text,
+  currency text,
+  is_paused boolean not null default false,
+  is_archived boolean not null default false,
+  is_notification_enabled boolean not null default false,
+  has_notification boolean not null default false,
+  notification_reminder_days int not null default 0,
+  notification_hour int not null default 9,
+  notification_minute int not null default 0,
+  vault_id uuid references public.vaults(id) on delete set null,
+  vault_ids uuid[],
+  updated_at timestamptz not null default now()
+);
+
 create table if not exists public.transaction_records (
   id uuid primary key default gen_random_uuid(),
   user_id uuid not null references auth.users(id) on delete cascade,
@@ -23,21 +52,20 @@ create table if not exists public.transaction_records (
   min_amount double precision,
   max_amount double precision,
   date timestamptz not null default now(),
-  period_type int not null default 0,
+  occurrence_date date not null,
+  template_id uuid references public.recurring_templates(id) on delete set null,
+  occurrence_key text not null,
+  installment_number int,
+  total_installments int,
+  status int not null default 0,
+  is_reviewed boolean not null default false,
   is_archived boolean not null default false,
   vault_id uuid references public.vaults(id) on delete set null,
+  vault_ids uuid[],
   note text,
   currency text,
-  remaining_installments int,
-  recurrence_day int,
-  recurrence_date timestamptz,
-  recurrence_duration int,
-  is_notification_enabled boolean not null default false,
-  has_notification boolean not null default false,
-  notification_reminder_days int not null default 0,
-  notification_hour int not null default 9,
-  notification_minute int not null default 0,
-  updated_at timestamptz not null default now()
+  updated_at timestamptz not null default now(),
+  unique (user_id, occurrence_key)
 );
 
 create table if not exists public.app_settings (
@@ -67,55 +95,63 @@ create table if not exists public.custom_categories (
 
 -- 2) RLS
 alter table public.vaults enable row level security;
+alter table public.recurring_templates enable row level security;
 alter table public.transaction_records enable row level security;
 alter table public.app_settings enable row level security;
 alter table public.custom_categories enable row level security;
 
+-- Vaults Policies
 drop policy if exists "vaults_select_own" on public.vaults;
 drop policy if exists "vaults_insert_own" on public.vaults;
 drop policy if exists "vaults_update_own" on public.vaults;
 drop policy if exists "vaults_delete_own" on public.vaults;
-
 create policy "vaults_select_own" on public.vaults for select using (auth.uid() = user_id);
 create policy "vaults_insert_own" on public.vaults for insert with check (auth.uid() = user_id);
 create policy "vaults_update_own" on public.vaults for update using (auth.uid() = user_id);
 create policy "vaults_delete_own" on public.vaults for delete using (auth.uid() = user_id);
 
+-- Templates Policies
+drop policy if exists "templates_select_own" on public.recurring_templates;
+drop policy if exists "templates_insert_own" on public.recurring_templates;
+drop policy if exists "templates_update_own" on public.recurring_templates;
+drop policy if exists "templates_delete_own" on public.recurring_templates;
+create policy "templates_select_own" on public.recurring_templates for select using (auth.uid() = user_id);
+create policy "templates_insert_own" on public.recurring_templates for insert with check (auth.uid() = user_id);
+create policy "templates_update_own" on public.recurring_templates for update using (auth.uid() = user_id);
+create policy "templates_delete_own" on public.recurring_templates for delete using (auth.uid() = user_id);
+
+-- Transaction Records Policies
 drop policy if exists "tx_select_own" on public.transaction_records;
 drop policy if exists "tx_insert_own" on public.transaction_records;
 drop policy if exists "tx_update_own" on public.transaction_records;
 drop policy if exists "tx_delete_own" on public.transaction_records;
-
 create policy "tx_select_own" on public.transaction_records for select using (auth.uid() = user_id);
 create policy "tx_insert_own" on public.transaction_records for insert with check (auth.uid() = user_id);
 create policy "tx_update_own" on public.transaction_records for update using (auth.uid() = user_id);
 create policy "tx_delete_own" on public.transaction_records for delete using (auth.uid() = user_id);
 
+-- Settings Policies
 drop policy if exists "settings_select_own" on public.app_settings;
 drop policy if exists "settings_insert_own" on public.app_settings;
 drop policy if exists "settings_update_own" on public.app_settings;
-
 create policy "settings_select_own" on public.app_settings for select using (auth.uid() = user_id);
 create policy "settings_insert_own" on public.app_settings for insert with check (auth.uid() = user_id);
 create policy "settings_update_own" on public.app_settings for update using (auth.uid() = user_id);
 
+-- Custom Categories Policies
 drop policy if exists "custom_categories_select_own" on public.custom_categories;
 drop policy if exists "custom_categories_insert_own" on public.custom_categories;
 drop policy if exists "custom_categories_update_own" on public.custom_categories;
 drop policy if exists "custom_categories_delete_own" on public.custom_categories;
-
 create policy "custom_categories_select_own" on public.custom_categories for select using (auth.uid() = user_id);
 create policy "custom_categories_insert_own" on public.custom_categories for insert with check (auth.uid() = user_id);
 create policy "custom_categories_update_own" on public.custom_categories for update using (auth.uid() = user_id);
 create policy "custom_categories_delete_own" on public.custom_categories for delete using (auth.uid() = user_id);
 
 -- 3) Yetkilendirmeler (Grants)
--- Supabase API rollerine (anon ve authenticated) şema kullanım yetkisi ver
 grant usage on schema public to anon, authenticated;
-
--- Tablolar üzerinde temel okuma/yazma yetkilerini tanımla (RLS politikaları ile korunacaktır)
 grant select, insert, update, delete on public.vaults to anon, authenticated;
+grant select, insert, update, delete on public.recurring_templates to anon, authenticated;
 grant select, insert, update, delete on public.transaction_records to anon, authenticated;
 grant select, insert, update, delete on public.app_settings to anon, authenticated;
 grant select, insert, update, delete on public.custom_categories to anon, authenticated;
-

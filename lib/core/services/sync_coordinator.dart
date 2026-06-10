@@ -6,6 +6,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../database/database_service.dart';
 import 'sync_service.dart';
+import 'materialization_service.dart';
 import '../../l10n/app_localizations.dart';
 
 class SyncCoordinator {
@@ -100,6 +101,11 @@ class SyncCoordinator {
         // Kısmi hata varsa kaydetme → sonraki sync full sync yapıp
         // başarısız kayıtları tekrar dener.
         await prefs.setString('last_sync_time', DateTime.now().toIso8601String());
+        
+        // Eşitleme sonrası yeni şablonlar geldiyse tekrarlı işlemleri somutlaştır
+        debugPrint('[SyncCoordinator] Eşitleme sonrası materialization tetikleniyor...');
+        await MaterializationService.materializeAll();
+
         _retryCount = 0;
         _retryTimer?.cancel();
         return true;

@@ -329,9 +329,12 @@ class _SmartScanScreenState extends ConsumerState<SmartScanScreen> with WidgetsB
           initialNotificationMinute: draft.notificationMinute,
           initialPeriodType: draft.periodType,
           initialRecurrenceDay: draft.recurrenceDay,
-          initialRecurrenceDuration: draft.recurrenceDuration,
-          initialVaultIds: _selectedVaultIdForDraft[draft.id] != null && _selectedVaultIdForDraft[draft.id] != -1
-              ? [_selectedVaultIdForDraft[draft.id]!] 
+          initialTotalInstallments: draft.remainingInstallments,
+          initialBuilderType: draft.periodType > 0
+              ? TransactionBuilderType.recurring
+              : TransactionBuilderType.oneTime,
+          initialVaultId: _selectedVaultIdForDraft[draft.id] != null && _selectedVaultIdForDraft[draft.id] != -1
+              ? _selectedVaultIdForDraft[draft.id]! 
               : null,
           onSuccess: () {
             ref.read(smartInboxDraftsProvider.notifier).deleteDraft(draft.id);

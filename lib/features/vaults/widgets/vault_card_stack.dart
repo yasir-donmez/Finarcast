@@ -87,96 +87,88 @@ class _VaultCardStackState extends ConsumerState<VaultCardStack> {
     // Kasa kartları %1 bile küçülmeye başlasa etkileşimi (kaydırmayı) kapatıyoruz.
     final bool isInteractingDisabled = widget.morphProgress > 0.01;
 
-    return NotificationListener<ScrollNotification>(
-      onNotification: (notification) {
-        if (notification is ScrollEndNotification && !isInteractingDisabled) {
-          final page = _pageController.page?.round() ?? 0;
-          if (_lastTargetIndex != page) {
-            _lastTargetIndex = page;
-            HapticFeedback.selectionClick();
-            if (page >= 0 && page < widget.deckItems.length) {
-              widget.onVaultSelect(widget.deckItems[page]);
-            }
-          }
+    return PageView.builder(
+      controller: _pageController,
+      physics: isInteractingDisabled ? const NeverScrollableScrollPhysics() : const PageScrollPhysics(),
+      clipBehavior: Clip.hardEdge,
+      itemCount: widget.deckItems.length,
+      onPageChanged: (page) {
+        _lastTargetIndex = page;
+        HapticFeedback.selectionClick();
+        if (page >= 0 && page < widget.deckItems.length) {
+          widget.onVaultSelect(widget.deckItems[page]);
         }
-        return true;
       },
-      child: PageView.builder(
-        controller: _pageController,
-        physics: isInteractingDisabled ? const NeverScrollableScrollPhysics() : const PageScrollPhysics(),
-        clipBehavior: Clip.hardEdge,
-        itemCount: widget.deckItems.length,
-        itemBuilder: (context, index) {
-          final vaultId = widget.deckItems[index];
-          final globalCurrency = ref.watch(settingsProvider).currencySymbol;
-          final cardDataMap = ref.watch(vaultCardDataProvider);
-          
-          final cardData = cardDataMap[vaultId] ?? VaultCardData(
-            vaultId: vaultId,
-            income: 0,
-            expense: 0,
-            balance: 0,
-            currencySymbol: globalCurrency,
-            targetCurrency: globalCurrency,
-            hasFlexibleTx: false,
-            minNet: 0,
-            maxNet: 0,
-          );
+      itemBuilder: (context, index) {
+        final vaultId = widget.deckItems[index];
+        final globalCurrency = ref.watch(settingsProvider).currencySymbol;
+        final cardDataMap = ref.watch(vaultCardDataProvider);
+        
+        final cardData = cardDataMap[vaultId] ?? VaultCardData(
+          vaultId: vaultId,
+          income: 0,
+          expense: 0,
+          balance: 0,
+          currencySymbol: globalCurrency,
+          targetCurrency: globalCurrency,
+          hasFlexibleTx: false,
+          minNet: 0,
+          maxNet: 0,
+        );
 
-          return AnimatedBuilder(
-            animation: _pageController,
-            builder: (context, child) {
-              double value = 1.0;
-              if (_pageController.position.haveDimensions) {
-                double diff = (_pageController.page! - index).abs();
-                value = (1 - (diff * 0.15)).clamp(0.85, 1.0);
-              } else {
-                value = index == widget.currentIndex ? 1.0 : 0.85;
-              }
-              
-              final isCurrent = index == widget.currentIndex;
-              final cardOpacity = isCurrent ? 1.0 : (1 - widget.morphProgress * 2.0).clamp(0.0, 1.0);
-              
-              // Seçili olmayan kartlar daha hızlı yanlara doğru kaysın (Depth Effect)
-              final double slideOutOffset = (index - widget.currentIndex) * (widget.morphProgress * 450);
+        return AnimatedBuilder(
+          animation: _pageController,
+          builder: (context, child) {
+            double value = 1.0;
+            if (_pageController.position.haveDimensions) {
+              double diff = (_pageController.page! - index).abs();
+              value = (1 - (diff * 0.15)).clamp(0.85, 1.0);
+            } else {
+              value = index == widget.currentIndex ? 1.0 : 0.85;
+            }
+            
+            final isCurrent = index == widget.currentIndex;
+            final cardOpacity = isCurrent ? 1.0 : (1 - widget.morphProgress * 2.0).clamp(0.0, 1.0);
+            
+            // Seçili olmayan kartlar daha hızlı yanlara doğru kaysın (Depth Effect)
+            final double slideOutOffset = (index - widget.currentIndex) * (widget.morphProgress * 450);
 
-              return Center(
-                child: Opacity(
-                  opacity: cardOpacity * (isCurrent ? 1.0 : (value * 2 - 1).clamp(0.0, 1.0)),
-                  child: Transform.translate(
-                    offset: Offset(slideOutOffset, 0),
-                    child: Transform.scale(
-                      scale: isCurrent ? value : value * (1 - widget.morphProgress * 0.15), // Yumuşak küçülme
-                      child: RepaintBoundary(
-                        child: GestureDetector(
-                          onTap: isCurrent ? () => widget.onVaultTap(vaultId) : null,
-                          child: IntegratedVaultCard(
-                            vaultId: vaultId,
-                            income: cardData.income,
-                            expense: cardData.expense,
-                            balance: cardData.balance,
-                            activeColor: widget.activeColor,
-                            l10n: widget.l10n,
-                            vaultName: widget.groups[index].name,
-                            currencySymbol: cardData.currencySymbol,
-                            convertedBalance: cardData.convertedBalance,
-                            convertedSymbol: globalCurrency,
-                            hasFlexibleTx: cardData.hasFlexibleTx,
-                            minNet: cardData.minNet,
-                            maxNet: cardData.maxNet,
-                            morphProgress: widget.morphProgress,
-                            isCurrent: isCurrent,
-                          ),
+            return Center(
+              child: Opacity(
+                opacity: cardOpacity * (isCurrent ? 1.0 : (value * 2 - 1).clamp(0.0, 1.0)),
+                child: Transform.translate(
+                  offset: Offset(slideOutOffset, 0),
+                  child: Transform.scale(
+                    scale: isCurrent ? value : value * (1 - widget.morphProgress * 0.15), // Yumuşak küçülme
+                    child: RepaintBoundary(
+                      child: GestureDetector(
+                        onTap: isCurrent ? () => widget.onVaultTap(vaultId) : null,
+                        child: IntegratedVaultCard(
+                          vaultId: vaultId,
+                          income: cardData.income,
+                          expense: cardData.expense,
+                          balance: cardData.balance,
+                          activeColor: widget.activeColor,
+                          l10n: widget.l10n,
+                          vaultName: widget.groups[index].name,
+                          currencySymbol: cardData.currencySymbol,
+                          convertedBalance: cardData.convertedBalance,
+                          convertedSymbol: globalCurrency,
+                          hasFlexibleTx: cardData.hasFlexibleTx,
+                          minNet: cardData.minNet,
+                          maxNet: cardData.maxNet,
+                          morphProgress: widget.morphProgress,
+                          isCurrent: isCurrent,
                         ),
                       ),
                     ),
                   ),
                 ),
-              );
-            },
-          );
-        },
-      ),
+              ),
+            );
+          },
+        );
+      },
     );
   }
 }

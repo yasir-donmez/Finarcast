@@ -75,134 +75,159 @@ class CustomBottomSheet extends ConsumerWidget {
       activeBgColor = AppColors.getThemeSurface(context, 1, isInsideSheet: false);
       activeBorderColor = AppColors.getThemeBorder(context, 1);
     }
+
+    final double keyboardHeight = bottomPadding;
+    final double bottomMargin = keyboardHeight > 0
+        ? keyboardHeight + 16.0
+        : MediaQuery.of(context).padding.bottom + 16.0;
     
     return PrecisionSheetScope(
-      child: Padding(
-        padding: EdgeInsets.only(bottom: bottomPadding),
-        child: Stack(
-          alignment: Alignment.bottomCenter,
-          children: [
-            // Sayfa kapandığında tetiklenecek alan
-            Positioned.fill(
-              child: GestureDetector(
-                onTap: () => Navigator.pop(context),
-                child: Container(color: Colors.transparent),
-              ),
+      child: Stack(
+        alignment: Alignment.bottomCenter,
+        children: [
+          // Sayfa kapandığında tetiklenecek alan (Tüm ekranı kaplar)
+          Positioned.fill(
+            child: GestureDetector(
+              onTap: () => Navigator.pop(context),
+              child: Container(color: Colors.transparent),
             ),
-            
-            // Bombeli Gövde
-            AnimatedContainer(
+          ),
+          
+          // Yüzen Gövde
+          Padding(
+            padding: EdgeInsets.only(
+              left: 16.0,
+              right: 16.0,
+              bottom: bottomMargin,
+            ),
+            child: AnimatedContainer(
               duration: const Duration(milliseconds: 300),
               curve: Curves.easeInOut,
               constraints: BoxConstraints(
-                maxHeight: isFullScreen 
-                    ? MediaQuery.of(context).size.height 
-                    : MediaQuery.of(context).size.height * 0.88,
+                maxHeight: height ?? (isFullScreen 
+                    ? MediaQuery.of(context).size.height - bottomMargin - 16.0
+                    : MediaQuery.of(context).size.height * 0.85),
               ),
               width: double.infinity,
               decoration: BoxDecoration(
                 color: activeBgColor,
-                borderRadius: const BorderRadius.vertical(top: Radius.circular(AppSizes.radiusLarge * 2.5)),
+                borderRadius: BorderRadius.circular(28.0), // Tamamen yuvarlatılmış köşeler
                 border: Border.all(
                   color: activeBorderColor,
                   width: 1.0,
                 ),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withValues(alpha: isDark ? 0.4 : 0.15),
-                    blurRadius: 40,
-                    offset: const Offset(0, -10),
-                    spreadRadius: -5,
+                    color: Colors.black.withValues(alpha: isDark ? 0.3 : 0.08),
+                    blurRadius: 32,
+                    offset: const Offset(0, 8),
                   ),
                 ],
               ),
               child: ClipRRect(
-                borderRadius: const BorderRadius.vertical(top: Radius.circular(AppSizes.radiusLarge * 2.5)),
+                borderRadius: BorderRadius.circular(28.0),
                 child: _buildSheetContent(context),
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
 
   Widget _buildSheetContent(BuildContext context) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        if (showHandle) ...[
-          const SizedBox(height: 12),
-          Container(
-            width: 40,
-            height: 4,
-            decoration: BoxDecoration(
-              color: AppColors.getTextSecondary(context).withValues(alpha: 0.2),
-              borderRadius: BorderRadius.circular(2),
-            ),
-          ),
-          const SizedBox(height: 12),
-        ],
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final double maxContentHeight = constraints.maxHeight;
         
-        if (title != null) ...[
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: AppSizes.paddingLarge),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Expanded(
-                  child: title is Widget
-                      ? (title as Widget)
-                      : Text(
-                          title!.toString(),
-                          style: TextStyle(
-                            fontSize: 24,
-                            fontWeight: FontWeight.w900,
-                            color: AppColors.getTextPrimary(context),
-                            letterSpacing: -0.8,
-                          ),
-                        ),
+        // Calculate static content height to get remaining scrollable height
+        double staticHeight = 0.0;
+        if (showHandle) staticHeight += 28.0; // handle padding + height
+        if (title != null) staticHeight += 56.0; // title height + spacing
+        staticHeight += 12.0; // bottom spacing
+        
+        final double remainingHeight = (maxContentHeight - staticHeight).clamp(0.0, double.infinity);
+        
+        return Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (showHandle) ...[
+              const SizedBox(height: 12),
+              Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: AppColors.getTextSecondary(context).withValues(alpha: 0.2),
+                  borderRadius: BorderRadius.circular(2),
                 ),
-                if (actions != null) Row(children: actions!),
-              ],
-            ),
-          ),
-          const SizedBox(height: 16),
-        ],
-        
-        Flexible(
-          child: SingleChildScrollView(
-            physics: const BouncingScrollPhysics(),
-            child: TweenAnimationBuilder<double>(
-              tween: Tween(begin: 0.98, end: 1.0),
-              duration: const Duration(milliseconds: 280),
-              curve: Curves.easeOutCubic,
-              builder: (context, value, child) {
-                return Transform.scale(
-                  scale: value,
-                  child: Opacity(
-                    opacity: ((value - 0.95) / 0.05).clamp(0.0, 1.0),
-                    child: child,
+              ),
+              const SizedBox(height: 12),
+            ],
+            
+            if (title != null) ...[
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: AppSizes.paddingLarge),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Expanded(
+                      child: title is Widget
+                          ? (title as Widget)
+                          : Text(
+                              title!.toString(),
+                              style: TextStyle(
+                                fontSize: 24,
+                                fontWeight: FontWeight.w900,
+                                color: AppColors.getTextPrimary(context),
+                                letterSpacing: -0.8,
+                              ),
+                            ),
+                    ),
+                    if (actions != null) Row(children: actions!),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 16),
+            ],
+            
+            ConstrainedBox(
+              constraints: BoxConstraints(
+                maxHeight: remainingHeight,
+              ),
+              child: SingleChildScrollView(
+                physics: const BouncingScrollPhysics(),
+                child: TweenAnimationBuilder<double>(
+                  tween: Tween(begin: 0.98, end: 1.0),
+                  duration: const Duration(milliseconds: 280),
+                  curve: Curves.easeOutCubic,
+                  builder: (context, value, child) {
+                    return Transform.scale(
+                      scale: value,
+                      child: Opacity(
+                        opacity: ((value - 0.95) / 0.05).clamp(0.0, 1.0),
+                        child: child,
+                      ),
+                    );
+                  },
+                  child: RepaintBoundary(
+                    child: Padding(
+                      padding: const EdgeInsets.only(
+                        left: AppSizes.paddingLarge,
+                        right: AppSizes.paddingLarge,
+                        bottom: 0.0, // Alt dolguyu sıfırlayarak çift boşluğu önlüyoruz
+                      ),
+                      child: child,
+                    ),
                   ),
-                );
-              },
-              child: RepaintBoundary(
-                child: Padding(
-                  padding: const EdgeInsets.only(
-                    left: AppSizes.paddingLarge,
-                    right: AppSizes.paddingLarge,
-                    bottom: AppSizes.paddingLarge,
-                  ),
-                  child: child,
                 ),
               ),
             ),
-          ),
-        ),
-        
-        // Alt boşluk (Güvenli alan kontrolü ile)
-        SizedBox(height: MediaQuery.of(context).padding.bottom > 0 ? MediaQuery.of(context).padding.bottom : AppSizes.paddingLarge),
-      ],
+            
+            // Alt boşluk (Yüzen kart olduğu için standart hafif dolgu yeterlidir)
+            const SizedBox(height: 12.0),
+          ],
+        );
+      },
     );
   }
 }

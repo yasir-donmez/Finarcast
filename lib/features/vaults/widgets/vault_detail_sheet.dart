@@ -95,7 +95,6 @@ class _VaultDetailSheetState extends ConsumerState<VaultDetailSheet> with Single
     }
     
     final globalCurrency = ref.read(settingsProvider).currencySymbol;
-    final rates = ref.read(exchangeRatesProvider).value ?? [];
 
     if (_tempCurrency != null && _tempCurrency != vault.currency) {
       final baseCurrency = globalCurrency;
@@ -160,14 +159,8 @@ class _VaultDetailSheetState extends ConsumerState<VaultDetailSheet> with Single
     if (editedBalance != null) {
       final tempCurrency = (_tempCurrency ?? vault.currency) == 'AUTO' ? globalCurrency : (_tempCurrency ?? vault.currency);
       
-      final allTransactions = ref.read(vaultTransactionsProvider);
-      final displayTxs = allTransactions.where((t) => t.groupIds.contains(widget.vaultId!)).toList();
-      
-      final double initialBalanceVal = vault.balance;
-      final double currentBalanceVal = displayTxs.fold<double>(initialBalanceVal, (sum, t) {
-        final amt = t.getConvertedAmount(tempCurrency, rates) * t.passedOccurrences;
-        return t.isIncome ? sum + amt : sum - amt;
-      });
+      final cardData = ref.read(vaultCardDataProvider)[widget.vaultId];
+      final double currentBalanceVal = cardData?.balance ?? 0.0;
 
       if ((editedBalance - currentBalanceVal).abs() > 0.005) {
         final double difference = editedBalance - currentBalanceVal;
@@ -180,12 +173,15 @@ class _VaultDetailSheetState extends ConsumerState<VaultDetailSheet> with Single
           ..amount = difference.abs()
           ..isIncome = difference > 0
           ..date = DateTime.now()
-          ..vaultIds = [vault.id]
+          ..occurrenceDate = DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day)
+          ..vaultId = vault.id
           ..currency = tempCurrency
           ..categoryId = difference > 0 ? 'inc_other_general' : 'exp_other_general'
           ..iconCode = 'account_balance_wallet_rounded'
           ..note = l10n.balanceAdjustmentNote(oldBalanceStr, newBalanceStr)
-          ..periodType = 0; // Tek Seferlik
+          ..status = 0
+          ..isReviewed = true
+          ..occurrenceKey = TransactionRecord.generateManualKey();
 
         await DatabaseService.addTransaction(tx);
       }
@@ -203,18 +199,21 @@ class _VaultDetailSheetState extends ConsumerState<VaultDetailSheet> with Single
     final l10n = AppLocalizations.of(context)!;
     final allVaults = ref.watch(allVaultsProvider);
     final allTransactions = ref.watch(vaultTransactionsProvider);
+    final allTemplates = ref.watch(vaultTemplatesProvider);
     final globalCurrency = ref.watch(settingsProvider).currencySymbol;
     final rates = ref.watch(exchangeRatesProvider).value ?? [];
     
     final bool isMainVault = widget.vaultId == null;
     Vault? vault;
     List<TransactionUI> displayTxs;
+    List<TemplateUI> displayTemplates;
 
     if (isMainVault) {
       vault = Vault()
         ..name = l10n.mainVault
         ..currency = 'AUTO';
       displayTxs = allTransactions;
+      displayTemplates = allTemplates;
     } else {
       final vaultDbId = int.tryParse(widget.vaultId!.replaceFirst('v_', ''));
       vault = allVaults.where((v) => v.id == vaultDbId).firstOrNull;
@@ -223,17 +222,18 @@ class _VaultDetailSheetState extends ConsumerState<VaultDetailSheet> with Single
         return t.groupIds.contains(widget.vaultId!);
       }).toList();
 
+      displayTemplates = allTemplates.where((t) {
+        return t.vaultId == vaultDbId;
+      }).toList();
+
       if (vault != null && !_isInitialized) {
         _tempName = vault.name;
         _tempCurrency = vault.currency;
         _nameController.text = _tempName!;
         
-        final tempCurrency = _tempCurrency == 'AUTO' ? globalCurrency : _tempCurrency!;
-        final double initialBalanceVal = vault.balance;
-        _initialCurrentBalance = displayTxs.fold<double>(initialBalanceVal, (sum, t) {
-          final amt = t.getConvertedAmount(tempCurrency, rates) * t.passedOccurrences;
-          return t.isIncome ? sum + amt : sum - amt;
-        });
+        final cardData = ref.read(vaultCardDataProvider)[widget.vaultId];
+        _initialCurrentBalance = cardData?.balance ?? 0.0;
+
         final locale = Localizations.localeOf(context).toString();
         final format = NumberFormat.decimalPattern(locale);
         final decimalSep = format.symbols.DECIMAL_SEP;
@@ -282,7 +282,7 @@ class _VaultDetailSheetState extends ConsumerState<VaultDetailSheet> with Single
               switchInCurve: Curves.easeOutCubic,
               switchOutCurve: Curves.easeInCubic,
               child: _activeTab == VaultDetailTab.transactions
-                ? _buildMainView(context, vault, displayTxs, activeColor, isDark, isMainVault, displayCurrency, sf, rates, l10n)
+                ? _buildMainView(context, vault, displayTxs, displayTemplates, activeColor, isDark, isMainVault, displayCurrency, sf, rates, l10n)
                 : _buildManageView(context, vault, activeColor, isDark, sf, l10n),
             ),
           ),
@@ -291,19 +291,30 @@ class _VaultDetailSheetState extends ConsumerState<VaultDetailSheet> with Single
     );
   }
 
-  Widget _buildMainView(BuildContext context, Vault vault, List<TransactionUI> vaultTransactions, Color activeColor, bool isDark, bool isMainVault, String currency, double sf, List<ExchangeRate> rates, AppLocalizations l10n) {
+  Widget _buildMainView(
+    BuildContext context,
+    Vault vault,
+    List<TransactionUI> vaultTransactions,
+    List<TemplateUI> vaultTemplates,
+    Color activeColor,
+    bool isDark,
+    bool isMainVault,
+    String currency,
+    double sf,
+    List<ExchangeRate> rates,
+    AppLocalizations l10n,
+  ) {
     final isTr = Localizations.localeOf(context).languageCode == 'tr';
     // === FİNANSAL HESAPLAMALAR ===
-    final recurringTxs = vaultTransactions.where((t) => t.periodType != 0).toList();
-    final incomeLoad = recurringTxs.where((t) => t.isIncome).fold<double>(0, (sum, t) => sum + t.getConvertedMonthlyEquivalent(currency, rates));
-    final expenseLoad = recurringTxs.where((t) => !t.isIncome).fold<double>(0, (sum, t) => sum + t.getConvertedMonthlyEquivalent(currency, rates));
+    final incomeLoad = vaultTemplates.where((t) => t.isIncome).fold<double>(0, (sum, t) => sum + t.getConvertedMonthlyEquivalent(currency, rates));
+    final expenseLoad = vaultTemplates.where((t) => !t.isIncome).fold<double>(0, (sum, t) => sum + t.getConvertedMonthlyEquivalent(currency, rates));
     final netLoad = incomeLoad - expenseLoad;
     final savingsRate = incomeLoad > 0 ? ((netLoad / incomeLoad) * 100).clamp(-999.0, 100.0) : 0.0;
     final yearlyProjection = netLoad * 12;
 
     // En büyük gelir ve gider kalemleri
-    final incomeItems = recurringTxs.where((t) => t.isIncome).toList()..sort((a, b) => b.getConvertedMonthlyEquivalent(currency, rates).compareTo(a.getConvertedMonthlyEquivalent(currency, rates)));
-    final expenseItems = recurringTxs.where((t) => !t.isIncome).toList()..sort((a, b) => b.getConvertedMonthlyEquivalent(currency, rates).compareTo(a.getConvertedMonthlyEquivalent(currency, rates)));
+    final incomeItems = vaultTemplates.where((t) => t.isIncome).toList()..sort((a, b) => b.getConvertedMonthlyEquivalent(currency, rates).compareTo(a.getConvertedMonthlyEquivalent(currency, rates)));
+    final expenseItems = vaultTemplates.where((t) => !t.isIncome).toList()..sort((a, b) => b.getConvertedMonthlyEquivalent(currency, rates).compareTo(a.getConvertedMonthlyEquivalent(currency, rates)));
     final topIncome = incomeItems.isNotEmpty ? incomeItems.first : null;
     final topExpense = expenseItems.isNotEmpty ? expenseItems.first : null;
 
@@ -312,9 +323,9 @@ class _VaultDetailSheetState extends ConsumerState<VaultDetailSheet> with Single
     final expenseCount = vaultTransactions.where((t) => !t.isIncome).length;
 
     // Senaryo analizi (esnek işlemlerin min/max değerlerine göre)
-    final hasFlexible = recurringTxs.any((t) => t.minAmount != null || t.maxAmount != null);
+    final hasFlexible = vaultTemplates.any((t) => t.minAmount != null || t.maxAmount != null);
     double monthlyBest = 0, monthlyWorst = 0;
-    for (final tx in recurringTxs) {
+    for (final tx in vaultTemplates) {
       if (tx.isIncome) {
         monthlyBest += tx.maxMonthlyEquivalent > 0 ? CurrencyUtils.convert(tx.maxMonthlyEquivalent, tx.currency ?? '₺', currency, rates) : tx.getConvertedMonthlyEquivalent(currency, rates);
         monthlyWorst += tx.minMonthlyEquivalent > 0 ? CurrencyUtils.convert(tx.minMonthlyEquivalent, tx.currency ?? '₺', currency, rates) : tx.getConvertedMonthlyEquivalent(currency, rates);
@@ -487,7 +498,7 @@ class _VaultDetailSheetState extends ConsumerState<VaultDetailSheet> with Single
                           children: [
                             Icon(topIncome.icon, color: topIncome.color, size: 16 * sf),
                             SizedBox(width: 6 * sf),
-                            Flexible(child: Text(topIncome.name, style: TextStyle(fontSize: 12 * sf, fontWeight: FontWeight.w800), maxLines: 1, overflow: TextOverflow.ellipsis)),
+                            Flexible(child: Text(topIncome.title, style: TextStyle(fontSize: 12 * sf, fontWeight: FontWeight.w800), maxLines: 1, overflow: TextOverflow.ellipsis)),
                           ],
                         ),
                         SizedBox(height: 4 * sf),
@@ -517,7 +528,7 @@ class _VaultDetailSheetState extends ConsumerState<VaultDetailSheet> with Single
                           children: [
                             Icon(topExpense.icon, color: topExpense.color, size: 16 * sf),
                             SizedBox(width: 6 * sf),
-                            Flexible(child: Text(topExpense.name, style: TextStyle(fontSize: 12 * sf, fontWeight: FontWeight.w800), maxLines: 1, overflow: TextOverflow.ellipsis)),
+                            Flexible(child: Text(topExpense.title, style: TextStyle(fontSize: 12 * sf, fontWeight: FontWeight.w800), maxLines: 1, overflow: TextOverflow.ellipsis)),
                           ],
                         ),
                         SizedBox(height: 4 * sf),

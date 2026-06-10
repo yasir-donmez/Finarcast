@@ -8,6 +8,8 @@ import '../../core/theme/app_constants.dart';
 import '../../core/utils/string_utils.dart';
 import '../../core/database/database_service.dart';
 import '../../core/database/models/transaction_record.dart';
+import '../../core/database/models/recurring_template.dart';
+import '../../core/services/materialization_service.dart';
 import '../../core/database/models/vault.dart';
 import '../../core/services/custom_category_service.dart';
 import '../../core/providers/settings_provider.dart';
@@ -37,6 +39,8 @@ import '../../shared/widgets/glass_surface.dart';
 import '../../shared/widgets/custom_notification.dart';
 import '../../shared/widgets/custom_dialog.dart';
 
+enum TransactionBuilderType { oneTime, recurring }
+
 class TransactionBuilderScreen extends ConsumerStatefulWidget {
   final int? initialId;
   final String? initialName;
@@ -44,7 +48,7 @@ class TransactionBuilderScreen extends ConsumerStatefulWidget {
   final double? initialMinAmount;
   final double? initialMaxAmount;
   final bool? initialIsIncome;
-  final List<int>? initialVaultIds;
+  final int? initialVaultId;
   final String? initialCategoryId;
   final String? initialNote;
   final String? initialCurrency;
@@ -61,6 +65,10 @@ class TransactionBuilderScreen extends ConsumerStatefulWidget {
 
   final VoidCallback? onSuccess;
 
+  final TransactionBuilderType initialBuilderType;
+  final bool? isTemplateEdit;
+  final int? initialTotalInstallments;
+
   const TransactionBuilderScreen({
     super.key,
     this.initialId,
@@ -69,7 +77,7 @@ class TransactionBuilderScreen extends ConsumerStatefulWidget {
     this.initialMinAmount,
     this.initialMaxAmount,
     this.initialIsIncome,
-    this.initialVaultIds,
+    this.initialVaultId,
     this.initialCategoryId,
     this.initialNote,
     this.initialCurrency,
@@ -82,6 +90,9 @@ class TransactionBuilderScreen extends ConsumerStatefulWidget {
     this.initialNotificationHour,
     this.initialNotificationMinute,
     this.onSuccess,
+    this.initialBuilderType = TransactionBuilderType.oneTime,
+    this.isTemplateEdit,
+    this.initialTotalInstallments,
   });
 
   @override
@@ -113,20 +124,64 @@ class _TransactionBuilderScreenState extends ConsumerState<TransactionBuilderScr
   bool _isPrefilled = false;
   String? _errorMessage;
 
+  late TransactionBuilderType _builderType;
+  int _reviewedCount = 0;
+
   AppLocalizations get l10n => AppLocalizations.of(context)!;
 
   @override
   void initState() {
     super.initState();
+    _builderType = widget.initialBuilderType;
+    if (widget.initialId != null) {
+      if (widget.isTemplateEdit == true) {
+        _builderType = TransactionBuilderType.recurring;
+      } else {
+        _builderType = TransactionBuilderType.oneTime;
+      }
+    }
+
+    DateTime initialDate = widget.initialRecurrenceDate ?? DateTime.now();
+    if (_builderType == TransactionBuilderType.oneTime) {
+      final now = DateTime.now();
+      final today = DateTime(now.year, now.month, now.day);
+      if (initialDate.isAfter(today)) {
+        initialDate = today;
+      }
+    }
+
+    int initialPeriod = widget.initialPeriodType ?? 0;
+    if (_builderType == TransactionBuilderType.recurring && initialPeriod == 0) {
+      initialPeriod = 301;
+    }
+
     _periodData = TransactionPeriodData(
-      periodType: 0,
-      selectedDay: 1,
-      selectedDateForRecurrence: widget.initialRecurrenceDate ?? DateTime.now(),
-      duration: 0,
+      periodType: initialPeriod,
+      selectedDay: widget.initialRecurrenceDay ?? 1,
+      selectedDateForRecurrence: initialDate,
+      duration: widget.initialRecurrenceDuration ?? 0,
+      totalInstallments: widget.initialTotalInstallments,
     );
+
     _loadVaults();
     _loadCustomCategories();
     _selectedCurrency = ref.read(settingsProvider).currencySymbol;
+
+    if (widget.initialId != null && widget.isTemplateEdit == true) {
+      _loadReviewedCount();
+    }
+  }
+
+  Future<void> _loadReviewedCount() async {
+    if (widget.initialId != null) {
+      final records = await DatabaseService.getRecordsForTemplate(widget.initialId!);
+      final reviewedCount = records.where((r) => r.isReviewed).length;
+      if (mounted) {
+        setState(() {
+          _reviewedCount = reviewedCount;
+        });
+      }
+    }
   }
 
   @override
@@ -191,8 +246,8 @@ class _TransactionBuilderScreenState extends ConsumerState<TransactionBuilderScr
       if (widget.initialNote != null) {
         _noteController.text = widget.initialNote!;
       }
-      if (widget.initialVaultIds != null) {
-        _selectedVaultIds = List<int>.from(widget.initialVaultIds!);
+      if (widget.initialVaultId != null) {
+        _selectedVaultIds = [widget.initialVaultId!];
       }
       if (widget.initialPeriodType != null && widget.initialPeriodType != 0) {
         _periodData = TransactionPeriodData(
@@ -201,6 +256,7 @@ class _TransactionBuilderScreenState extends ConsumerState<TransactionBuilderScr
           selectedDateForRecurrence:
               widget.initialRecurrenceDate ?? DateTime.now(),
           duration: widget.initialRecurrenceDuration ?? 0,
+          totalInstallments: widget.initialTotalInstallments,
         );
       }
 
@@ -214,28 +270,7 @@ class _TransactionBuilderScreenState extends ConsumerState<TransactionBuilderScr
         );
       }
 
-      if (widget.initialCategoryId != null) {
-        final categories = _getMergedCategories();
-        for (int i = 0; i < categories.length; i++) {
-          final cat = categories[i];
-          if (cat['id'] == widget.initialCategoryId) {
-            _selectedCategoryIndex = i;
-            _selectedSubModelIndex = -1;
-            break;
-          }
-          final subModels = cat['subModels'] as List?;
-          if (subModels != null) {
-            for (int j = 0; j < subModels.length; j++) {
-              if (subModels[j]['id'] == widget.initialCategoryId) {
-                _selectedCategoryIndex = i;
-                _selectedSubModelIndex = j;
-                _expandedCategoryIndex = i;
-                break;
-              }
-            }
-          }
-        }
-      }
+      _matchInitialCategory();
     }
     // 2. YENİ KAYIT MODU (Parametreler Varsa)
     else {
@@ -256,11 +291,23 @@ class _TransactionBuilderScreenState extends ConsumerState<TransactionBuilderScr
         _maxController.text = _formatAmount(widget.initialMaxAmount!, _selectedCurrency);
         _isFlexibleAmount = true;
       }
-      if (widget.initialNote != null) {
-        _noteController.text = widget.initialNote!;
+      String? combinedNote;
+      if (widget.initialName != null &&
+          widget.initialName!.isNotEmpty &&
+          widget.initialName != '__EMPTY_DRAFT__' &&
+          widget.initialName != '__RECEIPT_EXPENSE__') {
+        combinedNote = widget.initialNote != null && widget.initialNote!.isNotEmpty
+            ? '${widget.initialName} - ${widget.initialNote}'
+            : widget.initialName;
+      } else {
+        combinedNote = widget.initialNote;
       }
-      if (widget.initialVaultIds != null) {
-        _selectedVaultIds = List<int>.from(widget.initialVaultIds!);
+
+      if (combinedNote != null) {
+        _noteController.text = combinedNote;
+      }
+      if (widget.initialVaultId != null) {
+        _selectedVaultIds = [widget.initialVaultId!];
       }
       if (widget.initialCurrency != null) {
         _selectedCurrency = widget.initialCurrency!;
@@ -285,30 +332,10 @@ class _TransactionBuilderScreenState extends ConsumerState<TransactionBuilderScr
           selectedDateForRecurrence:
               widget.initialRecurrenceDate ?? DateTime.now(),
           duration: widget.initialRecurrenceDuration ?? 0,
+          totalInstallments: widget.initialTotalInstallments,
         );
       }
-      if (widget.initialCategoryId != null) {
-        final categories = _getMergedCategories();
-        for (int i = 0; i < categories.length; i++) {
-          final cat = categories[i];
-          if (cat['id'] == widget.initialCategoryId) {
-            _selectedCategoryIndex = i;
-            _selectedSubModelIndex = -1;
-            break;
-          }
-          final subModels = cat['subModels'] as List?;
-          if (subModels != null) {
-            for (int j = 0; j < subModels.length; j++) {
-              if (subModels[j]['id'] == widget.initialCategoryId) {
-                _selectedCategoryIndex = i;
-                _selectedSubModelIndex = j;
-                _expandedCategoryIndex = i;
-                break;
-              }
-            }
-          }
-        }
-      }
+      _matchInitialCategory();
     }
   }
 
@@ -317,8 +344,12 @@ class _TransactionBuilderScreenState extends ConsumerState<TransactionBuilderScr
     if (mounted) {
       setState(() {
         _vaults = v;
-        if (_selectedVaultIds.isEmpty && v.isNotEmpty) {
-          _selectedVaultIds = [v.first.id];
+        if (_selectedVaultIds.isEmpty) {
+          if (widget.initialVaultId != null) {
+            _selectedVaultIds = [widget.initialVaultId!];
+          } else if (v.isNotEmpty) {
+            _selectedVaultIds = [v.first.id];
+          }
         }
       });
     }
@@ -326,7 +357,37 @@ class _TransactionBuilderScreenState extends ConsumerState<TransactionBuilderScr
 
   Future<void> _loadCustomCategories() async {
     final customs = await CustomCategoryService.getAllCustomSubcategories();
-    if (mounted) setState(() => _customSubs = customs);
+    if (mounted) {
+      setState(() {
+        _customSubs = customs;
+        _matchInitialCategory();
+      });
+    }
+  }
+
+  void _matchInitialCategory() {
+    if (widget.initialCategoryId != null) {
+      final categories = _getMergedCategories();
+      for (int i = 0; i < categories.length; i++) {
+        final cat = categories[i];
+        if (cat['id'] == widget.initialCategoryId) {
+          _selectedCategoryIndex = i;
+          _selectedSubModelIndex = -1;
+          break;
+        }
+        final subModels = cat['subModels'] as List?;
+        if (subModels != null) {
+          for (int j = 0; j < subModels.length; j++) {
+            if (subModels[j]['id'] == widget.initialCategoryId) {
+              _selectedCategoryIndex = i;
+              _selectedSubModelIndex = j;
+              _expandedCategoryIndex = i;
+              break;
+            }
+          }
+        }
+      }
+    }
   }
 
   List<Map<String, dynamic>> _getMergedCategories() {
@@ -728,75 +789,109 @@ class _TransactionBuilderScreenState extends ConsumerState<TransactionBuilderScr
           ? (subModel['icon'] as IconData).codePoint.toString()
           : null;
 
-      if (widget.initialId != null) {
-        final old = await DatabaseService.getTransaction(widget.initialId!);
-        if (old != null) {
-          final catName = subModel != null
-              ? subModel['name'] as String
-              : cat['name'] as String;
+      final catName = subModel != null
+          ? subModel['name'] as String
+          : cat['name'] as String;
 
-          old.title = catName;
-          old.amount = finalAmount;
-          old.minAmount = finalMin;
-          old.maxAmount = finalMax;
-          old.isIncome = _tabIndex == 1;
-          old.vaultIds = _selectedVaultIds;
-          old.categoryId = categoryId;
-          old.iconCode = iconCodeStr;
-          old.periodType = _periodData.periodType;
-          old.recurrenceDay = _periodData.selectedDay;
-          old.recurrenceDate = _periodData.selectedDateForRecurrence;
-          old.recurrenceDuration = _periodData.duration;
-          old.note = _noteController.text.isNotEmpty
-              ? _noteController.text
-              : null;
-          old.currency = _selectedCurrency;
-          old.date = _periodData.selectedDateForRecurrence;
+      if (_builderType == TransactionBuilderType.recurring) {
+        if (widget.initialId != null && widget.isTemplateEdit == true) {
+          final old = await DatabaseService.getTemplate(widget.initialId!);
+          if (old != null) {
+            old.title = catName;
+            old.amount = finalAmount;
+            old.minAmount = finalMin;
+            old.maxAmount = finalMax;
+            old.isIncome = _tabIndex == 1;
+            old.vaultId = _selectedVaultIds.firstOrNull;
+            old.categoryId = categoryId;
+            old.iconCode = iconCodeStr;
+            old.periodType = _periodData.periodType;
+            old.recurrenceDay = _periodData.selectedDay;
+            old.recurrenceDate = _periodData.selectedDateForRecurrence;
+            old.totalInstallments = _periodData.totalInstallments;
+            old.note = _noteController.text.isNotEmpty ? _noteController.text : null;
+            old.currency = _selectedCurrency;
+            old.startDate = _periodData.selectedDateForRecurrence;
 
-          old.isNotificationEnabled = _isNotificationEnabled;
-          if (_isNotificationEnabled) {
-            old.hasNotification = true;
-          } else {
-            if (!old.hasNotification) {
-              old.hasNotification = false;
-            }
+            old.isNotificationEnabled = _isNotificationEnabled;
+            old.notificationReminderDays = _notificationReminderDays;
+            old.notificationHour = _notificationTime.hour;
+            old.notificationMinute = _notificationTime.minute;
+
+            await DatabaseService.updateTemplate(old);
+            await MaterializationService.onTemplateChanged(old);
           }
-          old.notificationReminderDays = _notificationReminderDays;
-          old.notificationHour = _notificationTime.hour;
-          old.notificationMinute = _notificationTime.minute;
+        } else {
+          final template = RecurringTemplate()
+            ..title = catName
+            ..amount = finalAmount
+            ..minAmount = finalMin
+            ..maxAmount = finalMax
+            ..isIncome = _tabIndex == 1
+            ..startDate = _periodData.selectedDateForRecurrence
+            ..vaultId = _selectedVaultIds.firstOrNull
+            ..categoryId = categoryId
+            ..iconCode = iconCodeStr
+            ..periodType = _periodData.periodType
+            ..recurrenceDay = _periodData.selectedDay
+            ..recurrenceDate = _periodData.selectedDateForRecurrence
+            ..totalInstallments = _periodData.totalInstallments
+            ..note = _noteController.text.isNotEmpty ? _noteController.text : null
+            ..currency = _selectedCurrency
+            ..isNotificationEnabled = _isNotificationEnabled
+            ..notificationReminderDays = _notificationReminderDays
+            ..notificationHour = _notificationTime.hour
+            ..notificationMinute = _notificationTime.minute;
 
-          await DatabaseService.updateTransaction(old);
+          await DatabaseService.addTemplate(template);
+          await MaterializationService.onTemplateChanged(template);
         }
       } else {
-        final catName = subModel != null
-            ? subModel['name'] as String
-            : cat['name'] as String;
+        if (widget.initialId != null && widget.isTemplateEdit != true) {
+          final old = await DatabaseService.getTransaction(widget.initialId!);
+          if (old != null) {
+            old.title = catName;
+            old.amount = finalAmount;
+            old.minAmount = finalMin;
+            old.maxAmount = finalMax;
+            old.isIncome = _tabIndex == 1;
+            old.vaultId = _selectedVaultIds.firstOrNull;
+            old.categoryId = categoryId;
+            old.iconCode = iconCodeStr;
+            old.note = _noteController.text.isNotEmpty ? _noteController.text : null;
+            old.currency = _selectedCurrency;
+            old.date = _periodData.selectedDateForRecurrence;
+            old.occurrenceDate = DateTime(
+              _periodData.selectedDateForRecurrence.year,
+              _periodData.selectedDateForRecurrence.month,
+              _periodData.selectedDateForRecurrence.day,
+            );
 
-        DateTime initialDate = _periodData.selectedDateForRecurrence;
+            await DatabaseService.updateTransaction(old);
+          }
+        } else {
+          final tx = TransactionRecord()
+            ..title = catName
+            ..amount = finalAmount
+            ..minAmount = finalMin
+            ..maxAmount = finalMax
+            ..isIncome = _tabIndex == 1
+            ..date = _periodData.selectedDateForRecurrence
+            ..occurrenceDate = DateTime(
+              _periodData.selectedDateForRecurrence.year,
+              _periodData.selectedDateForRecurrence.month,
+              _periodData.selectedDateForRecurrence.day,
+            )
+            ..vaultId = _selectedVaultIds.firstOrNull
+            ..categoryId = categoryId
+            ..iconCode = iconCodeStr
+            ..note = _noteController.text.isNotEmpty ? _noteController.text : null
+            ..currency = _selectedCurrency
+            ..occurrenceKey = TransactionRecord.generateManualKey()
+            ..isReviewed = true;
 
-        final tx = TransactionRecord()
-          ..title = catName
-          ..amount = finalAmount
-          ..minAmount = finalMin
-          ..maxAmount = finalMax
-          ..isIncome = _tabIndex == 1
-          ..date = initialDate
-          ..vaultIds = _selectedVaultIds
-          ..categoryId = categoryId
-          ..iconCode = iconCodeStr
-          ..periodType = _periodData.periodType
-          ..recurrenceDay = _periodData.selectedDay
-          ..recurrenceDate = _periodData.selectedDateForRecurrence
-          ..recurrenceDuration = _periodData.duration
-          ..note = _noteController.text.isNotEmpty ? _noteController.text : null
-          ..currency = _selectedCurrency
-          ..isNotificationEnabled = _isNotificationEnabled
-          ..hasNotification = _isNotificationEnabled
-          ..notificationReminderDays = _notificationReminderDays
-          ..notificationHour = _notificationTime.hour
-          ..notificationMinute = _notificationTime.minute;
-
-        await DatabaseService.addTransaction(tx);
+          await DatabaseService.addTransaction(tx);
+        }
       }
 
       if (mounted) {
@@ -812,6 +907,7 @@ class _TransactionBuilderScreenState extends ConsumerState<TransactionBuilderScr
       _showValidationError(l10n.transactionSaveError(e.toString()));
     }
   }
+
 
   void _onCurrencyChanged(String newCurrency) {
     if (newCurrency == _selectedCurrency) return;
@@ -950,9 +1046,7 @@ class _TransactionBuilderScreenState extends ConsumerState<TransactionBuilderScr
                             right: 0,
                             child: IgnorePointer(
                               child: Text(
-                                (widget.initialId != null
-                                        ? l10n.edit
-                                        : l10n.addTransaction)
+                          _getAppBarTitle()
                                     .toSafeUpperCase(context),
                                 textAlign: TextAlign.center,
                                 style: TextStyle(
@@ -993,16 +1087,18 @@ class _TransactionBuilderScreenState extends ConsumerState<TransactionBuilderScr
                 const SizedBox(height: 8),
                 TransactionTypeToggle(
                   tabIndex: _tabIndex,
-                  onTabChanged: (index) {
-                    HapticFeedback.selectionClick();
-                    FocusManager.instance.primaryFocus?.unfocus();
-                    setState(() {
-                      _tabIndex = index;
-                      _selectedCategoryIndex = 0;
-                      _expandedCategoryIndex = -1;
-                      _selectedSubModelIndex = -1;
-                    });
-                  },
+                  onTabChanged: widget.initialId != null
+                      ? null
+                      : (index) {
+                          HapticFeedback.selectionClick();
+                          FocusManager.instance.primaryFocus?.unfocus();
+                          setState(() {
+                            _tabIndex = index;
+                            _selectedCategoryIndex = 0;
+                            _expandedCategoryIndex = -1;
+                            _selectedSubModelIndex = -1;
+                          });
+                        },
                 ),
                 const SizedBox(height: 12),
                 TransactionAmountInput(
@@ -1129,6 +1225,11 @@ class _TransactionBuilderScreenState extends ConsumerState<TransactionBuilderScr
                     child: TransactionPeriodSelector(
                       initialData: _periodData,
                       scalingFactor: scalingFactor,
+                      hidePeriodSelection: _builderType == TransactionBuilderType.oneTime,
+                      hideOneTime: _builderType == TransactionBuilderType.recurring,
+                      disableFutureDates: _builderType == TransactionBuilderType.oneTime,
+                      readOnlyPeriod: widget.isTemplateEdit == true,
+                      minDuration: _reviewedCount,
                       onChanged: (data) {
                         HapticFeedback.mediumImpact();
                         FocusManager.instance.primaryFocus?.unfocus();
@@ -1348,6 +1449,24 @@ class _TransactionBuilderScreenState extends ConsumerState<TransactionBuilderScr
     ),
       ],
     );
+  }
+
+  String _getAppBarTitle() {
+    final isEdit = widget.initialId != null;
+    final isTr = l10n.localeName == 'tr';
+    if (_builderType == TransactionBuilderType.recurring) {
+      if (isEdit) {
+        return isTr ? 'Planı Düzenle' : (l10n.localeName == 'de' ? 'Plan bearbeiten' : 'Edit Plan');
+      } else {
+        return isTr ? 'Yeni Plan' : (l10n.localeName == 'de' ? 'Neuer Plan' : 'New Plan');
+      }
+    } else {
+      if (isEdit) {
+        return isTr ? 'İşlemi Düzenle' : (l10n.localeName == 'de' ? 'Transaktion bearbeiten' : 'Edit Transaction');
+      } else {
+        return isTr ? 'Yeni İşlem' : l10n.addTransaction;
+      }
+    }
   }
 }
 

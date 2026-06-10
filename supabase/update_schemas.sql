@@ -19,9 +19,17 @@ alter table public.transaction_records
 alter table public.app_settings 
   drop column if exists country_name;
 
--- 4) Yetkilendirmeler (Grants)
+-- 4) vault_ids uuid[] kolonu ekle (Çoklu Kasa desteği için)
+alter table public.recurring_templates
+  add column if not exists vault_ids uuid[];
+
+alter table public.transaction_records
+  add column if not exists vault_ids uuid[];
+
+-- 5) Yetkilendirmeler (Grants)
 grant usage on schema public to anon, authenticated;
 grant select, insert, update, delete on public.vaults to anon, authenticated;
+grant select, insert, update, delete on public.recurring_templates to anon, authenticated;
 grant select, insert, update, delete on public.transaction_records to anon, authenticated;
 grant select, insert, update, delete on public.app_settings to anon, authenticated;
 grant select, insert, update, delete on public.custom_categories to anon, authenticated;

@@ -247,8 +247,22 @@ Kurallar:
    - notificationHour: Hatırlatılacak saat (24 saatlik formatta tamsayı, 0-23 arası). Varsayılan olarak 9 döndür.
    - notificationMinute: Hatırlatacak dakika (0-59 arası tamsayı). Varsayılan olarak 0 döndür.
 9. Kasa/Hesap Belirteci (vaultName): Kullanıcı belirli bir kasa/hesap belirtiyorsa (örn: "ortak kasa", "maaş hesabı", "ana kasa"), bu kasa ismini metinden aynen çıkarıp döndür. Yoksa null döndür.
-10. Tekrarlama/Periyot (periodType): Eğer işlem periyodik ise şu kodlardan birini döndür:
-    - 0: Tek Seferlik, 1: Haftalık, 2: Aylık, 3: Yıllık, 4: İki Haftada Bir, 8: Günlük.
+10. Tekrarlama/Periyot (periodType): İşlem tekrarlı/periyodik ise şu formüle göre bir tamsayı döndür: `birim * 100 + aralık`.
+    - Birimler (unit): 1 = Gün, 2 = Hafta, 3 = Ay, 4 = Yıl.
+    - Aralık (interval): Tekrarlama sıklığı (örn: her 1 birimde bir, her 2 birimde bir vb.).
+    - Örnek kodlar: 
+      * 0 = Tek Seferlik (tekrarsız harcama/gelir)
+      * 101 = Günlük (her gün / 1 günde bir)
+      * 102 = 2 günde bir, 103 = 3 günde bir, 104 = 4 günde bir
+      * 201 = Haftalık (her hafta / 1 haftada bir)
+      * 202 = 2 haftada bir, 203 = 3 haftada bir
+      * 250 = Hafta içi her gün (Pazartesi-Cuma)
+      * 251 = Hafta sonu her gün (Cumartesi-Pazar)
+      * 301 = Aylık (her ay / 1 ayda bir)
+      * 302 = 2 ayda bir, 303 = 3 ayda bir, 306 = 6 ayda bir
+      * 401 = Yıllık (her yıl / 1 yılda bir)
+      * 402 = 2 yılda bir
+    Metne en uygun periyot kodunu yukarıdaki kurallara göre tam olarak sayısal olarak döndür. Periyodik olmayan normal harcamalar için mutlaka 0 döndür.
 11. Tekrarlama Günü (recurrenceDay): Haftalık ise gün (1-7), aylık ise ayın günü (1-31).
 12. Tekrarlama Süresi (recurrenceDuration): Toplam kaç kez tekrar edeceğini gösteren sayı.
 13. Taksit Sayısı (remainingInstallments): Taksit sayısı.

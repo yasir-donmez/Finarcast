@@ -18,6 +18,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'core/services/subscription_service.dart';
 import 'core/services/notification_service.dart';
 import 'core/widgets/sync_bootstrap.dart';
+import 'core/services/materialization_service.dart';
 import 'package:dynamic_color/dynamic_color.dart';
 import 'shared/widgets/custom_notification.dart';
 
@@ -44,6 +45,11 @@ void main() async {
     debugPrint('📦 [Finarcast] Veritabanı başlatılıyor...');
     await DatabaseService.init();
     debugPrint('✅ [Finarcast] Veritabanı başarıyla başlatıldı.');
+
+    // Tekrarlı işlemleri somutlaştır (Materialization)
+    debugPrint('⚙️ [Finarcast] Tekrarlı işlemler somutlaştırılıyor...');
+    await MaterializationService.materializeAll();
+    debugPrint('✅ [Finarcast] Somutlaştırma tamamlandı.');
 
     // Bildirimleri başlat
     debugPrint('🔔 [Finarcast] Bildirim servisi başlatılıyor...');
@@ -295,6 +301,7 @@ class _DatabaseCrashScreenState extends State<DatabaseCrashScreen> {
       
       // Tekrar başlatma adımlarıüs
       await DatabaseService.init();
+      await MaterializationService.materializeAll();
       await DataRetentionService.archiveExpiredTransactions();
       await initializeDateFormatting('tr_TR', null);
       final prefs = await SharedPreferences.getInstance();

@@ -3,6 +3,8 @@ import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../../core/database/database_service.dart';
 import '../../../core/database/models/transaction_record.dart';
+import '../../../core/database/models/recurring_template.dart';
+import '../../../core/services/materialization_service.dart';
 
 class DraftTransaction {
   final String id;
@@ -173,30 +175,50 @@ class DraftService {
         return false;
       }
 
-      // Gerçek işlem modelini oluştur
-      final tx = TransactionRecord()
-        ..title = categoryName
-        ..amount = draft.amount
-        ..minAmount = draft.minAmount
-        ..maxAmount = draft.maxAmount
-        ..categoryId = draft.categoryId
-        ..date = draft.date
-        ..isIncome = draft.isIncome
-        ..vaultIds = [finalVaultId]
-        ..currency = draft.currency ?? currency
-        ..note = finalNote
-        ..isNotificationEnabled = draft.isNotificationEnabled
-        ..hasNotification = draft.isNotificationEnabled
-        ..notificationReminderDays = draft.notificationReminderDays
-        ..notificationHour = draft.notificationHour
-        ..notificationMinute = draft.notificationMinute
-        ..periodType = draft.periodType
-        ..remainingInstallments = draft.remainingInstallments
-        ..recurrenceDay = draft.recurrenceDay
-        ..recurrenceDuration = draft.recurrenceDuration;
+      if (draft.periodType > 0) {
+        // Tekrarlı işlem şablonu oluştur
+        final template = RecurringTemplate()
+          ..title = categoryName
+          ..amount = draft.amount
+          ..minAmount = draft.minAmount
+          ..maxAmount = draft.maxAmount
+          ..categoryId = draft.categoryId
+          ..startDate = draft.date
+          ..isIncome = draft.isIncome
+          ..vaultId = finalVaultId
+          ..currency = draft.currency ?? currency
+          ..note = finalNote
+          ..isNotificationEnabled = draft.isNotificationEnabled
+          ..notificationReminderDays = draft.notificationReminderDays
+          ..notificationHour = draft.notificationHour
+          ..notificationMinute = draft.notificationMinute
+          ..periodType = draft.periodType
+          ..totalInstallments = draft.remainingInstallments
+          ..recurrenceDay = draft.recurrenceDay;
 
-      // Veritabanına kaydet
-      await DatabaseService.addTransaction(tx);
+        final templateId = await DatabaseService.addTemplate(template);
+        template.id = templateId;
+        await MaterializationService.onTemplateChanged(template);
+      } else {
+        // Tek seferlik işlem kaydı oluştur
+        final tx = TransactionRecord()
+          ..title = categoryName
+          ..amount = draft.amount
+          ..minAmount = draft.minAmount
+          ..maxAmount = draft.maxAmount
+          ..categoryId = draft.categoryId
+          ..date = draft.date
+          ..occurrenceDate = DateTime(draft.date.year, draft.date.month, draft.date.day)
+          ..isIncome = draft.isIncome
+          ..vaultId = finalVaultId
+          ..currency = draft.currency ?? currency
+          ..note = finalNote
+          ..status = 0 // confirmed
+          ..isReviewed = true
+          ..occurrenceKey = TransactionRecord.generateManualKey();
+
+        await DatabaseService.addTransaction(tx);
+      }
 
       // Taslağı listeden sil
       drafts.removeAt(index);

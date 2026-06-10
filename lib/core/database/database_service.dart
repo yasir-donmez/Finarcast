@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:isar/isar.dart';
 import 'package:path_provider/path_provider.dart';
 import 'models/transaction_record.dart';
+import 'models/recurring_template.dart';
 import 'models/vault.dart';
 import 'models/app_settings.dart';
 import 'models/exchange_rate.dart';
@@ -33,7 +34,8 @@ class DatabaseService {
 
       debugPrint('⚙️ [DatabaseService] Isar.open() çağrılıyor...');
       _isar = await Isar.open([
-        TransactionRecordSchema,
+        RecurringTemplateSchema, // YENİ
+        TransactionRecordSchema, // GÜNCELLENMİŞ
         VaultSchema,
         AppSettingsSchema,
         ExchangeRateSchema,
@@ -45,9 +47,6 @@ class DatabaseService {
       debugPrint('🌱 [DatabaseService] Varsayılan veriler kontrol ediliyor...');
       await _seedDefaultVaults();
       debugPrint('✅ [DatabaseService] Veri tohumlama tamamlandı.');
-
-      // Eski periodType değerlerini yeni düzenli yapıya göç ettir
-      await _migratePeriodTypes();
 
       // Yetim işlemleri temizle (hiçbir kasaya bağlı olmayanları sil)
       await _cleanupOrphanTransactions();
@@ -104,64 +103,109 @@ class DatabaseService {
     }
   }
 
+  // =====================
+  // RECURRING TEMPLATE CRUD
+  // =====================
 
+  static Future<int> addTemplate(RecurringTemplate t) async {
+    t.remoteId ??= const Uuid().v4();
+    t.updatedAt = DateTime.now();
+    t.syncStatus = 1; // Pending
+    final id = await isar.writeTxn(() async {
+      return await isar.recurringTemplates.put(t);
+    });
+    // Bildirimi zamanla (Master Switch kontrolü ile)
+    final settings = await getSettings();
+    if (settings.isNotificationsEnabled) {
+      await NotificationService().scheduleTemplateNotification(t..id = id);
+    }
+    SyncCoordinator.scheduleSync();
+    return id;
+  }
 
+  static Future<void> updateTemplate(RecurringTemplate t) async {
+    t.updatedAt = DateTime.now();
+    t.syncStatus = 1; // Pending
+    await isar.writeTxn(() async {
+      await isar.recurringTemplates.put(t);
+    });
+    // Bildirimi güncelle (Master Switch kontrolü ile)
+    final settings = await getSettings();
+    if (settings.isNotificationsEnabled) {
+      await NotificationService().scheduleTemplateNotification(t);
+    } else {
+      await NotificationService().cancelNotification(t.id);
+    }
+    SyncCoordinator.scheduleSync();
+  }
+
+  static Future<void> deleteTemplate(int id) async {
+    final template = await isar.recurringTemplates.get(id);
+    if (template == null) return;
+
+    final settings = await getSettings();
+    final shouldTombstone = settings.isSyncEnabled && template.remoteId != null;
+
+    if (shouldTombstone) {
+      template.syncStatus = 2;
+      template.updatedAt = DateTime.now();
+      await isar.writeTxn(() async {
+        await isar.recurringTemplates.put(template);
+      });
+    } else {
+      await isar.writeTxn(() async {
+        await isar.recurringTemplates.delete(id);
+      });
+    }
+    await NotificationService().cancelNotification(id);
+    SyncCoordinator.scheduleSync();
+  }
+
+  static Future<RecurringTemplate?> getTemplate(int id) async {
+    return await isar.recurringTemplates.get(id);
+  }
+
+  static Future<List<RecurringTemplate>> getAllTemplates() async {
+    return await isar.recurringTemplates
+        .filter()
+        .syncStatusLessThan(2)
+        .findAll();
+  }
+
+  static Stream<List<RecurringTemplate>> watchAllTemplates() {
+    return isar.recurringTemplates
+        .filter()
+        .syncStatusLessThan(2)
+        .watch(fireImmediately: true);
+  }
 
   // =====================
   // TRANSACTION CRUD
   // =====================
 
-  /// Tek periyot değerini yeni şemaya göç ettirir
-  static int migrateSinglePeriodType(int oldType) {
-    if (oldType >= 1 && oldType <= 10) {
-      switch (oldType) {
-        case 8: return 101; // Daily -> 1 Day
-        case 9: return 102; // 2 Days
-        case 10: return 103; // 3 Days
-        case 1: return 201; // Weekly -> 1 Week
-        case 4: return 202; // 2 Weeks
-        case 5: return 203; // 3 Weeks
-        case 2: return 301; // Monthly -> 1 Month
-        case 6: return 303; // 3 Months
-        case 7: return 306; // 6 Months
-        case 3: return 401; // Yearly -> 1 Year
-      }
-    }
-    return oldType;
-  }
-
   static Future<int> addTransaction(TransactionRecord tx) async {
     tx.remoteId ??= const Uuid().v4();
-    tx.periodType = migrateSinglePeriodType(tx.periodType);
+    if (tx.occurrenceKey.isEmpty) {
+      tx.occurrenceKey = TransactionRecord.generateManualKey();
+    }
+    tx.occurrenceDate = DateTime(tx.date.year, tx.date.month, tx.date.day);
     tx.updatedAt = DateTime.now();
     tx.syncStatus = 1; // Pending
     final id = await isar.writeTxn(() async {
       return await isar.transactionRecords.put(tx);
     });
-    // Bildirimi zamanla (Master Switch kontrolü ile)
-    final settings = await getSettings();
-    if (settings.isNotificationsEnabled) {
-      await NotificationService().scheduleTransactionNotification(tx..id = id);
-    }
     SyncCoordinator.scheduleSync();
     return id;
   }
 
   /// İşlemi güncelle
   static Future<void> updateTransaction(TransactionRecord tx) async {
-    tx.periodType = migrateSinglePeriodType(tx.periodType);
+    tx.occurrenceDate = DateTime(tx.date.year, tx.date.month, tx.date.day);
     tx.updatedAt = DateTime.now();
     tx.syncStatus = 1; // Pending
     await isar.writeTxn(() async {
       await isar.transactionRecords.put(tx);
     });
-    // Bildirimi güncelle (Master Switch kontrolü ile)
-    final settings = await getSettings();
-    if (settings.isNotificationsEnabled) {
-      await NotificationService().scheduleTransactionNotification(tx);
-    } else {
-      await NotificationService().cancelNotification(tx.id);
-    }
     SyncCoordinator.scheduleSync();
   }
 
@@ -171,8 +215,7 @@ class DatabaseService {
     if (tx == null) return;
 
     final settings = await getSettings();
-    final shouldTombstone =
-        settings.isSyncEnabled && tx.remoteId != null;
+    final shouldTombstone = settings.isSyncEnabled && tx.remoteId != null;
 
     if (shouldTombstone) {
       tx.syncStatus = 2;
@@ -185,7 +228,6 @@ class DatabaseService {
         await isar.transactionRecords.delete(id);
       });
     }
-    await NotificationService().cancelNotification(id);
     SyncCoordinator.scheduleSync();
   }
 
@@ -200,7 +242,7 @@ class DatabaseService {
   static Future<void> updateAllTransactions(List<TransactionRecord> txs) async {
     final now = DateTime.now();
     for (final tx in txs) {
-      tx.periodType = migrateSinglePeriodType(tx.periodType);
+      tx.occurrenceDate = DateTime(tx.date.year, tx.date.month, tx.date.day);
       if (tx.syncStatus != 2) {
         tx.updatedAt = now;
         tx.syncStatus = 1;
@@ -225,22 +267,6 @@ class DatabaseService {
         .findAll();
   }
 
-  /// Gelir işlemlerini getir
-  static Future<List<TransactionRecord>> getIncomeTransactions() async {
-    return await isar.transactionRecords
-        .filter()
-        .isIncomeEqualTo(true)
-        .findAll();
-  }
-
-  /// Gider işlemlerini getir
-  static Future<List<TransactionRecord>> getExpenseTransactions() async {
-    return await isar.transactionRecords
-        .filter()
-        .isIncomeEqualTo(false)
-        .findAll();
-  }
-
   /// İşlemleri canlı dinle (Stream)
   static Stream<List<TransactionRecord>> watchAllTransactions() {
     return isar.transactionRecords
@@ -250,12 +276,105 @@ class DatabaseService {
   }
 
   // =====================
+  // TRANSACTION BATCH & SPECIFIC QUERIES
+  // =====================
+
+  static Future<List<TransactionRecord>> getRecordsForTemplate(int templateId) async {
+    return await isar.transactionRecords
+        .filter()
+        .templateIdEqualTo(templateId)
+        .syncStatusLessThan(2)
+        .findAll();
+  }
+
+  static Future<Set<String>> getOccurrenceKeysForTemplate(int templateId) async {
+    final records = await isar.transactionRecords
+        .filter()
+        .templateIdEqualTo(templateId)
+        .syncStatusLessThan(2)
+        .findAll();
+    return records.map((r) => r.occurrenceKey).toSet();
+  }
+
+  static Future<void> addTransactionsBatch(List<TransactionRecord> records) async {
+    final now = DateTime.now();
+    for (final r in records) {
+      r.remoteId ??= const Uuid().v4();
+      r.occurrenceDate = DateTime(r.date.year, r.date.month, r.date.day);
+      r.updatedAt = now;
+      r.syncStatus = 1; // Pending
+    }
+    await isar.writeTxn(() async {
+      await isar.transactionRecords.putAll(records);
+    });
+    SyncCoordinator.scheduleSync();
+  }
+
+  static Future<DateTime?> getLatestReviewedDateForTemplate(int templateId) async {
+    final lastRecord = await isar.transactionRecords
+        .filter()
+        .templateIdEqualTo(templateId)
+        .isReviewedEqualTo(true)
+        .syncStatusLessThan(2)
+        .sortByDateDesc()
+        .findFirst();
+    return lastRecord?.date;
+  }
+
+  static Future<void> deleteUnreviewedRecordsForTemplate(int templateId) async {
+    final unreviewed = await isar.transactionRecords
+        .filter()
+        .templateIdEqualTo(templateId)
+        .isReviewedEqualTo(false)
+        .syncStatusLessThan(2)
+        .findAll();
+
+    if (unreviewed.isEmpty) return;
+
+    final settings = await getSettings();
+    final isSyncEnabled = settings.isSyncEnabled;
+
+    final toDelete = <int>[];
+    final toTombstone = <TransactionRecord>[];
+
+    for (final r in unreviewed) {
+      if (isSyncEnabled && r.remoteId != null) {
+        r.syncStatus = 2;
+        r.updatedAt = DateTime.now();
+        toTombstone.add(r);
+      } else {
+        toDelete.add(r.id);
+      }
+    }
+
+    await isar.writeTxn(() async {
+      if (toTombstone.isNotEmpty) {
+        await isar.transactionRecords.putAll(toTombstone);
+      }
+      if (toDelete.isNotEmpty) {
+        await isar.transactionRecords.deleteAll(toDelete);
+      }
+    });
+    SyncCoordinator.scheduleSync();
+  }
+
+  static Future<bool> occurrenceKeyExists(String key) async {
+    final count = await isar.transactionRecords
+        .filter()
+        .occurrenceKeyEqualTo(key)
+        .syncStatusLessThan(2)
+        .count();
+    return count > 0;
+  }
+
+  // =====================
   // VAULT CRUD
   // =====================
 
   /// Tüm kasaları getir
   static Future<List<Vault>> getAllVaults() async {
-    return await isar.vaults.where().syncStatusNotEqualTo(2).findAll();
+    final list = await isar.vaults.where().syncStatusNotEqualTo(2).findAll();
+    return list..sort((a, b) => a.id.compareTo(b.id));
   }
 
   /// Tek bir kasayı ID ile getir
@@ -317,7 +436,7 @@ class DatabaseService {
     final txsToTombstone = <TransactionRecord>[];
 
     for (final tx in transactions) {
-      if (tx.vaultIds.contains(id)) {
+      if (tx.vaultId == id) {
         final shouldTombstoneTx = isSyncEnabled && tx.remoteId != null;
         if (shouldTombstoneTx) {
           tx.syncStatus = 2;
@@ -325,6 +444,28 @@ class DatabaseService {
           txsToTombstone.add(tx);
         } else {
           txsToDelete.add(tx.id);
+        }
+      }
+    }
+
+    // Fetch all active templates associated with this vault
+    final templates = await isar.recurringTemplates
+        .filter()
+        .syncStatusLessThan(2)
+        .findAll();
+
+    final templatesToDelete = <int>[];
+    final templatesToTombstone = <RecurringTemplate>[];
+
+    for (final t in templates) {
+      if (t.vaultId == id) {
+        final shouldTombstoneT = isSyncEnabled && t.remoteId != null;
+        if (shouldTombstoneT) {
+          t.syncStatus = 2;
+          t.updatedAt = DateTime.now();
+          templatesToTombstone.add(t);
+        } else {
+          templatesToDelete.add(t.id);
         }
       }
     }
@@ -340,6 +481,14 @@ class DatabaseService {
         await isar.transactionRecords.deleteAll(txsToDelete);
       }
 
+      // Put/Delete templates
+      if (templatesToTombstone.isNotEmpty) {
+        await isar.recurringTemplates.putAll(templatesToTombstone);
+      }
+      if (templatesToDelete.isNotEmpty) {
+        await isar.recurringTemplates.deleteAll(templatesToDelete);
+      }
+
       // Put/Delete vault
       if (shouldTombstoneVault) {
         vault.syncStatus = 2;
@@ -350,12 +499,12 @@ class DatabaseService {
       }
     });
 
-    // Cancel notifications for deleted transactions
-    for (final tx in txsToTombstone) {
-      await NotificationService().cancelNotification(tx.id);
+    // Cancel notifications for deleted templates
+    for (final t in templatesToTombstone) {
+      await NotificationService().cancelNotification(t.id);
     }
-    for (final txId in txsToDelete) {
-      await NotificationService().cancelNotification(txId);
+    for (final tId in templatesToDelete) {
+      await NotificationService().cancelNotification(tId);
     }
 
     SyncCoordinator.scheduleSync();
@@ -368,8 +517,6 @@ class DatabaseService {
         .syncStatusNotEqualTo(2)
         .watch(fireImmediately: true);
   }
-
-
 
   // =====================
   // APP SETTINGS
@@ -416,7 +563,6 @@ class DatabaseService {
       defaultLang = 'ko';
       defaultCurrency = '₩';
     } else {
-      // Dil İngilizce veya bilinmeyen ise ülke koduna göre ikincil kontrol
       if (country == 'TR') {
         defaultLang = 'tr';
         defaultCurrency = '₺';
@@ -503,56 +649,14 @@ class DatabaseService {
     return isar.customCategorys.where().watch(fireImmediately: true);
   }
 
-  /// Eski periodType kodlarını yeni düzenli yapıya göç ettirir
-  static Future<void> _migratePeriodTypes() async {
-    try {
-      final transactions = await isar.transactionRecords.where().findAll();
-      bool needsMigration = false;
-      for (var tx in transactions) {
-        if (tx.periodType >= 1 && tx.periodType <= 10) {
-          needsMigration = true;
-          break;
-        }
-      }
-
-      if (needsMigration) {
-        debugPrint('⚙️ [DatabaseService] Eski periyot tipleri yeni düzenli kodlama yapısına göç ettiriliyor...');
-        await isar.writeTxn(() async {
-          for (var tx in transactions) {
-            int oldType = tx.periodType;
-            int newType = oldType;
-            switch (oldType) {
-              case 8: newType = 101; break; // Daily -> 1 Day
-              case 9: newType = 102; break; // 2 Days
-              case 10: newType = 103; break; // 3 Days
-              case 1: newType = 201; break; // Weekly -> 1 Week
-              case 4: newType = 202; break; // 2 Weeks
-              case 5: newType = 203; break; // 3 Weeks
-              case 2: newType = 301; break; // Monthly -> 1 Month
-              case 6: newType = 303; break; // 3 Months
-              case 7: newType = 306; break; // 6 Months
-              case 3: newType = 401; break; // Yearly -> 1 Year
-            }
-            if (newType != oldType) {
-              tx.periodType = newType;
-              await isar.transactionRecords.put(tx);
-            }
-          }
-        });
-        debugPrint('✅ [DatabaseService] Periyot tipleri başarıyla göç ettirildi.');
-      }
-    } catch (e) {
-      debugPrint('⚠️ [DatabaseService] Periyot göçü sırasında hata (yutuldu): $e');
-    }
-  }
-
-  /// =====================
-  /// GLOBAL RESET
-  /// =====================
+  // =====================
+  // GLOBAL RESET
+  // =====================
 
   /// Tüm veritabanını tamamen sıfırla
   static Future<void> clearAllData() async {
     await isar.writeTxn(() async {
+      await isar.recurringTemplates.clear();
       await isar.transactionRecords.clear();
       await isar.vaults.clear();
       await isar.appSettings.clear();
@@ -560,7 +664,6 @@ class DatabaseService {
       await isar.customCategorys.clear();
     });
 
-    // Sıfırlama sonrası SharedPreferences'taki kullanıcıya özel/geçici verileri de temizle
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove('is_default_vault_seeded');
     await prefs.remove('ai_transaction_drafts');
@@ -569,7 +672,6 @@ class DatabaseService {
     await prefs.remove('Finarcast_last_ai_usage_timestamp');
     await prefs.setBool('Finarcast_is_pro_user', false);
 
-    // Bugün veya geçmiş günlerdeki AI kullanım limit sayaçlarını temizle
     final keys = prefs.getKeys();
     for (final key in keys) {
       if (key.startsWith('Finarcast_ai_usage_')) {
@@ -577,7 +679,6 @@ class DatabaseService {
       }
     }
 
-    // Varsayılan kasayı hemen yeniden oluştur
     await _seedDefaultVaults();
   }
 
@@ -587,7 +688,7 @@ class DatabaseService {
       final transactions = await isar.transactionRecords.where().findAll();
       final orphanIds = <int>[];
       for (final tx in transactions) {
-        if (tx.vaultIds.isEmpty) {
+        if (tx.vaultId == null) {
           orphanIds.add(tx.id);
         }
       }
@@ -602,7 +703,7 @@ class DatabaseService {
     }
   }
 
-  /// Veritabanı dosyalarını diskten tamamen sil (bozulma durumunda kurtarma için)
+  /// Veritabanı dosyalarını diskten tamamen sil
   static Future<void> deleteDatabaseFiles() async {
     try {
       if (_isar != null) {

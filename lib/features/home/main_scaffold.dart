@@ -256,11 +256,17 @@ class _MainScaffoldState extends ConsumerState<MainScaffold> with TickerProvider
       }
     }
 
+    final viewMode = ref.read(vaultViewModeProvider);
+    final initialBuilderType = viewMode == VaultViewMode.templates
+        ? TransactionBuilderType.recurring
+        : TransactionBuilderType.oneTime;
+
     Navigator.push(
       context,
       SlideUpPageRoute(
         child: TransactionBuilderScreen(
-          initialVaultIds: vaultIds,
+          initialVaultId: vaultIds?.first,
+          initialBuilderType: initialBuilderType,
         ),
         fullscreenDialog: true,
       ),

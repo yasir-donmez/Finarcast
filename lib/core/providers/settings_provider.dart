@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../database/models/recurring_template.dart';
 import '../database/database_service.dart';
 import '../database/models/app_settings.dart';
 import '../services/notification_service.dart';
@@ -232,10 +233,10 @@ class SettingsNotifier extends StateNotifier<AppSettings> {
       await NotificationService().cancelAll();
     } else {
       await NotificationService().requestPermissions();
-      final transactions = await DatabaseService.getAllTransactions();
-      for (final tx in transactions) {
-        if (tx.isNotificationEnabled) {
-          await NotificationService().scheduleTransactionNotification(tx);
+      final templates = await DatabaseService.getAllTemplates();
+      for (final RecurringTemplate template in templates) {
+        if (template.isNotificationEnabled) {
+          await NotificationService().scheduleTemplateNotification(template);
         }
       }
     }

@@ -7,6 +7,7 @@ import 'package:uuid/uuid.dart';
 import '../database/database_service.dart';
 import '../database/models/app_settings.dart';
 import '../database/models/transaction_record.dart';
+import '../database/models/recurring_template.dart';
 import '../database/models/vault.dart';
 import '../database/models/custom_category.dart';
 import '../../l10n/app_localizations.dart';
@@ -78,9 +79,11 @@ class SyncService {
       // 4. Yereldeki yeni/değişen kayıtları buluta gönder
       debugPrint('[SyncService] 🔄 İlk sync: Dedup → Pull → Dedup → Push sırası');
       await _deduplicateCloudVaults(user.id, result);
+      await _deduplicateCloudTemplates(user.id, result);
       await _deduplicateCloudTransactions(user.id, result);
       await _pullRemoteChanges(user.id, result, lastSyncTime: null);
       await _cleanOrphanedSeedVaults(result);
+      await _deduplicateLocalTemplates(result);
       await _deduplicateLocalTransactions(result);
       await _pushLocalChanges(user.id, result);
     } else {
@@ -196,6 +199,17 @@ class SyncService {
             debugPrint('[SyncService] ⚠️ İşlem taşıma hatası: $e');
           }
 
+          // Duplikatın şablonlarını ana kasaya taşı
+          try {
+            await _supabase
+                .from('recurring_templates')
+                .update({'vault_id': keeperId})
+                .eq('vault_id', dupId)
+                .eq('user_id', userId);
+          } catch (e) {
+            debugPrint('[SyncService] ⚠️ Şablon taşıma hatası: $e');
+          }
+
           // Duplikat kasayı sil
           try {
             await _supabase
@@ -219,6 +233,36 @@ class SyncService {
   /// İlk pull'dan sonra, buluttan gelen kasalarla eşleşmeyen
   /// yerel seed kasaları (remoteId == null) temizle.
   /// Bu kasalar push edilirse bulutta gereksiz duplikasyon olur.
+  /// Bir kasanın boş bir varsayılan tohum (seed) cüzdan olup olmadığını doğrular.
+  /// Eğer kasada herhangi bir işlem veya şablon varsa, ya da adı varsayılan isimlerden farklıysa tohum kabul edilmez.
+  Future<bool> _isSeedVault(Vault vault) async {
+    if (vault.remoteId != null) return false;
+
+    // Bağlı işlem var mı?
+    final txCount = await DatabaseService.isar.transactionRecords
+        .filter()
+        .vaultIdEqualTo(vault.id)
+        .count();
+    if (txCount > 0) return false;
+
+    // Bağlı şablon var mı?
+    final templateCount = await DatabaseService.isar.recurringTemplates
+        .filter()
+        .vaultIdEqualTo(vault.id)
+        .count();
+    if (templateCount > 0) return false;
+
+    // Varsayılan isimlerden biri mi?
+    const defaultNames = {
+      'cüzdan', 'wallet', 'brieftasche', 'portefeuille', 
+      'cartera', 'portafoglio', 'carteira', '钱包', 'ウォレット', '지갑'
+    };
+    return defaultNames.contains(vault.name.trim().toLowerCase());
+  }
+
+  /// İlk pull'dan sonra, buluttan gelen kasalarla eşleşmeyen
+  /// yerel seed kasaları (remoteId == null) temizle.
+  /// Bu kasalar push edilirse bulutta gereksiz duplikasyon olur.
   Future<void> _cleanOrphanedSeedVaults(SyncResult result) async {
     final orphans = await DatabaseService.isar.vaults
         .filter()
@@ -234,17 +278,205 @@ class SyncService {
         .findAll();
 
     if (syncedVaults.isNotEmpty) {
-      // Buluttan kasalar geldi, orphan seed kasaları sil
+      // Buluttan kasalar geldi, sadece gerçekten seed/boş olan orphan kasaları sil
       final List<int> idsToDelete = [];
       for (final orphan in orphans) {
-        debugPrint('[SyncService] 🧹 Orphan seed kasa siliniyor: ${orphan.name} (id=${orphan.id})');
-        idsToDelete.add(orphan.id);
+        if (await _isSeedVault(orphan)) {
+          debugPrint('[SyncService] 🧹 Orphan seed kasa siliniyor: ${orphan.name} (id=${orphan.id})');
+          idsToDelete.add(orphan.id);
+        } else {
+          debugPrint('[SyncService] 🛡️ Kasa korunuyor (işlem/şablon var veya adı değiştirilmiş): ${orphan.name} (id=${orphan.id})');
+        }
       }
       if (idsToDelete.isNotEmpty) {
         await DatabaseService.isar.writeTxn(() async {
           await DatabaseService.isar.vaults.deleteAll(idsToDelete);
         });
       }
+    }
+  }
+
+  /// Buluttaki duplikat şablonları temizle.
+  Future<void> _deduplicateCloudTemplates(String userId, SyncResult result) async {
+    try {
+      final remoteTemplates = await _supabase
+          .from('recurring_templates')
+          .select()
+          .eq('user_id', userId);
+
+      if (remoteTemplates.length <= 1) return; // Duplikat yok
+
+      final Map<String, List<Map<String, dynamic>>> groups = {};
+      for (final t in remoteTemplates) {
+        final title = (t['title'] as String?)?.toLowerCase().trim() ?? '';
+        final amount = (t['amount'] as num?)?.toDouble() ?? 0.0;
+        final isIncome = t['is_income'] as bool? ?? false;
+        final vaultId = t['vault_id'] as String? ?? 'null';
+        final periodType = t['period_type'] as int? ?? 301;
+        final recurrenceDay = t['recurrence_day'] as int? ?? -1;
+
+        final key = '${title}_${amount}_${isIncome}_${vaultId}_${periodType}_$recurrenceDay';
+        groups.putIfAbsent(key, () => []).add(t);
+      }
+
+      for (final entry in groups.entries) {
+        final templates = entry.value;
+        if (templates.length <= 1) continue;
+
+        // Güncelleme tarihine göre sırala, en eskisini tutalım.
+        templates.sort((a, b) {
+          final aTime = DateTime.tryParse(a['updated_at']?.toString() ?? '') ?? DateTime.now();
+          final bTime = DateTime.tryParse(b['updated_at']?.toString() ?? '') ?? DateTime.now();
+          return aTime.compareTo(bTime);
+        });
+
+        final keeper = templates.first;
+        final keeperId = keeper['id'] as String;
+        final duplicates = templates.skip(1).toList();
+
+        for (final dup in duplicates) {
+          final dupId = dup['id'] as String;
+          debugPrint('[SyncService] 🔀 Bulut duplikat şablon siliniyor: '
+              '"${dup['title']}" ($dupId) → ($keeperId)');
+
+          // Duplikatın işlemlerini ana şablona taşı
+          try {
+            await _supabase
+                .from('transaction_records')
+                .update({'template_id': keeperId})
+                .eq('template_id', dupId)
+                .eq('user_id', userId);
+          } catch (e) {
+            debugPrint('[SyncService] ⚠️ İşlem şablon güncelleme hatası: $e');
+          }
+
+          try {
+            await _supabase
+                .from('recurring_templates')
+                .delete()
+                .eq('id', dupId)
+                .eq('user_id', userId);
+          } catch (e) {
+            result.addError('Dedup Şablon', 'Duplikat şablon silinemedi ($dupId): $e');
+          }
+        }
+      }
+    } catch (e) {
+      debugPrint('[SyncService] ⚠️ Şablon dedup hatası (atlanıyor): $e');
+    }
+  }
+
+  /// Yereldeki duplikat şablonları temizle.
+  Future<void> _deduplicateLocalTemplates(SyncResult result) async {
+    try {
+      final localTemplates = await DatabaseService.isar.recurringTemplates
+          .filter()
+          .not()
+          .syncStatusEqualTo(2) // Silinenleri hariç tut
+          .findAll();
+
+      if (localTemplates.length <= 1) return;
+
+      final Map<String, List<RecurringTemplate>> groups = {};
+      for (final t in localTemplates) {
+        final title = t.title.toLowerCase().trim();
+        final amount = t.amount;
+        final isIncome = t.isIncome;
+        final vaultId = t.vaultId != null ? t.vaultId.toString() : 'null';
+        final periodType = t.periodType;
+        final recurrenceDay = t.recurrenceDay ?? -1;
+
+        final key = '${title}_${amount}_${isIncome}_${vaultId}_${periodType}_$recurrenceDay';
+        groups.putIfAbsent(key, () => []).add(t);
+      }
+
+      final user = _supabase.auth.currentUser;
+      final List<int> idsToDelete = [];
+
+      for (final entry in groups.entries) {
+        final templates = entry.value;
+        if (templates.length <= 1) continue;
+
+        // Öncelik sıralaması:
+        // 1. remoteId'si olanlar başa
+        // 2. syncStatus == 0 (synced) olanlar başa
+        // 3. Daha eski updatedAt olanlar başa
+        templates.sort((a, b) {
+          final aHasRemote = a.remoteId != null ? 1 : 0;
+          final bHasRemote = b.remoteId != null ? 1 : 0;
+          if (aHasRemote != bHasRemote) {
+            return bHasRemote.compareTo(aHasRemote);
+          }
+
+          final aSynced = a.syncStatus == 0 ? 1 : 0;
+          final bSynced = b.syncStatus == 0 ? 1 : 0;
+          if (aSynced != bSynced) {
+            return bSynced.compareTo(aSynced);
+          }
+
+          return a.updatedAt.compareTo(b.updatedAt);
+        });
+
+        final keeper = templates.first;
+        final duplicates = templates.skip(1).toList();
+
+        for (final dup in duplicates) {
+          debugPrint('[SyncService] 🧹 Yerel duplikat şablon siliniyor: '
+              '"${dup.title}" (id=${dup.id}, remoteId=${dup.remoteId}) → keeper(id=${keeper.id}, remoteId=${keeper.remoteId})');
+
+          // Yerel işlemleri ana şablona taşıyalım
+          final txsToMigrate = await DatabaseService.isar.transactionRecords
+              .filter()
+              .templateIdEqualTo(dup.id)
+              .findAll();
+          if (txsToMigrate.isNotEmpty) {
+            await DatabaseService.isar.writeTxn(() async {
+              for (final tx in txsToMigrate) {
+                tx.templateId = keeper.id;
+                tx.syncStatus = 1; // Değişikliği buluta itmek için
+                tx.updatedAt = DateTime.now();
+                await DatabaseService.isar.transactionRecords.put(tx);
+              }
+            });
+          }
+
+          // Eğer silinen duplikatın remoteId'si varsa ve bulut kullanıcısı aktifse buluttan da sil
+          if (dup.remoteId != null && user != null) {
+            // Önce buluttaki işlemleri de güncellemeye çalışalım
+            if (keeper.remoteId != null) {
+              try {
+                await _supabase
+                    .from('transaction_records')
+                    .update({'template_id': keeper.remoteId})
+                    .eq('template_id', dup.remoteId!)
+                    .eq('user_id', user.id);
+              } catch (e) {
+                debugPrint('[SyncService] ⚠️ Yerel duplikat işlemleri bulutta keeper şablona taşınamadı: $e');
+              }
+            }
+
+            try {
+              await _supabase
+                  .from('recurring_templates')
+                  .delete()
+                  .eq('id', dup.remoteId!)
+                  .eq('user_id', user.id);
+            } catch (e) {
+              debugPrint('[SyncService] ⚠️ Yerel duplikat şablon buluttan silinemedi: $e');
+            }
+          }
+
+          idsToDelete.add(dup.id);
+        }
+      }
+
+      if (idsToDelete.isNotEmpty) {
+        await DatabaseService.isar.writeTxn(() async {
+          await DatabaseService.isar.recurringTemplates.deleteAll(idsToDelete);
+        });
+      }
+    } catch (e) {
+      debugPrint('[SyncService] ⚠️ Yerel şablon dedup hatası: $e');
     }
   }
 
@@ -326,7 +558,7 @@ class SyncService {
         final title = tx.title.toLowerCase().trim();
         final amount = tx.amount;
         final isIncome = tx.isIncome;
-        final vaultId = tx.vaultIds.isNotEmpty ? tx.vaultIds.first.toString() : 'null';
+        final vaultId = tx.vaultId != null ? tx.vaultId.toString() : 'null';
         
         // Tarihin YYYY-MM-DD kısmını al
         final dateStr = tx.date.toUtc().toIso8601String();
@@ -403,9 +635,11 @@ class SyncService {
 
   Future<void> _pushLocalChanges(String userId, SyncResult result) async {
     await _pushDeletedVaults(userId, result);
+    await _pushDeletedTemplates(userId, result);
     await _pushDeletedTransactions(userId, result);
     await _pushDeletedCustomCategories(userId, result);
     await _pushPendingVaults(userId, result);
+    await _pushPendingTemplates(userId, result);
     await _pushPendingTransactions(userId, result);
     await _pushPendingCustomCategories(userId, result);
     await _pushPendingSettings(userId, result);
@@ -484,6 +718,41 @@ class SyncService {
     }
   }
 
+  Future<void> _pushDeletedTemplates(String userId, SyncResult result) async {
+    final tombstones = await DatabaseService.isar.recurringTemplates
+        .filter()
+        .syncStatusEqualTo(2)
+        .findAll();
+
+    final List<int> idsToDelete = [];
+    for (final template in tombstones) {
+      try {
+        if (template.remoteId != null) {
+          await _supabase
+              .from('recurring_templates')
+              .delete()
+              .eq('id', template.remoteId!)
+              .eq('user_id', userId);
+        }
+        idsToDelete.add(template.id);
+        result.deletedCount++;
+      } catch (e) {
+        if (_isRlsError(e)) {
+          idsToDelete.add(template.id);
+          result.deletedCount++;
+        } else {
+          result.addError('Şablon Silme', '${template.title}: $e');
+        }
+      }
+    }
+
+    if (idsToDelete.isNotEmpty) {
+      await DatabaseService.isar.writeTxn(() async {
+        await DatabaseService.isar.recurringTemplates.deleteAll(idsToDelete);
+      });
+    }
+  }
+
   // --- Push: bekleyenler (syncStatus = 1) ---
 
   Future<void> _pushPendingVaults(String userId, SyncResult result) async {
@@ -526,6 +795,63 @@ class SyncService {
     }
   }
 
+  Future<void> _pushPendingTemplates(String userId, SyncResult result) async {
+    final pending = await DatabaseService.isar.recurringTemplates
+        .filter()
+        .syncStatusEqualTo(1)
+        .findAll();
+
+    final List<RecurringTemplate> pushedTemplates = [];
+    for (final template in pending) {
+      try {
+        // FK Güvenliği: Şablonun bağlı olduğu cüzdanın bulutta var olduğunu doğrula
+        String? vaultRemoteId;
+        bool hasUnsyncedVault = false;
+        if (template.vaultId != null) {
+          final vault = await DatabaseService.isar.vaults.get(template.vaultId!);
+          if (vault != null) {
+            if (vault.syncStatus == 1) {
+              hasUnsyncedVault = true;
+            } else if (vault.remoteId != null) {
+              vaultRemoteId = vault.remoteId;
+            }
+          }
+        }
+        if (hasUnsyncedVault) {
+          result.addError('Şablon Push', '${template.title}: Bağlı cüzdan henüz senkronize edilmedi, sonraki turda denenecek.');
+          continue;
+        }
+
+        template.remoteId ??= _uuid.v4();
+        final data = _templateToRemote(template, userId, vaultRemoteId);
+
+        try {
+          await _supabase.from('recurring_templates').upsert(data);
+        } on PostgrestException catch (pe) {
+          if (_isRlsError(pe)) {
+            template.remoteId = _uuid.v4();
+            final newData = _templateToRemote(template, userId, vaultRemoteId);
+            await _supabase.from('recurring_templates').upsert(newData);
+          } else {
+            rethrow;
+          }
+        }
+
+        template.syncStatus = 0;
+        pushedTemplates.add(template);
+        result.pushedCount++;
+      } catch (e) {
+        result.addError('Şablon Push', '${template.title}: $e');
+      }
+    }
+
+    if (pushedTemplates.isNotEmpty) {
+      await DatabaseService.isar.writeTxn(() async {
+        await DatabaseService.isar.recurringTemplates.putAll(pushedTemplates);
+      });
+    }
+  }
+
   Future<void> _pushPendingTransactions(String userId, SyncResult result) async {
     final pending = await DatabaseService.isar.transactionRecords
         .filter()
@@ -536,14 +862,18 @@ class SyncService {
     for (final tx in pending) {
       try {
         // FK Güvenliği: İşlemin bağlı olduğu cüzdanın bulutta var olduğunu doğrula
-        if (tx.vaultIds.isNotEmpty) {
-          final vault = await DatabaseService.isar.vaults.get(tx.vaultIds.first);
-          if (vault != null && vault.syncStatus == 1) {
-            // Bu cüzdan henüz push edilmemiş — bu işlemi şimdilik atla,
-            // sonraki senkronizasyonda denenecek
-            result.addError('İşlem Push', '${tx.title}: Bağlı cüzdan henüz senkronize edilmedi, sonraki turda denenecek.');
-            continue;
+        bool hasUnsyncedVault = false;
+        if (tx.vaultId != null) {
+          final vault = await DatabaseService.isar.vaults.get(tx.vaultId!);
+          if (vault != null) {
+            if (vault.syncStatus == 1) {
+              hasUnsyncedVault = true;
+            }
           }
+        }
+        if (hasUnsyncedVault) {
+          result.addError('İşlem Push', '${tx.title}: Bağlı cüzdan henüz senkronize edilmedi, sonraki turda denenecek.');
+          continue;
         }
 
         tx.remoteId ??= _uuid.v4();
@@ -678,6 +1008,7 @@ class SyncService {
     DateTime? lastSyncTime,
   }) async {
     await _pullVaults(userId, result, lastSyncTime: lastSyncTime);
+    await _pullTemplates(userId, result, lastSyncTime: lastSyncTime);
     await _pullTransactions(userId, result, lastSyncTime: lastSyncTime);
     await _pullCustomCategories(userId, result, lastSyncTime: lastSyncTime);
     await _pullSettings(userId, result);
@@ -715,14 +1046,23 @@ class SyncService {
           // Eşleşme bulunamazsa, remoteId'si null olan (seed) kasayı adopt et
           // Bu, çıkış→giriş sonrası kasa duplikasyonunu önler
           if (existing == null) {
-            final unsynced = await DatabaseService.isar.vaults
+            final unsyncedVaults = await DatabaseService.isar.vaults
                 .filter()
                 .remoteIdIsNull()
-                .findFirst();
-            if (unsynced != null) {
+                .findAll();
+            
+            Vault? adoptable;
+            for (final v in unsyncedVaults) {
+              if (await _isSeedVault(v)) {
+                adoptable = v;
+                break;
+              }
+            }
+
+            if (adoptable != null) {
               debugPrint('[SyncService] 🔗 Seed kasa adopt ediliyor: '
-                  '${unsynced.name} → remoteId=$remoteId');
-              existing = unsynced;
+                  '${adoptable.name} → remoteId=$remoteId');
+              existing = adoptable;
             }
           }
 
@@ -764,6 +1104,65 @@ class SyncService {
       }
     } catch (e) {
       result.addError('Vault Pull', 'Sorgu hatası: $e');
+    }
+  }
+
+  Future<void> _pullTemplates(
+    String userId,
+    SyncResult result, {
+    DateTime? lastSyncTime,
+  }) async {
+    try {
+      var query = _supabase.from('recurring_templates').select().eq('user_id', userId);
+
+      if (lastSyncTime != null) {
+        query = query.gt('updated_at', lastSyncTime.toUtc().toIso8601String());
+      }
+
+      final remoteTemplates = await query;
+      final List<RecurringTemplate> templatesToPut = [];
+
+      for (final raw in remoteTemplates) {
+        try {
+          final remoteId = raw['id'] as String?;
+          if (remoteId == null) continue;
+
+          final remoteUpdated = _parseRemoteTime(raw['updated_at']);
+
+          var existing = await DatabaseService.isar.recurringTemplates
+              .filter()
+              .remoteIdEqualTo(remoteId)
+              .findFirst();
+
+          if (existing != null) {
+            if (existing.syncStatus == 1) continue;
+            if (existing.syncStatus == 2) continue;
+            if (!_shouldApplyRemote(existing.updatedAt, remoteUpdated)) continue;
+
+            await _applyTemplateFromRemote(existing, raw);
+            existing.syncStatus = 0;
+            templatesToPut.add(existing);
+          } else {
+            final template = RecurringTemplate()
+              ..remoteId = remoteId
+              ..syncStatus = 0;
+            await _applyTemplateFromRemote(template, raw);
+            if (remoteUpdated != null) template.updatedAt = remoteUpdated;
+            templatesToPut.add(template);
+          }
+          result.pulledCount++;
+        } catch (e) {
+          result.addError('Şablon Pull', '${raw['title'] ?? 'bilinmeyen'}: $e');
+        }
+      }
+
+      if (templatesToPut.isNotEmpty) {
+        await DatabaseService.isar.writeTxn(() async {
+          await DatabaseService.isar.recurringTemplates.putAll(templatesToPut);
+        });
+      }
+    } catch (e) {
+      result.addError('Şablon Pull', 'Sorgu hatası: $e');
     }
   }
 
@@ -945,9 +1344,17 @@ class SyncService {
     String userId,
   ) async {
     String? vaultRemoteId;
-    if (tx.vaultIds.isNotEmpty) {
-      final vault = await DatabaseService.isar.vaults.get(tx.vaultIds.first);
-      vaultRemoteId = vault?.remoteId;
+    if (tx.vaultId != null) {
+      final vault = await DatabaseService.isar.vaults.get(tx.vaultId!);
+      if (vault?.remoteId != null) {
+        vaultRemoteId = vault!.remoteId!;
+      }
+    }
+
+    String? templateRemoteId;
+    if (tx.templateId != null) {
+      final template = await DatabaseService.isar.recurringTemplates.get(tx.templateId!);
+      templateRemoteId = template?.remoteId;
     }
 
     return {
@@ -961,20 +1368,17 @@ class SyncService {
       'min_amount': tx.minAmount,
       'max_amount': tx.maxAmount,
       'date': tx.date.toUtc().toIso8601String(),
-      'period_type': tx.periodType,
+      'occurrence_date': tx.occurrenceDate.toUtc().toIso8601String().substring(0, 10),
+      'template_id': templateRemoteId,
+      'occurrence_key': tx.occurrenceKey,
+      'installment_number': tx.installmentNumber,
+      'total_installments': tx.totalInstallments,
+      'status': tx.status,
+      'is_reviewed': tx.isReviewed,
       'is_archived': tx.isArchived,
       'vault_id': vaultRemoteId,
       'note': tx.note,
       'currency': tx.currency,
-      'remaining_installments': tx.remainingInstallments,
-      'recurrence_day': tx.recurrenceDay,
-      'recurrence_date': tx.recurrenceDate?.toUtc().toIso8601String(),
-      'recurrence_duration': tx.recurrenceDuration,
-      'is_notification_enabled': tx.isNotificationEnabled,
-      'has_notification': tx.hasNotification,
-      'notification_reminder_days': tx.notificationReminderDays,
-      'notification_hour': tx.notificationHour,
-      'notification_minute': tx.notificationMinute,
       'updated_at': tx.updatedAt.toUtc().toIso8601String(),
     };
   }
@@ -990,26 +1394,36 @@ class SyncService {
     tx.amount = (raw['amount'] as num?)?.toDouble() ?? tx.amount;
     tx.minAmount = (raw['min_amount'] as num?)?.toDouble();
     tx.maxAmount = (raw['max_amount'] as num?)?.toDouble();
-    tx.periodType = raw['period_type'] ?? tx.periodType;
+    tx.occurrenceKey = raw['occurrence_key'] ?? tx.occurrenceKey;
+    tx.installmentNumber = raw['installment_number'];
+    tx.totalInstallments = raw['total_installments'];
+    tx.status = raw['status'] ?? tx.status;
+    tx.isReviewed = raw['is_reviewed'] ?? tx.isReviewed;
     tx.isArchived = raw['is_archived'] ?? tx.isArchived;
     tx.note = raw['note'];
     tx.currency = raw['currency'];
-    tx.remainingInstallments = raw['remaining_installments'];
-    tx.recurrenceDay = raw['recurrence_day'];
-    final recDateStr = raw['recurrence_date']?.toString();
-    if (recDateStr != null) {
-      tx.recurrenceDate = DateTime.tryParse(recDateStr)?.toLocal();
-    }
-    tx.recurrenceDuration = raw['recurrence_duration'];
-    tx.isNotificationEnabled = raw['is_notification_enabled'] ?? false;
-    tx.hasNotification = raw['has_notification'] ?? false;
-    tx.notificationReminderDays = raw['notification_reminder_days'] ?? 0;
-    tx.notificationHour = raw['notification_hour'] ?? 9;
-    tx.notificationMinute = raw['notification_minute'] ?? 0;
 
     final dateStr = raw['date']?.toString();
     if (dateStr != null) {
       tx.date = DateTime.tryParse(dateStr)?.toLocal() ?? tx.date;
+    }
+
+    final occurrenceDateStr = raw['occurrence_date']?.toString();
+    if (occurrenceDateStr != null) {
+      tx.occurrenceDate = DateTime.tryParse(occurrenceDateStr)?.toLocal() ?? tx.occurrenceDate;
+    }
+
+    final templateRemoteId = raw['template_id'] as String?;
+    if (templateRemoteId != null) {
+      final template = await DatabaseService.isar.recurringTemplates
+          .filter()
+          .remoteIdEqualTo(templateRemoteId)
+          .findFirst();
+      if (template != null) {
+        tx.templateId = template.id;
+      }
+    } else {
+      tx.templateId = null;
     }
 
     final vaultRemoteId = raw['vault_id'] as String?;
@@ -1019,12 +1433,97 @@ class SyncService {
           .remoteIdEqualTo(vaultRemoteId)
           .findFirst();
       if (vault != null) {
-        tx.vaultIds = [vault.id];
+        tx.vaultId = vault.id;
+      } else {
+        tx.vaultId = null;
       }
+    } else {
+      tx.vaultId = null;
     }
 
     final remoteUpdated = _parseRemoteTime(raw['updated_at']);
     if (remoteUpdated != null) tx.updatedAt = remoteUpdated;
+  }
+
+  Map<String, dynamic> _templateToRemote(RecurringTemplate t, String userId, String? vaultRemoteId) {
+    return {
+      'id': t.remoteId,
+      'user_id': userId,
+      'title': t.title,
+      'is_income': t.isIncome,
+      'category_id': t.categoryId,
+      'icon_code': t.iconCode,
+      'amount': t.amount,
+      'min_amount': t.minAmount,
+      'max_amount': t.maxAmount,
+      'period_type': t.periodType,
+      'recurrence_day': t.recurrenceDay,
+      'recurrence_date': t.recurrenceDate?.toUtc().toIso8601String(),
+      'total_installments': t.totalInstallments,
+      'start_date': t.startDate.toUtc().toIso8601String(),
+      'note': t.note,
+      'currency': t.currency,
+      'is_paused': t.isPaused,
+      'is_archived': t.isArchived,
+      'is_notification_enabled': t.isNotificationEnabled,
+      'has_notification': t.isNotificationEnabled,
+      'notification_reminder_days': t.notificationReminderDays,
+      'notification_hour': t.notificationHour,
+      'notification_minute': t.notificationMinute,
+      'vault_id': vaultRemoteId,
+      'updated_at': t.updatedAt.toUtc().toIso8601String(),
+    };
+  }
+
+  Future<void> _applyTemplateFromRemote(RecurringTemplate t, Map<String, dynamic> raw) async {
+    t.title = raw['title'] ?? t.title;
+    t.isIncome = raw['is_income'] ?? t.isIncome;
+    t.categoryId = raw['category_id'];
+    t.iconCode = raw['icon_code'];
+    t.amount = (raw['amount'] as num?)?.toDouble() ?? t.amount;
+    t.minAmount = (raw['min_amount'] as num?)?.toDouble();
+    t.maxAmount = (raw['max_amount'] as num?)?.toDouble();
+    t.periodType = raw['period_type'] ?? t.periodType;
+    t.recurrenceDay = raw['recurrence_day'];
+    
+    final recDateStr = raw['recurrence_date']?.toString();
+    if (recDateStr != null) {
+      t.recurrenceDate = DateTime.tryParse(recDateStr)?.toLocal();
+    }
+    
+    t.totalInstallments = raw['total_installments'];
+    
+    final startDateStr = raw['start_date']?.toString();
+    if (startDateStr != null) {
+      t.startDate = DateTime.tryParse(startDateStr)?.toLocal() ?? t.startDate;
+    }
+    
+    t.note = raw['note'];
+    t.currency = raw['currency'];
+    t.isPaused = raw['is_paused'] ?? t.isPaused;
+    t.isArchived = raw['is_archived'] ?? t.isArchived;
+    t.isNotificationEnabled = raw['is_notification_enabled'] ?? t.isNotificationEnabled;
+    t.notificationReminderDays = raw['notification_reminder_days'] ?? t.notificationReminderDays;
+    t.notificationHour = raw['notification_hour'] ?? t.notificationHour;
+    t.notificationMinute = raw['notification_minute'] ?? t.notificationMinute;
+
+    final vaultRemoteId = raw['vault_id'] as String?;
+    if (vaultRemoteId != null) {
+      final vault = await DatabaseService.isar.vaults
+          .filter()
+          .remoteIdEqualTo(vaultRemoteId)
+          .findFirst();
+      if (vault != null) {
+        t.vaultId = vault.id;
+      } else {
+        t.vaultId = null;
+      }
+    } else {
+      t.vaultId = null;
+    }
+
+    final remoteUpdated = _parseRemoteTime(raw['updated_at']);
+    if (remoteUpdated != null) t.updatedAt = remoteUpdated;
   }
 
   Future<void> _pullCustomCategories(

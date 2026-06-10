@@ -61,7 +61,7 @@ class _SpendingGiantsWidgetState extends ConsumerState<SpendingGiantsWidget> wit
     if (widget.selectedVaultId != null && widget.selectedVaultId!.startsWith('v_')) {
       final filterVaultId = int.tryParse(widget.selectedVaultId!.replaceFirst('v_', ''));
       if (filterVaultId != null) {
-        vaultFilteredTxs = transactions.where((tx) => tx.vaultIds.contains(filterVaultId)).toList();
+        vaultFilteredTxs = transactions.where((tx) => tx.vaultId == filterVaultId).toList();
       }
     }
     

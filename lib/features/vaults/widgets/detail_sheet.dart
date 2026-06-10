@@ -6,6 +6,9 @@ import '../../../../core/theme/app_constants.dart';
 import '../../../../core/database/database_service.dart';
 import '../../../../core/database/models/vault.dart';
 import '../../../../core/database/models/transaction_record.dart';
+import '../../../../core/database/models/recurring_template.dart';
+import '../../../../core/services/materialization_service.dart';
+import '../../../../core/domain/recurrence_engine.dart';
 import '../../../../core/providers/db_providers.dart';
 
 import '../../../../shared/widgets/custom_card.dart';
@@ -18,16 +21,16 @@ import '../../../../shared/widgets/clickable_action.dart';
 import '../../../../shared/widgets/custom_animated_icon.dart';
 import '../vaults_providers.dart';
 
+enum DetailSheetAction { edit, delete }
+
 class DetailSheet extends ConsumerStatefulWidget {
   final TransactionUI transaction;
-  final VoidCallback onEdit;
-  final VoidCallback onDelete;
+  final bool isTemplateMode;
 
   const DetailSheet({
     super.key,
     required this.transaction,
-    required this.onEdit,
-    required this.onDelete,
+    this.isTemplateMode = false,
   });
 
   @override
@@ -38,44 +41,76 @@ class _PrecisionDetailSheetState extends ConsumerState<DetailSheet> {
   List<Vault> _allVaults = [];
   List<Vault> _attachedVaults = [];
   TransactionRecord? _fullRecord;
+  RecurringTemplate? _template;
+  RecurringTemplate? _activeTemplate;
   late bool _isNotificationEnabled;
+
+  bool _isRecurring = false;
+  int _passedOccurrences = 0;
+  int? _totalLimit;
+  int _remainingOccurrences = 0;
+  DateTime? _endDate;
 
   @override
   void initState() {
     super.initState();
-    _isNotificationEnabled = widget.transaction.isNotificationEnabled;
+    _isNotificationEnabled = false;
     _loadData();
-  }
-
-  @override
-  void didUpdateWidget(covariant DetailSheet oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (oldWidget.transaction.isNotificationEnabled != widget.transaction.isNotificationEnabled) {
-      _isNotificationEnabled = widget.transaction.isNotificationEnabled;
-    }
   }
 
   Future<void> _loadData() async {
     final allVaults = await DatabaseService.getAllVaults();
     if (widget.transaction.dbId != null) {
-      _fullRecord = await DatabaseService.getTransaction(widget.transaction.dbId!);
+      if (widget.isTemplateMode) {
+        _template = await DatabaseService.getTemplate(widget.transaction.dbId!);
+      } else {
+        _fullRecord = await DatabaseService.getTransaction(widget.transaction.dbId!);
+        if (_fullRecord == null) {
+          _template = await DatabaseService.getTemplate(widget.transaction.dbId!);
+        }
+      }
     }
-    final dbVaultIds = _fullRecord?.vaultIds;
-    final ids = (dbVaultIds != null && dbVaultIds.isNotEmpty)
-        ? dbVaultIds
+    final dbVaultId = _fullRecord?.vaultId ?? _template?.vaultId;
+    final ids = dbVaultId != null 
+        ? [dbVaultId] 
         : widget.transaction.groupIds.map((id) => int.tryParse(id.replaceFirst('v_', ''))).whereType<int>().toList();
     
+    final template = _template ?? (_fullRecord?.templateId != null ? await DatabaseService.getTemplate(_fullRecord!.templateId!) : null);
+    _activeTemplate = template;
+
+    if (template != null) {
+      _isRecurring = true;
+      _isNotificationEnabled = template.isNotificationEnabled;
+      final records = await DatabaseService.getRecordsForTemplate(template.id);
+      _passedOccurrences = records.length;
+      _totalLimit = template.totalInstallments;
+      if (_totalLimit != null) {
+        _remainingOccurrences = (_totalLimit! - _passedOccurrences).clamp(0, _totalLimit!);
+        final dates = RecurrenceEngine.occurrenceDates(
+          template.recurrenceRule,
+          DateTime(DateTime.now().year + 50),
+        );
+        if (dates.isNotEmpty) {
+          _endDate = dates.last;
+        }
+      } else {
+        _endDate = null;
+      }
+    } else {
+      _isRecurring = false;
+      _passedOccurrences = 0;
+      _totalLimit = null;
+      _remainingOccurrences = 0;
+      _endDate = null;
+    }
+    
     debugPrint('🔎 [DetailSheet] dbId: ${widget.transaction.dbId}');
-    debugPrint('🔎 [DetailSheet] widget groupIds: ${widget.transaction.groupIds}');
-    debugPrint('🔎 [DetailSheet] db record vaultIds: ${_fullRecord?.vaultIds}');
     debugPrint('🔎 [DetailSheet] computed ids: $ids');
-    debugPrint('🔎 [DetailSheet] allVaults IDs: ${allVaults.map((v) => v.id).toList()}');
     
     if (mounted) {
       setState(() {
         _allVaults = allVaults;
         _attachedVaults = allVaults.where((v) => ids.contains(v.id)).toList();
-        debugPrint('🔎 [DetailSheet] attachedVaults IDs: ${_attachedVaults.map((v) => v.id).toList()}');
       });
     }
   }
@@ -83,31 +118,37 @@ class _PrecisionDetailSheetState extends ConsumerState<DetailSheet> {
   Future<void> _toggleVault(Vault vault) async {
     if (widget.transaction.dbId == null) return;
     
-    final record = await DatabaseService.getTransaction(widget.transaction.dbId!);
-    if (record == null) return;
+    if (_fullRecord != null) {
+      final record = await DatabaseService.getTransaction(widget.transaction.dbId!);
+      if (record == null) return;
 
-    final currentVaults = List<int>.from(record.vaultIds);
-    bool isCurrentlyAttached = currentVaults.contains(vault.id);
-
-    if (isCurrentlyAttached) {
-      if (currentVaults.length <= 1) {
-        // Arayüzden kasanın çıkarılmasını engelle, en az bir tane kalmalıdır.
-        HapticFeedback.vibrate();
+      // Zaten seçili olan kasaya tekrar tıklandıysa bir şey yapma (en az 1 kasa seçili kalmalı)
+      if (record.vaultId == vault.id) {
         return;
       }
-      currentVaults.remove(vault.id);
-    } else {
-      currentVaults.add(vault.id);
+
+      record.vaultId = vault.id;
+      record.updatedAt = DateTime.now();
+      await DatabaseService.updateTransaction(record);
+    } else if (_template != null) {
+      final template = await DatabaseService.getTemplate(widget.transaction.dbId!);
+      if (template == null) return;
+
+      // Zaten seçili olan kasaya tekrar tıklandıysa bir şey yapma (en az 1 kasa seçili kalmalı)
+      if (template.vaultId == vault.id) {
+        return;
+      }
+
+      template.vaultId = vault.id;
+      template.updatedAt = DateTime.now();
+      await DatabaseService.updateTemplate(template);
+      await MaterializationService.onTemplateChanged(template);
     }
-    
-    record.vaultIds = currentVaults;
-    record.updatedAt = DateTime.now();
-    await DatabaseService.updateTransaction(record);
     
     HapticFeedback.mediumImpact();
     await _loadData();
-    // Provider'ları invalidate ederek bakiye ve UI güncellemelerini tetikle
     ref.invalidate(transactionsStreamProvider);
+    ref.invalidate(templatesStreamProvider);
   }
 
   Future<void> _toggleNotification(bool value) async {
@@ -115,11 +156,12 @@ class _PrecisionDetailSheetState extends ConsumerState<DetailSheet> {
       _isNotificationEnabled = value;
     });
 
-    if (widget.transaction.dbId != null) {
-      final record = await DatabaseService.getTransaction(widget.transaction.dbId!);
-      if (record != null) {
-        record.isNotificationEnabled = value;
-        await DatabaseService.updateTransaction(record);
+    final templateToUpdate = _activeTemplate ?? _template;
+    if (templateToUpdate != null) {
+      final template = await DatabaseService.getTemplate(templateToUpdate.id);
+      if (template != null) {
+        template.isNotificationEnabled = value;
+        await DatabaseService.updateTemplate(template);
         HapticFeedback.mediumImpact();
       }
     }
@@ -235,18 +277,28 @@ class _PrecisionDetailSheetState extends ConsumerState<DetailSheet> {
           padding: EdgeInsets.all(12 * sf),
           child: Column(
             children: [
-              _buildInfoRow(context, icon: Icons.calendar_today_rounded, label: l10n.added, value: _fullRecord != null ? DateFormat.yMMMd(Localizations.localeOf(context).toString()).format(_fullRecord!.date) : '-', color: Colors.blue),
+              _buildInfoRow(
+                context, 
+                icon: Icons.calendar_today_rounded, 
+                label: l10n.added, 
+                value: _fullRecord != null 
+                    ? DateFormat.yMMMd(Localizations.localeOf(context).toString()).format(_fullRecord!.date) 
+                    : (_template != null 
+                        ? DateFormat.yMMMd(Localizations.localeOf(context).toString()).format(_template!.startDate) 
+                        : '-'), 
+                color: Colors.blue
+              ),
               Divider(height: 16 * sf, thickness: 0.5),
               _buildInfoRow(context, icon: Icons.replay_rounded, label: l10n.period, value: _getDetailedPeriodLabel(tx, l10n, context), color: Colors.purple),
               
-              if (tx.periodType != 0) ...[
-                if (tx.recurrenceDuration != null && tx.recurrenceDuration! > 0) ...[
+              if (_isRecurring) ...[
+                if (_endDate != null) ...[
                   Divider(height: 16 * sf, thickness: 0.5),
                   _buildInfoRow(
                     context, 
                     icon: Icons.event_available_rounded, 
                     label: l10n.endDate, 
-                    value: _calculateEndDate(tx) != null ? DateFormat.yMMMd(Localizations.localeOf(context).toString()).format(_calculateEndDate(tx)!) : '-', 
+                    value: DateFormat.yMMMd(Localizations.localeOf(context).toString()).format(_endDate!), 
                     color: Colors.redAccent
                   ),
                 ],
@@ -255,16 +307,16 @@ class _PrecisionDetailSheetState extends ConsumerState<DetailSheet> {
                   context, 
                   icon: Icons.task_alt_rounded, 
                   label: l10n.occurred, 
-                  value: l10n.times(tx.passedOccurrences), 
+                  value: l10n.times(_passedOccurrences), 
                   color: Colors.teal
                 ),
-                if (tx.recurrenceDuration != null && tx.recurrenceDuration! > 0) ...[
+                if (_totalLimit != null) ...[
                   Divider(height: 16 * sf, thickness: 0.5),
                   _buildInfoRow(
                     context, 
                     icon: Icons.hourglass_bottom_rounded, 
                     label: l10n.remainingCount, 
-                    value: l10n.times((tx.recurrenceDuration! - tx.passedOccurrences).clamp(0, tx.recurrenceDuration!)), 
+                    value: l10n.times(_remainingOccurrences), 
                     color: Colors.deepOrange
                   ),
                 ],
@@ -330,7 +382,7 @@ class _PrecisionDetailSheetState extends ConsumerState<DetailSheet> {
         const SizedBox(height: 8),
 
         // 3. KASALAR
-        if (_allVaults.isNotEmpty) ...[
+        if (_allVaults.isNotEmpty && !widget.isTemplateMode) ...[
           Align(
             alignment: Alignment.centerLeft,
             child: Text(
@@ -435,7 +487,7 @@ class _PrecisionDetailSheetState extends ConsumerState<DetailSheet> {
         SizedBox(height: 12 * sf),
 
         // 3.5 BİLDİRİM TOGGLE
-        if (tx.hasNotification) ...[
+        if (_activeTemplate != null && _activeTemplate!.isNotificationEnabled) ...[
           CustomCard(
             scalingFactor: sf,
             padding: EdgeInsets.symmetric(horizontal: 16 * sf, vertical: 12 * sf),
@@ -501,8 +553,7 @@ class _PrecisionDetailSheetState extends ConsumerState<DetailSheet> {
               child: CustomButton(
                 label: l10n.edit,
                 onTap: () {
-                  Navigator.pop(context);
-                  widget.onEdit();
+                  Navigator.pop(context, DetailSheetAction.edit);
                 },
                 height: 52 * sf,
                 fontSize: 13,
@@ -511,7 +562,7 @@ class _PrecisionDetailSheetState extends ConsumerState<DetailSheet> {
             ),
             const SizedBox(width: 12),
             CustomIconButton(
-              onTap: () => widget.onDelete(),
+              onTap: () => Navigator.pop(context, DetailSheetAction.delete),
               icon: Icons.delete_sweep_rounded,
               color: AppColors.error,
               backgroundColor: AppColors.error.withValues(alpha: 0.1),
@@ -590,120 +641,63 @@ class _PrecisionDetailSheetState extends ConsumerState<DetailSheet> {
   }
 
 
-  DateTime? _calculateEndDate(TransactionUI tx) {
-    if (tx.periodType == 0 || tx.recurrenceDuration == null || tx.recurrenceDuration! <= 0) return null;
-    
-    final start = tx.date;
-    final duration = tx.recurrenceDuration! - 1; // İlki başlangıç tarihinde gerçekleştiği için -1
-    if (duration <= 0) return start;
-    
-    if (tx.periodType == 250) {
-      DateTime temp = start;
-      for (int i = 0; i < duration; i++) {
-        int addDays = 1;
-        if (temp.weekday == DateTime.friday) {
-          addDays = 3;
-        } else if (temp.weekday == DateTime.saturday) {
-          addDays = 2;
-        }
-        temp = temp.add(Duration(days: addDays));
-      }
-      return temp;
-    } else if (tx.periodType == 251) {
-      DateTime temp = start;
-      for (int i = 0; i < duration; i++) {
-        int addDays = 1;
-        if (temp.weekday == DateTime.sunday) {
-          addDays = 6;
-        } else if (temp.weekday >= DateTime.monday && temp.weekday <= DateTime.friday) {
-          addDays = DateTime.saturday - temp.weekday;
-        }
-        temp = temp.add(Duration(days: addDays));
-      }
-      return temp;
-    } else {
-      final unit = tx.periodType ~/ 100;
-      final interval = tx.periodType % 100;
-      if (interval > 0) {
-        switch (unit) {
-          case 1: return start.add(Duration(days: duration * interval));
-          case 2: return start.add(Duration(days: duration * interval * 7));
-          case 3: return DateTime(start.year, start.month + (duration * interval), start.day, start.hour, start.minute);
-          case 4: return DateTime(start.year + (duration * interval), start.month, start.day, start.hour, start.minute);
-        }
-      }
-    }
-    return null;
-  }
-
   String _getDetailedPeriodLabel(TransactionUI tx, AppLocalizations l10n, BuildContext context) {
-    String base = '';
+    final t = _activeTemplate;
+    if (t == null) {
+      return l10n.oneTime;
+    }
     
-    if (tx.periodType == 0) {
+    String base = '';
+    final int pType = t.periodType;
+    
+    if (pType == 0) {
       base = l10n.oneTime;
-    } else if (tx.periodType == 250) {
+    } else if (pType == 250) {
       base = l10n.weekdays;
-    } else if (tx.periodType == 251) {
+    } else if (pType == 251) {
       base = l10n.weekends;
     } else {
-      final unit = tx.periodType ~/ 100;
-      final interval = tx.periodType % 100;
+      final unit = pType ~/ 100;
+      final interval = pType % 100;
       
       switch (unit) {
-        case 1: // Gün
-          if (interval == 1) {
-            base = l10n.everyDayDetailed;
-          } else {
-            base = l10n.everyXDays(interval);
-          }
+        case 1:
+          base = interval == 1 ? l10n.everyDayDetailed : l10n.everyXDays(interval);
           break;
-        case 2: // Hafta
-          if (interval == 1) {
-            base = l10n.everyWeekDetailed;
-          } else {
-            base = l10n.everyXWeeks(interval);
-          }
+        case 2:
+          base = interval == 1 ? l10n.everyWeekDetailed : l10n.everyXWeeks(interval);
           break;
-        case 3: // Ay
-          if (interval == 1) {
-            base = l10n.everyMonthDetailed;
-          } else {
-            base = l10n.everyXMonths(interval);
-          }
+        case 3:
+          base = interval == 1 ? l10n.everyMonthDetailed : l10n.everyXMonths(interval);
           break;
-        case 4: // Yıl
-          if (interval == 1) {
-            base = l10n.everyYearDetailed;
-          } else {
-            base = l10n.everyXYears(interval);
-          }
+        case 4:
+          base = interval == 1 ? l10n.everyYearDetailed : l10n.everyXYears(interval);
           break;
         default:
           base = l10n.oneTime;
       }
     }
     
-    if (tx.periodType != 0) {
+    if (pType != 0) {
       List<String> details = [base];
-      final unit = tx.periodType ~/ 100;
+      final unit = pType ~/ 100;
       
-      if (tx.recurrenceDay != null && (unit == 2 || tx.periodType == 250 || tx.periodType == 251)) {
+      if (t.recurrenceDay != null && (unit == 2 || pType == 250 || pType == 251)) {
         final List<String> weekDays = [l10n.monday, l10n.tuesday, l10n.wednesday, l10n.thursday, l10n.friday, l10n.saturday, l10n.sunday];
-        if (tx.recurrenceDay! > 0 && tx.recurrenceDay! <= 7) {
-          details.add(weekDays[tx.recurrenceDay! - 1]);
+        if (t.recurrenceDay! > 0 && t.recurrenceDay! <= 7) {
+          details.add(weekDays[t.recurrenceDay! - 1]);
         }
-      } else if (tx.recurrenceDate != null && (unit == 3 || unit == 4)) {
+      } else if (t.recurrenceDate != null && (unit == 3 || unit == 4)) {
         if (unit == 4) {
-          // Yıllık ise: 12 Mayıs
-          details.add(DateFormat.MMMMd(Localizations.localeOf(context).toString()).format(tx.recurrenceDate!));
+          details.add(DateFormat.MMMMd(Localizations.localeOf(context).toString()).format(t.recurrenceDate!));
         } else {
-          // Aylık veya X ayda bir ise: Ayın 12'si
-          details.add(l10n.dayOfMonthOrdinal(tx.recurrenceDate!.day));
+          details.add(l10n.dayOfMonthOrdinal(t.recurrenceDate!.day));
         }
       }
       
-      if (tx.recurrenceDuration != null && tx.recurrenceDuration! > 0) {
-        details.add(l10n.times(tx.recurrenceDuration!));
+      if (t.totalInstallments != null) {
+        final langCode = Localizations.localeOf(context).languageCode;
+        details.add(_getInstallmentsLabel(langCode, t.totalInstallments!));
       } else {
         details.add(l10n.indefinitely);
       }
@@ -712,5 +706,13 @@ class _PrecisionDetailSheetState extends ConsumerState<DetailSheet> {
     }
     
     return base;
+  }
+
+  String _getInstallmentsLabel(String langCode, int count) {
+    if (langCode == 'tr') return '$count Taksit';
+    if (langCode == 'de') return '$count Raten';
+    if (langCode == 'fr') return '$count mensualités';
+    if (langCode == 'es') return '$count cuotas';
+    return '$count installments';
   }
 }

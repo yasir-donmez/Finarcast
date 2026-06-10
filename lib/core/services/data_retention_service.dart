@@ -18,17 +18,8 @@ class DataRetentionService {
     final toArchive = allTx.where((tx) {
       if (tx.isArchived) return false; // Zaten arşivlenmiş
 
-      // Tek seferlik işlem (periodType == 0): tarihine bak
-      if (tx.periodType == 0) {
-        return tx.date.isBefore(cutoff);
-      }
-
-      // Periyodik işlem: kalan taksit 0 olmuş ve tarih geçmiş
-      if (tx.remainingInstallments != null && tx.remainingInstallments! <= 0) {
-        return tx.date.isBefore(cutoff);
-      }
-
-      return false;
+      // Tarihi cutoff'tan önce olan her işlemi arşivle (tüm tipler için güvenlidir)
+      return tx.date.isBefore(cutoff);
     }).toList();
 
     if (toArchive.isEmpty) return;
@@ -45,14 +36,12 @@ class DataRetentionService {
 
     final deleteCutoff = DateTime.now().subtract(Duration(days: permanentDeletionDays));
     
-    // Sadece arşivlenmiş olanları değil, tüm işlemleri tara (güvenlik için)
+    // Sadece tek seferlik (templateId == null) işlemler silinebilir.
+    // Tekrarlı işlem kayıtlarının silinmesi MaterializationService tarafından yeniden üretilmelerine yol açar.
     final toDelete = allTx.where((tx) {
-      // Güvenlik kuralları:
-      // 1. Taksidi bitmiş olmalı
-      bool isFinished = tx.periodType == 0 || (tx.remainingInstallments != null && tx.remainingInstallments! <= 0);
-      if (!isFinished) return false;
+      if (tx.templateId != null) return false;
 
-      // 2. Silme süresinden eski olmalı
+      // Silme süresinden eski olmalı
       return tx.date.isBefore(deleteCutoff);
     }).toList();
 

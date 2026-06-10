@@ -20,6 +20,7 @@ import 'detail_sheet.dart';
 import '../../../shared/widgets/custom_bottom_sheet.dart';
 import '../../../shared/widgets/custom_dialog.dart';
 import '../../../core/database/database_service.dart';
+import '../../../core/domain/recurrence_engine.dart';
 
 class InAppNotificationsSheet extends ConsumerStatefulWidget {
   const InAppNotificationsSheet({super.key});
@@ -54,21 +55,65 @@ class _InAppNotificationsSheetState extends ConsumerState<InAppNotificationsShee
   @override
   Widget build(BuildContext context) {
     final activeColor = ref.watch(rotaryColorProvider);
-    final allTransactions = ref.watch(vaultTransactionsProvider);
+    final templates = ref.watch(allTemplatesProvider);
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final l10n = AppLocalizations.of(context)!;
-    
-    // Sadece bildirimleri açık olan aktif işlemleri filtrele
-    final notifications = allTransactions.where((tx) => tx.isNotificationEnabled).toList();
+    final customCategories = ref.watch(customCategoriesProvider);
 
-    // Zamanı geçmiş (tetiklenmiş) alarmları filtrele
     final now = DateTime.now();
     final triggeredNotifications = <Map<String, dynamic>>[];
 
-    for (final tx in notifications) {
-      final reminderTime = calculateTransactionReminderDateTime(tx);
-      if (reminderTime.isBefore(now)) {
-        triggeredNotifications.add({'tx': tx, 'time': reminderTime});
+    for (final template in templates) {
+      if (!template.isNotificationEnabled || template.isPaused || template.isArchived) continue;
+
+      // Generate occurrences from template.startDate to now + 1 day
+      final dates = RecurrenceEngine.occurrenceDates(
+        template.recurrenceRule,
+        now.add(const Duration(days: 1)),
+      );
+
+      for (final date in dates) {
+        final DateTime targetDate = date.subtract(Duration(days: template.notificationReminderDays));
+        final DateTime reminderTime = DateTime(
+          targetDate.year,
+          targetDate.month,
+          targetDate.day,
+          template.notificationHour,
+          template.notificationMinute,
+        );
+
+        if (reminderTime.isBefore(now)) {
+          final txUi = TransactionUI(
+            id: 'template_notif_${template.id}_${date.year}${date.month}${date.day}',
+            name: template.title,
+            icon: CategoryUtils.getCategoryIcon(
+              categoryId: template.categoryId,
+              customCategories: customCategories,
+              iconCode: template.iconCode,
+            ),
+            color: CategoryUtils.getCategoryColor(
+              categoryId: template.categoryId,
+              customCategories: customCategories,
+            ),
+            amount: template.amount,
+            minAmount: template.minAmount,
+            maxAmount: template.maxAmount,
+            isIncome: template.isIncome,
+            date: date,
+            dbId: template.id,
+            categoryId: template.categoryId,
+            iconCode: template.iconCode,
+            note: template.note,
+            currency: template.currency,
+            status: 0,
+            isReviewed: false,
+            templateId: template.id,
+            occurrenceDate: date,
+            groupIds: [if (template.vaultId != null) 'v_${template.vaultId}'],
+          );
+
+          triggeredNotifications.add({'tx': txUi, 'time': reminderTime});
+        }
       }
     }
 
@@ -402,6 +447,14 @@ class _InAppNotificationsSheetState extends ConsumerState<InAppNotificationsShee
     // Önce bildirimler sayfasını kapatıyoruz
     Navigator.pop(context);
 
+    // Async devam - context güvenli mi kontrol et
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      if (!mounted) return;
+      await _openDetailSheet(tx);
+    });
+  }
+
+  Future<void> _openDetailSheet(TransactionUI tx) async {
     // Kategori ismini oluştur
     final customCategories = ref.read(customCategoriesProvider);
     final categoryName = CategoryUtils.getCategoryName(
@@ -459,82 +512,80 @@ class _InAppNotificationsSheetState extends ConsumerState<InAppNotificationsShee
       );
     }
 
-    // Detay sheet'ini aç
-    CustomBottomSheet.show(
+    final action = await CustomBottomSheet.show<DetailSheetAction>(
       context: context,
       title: sheetTitle,
       child: DetailSheet(
         transaction: tx,
-        onEdit: () {
-          final selectedVaultId = ref.read(selectedVaultProvider);
-          final groups = ref.read(transactionGroupsProvider);
-          final effectiveVaultId = selectedVaultId ?? (groups.isNotEmpty ? groups.first.id : null);
-          final currentVaultIds = tx.groupIds
-              .map((vId) => int.parse(vId.replaceFirst('v_', '')))
-              .toList();
-          
-          if (effectiveVaultId != null) {
-            final vId = int.tryParse(effectiveVaultId.replaceFirst('v_', ''));
-            if (vId != null && !currentVaultIds.contains(vId)) {
-              currentVaultIds.add(vId);
-            }
-          }
-
-          Navigator.push(
-            context,
-            SlideUpPageRoute(
-              child: TransactionBuilderScreen(
-                initialId: tx.dbId,
-                initialName: tx.name,
-                initialAmount: tx.amount,
-                initialMinAmount: tx.minAmount,
-                initialMaxAmount: tx.maxAmount,
-                initialIsIncome: tx.isIncome,
-                initialVaultIds: currentVaultIds,
-                initialCategoryId: tx.categoryId,
-                initialNote: tx.note,
-                initialCurrency: tx.currency,
-                initialPeriodType: tx.periodType,
-                initialRecurrenceDay: tx.recurrenceDay,
-                initialRecurrenceDate: tx.recurrenceDate,
-                initialRecurrenceDuration: tx.recurrenceDuration,
-                initialIsNotificationEnabled: tx.isNotificationEnabled,
-                initialNotificationReminderDays: tx.notificationReminderDays,
-                initialNotificationHour: tx.notificationHour,
-                initialNotificationMinute: tx.notificationMinute,
-              ),
-              fullscreenDialog: true,
-            ),
-          );
-        },
-        onDelete: () async {
-          final confirm = await showCustomDialog<bool>(
-            context: context,
-            accentColor: AppColors.error,
-            title: AppLocalizations.of(context)!.permanentDelete,
-            content: AppLocalizations.of(context)!.permanentDeleteDesc,
-            actions: [
-              PrecisionDialogAction(
-                label: AppLocalizations.of(context)!.cancel,
-                onTap: () => Navigator.pop(context, false),
-                isPrimary: false,
-              ),
-              PrecisionDialogAction(
-                label: AppLocalizations.of(context)!.ok,
-                onTap: () => Navigator.pop(context, true),
-                isPrimary: true,
-              ),
-            ],
-          );
-          if (confirm == true) {
-            await DatabaseService.deleteTransaction(tx.dbId!);
-            HapticFeedback.mediumImpact();
-            if (!mounted) return;
-            Navigator.pop(context); // Close the detail sheet
-          }
-        },
       ),
     );
+
+    if (!mounted) return;
+
+    if (action == DetailSheetAction.edit) {
+      final template = await DatabaseService.getTemplate(tx.dbId!);
+      if (template == null) return;
+      if (!mounted) return;
+
+      final selectedVaultId = ref.read(selectedVaultProvider);
+      final groups = ref.read(transactionGroupsProvider);
+      final effectiveVaultId = selectedVaultId ?? (groups.isNotEmpty ? groups.first.id : null);
+      int? currentVaultId = template.vaultId;
+
+      if (currentVaultId == null && effectiveVaultId != null) {
+        currentVaultId = int.tryParse(effectiveVaultId.replaceFirst('v_', ''));
+      }
+
+      Navigator.push(
+        context,
+        SlideUpPageRoute(
+          child: TransactionBuilderScreen(
+            initialId: template.id,
+            initialName: template.title,
+            initialAmount: template.amount,
+            initialMinAmount: template.minAmount,
+            initialMaxAmount: template.maxAmount,
+            initialIsIncome: template.isIncome,
+            initialVaultId: currentVaultId,
+            initialCategoryId: template.categoryId,
+            initialNote: template.note,
+            initialCurrency: template.currency,
+            initialPeriodType: template.periodType,
+            initialRecurrenceDay: template.recurrenceDay,
+            initialRecurrenceDate: template.recurrenceDate,
+            initialTotalInstallments: template.totalInstallments,
+            initialIsNotificationEnabled: template.isNotificationEnabled,            initialNotificationReminderDays: template.notificationReminderDays,
+            initialNotificationHour: template.notificationHour,
+            initialNotificationMinute: template.notificationMinute,
+            isTemplateEdit: true,
+          ),
+          fullscreenDialog: true,
+        ),
+      );
+    } else if (action == DetailSheetAction.delete) {
+      final confirm = await showCustomDialog<bool>(
+        context: context,
+        accentColor: AppColors.error,
+        title: AppLocalizations.of(context)!.permanentDelete,
+        content: AppLocalizations.of(context)!.permanentDeleteDesc,
+        actions: [
+          PrecisionDialogAction(
+            label: AppLocalizations.of(context)!.cancel,
+            onTap: () => Navigator.pop(context, false),
+            isPrimary: false,
+          ),
+          PrecisionDialogAction(
+            label: AppLocalizations.of(context)!.ok,
+            onTap: () => Navigator.pop(context, true),
+            isPrimary: true,
+          ),
+        ],
+      );
+      if (confirm == true && mounted) {
+        await DatabaseService.deleteTemplate(tx.dbId!);
+        HapticFeedback.mediumImpact();
+      }
+    }
   }
 
 }

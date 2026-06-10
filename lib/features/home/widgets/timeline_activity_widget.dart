@@ -4,6 +4,7 @@ import 'home_widget.dart';
 import 'package:intl/intl.dart';
 import '../../../core/providers/db_providers.dart';
 import '../../../core/database/models/transaction_record.dart';
+import '../../../core/database/models/transaction_status.dart';
 import '../../../core/database/models/custom_category.dart';
 import '../../../core/database/models/exchange_rate.dart';
 import '../../../core/utils/currency_utils.dart';
@@ -19,21 +20,23 @@ class TimelineActivityWidget extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final transactions = ref.watch(allTransactionsProvider);
+    final transactions = ref.watch(allTransactionsProvider)
+        .where((tx) => tx.status != TransactionStatus.skipped)
+        .toList();
     final customCategories = ref.watch(customCategoriesProvider);
     final rates = ref.watch(exchangeRatesProvider).value ?? [];
     final settings = ref.watch(settingsProvider);
     final symbol = settings.currencySymbol;
     
     // EKLEME SIRASINA GÖRE SIRALA (En son eklenen en üstte)
-    final sortedTxs = transactions.toList()..sort((a, b) => b.id.compareTo(a.id));
+    final sortedTxs = transactions..sort((a, b) => b.id.compareTo(a.id));
 
     // Kasa / Vault bazında filtrele
     List<TransactionRecord> vaultFilteredTxs = sortedTxs;
     if (selectedVaultId != null && selectedVaultId!.startsWith('v_')) {
       final filterVaultId = int.tryParse(selectedVaultId!.replaceFirst('v_', ''));
       if (filterVaultId != null) {
-        vaultFilteredTxs = sortedTxs.where((tx) => tx.vaultIds.contains(filterVaultId)).toList();
+        vaultFilteredTxs = sortedTxs.where((tx) => tx.vaultId == filterVaultId).toList();
       }
     }
     

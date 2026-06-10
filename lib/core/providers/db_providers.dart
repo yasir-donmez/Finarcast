@@ -1,13 +1,26 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../database/database_service.dart';
 import '../database/models/transaction_record.dart';
+import '../database/models/recurring_template.dart';
+import '../database/models/transaction_status.dart';
 import '../database/models/custom_category.dart';
-import '../utils/currency_utils.dart';
-
 import '../database/models/vault.dart';
 import '../database/models/exchange_rate.dart';
 import './settings_provider.dart';
 import '../services/subscription_service.dart';
+import '../services/balance_service.dart';
+
+/// === ŞABLON PROVİDER'LARI ===
+
+/// Tüm şablonları canlı dinleyen stream provider
+final templatesStreamProvider = StreamProvider<List<RecurringTemplate>>((ref) {
+  return DatabaseService.watchAllTemplates();
+});
+
+/// Tüm şablonların anlık listesi
+final allTemplatesProvider = Provider<List<RecurringTemplate>>((ref) {
+  return ref.watch(templatesStreamProvider).valueOrNull ?? [];
+});
 
 /// === İŞLEM PROVİDER'LARI ===
 
@@ -23,109 +36,74 @@ final allTransactionsProvider = Provider<List<TransactionRecord>>((ref) {
   return ref.watch(transactionsStreamProvider).valueOrNull ?? [];
 });
 
-/// Gelir işlemleri
+/// Gelir işlemleri (Atlanmamış olanlar)
 final incomeTransactionsProvider = Provider<List<TransactionRecord>>((ref) {
-  return ref.watch(allTransactionsProvider).where((t) => t.isIncome).toList();
+  return ref.watch(allTransactionsProvider)
+      .where((t) => t.isIncome && t.status != TransactionStatus.skipped)
+      .toList();
 });
 
-/// Gider işlemleri
+/// Gider işlemleri (Atlanmamış olanlar)
 final expenseTransactionsProvider = Provider<List<TransactionRecord>>((ref) {
-  return ref.watch(allTransactionsProvider).where((t) => !t.isIncome).toList();
+  return ref.watch(allTransactionsProvider)
+      .where((t) => !t.isIncome && t.status != TransactionStatus.skipped)
+      .toList();
 });
 
-/// Toplam gelir (Sadece gerçekleşenler: tarihi bugün veya geçmiş olanlar)
+/// Toplam gelir (Sadece gerçekleşenler: tarihi bugün veya geçmiş olanlar ve atlanmamış olanlar)
 final totalIncomeProvider = Provider<double>((ref) {
   final now = DateTime.now();
+  final today = DateTime(now.year, now.month, now.day);
   final rates = ref.watch(exchangeRatesProvider).value ?? [];
   final targetCurrency = ref.watch(settingsProvider).currencySymbol;
 
   return ref
       .watch(allTransactionsProvider)
-      .where((t) => t.isIncome && (t.date.isBefore(now) || t.date.isAtSameMomentAs(now)))
+      .where((t) => t.isIncome && t.status != TransactionStatus.skipped && !t.occurrenceDate.isAfter(today))
       .fold<double>(0, (sum, t) => sum + t.getConvertedAmount(targetCurrency, rates));
 });
 
-/// Toplam gider (Sadece gerçekleşenler)
+/// Toplam gider (Sadece gerçekleşenler ve atlanmamış olanlar)
 final totalExpenseProvider = Provider<double>((ref) {
   final now = DateTime.now();
+  final today = DateTime(now.year, now.month, now.day);
   final rates = ref.watch(exchangeRatesProvider).value ?? [];
   final targetCurrency = ref.watch(settingsProvider).currencySymbol;
 
   return ref
       .watch(allTransactionsProvider)
-      .where((t) => !t.isIncome && (t.date.isBefore(now) || t.date.isAtSameMomentAs(now)))
+      .where((t) => !t.isIncome && t.status != TransactionStatus.skipped && !t.occurrenceDate.isAfter(today))
       .fold<double>(0, (sum, t) => sum + t.getConvertedAmount(targetCurrency, rates));
 });
 
 /// Net bakiye (gelir - gider + kasaların ilk bakiyeleri)
 final netBalanceProvider = Provider<double>((ref) {
-  final vaults = ref.watch(allVaultsProvider);
-  final rates = ref.watch(exchangeRatesProvider).value ?? [];
-  final targetCurrency = ref.watch(settingsProvider).currencySymbol;
-
-  double totalVaultsInitial = 0;
-  for (final v in vaults) {
-    final vCurrency = v.currency == 'AUTO' ? targetCurrency : v.currency;
-    totalVaultsInitial += CurrencyUtils.convert(v.balance, vCurrency, targetCurrency, rates);
-  }
-
-  return totalVaultsInitial + ref.watch(totalIncomeProvider) - ref.watch(totalExpenseProvider);
+  return BalanceService.calculateNetBalance(
+    vaults: ref.watch(allVaultsProvider),
+    records: ref.watch(allTransactionsProvider),
+    targetCurrency: ref.watch(settingsProvider).currencySymbol,
+    rates: ref.watch(exchangeRatesProvider).value ?? [],
+  );
 });
 
-/// Net Min bakiye (Kötü senaryo - Sadece gerçekleşenler üzerinden)
+/// Net Min bakiye (Kötü senaryo - BalanceService delegasyonu)
 final netMinBalanceProvider = Provider<double>((ref) {
-  final now = DateTime.now();
-  final rates = ref.watch(exchangeRatesProvider).value ?? [];
-  final targetCurrency = ref.watch(settingsProvider).currencySymbol;
-  final vaults = ref.watch(allVaultsProvider);
-
-  double totalVaultsInitial = 0;
-  for (final v in vaults) {
-    final vCurrency = v.currency == 'AUTO' ? targetCurrency : v.currency;
-    totalVaultsInitial += CurrencyUtils.convert(v.balance, vCurrency, targetCurrency, rates);
-  }
-  
-  final txsSum = ref.watch(allTransactionsProvider)
-      .where((t) => t.date.isBefore(now) || t.date.isAtSameMomentAs(now))
-      .fold<double>(0, (sum, t) {
-    if (t.isIncome) {
-      final val = t.minAmount ?? t.amount;
-      return sum + CurrencyUtils.convert(val, t.currency ?? '₺', targetCurrency, rates);
-    } else {
-      final val = t.maxAmount ?? t.amount;
-      return sum - CurrencyUtils.convert(val, t.currency ?? '₺', targetCurrency, rates);
-    }
-  });
-
-  return totalVaultsInitial + txsSum;
+  return BalanceService.calculateMinBalance(
+    vaults: ref.watch(allVaultsProvider),
+    records: ref.watch(allTransactionsProvider),
+    targetCurrency: ref.watch(settingsProvider).currencySymbol,
+    rates: ref.watch(exchangeRatesProvider).value ?? [],
+  );
 });
 
-/// Net Max bakiye (İyi senaryo - Sadece gerçekleşenler üzerinden)
+/// Net Max bakiye (İyi senaryo - BalanceService delegasyonu)
 final netMaxBalanceProvider = Provider<double>((ref) {
-  final now = DateTime.now();
-  final rates = ref.watch(exchangeRatesProvider).value ?? [];
-  final targetCurrency = ref.watch(settingsProvider).currencySymbol;
-  final vaults = ref.watch(allVaultsProvider);
-
-  double totalVaultsInitial = 0;
-  for (final v in vaults) {
-    final vCurrency = v.currency == 'AUTO' ? targetCurrency : v.currency;
-    totalVaultsInitial += CurrencyUtils.convert(v.balance, vCurrency, targetCurrency, rates);
-  }
-
-  final txsSum = ref.watch(allTransactionsProvider)
-      .where((t) => t.date.isBefore(now) || t.date.isAtSameMomentAs(now))
-      .fold<double>(0, (sum, t) {
-    if (t.isIncome) {
-      final val = t.maxAmount ?? t.amount;
-      return sum + CurrencyUtils.convert(val, t.currency ?? '₺', targetCurrency, rates);
-    } else {
-      final val = t.minAmount ?? t.amount;
-      return sum - CurrencyUtils.convert(val, t.currency ?? '₺', targetCurrency, rates);
-    }
-  });
-
-  return totalVaultsInitial + txsSum;
+  return BalanceService.calculateMaxBalance(
+    vaults: ref.watch(allVaultsProvider),
+    records: ref.watch(allTransactionsProvider),
+    targetCurrency: ref.watch(settingsProvider).currencySymbol,
+    rates: ref.watch(exchangeRatesProvider).value ?? [],
+  );
 });
 
 /// === KASA PROVİDER'LARI ===

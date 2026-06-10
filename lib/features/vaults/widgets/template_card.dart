@@ -6,30 +6,24 @@ import '../../../../core/utils/category_utils.dart';
 import '../../../../core/utils/string_utils.dart';
 import '../../../../core/providers/db_providers.dart';
 import '../../../../shared/widgets/solid_surface.dart';
-import '../../../../shared/widgets/custom_bottom_sheet.dart';
 import '../vaults_providers.dart';
 import '../../../../l10n/app_localizations.dart';
-import 'detail_sheet.dart';
 
-class TransactionCard extends ConsumerWidget {
-  final TransactionUI transaction;
-  final VoidCallback? onDelete;
-  final VoidCallback? onEdit;
+class TemplateCard extends ConsumerWidget {
+  final TemplateUI template;
   final VoidCallback? onTap;
   final VoidCallback? onLongPress;
 
-  const TransactionCard({
+  const TemplateCard({
     super.key,
-    required this.transaction,
-    this.onDelete,
-    this.onEdit,
+    required this.template,
     this.onTap,
     this.onLongPress,
   });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final tx = transaction;
+    final tx = template;
     final l10n = AppLocalizations.of(context)!;
     final customCategories = ref.watch(customCategoriesProvider);
     final isDark = Theme.of(context).brightness == Brightness.dark;
@@ -37,47 +31,45 @@ class TransactionCard extends ConsumerWidget {
     final sf = (screenHeight / 812.0).clamp(0.85, 1.0);
 
     String? periodLabel;
-    if (tx.periodType != 0) {
-      if (tx.periodType == 250) {
-        periodLabel = l10n.weekdays;
-      } else if (tx.periodType == 251) {
-        periodLabel = l10n.weekends;
-      } else {
-        final unit = tx.periodType ~/ 100;
-        final interval = tx.periodType % 100;
-        
-        switch (unit) {
-          case 1:
-            periodLabel = interval == 1 
-                ? l10n.daily 
-                : l10n.daysCount(interval);
-            break;
-          case 2:
-            if (interval == 1) {
-              periodLabel = l10n.weekly;
-            } else if (interval == 2) {
-              periodLabel = l10n.every2Weeks;
-            } else if (interval == 3) {
-              periodLabel = l10n.every3Weeks;
-            } else {
-              periodLabel = l10n.weeksCount(interval);
-            }
-            break;
-          case 3:
-            if (interval == 1) {
-              periodLabel = l10n.monthly;
-            } else if (interval == 3) {
-              periodLabel = l10n.every3Months;
-            } else if (interval == 6) {
-              periodLabel = l10n.every6Months;
-            } else {
-              periodLabel = l10n.monthsCount(interval);
-            }
-            break;
-          case 4:
-            periodLabel = interval == 1 ? l10n.yearly : l10n.yearsCount(interval);
-            break;
-        }
+    if (tx.periodType == 250) {
+      periodLabel = l10n.weekdays;
+    } else if (tx.periodType == 251) {
+      periodLabel = l10n.weekends;
+    } else {
+      final unit = tx.periodType ~/ 100;
+      final interval = tx.periodType % 100;
+      
+      switch (unit) {
+        case 1:
+          periodLabel = interval == 1 
+              ? l10n.daily 
+              : l10n.daysCount(interval);
+          break;
+        case 2:
+          if (interval == 1) {
+            periodLabel = l10n.weekly;
+          } else if (interval == 2) {
+            periodLabel = l10n.every2Weeks;
+          } else if (interval == 3) {
+            periodLabel = l10n.every3Weeks;
+          } else {
+            periodLabel = l10n.weeksCount(interval);
+          }
+          break;
+        case 3:
+          if (interval == 1) {
+            periodLabel = l10n.monthly;
+          } else if (interval == 3) {
+            periodLabel = l10n.every3Months;
+          } else if (interval == 6) {
+            periodLabel = l10n.every6Months;
+          } else {
+            periodLabel = l10n.monthsCount(interval);
+          }
+          break;
+        case 4:
+          periodLabel = interval == 1 ? l10n.yearly : l10n.yearsCount(interval);
+          break;
       }
     }
 
@@ -85,7 +77,7 @@ class TransactionCard extends ConsumerWidget {
       categoryId: tx.categoryId,
       context: context,
       customCategories: customCategories,
-      fallbackTitle: tx.name,
+      fallbackTitle: tx.title,
     );
     final parentId = tx.categoryId?.split('_').take(2).join('_');
     final parentName = parentId != null
@@ -100,7 +92,7 @@ class TransactionCard extends ConsumerWidget {
     final amountColor = tx.isIncome
         ? AppColors.getIncome(context)
         : AppColors.getExpense(context);
-    final vaultCount = tx.groupIds.length;
+    final vaultCount = tx.vaultId != null ? 1 : 0;
 
     return GestureDetector(
       onTap: onTap,
@@ -111,13 +103,13 @@ class TransactionCard extends ConsumerWidget {
         showShadow: true,
         child: Stack(
           children: [
-            // 1. Taşabilen ama SolidSurface sınırlarında tam kart kenarında kırpılan Arka Plan İkonu
+            // 1. Watermark Background Icon
             Positioned(
               right: -15 * sf,
               bottom: -10 * sf,
               child: IgnorePointer(
                 child: Transform.rotate(
-                  angle: -0.22, // 12.6 degrees tilt for premium asymmetry
+                  angle: -0.22,
                   child: ShaderMask(
                     shaderCallback: (bounds) {
                       return LinearGradient(
@@ -133,7 +125,7 @@ class TransactionCard extends ConsumerWidget {
                     blendMode: BlendMode.srcIn,
                     child: Icon(
                       tx.icon,
-                      size: 105 * sf, // Premium watermark size
+                      size: 105 * sf,
                       color: Colors.white,
                     ),
                   ),
@@ -141,7 +133,7 @@ class TransactionCard extends ConsumerWidget {
               ),
             ),
 
-            // 2. Kart İçeriği (Padding ile orijinal hizalamayı korur)
+            // 2. Card Content
             Padding(
               padding: EdgeInsets.all(10 * sf),
               child: Column(
@@ -180,8 +172,7 @@ class TransactionCard extends ConsumerWidget {
                                 ),
                                 textAlign: TextAlign.right,
                                 maxLines: 1,
-                                overflow:
-                                    TextOverflow.visible, // FittedBox handles it
+                                overflow: TextOverflow.visible,
                               ),
                               if (hasSubCategory)
                                 Text(
@@ -277,10 +268,10 @@ class TransactionCard extends ConsumerWidget {
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                               Row(
+                              Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  if (tx.hasNotification) ...[
+                                  if (tx.isNotificationEnabled) ...[
                                     Icon(
                                       tx.isNotificationEnabled
                                           ? Icons.notifications_active_rounded
@@ -294,44 +285,123 @@ class TransactionCard extends ConsumerWidget {
                                       SizedBox(width: 4 * sf),
                                   ],
                                   if (vaultCount > 0) ...[
-                                    Text(
-                                      '$vaultCount',
-                                      style: TextStyle(
-                                        fontSize: 10 * sf,
-                                        fontWeight: FontWeight.w900,
-                                        color: AppColors.getTextSecondary(context).withValues(alpha: 0.5),
+                                    Container(
+                                      padding: EdgeInsets.symmetric(
+                                        horizontal: 5 * sf,
+                                        vertical: 2 * sf,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: (isDark ? Colors.white : Colors.black).withValues(alpha: 0.06),
+                                        borderRadius: BorderRadius.circular(5 * sf),
+                                      ),
+                                      child: Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Text(
+                                            '$vaultCount',
+                                            style: TextStyle(
+                                              fontSize: 8 * sf,
+                                              fontWeight: FontWeight.w900,
+                                              color: AppColors.getTextSecondary(context).withValues(alpha: 0.7),
+                                              letterSpacing: 0.4,
+                                            ),
+                                          ),
+                                          SizedBox(width: 3 * sf),
+                                          Icon(
+                                            Icons.account_balance_wallet_rounded,
+                                            size: 9 * sf,
+                                            color: AppColors.getTextSecondary(context).withValues(alpha: 0.5),
+                                          ),
+                                        ],
                                       ),
                                     ),
-                                    const SizedBox(width: 1),
+                                  ],
+                                  if (tx.isPaused) ...[
+                                    if (vaultCount > 0 || tx.isNotificationEnabled)
+                                      SizedBox(width: 4 * sf),
                                     Icon(
-                                      Icons.account_balance_wallet_rounded,
-                                      size: 9 * sf,
-                                      color: AppColors.getTextSecondary(context).withValues(alpha: 0.3),
+                                      Icons.pause_circle_filled_rounded,
+                                      size: 13 * sf,
+                                      color: Colors.orangeAccent,
                                     ),
                                   ],
                                 ],
                               ),
                               const SizedBox(width: 4),
-                              if (periodLabel != null)
-                                Container(
-                                  padding: EdgeInsets.symmetric(
-                                    horizontal: 5 * sf,
-                                    vertical: 2 * sf,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    color: amountColor.withValues(alpha: 0.1),
-                                    borderRadius: BorderRadius.circular(5 * sf),
-                                  ),
-                                  child: Text(
-                                    periodLabel.toSafeUpperCase(context),
-                                    style: TextStyle(
-                                      fontSize: 8 * sf,
-                                      fontWeight: FontWeight.w900,
-                                      color: amountColor,
-                                      letterSpacing: 0.4,
+                              Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  if (tx.totalInstallments != null) ...[
+                                    Container(
+                                      padding: EdgeInsets.symmetric(
+                                        horizontal: 5 * sf,
+                                        vertical: 2 * sf,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: Colors.blue.withValues(alpha: 0.1),
+                                        borderRadius: BorderRadius.circular(5 * sf),
+                                      ),
+                                      child: Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Text(
+                                            '${tx.totalInstallments}',
+                                            style: TextStyle(
+                                              fontSize: 8 * sf,
+                                              fontWeight: FontWeight.w900,
+                                              color: Colors.blueAccent,
+                                              letterSpacing: 0.4,
+                                            ),
+                                          ),
+                                          SizedBox(width: 3 * sf),
+                                          Icon(
+                                            Icons.repeat_rounded,
+                                            size: 10 * sf,
+                                            color: Colors.blueAccent,
+                                          ),
+                                        ],
+                                      ),
                                     ),
-                                  ),
-                                ),
+                                  ] else if (tx.periodType != 0) ...[
+                                    Container(
+                                      padding: EdgeInsets.symmetric(
+                                        horizontal: 5 * sf,
+                                        vertical: 2 * sf,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: Colors.blue.withValues(alpha: 0.1),
+                                        borderRadius: BorderRadius.circular(5 * sf),
+                                      ),
+                                      child: Icon(
+                                        Icons.all_inclusive_rounded,
+                                        size: 10 * sf,
+                                        color: Colors.blueAccent,
+                                      ),
+                                    ),
+                                    const SizedBox(width: 4),
+                                  ],
+                                  if (periodLabel != null)
+                                    Container(
+                                      padding: EdgeInsets.symmetric(
+                                        horizontal: 5 * sf,
+                                        vertical: 2 * sf,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: amountColor.withValues(alpha: 0.1),
+                                        borderRadius: BorderRadius.circular(5 * sf),
+                                      ),
+                                      child: Text(
+                                        periodLabel.toSafeUpperCase(context),
+                                        style: TextStyle(
+                                          fontSize: 8 * sf,
+                                          fontWeight: FontWeight.w900,
+                                          color: amountColor,
+                                          letterSpacing: 0.4,
+                                        ),
+                                      ),
+                                    ),
+                                ],
+                              ),
                             ],
                           ),
                         ),
@@ -346,21 +416,4 @@ class TransactionCard extends ConsumerWidget {
       ),
     );
   }
-}
-
-void showTransactionActionMenu(
-  BuildContext context, {
-  required TransactionUI transaction,
-  required VoidCallback onEdit,
-  required VoidCallback onDelete,
-}) {
-  CustomBottomSheet.show(
-    context: context,
-    title: transaction.name,
-    child: DetailSheet(
-      transaction: transaction,
-      onEdit: onEdit,
-      onDelete: onDelete,
-    ),
-  );
 }

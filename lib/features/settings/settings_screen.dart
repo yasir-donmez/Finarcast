@@ -19,6 +19,7 @@ import '../../shared/widgets/custom_button.dart';
 import 'widgets/settings/theme_setting.dart';
 import 'widgets/settings/color_theme_setting.dart';
 import 'widgets/settings/background_setting.dart';
+import '../auth/utils/auth_error_helper.dart';
 
 import 'widgets/etched_liquid_text.dart';
 import 'widgets/settings/subscription_setting.dart';
@@ -531,7 +532,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                                     } catch (e) {
                                       debugPrint("Çıkış yaparken hata: $e");
                                       if (context.mounted) {
-                                        CustomNotification.error(context, l10n.errorOccurred(e.toString()));
+                                        CustomNotification.error(context, l10n.errorOccurred(AuthErrorHelper.getFriendlyErrorMessage(context, e)));
                                       }
                                     }
                                   },
@@ -627,7 +628,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                                     } catch (e) {
                                       debugPrint("Hesap silinirken hata: $e");
                                       if (context.mounted) {
-                                        CustomNotification.error(context, l10n.errorOccurred(e.toString()));
+                                        CustomNotification.error(context, l10n.errorOccurred(AuthErrorHelper.getFriendlyErrorMessage(context, e)));
                                       }
                                     }
                                   },

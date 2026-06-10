@@ -3,8 +3,9 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:timezone/timezone.dart' as tz;
 import 'package:timezone/data/latest.dart' as tz_data;
 import 'package:intl/intl.dart';
-import '../database/models/transaction_record.dart';
+import '../database/models/recurring_template.dart';
 import '../database/database_service.dart';
+import '../domain/recurrence_engine.dart';
 import '../utils/currency_utils.dart';
 import '../../l10n/app_localizations.dart';
 
@@ -205,56 +206,70 @@ class NotificationService {
     }
   }
 
-  Future<void> scheduleTransactionNotification(TransactionRecord record) async {
+  Future<void> scheduleTemplateNotification(RecurringTemplate template) async {
     try {
-      if (!record.isNotificationEnabled) {
-        await cancelNotification(record.id);
+      if (!template.isNotificationEnabled) {
+        await cancelNotification(template.id);
         return;
       }
 
       // Isar ID'sini bildirim ID'si olarak kullanıyoruz
-      final int notificationId = record.id;
+      final int notificationId = template.id;
 
-      // Hedef tarihi hesapla
-      DateTime targetDate = record.date;
-      
-      // Hatırlatıcı gün farkını uygula
-      targetDate = targetDate.subtract(Duration(days: record.notificationReminderDays));
-      
-      // Saat ve dakikayı ayarla
-      DateTime localTarget = DateTime(
-        targetDate.year,
-        targetDate.month,
-        targetDate.day,
-        record.notificationHour,
-        record.notificationMinute,
-      );
-
-      // Eğer hedef tarih geçmişte ise bir sonraki periyoda aktar (periyodik ise)
       final now = DateTime.now();
-      if (localTarget.isBefore(now)) {
-        if (record.periodType == 0) {
-          // Tek seferlik ise ve geçtiyse, sadece iptal et (veya kurma)
-          await cancelNotification(record.id);
-          return;
+      DateTime? localTarget;
+
+      if (template.periodType == 0) {
+        // Tek seferlik
+        final DateTime targetDate = template.startDate.subtract(Duration(days: template.notificationReminderDays));
+        final DateTime candidate = DateTime(
+          targetDate.year,
+          targetDate.month,
+          targetDate.day,
+          template.notificationHour,
+          template.notificationMinute,
+        );
+        if (candidate.isAfter(now)) {
+          localTarget = candidate;
         }
-        
-        // Gelecek bir tarih bulana kadar ilerlet
-        while (localTarget.isBefore(now)) {
-          localTarget = _calculateNextOccurrence(localTarget, record.periodType);
+      } else {
+        // Tekrarlı şablon için RecurrenceEngine kullanan arama
+        DateTime searchAfter = now.subtract(Duration(days: template.notificationReminderDays + 2));
+        DateTime? nextOcc = RecurrenceEngine.nextOccurrence(template.recurrenceRule, after: searchAfter);
+
+        while (nextOcc != null) {
+          final DateTime targetDate = nextOcc.subtract(Duration(days: template.notificationReminderDays));
+          final DateTime candidate = DateTime(
+            targetDate.year,
+            targetDate.month,
+            targetDate.day,
+            template.notificationHour,
+            template.notificationMinute,
+          );
+          if (candidate.isAfter(now)) {
+            localTarget = candidate;
+            break;
+          }
+          searchAfter = nextOcc;
+          nextOcc = RecurrenceEngine.nextOccurrence(template.recurrenceRule, after: searchAfter);
         }
+      }
+
+      if (localTarget == null) {
+        await cancelNotification(template.id);
+        return;
       }
 
       final settings = await DatabaseService.getSettings();
       final l10n = await AppLocalizations.delegate.load(Locale(settings.languageCode));
 
-      final String amountText = record.minAmount != null && record.maxAmount != null
-          ? "${CurrencyUtils.formatAmount(record.minAmount!, currencySymbol: record.currency ?? "₺")} - ${CurrencyUtils.formatAmount(record.maxAmount!, currencySymbol: record.currency ?? "₺")}"
-          : CurrencyUtils.formatAmount(record.effectiveAmount, currencySymbol: record.currency ?? "₺");
+      final String amountText = template.minAmount != null && template.maxAmount != null
+          ? "${CurrencyUtils.formatAmount(template.minAmount!, currencySymbol: template.currency ?? "₺")} - ${CurrencyUtils.formatAmount(template.maxAmount!, currencySymbol: template.currency ?? "₺")}"
+          : CurrencyUtils.formatAmount(template.effectiveAmount, currencySymbol: template.currency ?? "₺");
 
       final String dateText;
       final today = DateTime(now.year, now.month, now.day);
-      final paymentDateOnly = DateTime(record.date.year, record.date.month, record.date.day);
+      final paymentDateOnly = DateTime(template.startDate.year, template.startDate.month, template.startDate.day);
       final difference = paymentDateOnly.difference(today).inDays;
       if (difference == 0) {
         dateText = l10n.today;
@@ -263,20 +278,20 @@ class NotificationService {
       } else if (difference == -1) {
         dateText = l10n.yesterday;
       } else {
-        dateText = DateFormat('d MMMM', settings.languageCode).format(record.date);
+        dateText = DateFormat('d MMMM', settings.languageCode).format(template.startDate);
       }
 
-      final String notificationTitle = record.isIncome
-          ? l10n.notificationIncomeTitle(record.title)
-          : l10n.notificationExpenseTitle(record.title);
+      final String notificationTitle = template.isIncome
+          ? l10n.notificationIncomeTitle(template.title)
+          : l10n.notificationExpenseTitle(template.title);
 
       final buffer = StringBuffer();
       buffer.write(l10n.notificationBodyAmount(amountText));
       buffer.write('  •  ');
       buffer.write(l10n.notificationBodyDate(dateText));
-      if (record.note != null && record.note!.trim().isNotEmpty) {
+      if (template.note != null && template.note!.trim().isNotEmpty) {
         buffer.write('\n');
-        buffer.write(l10n.notificationBodyNote(record.note!.trim()));
+        buffer.write(l10n.notificationBodyNote(template.note!.trim()));
       }
       final String notificationBody = buffer.toString();
 
@@ -318,7 +333,7 @@ class NotificationService {
           scheduledDate: scheduledDate,
           notificationDetails: details,
           androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-          matchDateTimeComponents: _getMatchComponents(record.periodType),
+          matchDateTimeComponents: _getMatchComponents(template.periodType),
         );
       } catch (e) {
         debugPrint('⚠️ [NotificationService] exactAllowWhileIdle başarısız oldu (Transaction), inexact deneniyor: $e');
@@ -329,7 +344,7 @@ class NotificationService {
           scheduledDate: scheduledDate,
           notificationDetails: details,
           androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
-          matchDateTimeComponents: _getMatchComponents(record.periodType),
+          matchDateTimeComponents: _getMatchComponents(template.periodType),
         );
       }
       debugPrint('🔔 [NotificationService] Bildirim başarıyla zamanlandı: ID $notificationId, Tarih: $scheduledDate');
@@ -357,43 +372,6 @@ class NotificationService {
     }
   }
 
-  DateTime _calculateNextOccurrence(DateTime current, int periodType) {
-    if (periodType == 250) {
-      // Hafta İçi (Pzt-Cum)
-      int addDays = 1;
-      if (current.weekday == DateTime.friday) {
-        addDays = 3;
-      } else if (current.weekday == DateTime.saturday) {
-        addDays = 2;
-      }
-      return current.add(Duration(days: addDays));
-    } else if (periodType == 251) {
-      // Hafta Sonu (Cmt-Paz)
-      int addDays = 1;
-      if (current.weekday == DateTime.sunday) {
-        addDays = 6;
-      } else if (current.weekday >= DateTime.monday && current.weekday <= DateTime.friday) {
-        addDays = DateTime.saturday - current.weekday;
-      }
-      return current.add(Duration(days: addDays));
-    } else {
-      final unit = periodType ~/ 100;
-      final interval = periodType % 100;
-      if (interval > 0) {
-        switch (unit) {
-          case 1: // Gün
-            return current.add(Duration(days: interval));
-          case 2: // Hafta
-            return current.add(Duration(days: interval * 7));
-          case 3: // Ay
-            return DateTime(current.year, current.month + interval, current.day, current.hour, current.minute);
-          case 4: // Yıl
-            return DateTime(current.year + interval, current.month, current.day, current.hour, current.minute);
-        }
-      }
-    }
-    return current.add(const Duration(days: 30)); // Varsayılan aylık
-  }
 
   DateTimeComponents? _getMatchComponents(int periodType) {
     switch (periodType) {

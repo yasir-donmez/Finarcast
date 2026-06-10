@@ -6,12 +6,12 @@ import '../../../l10n/app_localizations.dart';
 
 class TransactionTypeToggle extends StatelessWidget {
   final int tabIndex; // 0 = Gider, 1 = Gelir
-  final ValueChanged<int> onTabChanged;
+  final ValueChanged<int>? onTabChanged;
 
   const TransactionTypeToggle({
     super.key,
     required this.tabIndex,
-    required this.onTabChanged,
+    this.onTabChanged,
   });
 
   @override
@@ -21,15 +21,21 @@ class TransactionTypeToggle extends StatelessWidget {
 
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 16),
-      child: SegmentedControl(
-        tabs: [
-          l10n.expense.toSafeUpperCase(context),
-          l10n.income.toSafeUpperCase(context),
-        ],
-        // Seçili sekmeye göre ana rengi değiştiriyoruz
-        activeColor: isIncome ? AppColors.getIncome(context) : AppColors.getExpense(context),
-        selectedIndex: tabIndex,
-        onTabChanged: onTabChanged,
+      child: IgnorePointer(
+        ignoring: onTabChanged == null,
+        child: Opacity(
+          opacity: onTabChanged == null ? 0.6 : 1.0,
+          child: SegmentedControl(
+            tabs: [
+              l10n.expense.toSafeUpperCase(context),
+              l10n.income.toSafeUpperCase(context),
+            ],
+            // Seçili sekmeye göre ana rengi değiştiriyoruz
+            activeColor: isIncome ? AppColors.getIncome(context) : AppColors.getExpense(context),
+            selectedIndex: tabIndex,
+            onTabChanged: onTabChanged ?? (_) {},
+          ),
+        ),
       ),
     );
   }

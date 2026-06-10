@@ -6,6 +6,16 @@ class AuthErrorHelper {
   /// Maps Supabase authentication exceptions to localized, user-friendly messages.
   static String getFriendlyErrorMessage(BuildContext context, Object error) {
     final l10n = AppLocalizations.of(context)!;
+    
+    // Check for network connectivity errors (SocketException, Failed host lookup, etc.)
+    final errorString = error.toString().toLowerCase();
+    if (errorString.contains('socketexception') || 
+        errorString.contains('failed host lookup') || 
+        errorString.contains('network_error') ||
+        errorString.contains('connection failed')) {
+      return l10n.syncErrorNoInternet;
+    }
+
     if (error is AuthException) {
       final message = error.message.toLowerCase();
       
