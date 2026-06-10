@@ -21,6 +21,7 @@ class SubscriptionService extends ChangeNotifier {
 
   final SharedPreferences _prefs;
   bool _isInitializing = true;
+  bool _isLoggingIn = false;
   bool _isPro = false;
   Offerings? _offerings;
 
@@ -30,6 +31,7 @@ class SubscriptionService extends ChangeNotifier {
   }
 
   bool get isInitializing => _isInitializing;
+  bool get isLoggingIn => _isLoggingIn;
   bool get isPro => _isPro;
   Offerings? get offerings => _offerings;
 
@@ -122,12 +124,17 @@ class SubscriptionService extends ChangeNotifier {
 
   /// Log in to RevenueCat with a specific User ID (e.g. Supabase User ID)
   Future<void> logIn(String appUserId) async {
+    _isLoggingIn = true;
+    notifyListeners();
     try {
       final logInResult = await Purchases.logIn(appUserId);
       _updateProStatus(logInResult.customerInfo);
       debugPrint('✅ [SubscriptionService] RevenueCat identified user: $appUserId');
     } catch (e) {
       debugPrint('❌ [SubscriptionService] RevenueCat logIn error: $e');
+    } finally {
+      _isLoggingIn = false;
+      notifyListeners();
     }
   }
 

@@ -81,3 +81,8 @@ BEGIN
   );
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- 4) Yetkilendirmeler (Grants)
+GRANT SELECT ON public.user_subscriptions TO anon, authenticated;
+GRANT SELECT ON public.ai_usage_logs TO anon, authenticated;
+

@@ -7,6 +7,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../database/database_service.dart';
 import 'sync_service.dart';
 import 'materialization_service.dart';
+import 'currency_service.dart';
 import '../../l10n/app_localizations.dart';
 
 class SyncCoordinator {
@@ -105,6 +106,10 @@ class SyncCoordinator {
         // Eşitleme sonrası yeni şablonlar geldiyse tekrarlı işlemleri somutlaştır
         debugPrint('[SyncCoordinator] Eşitleme sonrası materialization tetikleniyor...');
         await MaterializationService.materializeAll();
+
+        // Eşitleme sonrası yeni para birimleri gelebileceği için kurları arka planda güncelle
+        debugPrint('[SyncCoordinator] Eşitleme sonrası kurlar güncelleniyor...');
+        unawaited(CurrencyService.updateRates(force: false));
 
         _retryCount = 0;
         _retryTimer?.cancel();

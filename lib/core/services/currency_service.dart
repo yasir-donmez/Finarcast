@@ -8,8 +8,17 @@ class CurrencyService {
   // Ücretsiz ve Anahtar Gerektirmeyen Yerel API (Emtialar ve yedek kurlar için)
   static const String _baseUrl = 'https://finans.truncgil.com/today.json';
 
+  static DateTime? _lastAttemptTime;
+
   /// Kurları internetten çeker ve veritabanını günceller
-  static Future<bool> updateRates() async {
+  static Future<bool> updateRates({bool force = false}) async {
+    final now = DateTime.now();
+    if (!force && _lastAttemptTime != null && now.difference(_lastAttemptTime!).inMinutes < 5) {
+      debugPrint('ℹ️ [CurrencyService] Son güncelleme denemesinden bu yana 5 dakikadan az süre geçti, istek atlanıyor.');
+      return false;
+    }
+    _lastAttemptTime = now;
+
     final lastUpdated = DateTime.now();
     final Map<String, double> mergedRates = {};
     bool anySuccessfulFetch = false;
@@ -18,7 +27,7 @@ class CurrencyService {
     try {
       debugPrint('🌍 [CurrencyService] Frankfurter API kurları çekiliyor...');
       final response = await http
-          .get(Uri.parse('https://api.frankfurter.app/latest'))
+          .get(Uri.parse('https://api.frankfurter.dev/v1/latest'))
           .timeout(const Duration(seconds: 8));
       
       if (response.statusCode == 200) {

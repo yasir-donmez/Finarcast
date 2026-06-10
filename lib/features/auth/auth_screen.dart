@@ -9,9 +9,7 @@ import 'widgets/auth_background.dart';
 import 'widgets/flip_card.dart';
 import '../../../shared/widgets/custom_notification.dart';
 import '../../../l10n/app_localizations.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import '../../../core/services/subscription_service.dart';
-import '../../../core/providers/settings_provider.dart';
+import '../../../core/providers/auth_provider.dart';
 
 import 'widgets/login_form.dart';
 import 'widgets/register_form.dart';
@@ -613,14 +611,13 @@ class _AuthScreenState extends ConsumerState<AuthScreen> with TickerProviderStat
                     isLoading: _isLoading || _isGoogleLoading,
                     onToggleAuthMode: _toggleAuthMode,
                     onContinueAsGuest: () async {
-                      final prefs = await SharedPreferences.getInstance();
-                      await prefs.setBool('Finarcast_is_pro_user', false);
-                      await prefs.setBool('Finarcast_is_guest_mode', true);
                       try {
-                        await ref.read(subscriptionServiceProvider).setProStatus(false);
-                      } catch (_) {}
-                      ref.read(guestModeProvider.notifier).state = true;
-                      ref.invalidate(settingsProvider);
+                        await ref.read(authControllerProvider.notifier).continueAsGuest();
+                      } catch (e) {
+                        if (context.mounted) {
+                          CustomNotification.error(context, e.toString());
+                        }
+                      }
                     },
                     onCancel: () {
                       setState(() {

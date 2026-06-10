@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../../core/providers/auth_provider.dart';
 import 'package:purchases_flutter/purchases_flutter.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -13,8 +14,6 @@ import '../../../../shared/widgets/custom_notification.dart';
 import '../../../../shared/widgets/custom_dialog.dart';
 import '../../../home/home_providers.dart';
 import '../settings_list_items.dart';
-import '../../../../core/services/auth_service.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class SubscriptionSetting extends ConsumerStatefulWidget {
   const SubscriptionSetting({super.key});
@@ -287,9 +286,7 @@ class _SubscriptionSettingState extends ConsumerState<SubscriptionSetting> {
                       label: l10n.loginOrRegister,
                       onTap: () async {
                         Navigator.pop(context);
-                        final prefs = await SharedPreferences.getInstance();
-                        await prefs.setBool('Finarcast_is_guest_mode', false);
-                        ref.read(guestModeProvider.notifier).state = false;
+                        await ref.read(authControllerProvider.notifier).exitGuestMode();
                       },
                       isPrimary: true,
                     ),

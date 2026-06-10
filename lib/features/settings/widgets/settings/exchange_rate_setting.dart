@@ -140,7 +140,7 @@ class _ExchangeRateSettingState extends ConsumerState<ExchangeRateSetting> with 
                         onTap: () async {
                           if (_isUpdating) return;
                           setState(() => _isUpdating = true);
-                          final success = await CurrencyService.updateRates();
+                          final success = await CurrencyService.updateRates(force: true);
                           if (mounted) setState(() => _isUpdating = false);
 
                           if (!context.mounted) return;

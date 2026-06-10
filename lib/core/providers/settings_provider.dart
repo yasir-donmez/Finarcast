@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:intl/intl.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import '../database/models/recurring_template.dart';
 import '../database/database_service.dart';
 import '../database/models/app_settings.dart';
@@ -53,56 +52,29 @@ class SettingsNotifier extends StateNotifier<AppSettings> {
   }
 
   void _listenToSubscriptionChanges() {
-    _ref.listen<bool>(
-      subscriptionServiceProvider.select((s) => s.isPro),
+    _ref.listen<(bool, bool, bool)>(
+      subscriptionServiceProvider.select((s) => (s.isPro, s.isInitializing, s.isLoggingIn)),
       (previous, next) {
-        if (previous != next && !next) {
-          _resetPremiumSettings();
+        if (previous != next) {
+          _loadSettings();
         }
       },
     );
   }
 
-  Future<void> _resetPremiumSettings() async {
-    bool needsSave = false;
-    var settings = state;
-
-    // Premium olmayan kullanıcılar için arkaplan stilini 'Sade' (2) yap
-    if (settings.bgColorStyle != 2) {
-      settings = settings.copyWith(bgColorStyle: 2);
-      needsSave = true;
-    }
-
-    // Premium olmayan kullanıcılar için vurgu rengini 'Kutup' (0xFF00BCD4) yap
-    if (settings.accentColorValue != 0xFF00BCD4) {
-      settings = settings.copyWith(accentColorValue: 0xFF00BCD4);
-      needsSave = true;
-    }
-
-    // Premium olmayan kullanıcılar için saklama/silme ve eşitleme ayarlarını sıfırla
-    if (settings.dataRetentionDays != -1) {
-      settings = settings.copyWith(dataRetentionDays: -1);
-      needsSave = true;
-    }
-    if (settings.permanentDeletionDays != -1) {
-      settings = settings.copyWith(permanentDeletionDays: -1);
-      needsSave = true;
-    }
-    if (settings.isSyncEnabled) {
-      settings = settings.copyWith(isSyncEnabled: false);
-      needsSave = true;
-    }
-
-    if (needsSave) {
-      await _save(settings);
-    }
-  }
-
   Future<void> _loadSettings() async {
     var settings = await DatabaseService.getSettings();
-    final prefs = await SharedPreferences.getInstance();
-    final isPro = prefs.getBool('Finarcast_is_pro_user') ?? false;
+    final subService = _ref.read(subscriptionServiceProvider);
 
+    // Eğer abonelik servisi henüz başlatılıyorsa veya giriş işlemi yapılıyorsa,
+    // gerçek premium durumunu henüz bilmediğimiz için ayarları sıfırlamıyoruz.
+    if (subService.isInitializing || subService.isLoggingIn) {
+      state = settings;
+      _updateIntl(state.languageCode);
+      return;
+    }
+
+    final isPro = subService.isPro;
     bool needsSave = false;
 
     // Premium olmayan kullanıcılar için arkaplan stilini 'Sade' (2) yap

@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../../../core/providers/settings_provider.dart';
+import '../../../../core/providers/auth_provider.dart';
 import '../../../../core/services/auth_service.dart';
 import '../../../../core/services/sync_coordinator.dart';
 import '../../../../core/services/subscription_service.dart';
@@ -293,9 +294,7 @@ class _SyncSettingState extends ConsumerState<SyncSetting> {
           label: l10n.authLogin,
           onTap: () async {
             Navigator.pop(context);
-            final prefs = await SharedPreferences.getInstance();
-            await prefs.setBool('Finarcast_is_guest_mode', false);
-            ref.read(guestModeProvider.notifier).state = false;
+            await ref.read(authControllerProvider.notifier).exitGuestMode();
           },
           isPrimary: true,
         ),

@@ -42,17 +42,22 @@ serve(async (req) => {
 
     // 2. Check Subscription and Rate Limits
     let isPro = false
-    const { data: subData } = await supabase
+    const { data: subData, error: subError } = await supabase
       .from('user_subscriptions')
       .select('is_pro')
       .eq('user_id', user.id)
       .maybeSingle()
       
+    if (subError) {
+      console.error('[Supabase Edge Function] Error fetching user subscription:', subError)
+    }
+
     if (subData && subData.is_pro) {
       isPro = true
     }
 
     const dailyLimit = isPro ? 50 : 5
+    console.log(`[Supabase Edge Function] User: ${user.id}, isPro: ${isPro}, dailyLimit: ${dailyLimit}`)
 
     // Check rate limit using anon role (RPC increments count safely due to SECURITY DEFINER)
     const supabaseClient = createClient(
@@ -71,6 +76,7 @@ serve(async (req) => {
     }
 
     if (!rpcData.allowed) {
+      console.warn(`[Supabase Edge Function] Rate limit exceeded: User: ${user.id}, used: ${rpcData.used}, limit: ${rpcData.limit}, isPro: ${isPro}`)
       return new Response(JSON.stringify({ 
         error: 'Rate limit exceeded. Please wait or upgrade your plan.',
         isRateLimit: true,
@@ -176,32 +182,32 @@ serve(async (req) => {
 
 function getParentCategoryName(id: string): string {
   switch (id) {
+    case 'exp_rent': return 'Barınma';
+    case 'exp_bill': return 'Faturalar';
     case 'exp_grocery': return 'Market';
-    case 'exp_dining': return 'Dışarıda Yemek';
-    case 'exp_rent': return 'Kira';
-    case 'exp_bill': return 'Fatura';
-    case 'exp_home': return 'Ev';
-    case 'exp_fun': return 'Eğlence';
-    case 'exp_sub': return 'Abonelik';
-    case 'exp_health': return 'Sağlık';
+    case 'exp_dining': return 'Yemek';
     case 'exp_trans': return 'Ulaşım';
     case 'exp_car': return 'Araç';
     case 'exp_cloth': return 'Giyim';
-    case 'exp_beauty': return 'Güzellik';
+    case 'exp_beauty': return 'Kişisel Bakım';
+    case 'exp_health': return 'Sağlık';
+    case 'exp_sub': return 'Abonelikler';
+    case 'exp_fun': return 'Eğlence';
     case 'exp_edu': return 'Eğitim';
     case 'exp_family': return 'Aile';
+    case 'exp_shopping': return 'Alışveriş';
+    case 'exp_travel': return 'Seyahat';
     case 'exp_debt': return 'Borç';
-    case 'exp_tax': return 'Vergi';
-    case 'exp_invest': return 'Yatırım';
-    case 'exp_other': return 'Diğer';
+    case 'exp_tax': return 'Vergiler';
+    case 'exp_other': return 'Diğer Giderler';
     case 'inc_salary': return 'Maaş';
     case 'inc_extra': return 'Ek Gelir';
-    case 'inc_invest': return 'Yatırım';
+    case 'inc_invest': return 'Yatırım Geliri';
+    case 'inc_rent': return 'Kira Geliri';
     case 'inc_scholarship': return 'Burs';
     case 'inc_sale': return 'Satış';
-    case 'inc_rent': return 'Kira';
     case 'inc_gift': return 'Hediye';
-    case 'inc_other': return 'Diğer';
+    case 'inc_other': return 'Diğer Gelirler';
     default: return 'Bilinmeyen';
   }
 }
@@ -269,34 +275,35 @@ Kurallar:
 14. Kategori Eşleştirme (categoryId): Aşağıdaki kategorilerden en uygun olanının "ID" değerini seç. En spesifik Alt Kategoriyi seçmeye çalış.
 
     **GİDERLER (isIncome = false):**
-    - exp_grocery (Market) -> Alt Kategoriler: exp_grocery_food (Gıda/yiyecek/içecek), exp_grocery_cleaning (Temizlik), exp_grocery_personal (Kişisel bakım), exp_grocery_pet (Evcil hayvan)
-    - exp_dining (Dışarıda Yemek) -> Alt Kategoriler: exp_dining_restaurant (Restoran), exp_dining_fastfood (Fastfood), exp_dining_cafe (Kahve/kafe), exp_dining_delivery (Eve sipariş)
-    - exp_rent (Kira) -> Alt Kategoriler: exp_rent_home (Ev), exp_rent_office (Ofis)
-    - exp_bill (Fatura) -> Alt Kategoriler: exp_bill_electricity (Elektrik), exp_bill_water (Su), exp_bill_gas (Doğalgaz), exp_bill_internet (İnternet), exp_bill_phone (Telefon), exp_bill_dues (Aidat)
-    - exp_home (Ev) -> Alt Kategoriler: exp_home_furniture (Mobilya), exp_home_maintenance (Tadilat), exp_home_supplies (Gereçler), exp_home_garden (Bahçe)
-    - exp_fun (Eğlence) -> Alt Kategoriler: exp_fun_cinema, exp_fun_concert, exp_fun_event, exp_fun_hobby
-    - exp_sub (Abonelik) -> Alt Kategoriler: exp_sub_stream, exp_sub_music, exp_sub_software, exp_sub_gym
-    - exp_health (Sağlık) -> Alt Kategoriler: exp_health_doctor, exp_health_medicine, exp_health_surgery, exp_health_dentist
-    - exp_trans (Ulaşım) -> Alt Kategoriler: exp_trans_taxi, exp_trans_bus, exp_trans_train, exp_trans_flight, exp_trans_travel (Seyahat/Otel)
-    - exp_car (Araç) -> Alt Kategoriler: exp_car_fuel (Akaryakıt), exp_car_maintenance (Tamir), exp_car_insurance (Kasko), exp_car_parking (Otopark/HGS)
-    - exp_cloth (Giyim) -> Alt Kategoriler: exp_cloth_daily, exp_cloth_shoes, exp_cloth_acc (Aksesuar)
-    - exp_beauty (Güzellik) -> Alt Kategoriler: exp_beauty_salon (Kuaför), exp_beauty_cosmetics (Kozmetik)
-    - exp_edu (Eğitim) -> Alt Kategoriler: exp_edu_course, exp_edu_book, exp_edu_school
-    - exp_family (Aile) -> Alt Kategoriler: exp_family_baby, exp_family_toy, exp_family_allowance (Harçlık)
-    - exp_debt (Borç) -> Alt Kategoriler: exp_debt_credit_card, exp_debt_loan, exp_debt_personal (Borç Ödeme/Verme)
-    - exp_tax (Vergi) -> Alt Kategoriler: exp_tax_income, exp_tax_fine (Ceza), exp_tax_fee (Harc)
+    - exp_rent (Barınma) -> Alt Kategoriler: exp_rent_home (Ev Kirası), exp_rent_office (Ofis Kirası), exp_rent_mortgage (Konut Kredisi), exp_rent_maintenance (Tadilat), exp_rent_storage (Depolama)
+    - exp_bill (Faturalar) -> Alt Kategoriler: exp_bill_electricity (Elektrik), exp_bill_water (Su), exp_bill_gas (Doğalgaz), exp_bill_internet (İnternet), exp_bill_phone (Telefon), exp_bill_dues (Aidat), exp_bill_tv (Televizyon)
+    - exp_grocery (Market) -> Alt Kategoriler: exp_grocery_food (Gıda/Yiyecek), exp_grocery_cleaning (Temizlik), exp_grocery_drink (İçecek/Soda/Kola/Su), exp_grocery_pet (Evcil Hayvan), exp_grocery_hygiene (Kişisel Hijyen)
+    - exp_dining (Yemek) -> Alt Kategoriler: exp_dining_restaurant (Restoran), exp_dining_cafe (Kafe/Kahve), exp_dining_fastfood (Hızlı Yemek/Döner/Burger), exp_dining_delivery (Eve Sipariş), exp_dining_canteen (Kantin)
+    - exp_trans (Ulaşım) -> Alt Kategoriler: exp_trans_bus (Toplu Taşıma/Otobüs/Metro), exp_trans_taxi (Taksi), exp_trans_intercity (Şehirlerarası Ulaşım/Otobüs/Tren), exp_trans_scooter (Mikromobilite/Scooter/Martı)
+    - exp_car (Araç) -> Alt Kategoriler: exp_car_fuel (Akaryakıt/Benzin/Dizel), exp_car_maintenance (Sanayi/Tamir/Bakım), exp_car_parking (Otopark/İSPARK), exp_car_wash (Oto Yıkama), exp_car_toll (Geçiş Ücreti/Köprü/HGS), exp_car_insurance (Kasko/Sigorta), exp_car_tax (MTV/Araç Vergisi), exp_car_rental (Araç Kiralama)
+    - exp_cloth (Giyim) -> Alt Kategoriler: exp_cloth_daily (Günlük Giyim/Kıyafet), exp_cloth_shoes (Ayakkabı), exp_cloth_acc (Aksesuar/Çanta/Takı), exp_cloth_tailor (Terzi)
+    - exp_beauty (Kişisel Bakım) -> Alt Kategoriler: exp_beauty_salon (Kuaför/Berber), exp_beauty_cosmetics (Kozmetik/Makyaj), exp_beauty_spa (Spa/Masaj)
+    - exp_health (Sağlık) -> Alt Kategoriler: exp_health_doctor (Muayene/Doktor Ücreti), exp_health_medicine (Eczane/İlaç), exp_health_dentist (Diş Hekimi/Tedavi), exp_health_surgery (Ameliyat/Hastane), exp_health_optics (Gözlük/Lens), exp_health_veterinary (Veteriner), exp_health_therapy (Psikolog/Terapi), exp_health_supplements (Gıda Takviyesi/Vitamin)
+    - exp_sub (Abonelikler) -> Alt Kategoriler: exp_sub_stream (Netflix/Disney/Dizi-Film), exp_sub_music (Spotify/Youtube Premium), exp_sub_gym (Spor Salonu Üyeliği), exp_sub_software (iCloud/Google One/Yazılım), exp_sub_publishing (Dergi/Yayın/Medium)
+    - exp_fun (Eğlence) -> Alt Kategoriler: exp_fun_cinema (Sinema), exp_fun_concert (Konser/Tiyatro), exp_fun_event (Etkinlik/Festival), exp_fun_game (Steam/Playstation/Oyun), exp_fun_hobby (Hobi Malzemeleri), exp_fun_gambling (Milli Piyango/Şans Oyunları)
+    - exp_edu (Eğitim) -> Alt Kategoriler: exp_edu_school (Okul/Harç/Taksit), exp_edu_course (Kurs/Udemy/Eğitim), exp_edu_book (Kitap/Roman), exp_edu_stationery (Kırtasiye), exp_edu_exams (Sınav Ücretleri/ÖSYM/YDS)
+    - exp_family (Aile) -> Alt Kategoriler: exp_family_baby (Bebek Bezi/Mama), exp_family_toy (Oyuncak), exp_family_allowance (Çocuğa Harçlık), exp_family_daycare (Kreş/Bakıcı)
+    - exp_shopping (Alışveriş) -> Alt Kategoriler: exp_shopping_tech (Telefon/Bilgisayar/Teknoloji), exp_shopping_furniture (Mobilya/Ev Eşyası), exp_shopping_decor (Ev Tekstili/Perde), exp_shopping_kitchen (Mutfak Gereçleri/Tabak), exp_shopping_gift (Hediye Alma), exp_shopping_general (Genel Alışveriş/Trendyol/Amazon)
+    - exp_travel (Seyahat) -> Alt Kategoriler: exp_travel_hotel (Otel/Konaklama/Airbnb), exp_travel_flight (Uçak/Otobüs/Gemi Bileti), exp_travel_tour (Turistik Gezi/Rehber), exp_travel_visa (Vize Ücretleri)
+    - exp_debt (Borç) -> Alt Kategoriler: exp_debt_credit_card (Kredi Kartı Ödemesi), exp_debt_loan (Banka Kredisi/Taksit), exp_debt_personal (Arkadaşa/Birine Borç Ödeme veya Verme)
+    - exp_tax (Vergiler) -> Alt Kategoriler: exp_tax_income (Gelir Vergisi), exp_tax_fine (Trafik Cezası/Ceza), exp_tax_fee (Harç/Pasaport Harcı)
     - exp_invest (Yatırım) -> Alt Kategoriler: exp_invest_gold (Altın/Döviz), exp_invest_stock (Hisse/Fon), exp_invest_crypto, exp_invest_savings
-    - exp_other (Diğer) -> Alt Kategoriler: exp_other_general, exp_other_donation, exp_other_insurance
+    - exp_other (Diğer Giderler) -> Alt Kategoriler: exp_other_general (Genel/Sınıflandırılamayan), exp_other_donation (Bağış/LÖSEV), exp_other_tip (Bahşiş)
 
     **GELİRLER (isIncome = true):**
-    - inc_salary (Maaş) -> Alt Kategoriler: inc_salary_main, inc_salary_bonus, inc_salary_dividend (Temettü), inc_salary_pension
-    - inc_extra (Ek Gelir) -> Alt Kategoriler: inc_extra_freelance, inc_extra_parttime, inc_extra_commission
-    - inc_invest (Yatırım) -> Alt Kategoriler: inc_invest_stock, inc_invest_crypto, inc_invest_interest, inc_invest_gold, inc_invest_property
-    - inc_scholarship (Burs) -> Alt Kategoriler: inc_scholarship_award, inc_scholarship_loan, inc_scholarship_gov
-    - inc_sale (Satış) -> Alt Kategoriler: inc_sale_online, inc_sale_physical
-    - inc_rent (Kira) -> Alt Kategoriler: inc_rent_home, inc_rent_office, inc_rent_car
-    - inc_gift (Hediye) -> Alt Kategoriler: inc_gift_general, inc_gift_award
-    - inc_other (Diğer) -> Alt Kategoriler: inc_other_general, inc_other_refund, inc_other_lottery
+    - inc_salary (Maaş) -> Alt Kategoriler: inc_salary_main (Ana Maaş), inc_salary_bonus (Prim/Bonus), inc_salary_dividend (Temettü/Kâr Payı), inc_salary_pension (Emeklilik Maaşı), inc_salary_severance (Tazminat)
+    - inc_extra (Ek Gelir) -> Alt Kategoriler: inc_extra_freelance (Freelance İşler), inc_extra_parttime (Yarı Zamanlı İş), inc_extra_commission (Satış Komisyonu), inc_extra_content (Youtube/Blog Geliri)
+    - inc_invest (Yatırım Geliri) -> Alt Kategoriler: inc_invest_stock (Borsa/Hisse Geliri), inc_invest_crypto (Kripto Para Geliri), inc_invest_interest (Mevduat Faizi), inc_invest_gold (Altın/Döviz Kârı), inc_invest_bond (Tahvil Geliri)
+    - inc_rent (Kira Geliri) -> Alt Kategoriler: inc_rent_home (Ev Kira Geliri), inc_rent_office (Dükkan/Ofis Kira Geliri), inc_rent_car (Araç Kira Geliri), inc_rent_equipment (Ekipman Kira Geliri)
+    - inc_scholarship (Burs) -> Alt Kategoriler: inc_scholarship_award (Öğrenim Bursu), inc_scholarship_loan (Kredi/KYK), inc_scholarship_gov (Devlet Yardımı), inc_scholarship_grant (Proje Desteği)
+    - inc_sale (Satış) -> Alt Kategoriler: inc_sale_online (Online Satış Geliri), inc_sale_physical (İkinci El Eşya Satış Geliri), inc_sale_vehicle (Araç Satış Geliri), inc_sale_property (Gayrimenkul/Ev Satış Geliri)
+    - inc_gift (Hediye) -> Alt Kategoriler: inc_gift_general (Nakit Hediye/Bayram Harçlığı), inc_gift_award (Yarışma/Ödül Geliri), inc_gift_inheritance (Miras Geliri), inc_gift_alimony (Nafaka)
+    - inc_other (Diğer Gelirler) -> Alt Kategoriler: inc_other_general (Genel/Diğer Gelir), inc_other_refund (İade Alınan Ücret), inc_other_lottery (Şans Oyunları İkramiyesi), inc_other_collection (Verilen Borcun Geri Alınması)
 
 ${customText}
 
@@ -348,12 +355,14 @@ Kurallar:
 1. Fişin kesildiği işletme adını (başlık), toplam tutarı (amount), fiş üzerindeki tarihi (date) ve kategoriyi belirle. Fişin kesildiği işletme adını (başlık) belirlerken resmi şirket unvanlarını (örn. 'TİC. A.Ş.', 'LTD. ŞTİ.', 'A.Ş.', 'A. S.', 'LTD. STI.') veya şube isimlerini temizle. Sadece bilinen marka/işletme adını sade ve kısa bir şekilde yaz (örn: 'ŞOK MARKETLER TİC. A.Ş.' veya 'ŞOK MARKET' yerine sadece 'Şok', 'MİGROS TİCARET A.Ş.' yerine sadece 'Migros', 'STARBUCKS KAHVE SANA' yerine sadece 'Starbucks').
 2. Tarihi bulamazsan bugünün tarihini kullan. Tarih formatı YYYY-MM-DD olmalı.
 3. Kategori olarak aşağıdaki ID'lerden en uygun olanını seç. Eğer fiş içeriği spesifik bir alt kategoriye tam uymuyorsa, doğrudan ana kategori ID'sini seç (örn: \`exp_grocery\`, \`exp_dining\` vb.):
-   - exp_grocery (Market) -> Alt: exp_grocery_food, exp_grocery_cleaning, exp_grocery_personal, exp_grocery_pet
-   - exp_dining (Dışarıda Yemek) -> Alt: exp_dining_restaurant, exp_dining_fastfood, exp_dining_cafe, exp_dining_delivery
+   - exp_grocery (Market) -> Alt: exp_grocery_food, exp_grocery_cleaning, exp_grocery_drink, exp_grocery_pet, exp_grocery_hygiene
+   - exp_dining (Yemek) -> Alt: exp_dining_restaurant, exp_dining_fastfood, exp_dining_cafe, exp_dining_delivery, exp_dining_canteen
    - exp_car (Araç) -> Alt: exp_car_fuel
    - exp_cloth (Giyim) -> Alt: exp_cloth_daily
-   - exp_beauty (Güzellik) -> Alt: exp_beauty_salon, exp_beauty_cosmetics
-   - exp_trans (Ulaşım) -> Alt: exp_trans_travel
+   - exp_beauty (Kişisel Bakım) -> Alt: exp_beauty_salon, exp_beauty_cosmetics
+   - exp_travel (Seyahat) -> Alt: exp_travel_flight, exp_travel_hotel
+   - exp_shopping (Alışveriş) -> Alt: exp_shopping_tech, exp_shopping_furniture, exp_shopping_decor, exp_shopping_kitchen, exp_shopping_gift, exp_shopping_general
+   - exp_health (Sağlık) -> Alt: exp_health_doctor, exp_health_medicine, exp_health_dentist, exp_health_optics
    - exp_other (Diğer) -> Alt: exp_other_general
 ${customText}
 4. Fişteki ürünleri karmaşık kodlar, barkod sayıları, detaylı marka-model bilgileri gibi kirliliklerden arındırarak çok kısa, sade ve anlaşılır bir alışveriş özeti halinde, yan yana tek satırda aralarına virgül koyarak ve her ürünün başına madde işareti (•) ekleyerek (varsa adet, kg, litre, gram gibi miktar/nicelik bilgilerini de ekleyerek, örn. '• 2 adet Süt, • 1 kg Nohut, • 1.5 L Kola') "note" alanına yaz.

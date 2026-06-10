@@ -4,10 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../home/home_providers.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import '../../l10n/app_localizations.dart';
 import '../../core/services/auth_service.dart';
-import '../../core/services/subscription_service.dart';
 import '../../core/theme/app_constants.dart';
 import '../../shared/widgets/custom_bottom_sheet.dart';
 import '../../shared/widgets/custom_dialog.dart';
@@ -24,9 +22,7 @@ import '../auth/utils/auth_error_helper.dart';
 import 'widgets/etched_liquid_text.dart';
 import 'widgets/settings/subscription_setting.dart';
 import 'widgets/settings_list_items.dart';
-import '../../core/database/database_service.dart';
-import '../../core/providers/db_providers.dart';
-import '../../core/providers/settings_provider.dart';
+import '../../core/providers/auth_provider.dart';
 
 // Modular Settings
 import 'widgets/settings/language_setting.dart';
@@ -120,11 +116,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       () {
                         if (user == null) {
                           return ClickableAction(
-                            onTap: () async {
-                              final prefs = await SharedPreferences.getInstance();
-                              await prefs.setBool('Finarcast_is_guest_mode', false);
-                              ref.read(guestModeProvider.notifier).state = false;
-                            },
+                            onTap: () => ref.read(authControllerProvider.notifier).exitGuestMode(),
                             child: Padding(
                               padding: const EdgeInsets.all(16),
                               child: Row(
@@ -506,31 +498,11 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                                   onTap: () async {
                                     Navigator.pop(context);
                                     try {
-                                      // 1. Önce abonelikten çık
-                                      await ref.read(subscriptionServiceProvider).logOut();
-                                      
-                                      // 2. Veritabanını temizle
-                                      await DatabaseService.clearAllData();
-                                      
-                                      // 3. Tercihleri ve durumları sıfırla
-                                      final prefs = await SharedPreferences.getInstance();
-                                      await prefs.setBool('Finarcast_is_guest_mode', false);
-                                      
-                                      ref.read(guestModeProvider.notifier).state = false;
-                                      ref.invalidate(transactionsStreamProvider);
-                                      ref.invalidate(vaultsStreamProvider);
-                                      ref.invalidate(settingsProvider);
-                                      ref.invalidate(subscriptionServiceProvider);
-
-                                      // Navigator üzerindeki tüm katmanları temizle (dialog, sayfa vb.)
+                                      await ref.read(authControllerProvider.notifier).signOut();
                                       if (context.mounted) {
                                         Navigator.of(context).popUntil((route) => route.isFirst);
                                       }
- 
-                                      // 4. En son oturumu kapat (bu işlem UI'ı değiştirecektir)
-                                      await ref.read(authServiceProvider).signOut();
                                     } catch (e) {
-                                      debugPrint("Çıkış yaparken hata: $e");
                                       if (context.mounted) {
                                         CustomNotification.error(context, l10n.errorOccurred(AuthErrorHelper.getFriendlyErrorMessage(context, e)));
                                       }
@@ -598,35 +570,12 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                                   onTap: () async {
                                     Navigator.pop(context);
                                     try {
-                                      // 1. Önce abonelikten çık
-                                      await ref.read(subscriptionServiceProvider).logOut();
-                                      
-                                      // 2. Veritabanını temizle
-                                      await DatabaseService.clearAllData();
-                                      
-                                      // 3. Tercihleri ve durumları sıfırla
-                                      final prefs = await SharedPreferences.getInstance();
-                                      await prefs.setBool('Finarcast_is_guest_mode', false);
-                                      
-                                      ref.read(guestModeProvider.notifier).state = false;
-                                      ref.invalidate(transactionsStreamProvider);
-                                      ref.invalidate(vaultsStreamProvider);
-                                      ref.invalidate(settingsProvider);
-                                      ref.invalidate(subscriptionServiceProvider);
-
-                                      // Navigator üzerindeki tüm katmanları temizle (dialog, sayfa vb.)
+                                      await ref.read(authControllerProvider.notifier).deleteAccount();
                                       if (context.mounted) {
                                         Navigator.of(context).popUntil((route) => route.isFirst);
-                                      }
- 
-                                      // 4. Hesabı ve oturumu sil (bu işlem UI'ı değiştirecektir)
-                                      await ref.read(authServiceProvider).deleteAccount();
-                                      
-                                      if (context.mounted) {
                                         CustomNotification.success(context, l10n.done);
                                       }
                                     } catch (e) {
-                                      debugPrint("Hesap silinirken hata: $e");
                                       if (context.mounted) {
                                         CustomNotification.error(context, l10n.errorOccurred(AuthErrorHelper.getFriendlyErrorMessage(context, e)));
                                       }

@@ -6,6 +6,7 @@ import '../../core/theme/app_constants.dart';
 import '../../core/database/models/vault.dart';
 import '../../core/providers/db_providers.dart';
 import '../../core/providers/settings_provider.dart';
+import '../../core/providers/auth_provider.dart';
 import '../../core/services/subscription_service.dart';
 import '../../shared/widgets/custom_card.dart';
 import '../../shared/widgets/custom_notification.dart';
@@ -19,8 +20,6 @@ import '../auth/widgets/auth_background.dart';
 import '../../core/utils/category_utils.dart';
 import 'providers/smart_inbox_providers.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import '../../core/services/auth_service.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import '../../l10n/app_localizations.dart';
 
 // Modular Widgets
@@ -127,9 +126,7 @@ class _SmartScanScreenState extends ConsumerState<SmartScanScreen> with WidgetsB
           label: l10n.loginOrSignUp,
           onTap: () async {
             Navigator.pop(context);
-            final prefs = await SharedPreferences.getInstance();
-            await prefs.setBool('Finarcast_is_guest_mode', false);
-            ref.read(guestModeProvider.notifier).state = false;
+            await ref.read(authControllerProvider.notifier).exitGuestMode();
           },
           isPrimary: true,
         ),

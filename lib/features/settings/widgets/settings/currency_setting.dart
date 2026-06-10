@@ -229,7 +229,7 @@ class CurrencySetting extends ConsumerWidget {
                       final hasRate = rates.any((r) => r.currencyCode == code && r.rate > 0);
 
                       if (!hasRate) {
-                        final success = await CurrencyService.updateRates();
+                        final success = await CurrencyService.updateRates(force: true);
                         if (success) {
                           final newRates = await DatabaseService.getAllExchangeRates();
                           final hasRateAfterUpdate = newRates.any((r) => r.currencyCode == code && r.rate > 0);

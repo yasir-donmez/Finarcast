@@ -490,9 +490,56 @@ class SyncService {
 
       if (remoteTxs.length <= 1) return; // Duplikat yok
 
-      // Gruplama için key oluştur
-      final Map<String, List<Map<String, dynamic>>> groups = {};
+      final List<String> deletedIds = [];
+
+      // 1. Aşama: occurrence_key'e göre dedup (boş olmayan ve manual_ ile başlamayanlar)
+      final Map<String, List<Map<String, dynamic>>> byOccurrenceKey = {};
       for (final tx in remoteTxs) {
+        final occKey = tx['occurrence_key'] as String? ?? '';
+        if (occKey.isNotEmpty && !occKey.startsWith('manual_')) {
+          byOccurrenceKey.putIfAbsent(occKey, () => []).add(tx);
+        }
+      }
+
+      for (final entry in byOccurrenceKey.entries) {
+        final txs = entry.value;
+        if (txs.length <= 1) continue;
+
+        // Güncelleme tarihine göre azalan sırala (en yeniyi tutalım)
+        txs.sort((a, b) {
+          final aTime = DateTime.tryParse(a['updated_at']?.toString() ?? '') ?? DateTime.now();
+          final bTime = DateTime.tryParse(b['updated_at']?.toString() ?? '') ?? DateTime.now();
+          return bTime.compareTo(aTime);
+        });
+
+        final keeper = txs.first;
+        final keeperId = keeper['id'] as String;
+        final duplicates = txs.skip(1).toList();
+
+        for (final dup in duplicates) {
+          final dupId = dup['id'] as String;
+          debugPrint('[SyncService] 🔀 Bulut duplikat işlem siliniyor (occurrence_key): '
+              '"${dup['title']}" ($dupId) → keeper="${keeper['title']}" ($keeperId)');
+
+          try {
+            await _supabase
+                .from('transaction_records')
+                .delete()
+                .eq('id', dupId)
+                .eq('user_id', userId);
+            deletedIds.add(dupId);
+          } catch (e) {
+            result.addError('Dedup İşlem', 'Duplikat işlem silinemedi ($dupId): $e');
+          }
+        }
+      }
+
+      // Silinenleri listeden çıkaralım
+      final remainingTxs = remoteTxs.where((tx) => !deletedIds.contains(tx['id'])).toList();
+
+      // 2. Aşama: Benzerliğe göre dedup (Başlık, miktar, kasa ve tarih)
+      final Map<String, List<Map<String, dynamic>>> groups = {};
+      for (final tx in remainingTxs) {
         final title = (tx['title'] as String?)?.toLowerCase().trim() ?? '';
         final amount = (tx['amount'] as num?)?.toDouble() ?? 0.0;
         final isIncome = tx['is_income'] as bool? ?? false;
@@ -510,11 +557,11 @@ class SyncService {
         final txs = entry.value;
         if (txs.length <= 1) continue;
 
-        // Güncelleme tarihine göre sırala, en eskisini tutalım.
+        // Güncelleme tarihine göre azalan sırala (en yeniyi tutalım)
         txs.sort((a, b) {
           final aTime = DateTime.tryParse(a['updated_at']?.toString() ?? '') ?? DateTime.now();
           final bTime = DateTime.tryParse(b['updated_at']?.toString() ?? '') ?? DateTime.now();
-          return aTime.compareTo(bTime);
+          return bTime.compareTo(aTime);
         });
 
         final keeper = txs.first;
@@ -523,8 +570,8 @@ class SyncService {
 
         for (final dup in duplicates) {
           final dupId = dup['id'] as String;
-          debugPrint('[SyncService] 🔀 Bulut duplikat işlem siliniyor: '
-              '"${dup['title']}" ($dupId) → ($keeperId)');
+          debugPrint('[SyncService] 🔀 Bulut duplikat işlem siliniyor (benzerlik): '
+              '"${dup['title']}" ($dupId) → keeper="${keeper['title']}" ($keeperId)');
 
           try {
             await _supabase
@@ -542,6 +589,7 @@ class SyncService {
     }
   }
 
+
   /// Yereldeki duplikat işlemleri temizle.
   Future<void> _deduplicateLocalTransactions(SyncResult result) async {
     try {
@@ -553,32 +601,25 @@ class SyncService {
 
       if (localTxs.length <= 1) return;
 
-      final Map<String, List<TransactionRecord>> groups = {};
-      for (final tx in localTxs) {
-        final title = tx.title.toLowerCase().trim();
-        final amount = tx.amount;
-        final isIncome = tx.isIncome;
-        final vaultId = tx.vaultId != null ? tx.vaultId.toString() : 'null';
-        
-        // Tarihin YYYY-MM-DD kısmını al
-        final dateStr = tx.date.toUtc().toIso8601String();
-        final datePart = dateStr.substring(0, 10);
+      final List<int> idsToDelete = [];
+      final user = _supabase.auth.currentUser;
 
-        final key = '${title}_${amount}_${isIncome}_${vaultId}_$datePart';
-        groups.putIfAbsent(key, () => []).add(tx);
+      // 1. Aşama: occurrenceKey'e göre dedup (boş olmayan ve manual_ ile başlamayanlar)
+      final Map<String, List<TransactionRecord>> byOccurrenceKey = {};
+      for (final tx in localTxs) {
+        if (tx.occurrenceKey.isNotEmpty && !tx.occurrenceKey.startsWith('manual_')) {
+          byOccurrenceKey.putIfAbsent(tx.occurrenceKey, () => []).add(tx);
+        }
       }
 
-      final user = _supabase.auth.currentUser;
-      final List<int> idsToDelete = [];
-
-      for (final entry in groups.entries) {
+      for (final entry in byOccurrenceKey.entries) {
         final txs = entry.value;
         if (txs.length <= 1) continue;
 
         // Öncelik sıralaması:
         // 1. remoteId'si olanlar başa
         // 2. syncStatus == 0 (synced) olanlar başa
-        // 3. Daha eski updatedAt olanlar başa
+        // 3. Daha yeni updatedAt olanlar başa (descending)
         txs.sort((a, b) {
           final aHasRemote = a.remoteId != null ? 1 : 0;
           final bHasRemote = b.remoteId != null ? 1 : 0;
@@ -592,14 +633,75 @@ class SyncService {
             return bSynced.compareTo(aSynced);
           }
 
-          return a.updatedAt.compareTo(b.updatedAt);
+          return b.updatedAt.compareTo(a.updatedAt);
         });
 
         final keeper = txs.first;
         final duplicates = txs.skip(1).toList();
 
         for (final dup in duplicates) {
-          debugPrint('[SyncService] 🧹 Yerel duplikat işlem siliniyor: '
+          debugPrint('[SyncService] 🧹 Yerel duplikat işlem siliniyor (occurrenceKey): '
+              '"${dup.title}" (id=${dup.id}, remoteId=${dup.remoteId}) → keeper(id=${keeper.id}, remoteId=${keeper.remoteId})');
+
+          if (dup.remoteId != null && user != null) {
+            try {
+              await _supabase
+                  .from('transaction_records')
+                  .delete()
+                  .eq('id', dup.remoteId!)
+                  .eq('user_id', user.id);
+            } catch (e) {
+              debugPrint('[SyncService] ⚠️ Yerel duplikat buluttan silinemedi: $e');
+            }
+          }
+
+          idsToDelete.add(dup.id);
+        }
+      }
+
+      // Kalan işlemlerle benzerlik dedup
+      final remainingTxs = localTxs.where((tx) => !idsToDelete.contains(tx.id)).toList();
+
+      final Map<String, List<TransactionRecord>> groups = {};
+      for (final tx in remainingTxs) {
+        final title = tx.title.toLowerCase().trim();
+        final amount = tx.amount;
+        final isIncome = tx.isIncome;
+        final vaultId = tx.vaultId != null ? tx.vaultId.toString() : 'null';
+        
+        // Tarihin YYYY-MM-DD kısmını al
+        final dateStr = tx.date.toUtc().toIso8601String();
+        final datePart = dateStr.substring(0, 10);
+
+        final key = '${title}_${amount}_${isIncome}_${vaultId}_$datePart';
+        groups.putIfAbsent(key, () => []).add(tx);
+      }
+
+      for (final entry in groups.entries) {
+        final txs = entry.value;
+        if (txs.length <= 1) continue;
+
+        txs.sort((a, b) {
+          final aHasRemote = a.remoteId != null ? 1 : 0;
+          final bHasRemote = b.remoteId != null ? 1 : 0;
+          if (aHasRemote != bHasRemote) {
+            return bHasRemote.compareTo(aHasRemote);
+          }
+
+          final aSynced = a.syncStatus == 0 ? 1 : 0;
+          final bSynced = b.syncStatus == 0 ? 1 : 0;
+          if (aSynced != bSynced) {
+            return bSynced.compareTo(aSynced);
+          }
+
+          return b.updatedAt.compareTo(a.updatedAt);
+        });
+
+        final keeper = txs.first;
+        final duplicates = txs.skip(1).toList();
+
+        for (final dup in duplicates) {
+          debugPrint('[SyncService] 🧹 Yerel duplikat işlem siliniyor (benzerlik): '
               '"${dup.title}" (id=${dup.id}, remoteId=${dup.remoteId}) → keeper(id=${keeper.id}, remoteId=${keeper.remoteId})');
 
           // Eğer silinen duplikatın remoteId'si varsa ve bulut kullanıcısı aktifse buluttan da sil
@@ -822,6 +924,7 @@ class SyncService {
           continue;
         }
 
+        final hadNoRemoteId = template.remoteId == null;
         template.remoteId ??= _uuid.v4();
         final data = _templateToRemote(template, userId, vaultRemoteId);
 
@@ -835,6 +938,11 @@ class SyncService {
           } else {
             rethrow;
           }
+        }
+
+        // Şablon ilk kez remoteId aldıysa, bağlı yerel işlemlerin occurrenceKey'lerini güncelle
+        if (hadNoRemoteId) {
+          await _updateOccurrenceKeysForTemplate(template);
         }
 
         template.syncStatus = 0;
@@ -881,19 +989,32 @@ class SyncService {
 
         try {
           await _supabase.from('transaction_records').upsert(data);
+          tx.syncStatus = 0;
+          pushedTxs.add(tx);
+          result.pushedCount++;
         } on PostgrestException catch (pe) {
           if (_isRlsError(pe)) {
             tx.remoteId = _uuid.v4();
             final newData = await _transactionToRemote(tx, userId);
             await _supabase.from('transaction_records').upsert(newData);
+            tx.syncStatus = 0;
+            pushedTxs.add(tx);
+            result.pushedCount++;
+          } else if (pe.code == '23505' &&
+              (pe.message.contains('transaction_records_user_id_occurrence_key_key') ||
+               pe.message.contains('occurrence_key'))) {
+            // occurrence_key üzerinde unique key kısıtlaması ihlal edildi!
+            debugPrint('[SyncService] ⚠️ duplicate key constraint detected on push for: ${tx.title}. Resolving...');
+            final resolved = await _resolveOccurrenceKeyConflict(tx, userId);
+            if (resolved) {
+              result.pushedCount++;
+            } else {
+              result.addError('İşlem Push', '${tx.title}: Benzersiz anahtar çakışması çözülemedi.');
+            }
           } else {
             rethrow;
           }
         }
-
-        tx.syncStatus = 0;
-        pushedTxs.add(tx);
-        result.pushedCount++;
       } catch (e) {
         result.addError('İşlem Push', '${tx.title}: $e');
       }
@@ -981,7 +1102,7 @@ class SyncService {
     for (final category in pending) {
       try {
         final map = _customCategoryToMap(category, userId);
-        await _supabase.from('custom_categories').upsert(map);
+        await _supabase.from('custom_categories').upsert(map, onConflict: 'unique_id');
 
         category.syncStatus = 0;
         pushedCats.add(category);
@@ -996,6 +1117,147 @@ class SyncService {
         await DatabaseService.isar.customCategorys.putAll(pushedCats);
       });
     }
+  }
+
+  // ==========================================================================
+  // Eşitleme Sırasında Hata & Çakışma Çözme Yardımcıları
+  // ==========================================================================
+
+  /// Şablonun remoteId'si güncellendiğinde (ilk senkron sonrası), yereldeki eski
+  /// işlemlerin occurrenceKey'lerini bu yeni UUID'ye göre günceller.
+  Future<void> _updateOccurrenceKeysForTemplate(RecurringTemplate template) async {
+    final txs = await DatabaseService.isar.transactionRecords
+        .filter()
+        .templateIdEqualTo(template.id)
+        .findAll();
+
+    if (txs.isEmpty) return;
+
+    final List<TransactionRecord> updatedTxs = [];
+    final prefix = '${template.id}_';
+
+    for (final tx in txs) {
+      if (tx.occurrenceKey.startsWith(prefix)) {
+        final datePart = tx.occurrenceKey.substring(prefix.length);
+        tx.occurrenceKey = '${template.remoteId}_$datePart';
+        tx.updatedAt = DateTime.now();
+        if (tx.syncStatus == 0) {
+          tx.syncStatus = 1; // Mark as pending sync to update in Supabase
+        }
+        updatedTxs.add(tx);
+      }
+    }
+
+    if (updatedTxs.isNotEmpty) {
+      await DatabaseService.isar.writeTxn(() async {
+        await DatabaseService.isar.transactionRecords.putAll(updatedTxs);
+      });
+      debugPrint('[SyncService] 🔄 Şablon "${template.title}" için ${updatedTxs.length} işlemin occurrenceKey değeri güncellendi.');
+    }
+  }
+
+  /// occurrence_key çakışması durumunda Supabase'deki mevcut işlemi sorgulayıp
+  /// yerel kayıtla en yeni olanı koruyacak şekilde uzlaştırma (reconciliation) yapar.
+  Future<bool> _resolveOccurrenceKeyConflict(TransactionRecord tx, String userId) async {
+    try {
+      final remoteTx = await _supabase
+          .from('transaction_records')
+          .select()
+          .eq('user_id', userId)
+          .eq('occurrence_key', tx.occurrenceKey)
+          .maybeSingle();
+
+      if (remoteTx == null) {
+        debugPrint('[SyncService] ⚠️ Çakışan bulut kaydı bulunamadı.');
+        return false;
+      }
+
+      final remoteId = remoteTx['id'] as String;
+      final remoteUpdated = _parseRemoteTime(remoteTx['updated_at']) ?? DateTime.fromMillisecondsSinceEpoch(0);
+
+      // 1. Aynı remoteId değerine sahip yerel kayıt var mı?
+      final localDup = await DatabaseService.isar.transactionRecords
+          .filter()
+          .remoteIdEqualTo(remoteId)
+          .findFirst();
+
+      if (localDup != null) {
+        // Çakışan yerel kayıt var, LWW (Last-Write-Wins) uygula
+        if (tx.updatedAt.isAfter(remoteUpdated)) {
+          // Yerel değişiklik yeni, bunu buluta güncelle
+          _applyLocalChangesToDup(localDup, tx);
+          localDup.remoteId = remoteId;
+          localDup.syncStatus = 0; // Doğrudan buluta yazıp 0 yapacağız
+          localDup.updatedAt = DateTime.now();
+
+          final data = await _transactionToRemote(localDup, userId);
+          await _supabase.from('transaction_records').upsert(data);
+
+          await DatabaseService.isar.writeTxn(() async {
+            await DatabaseService.isar.transactionRecords.delete(tx.id);
+            await DatabaseService.isar.transactionRecords.put(localDup);
+          });
+        } else {
+          // Buluttaki veri yeni, yerel kopyayı güncelle ve mevcut tx'i sil
+          await _applyTransactionFromRemote(localDup, remoteTx);
+          localDup.syncStatus = 0;
+
+          await DatabaseService.isar.writeTxn(() async {
+            await DatabaseService.isar.transactionRecords.delete(tx.id);
+            await DatabaseService.isar.transactionRecords.put(localDup);
+          });
+        }
+      } else {
+        // Yerelde remoteId yok, mevcut tx'in remoteId'sini güncelle (adopt et)
+        if (tx.updatedAt.isAfter(remoteUpdated)) {
+          // Yerel yeni, bulutu güncelle
+          tx.remoteId = remoteId;
+          tx.syncStatus = 0;
+          
+          final data = await _transactionToRemote(tx, userId);
+          await _supabase.from('transaction_records').upsert(data);
+
+          await DatabaseService.isar.writeTxn(() async {
+            await DatabaseService.isar.transactionRecords.put(tx);
+          });
+        } else {
+          // Bulut yeni, yereli güncelle
+          tx.remoteId = remoteId;
+          await _applyTransactionFromRemote(tx, remoteTx);
+          tx.syncStatus = 0;
+
+          await DatabaseService.isar.writeTxn(() async {
+            await DatabaseService.isar.transactionRecords.put(tx);
+          });
+        }
+      }
+      return true;
+    } catch (e) {
+      debugPrint('[SyncService] ❌ Çakışma çözme başarısız: $e');
+      return false;
+    }
+  }
+
+  void _applyLocalChangesToDup(TransactionRecord dest, TransactionRecord source) {
+    dest.title = source.title;
+    dest.isIncome = source.isIncome;
+    dest.categoryId = source.categoryId;
+    dest.iconCode = source.iconCode;
+    dest.amount = source.amount;
+    dest.minAmount = source.minAmount;
+    dest.maxAmount = source.maxAmount;
+    dest.date = source.date;
+    dest.occurrenceDate = source.occurrenceDate;
+    dest.templateId = source.templateId;
+    dest.installmentNumber = source.installmentNumber;
+    dest.totalInstallments = source.totalInstallments;
+    dest.status = source.status;
+    dest.isReviewed = source.isReviewed;
+    dest.isArchived = source.isArchived;
+    dest.vaultId = source.vaultId;
+    dest.note = source.note;
+    dest.currency = source.currency;
+    dest.updatedAt = source.updatedAt;
   }
 
   // ==========================================================================

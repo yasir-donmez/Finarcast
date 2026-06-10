@@ -1280,134 +1280,136 @@ class _TransactionBuilderScreenState extends ConsumerState<TransactionBuilderScr
                     ),
                   ),
                 ),
-                const SizedBox(height: 12),
-                Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: AppSizes.paddingMedium,
-                  ),
-                  child: CustomCard(
-                    scalingFactor: scalingFactor,
-                    padding: const EdgeInsets.all(16),
-                    child: Column(
-                      children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Row(
-                              children: [
-                                Icon(
-                                  Icons.notifications_active_rounded,
-                                  size: 20,
-                                  color: AppColors.getAccentDeep(context, activeColor).withValues(alpha: 0.7),
-                                ),
-                                const SizedBox(width: 12),
-                                Text(
-                                  l10n.reminder.toSafeUpperCase(context),
-                                  style: TextStyle(
-                                    fontSize: 13,
-                                    fontWeight: FontWeight.w900,
-                                    color: AppColors.getTextPrimary(
-                                      context,
-                                    ).withValues(alpha: 0.8),
-                                    letterSpacing: 0.5,
+                if (_builderType == TransactionBuilderType.recurring) ...[
+                  const SizedBox(height: 12),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: AppSizes.paddingMedium,
+                    ),
+                    child: CustomCard(
+                      scalingFactor: scalingFactor,
+                      padding: const EdgeInsets.all(16),
+                      child: Column(
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Row(
+                                children: [
+                                  Icon(
+                                    Icons.notifications_active_rounded,
+                                    size: 20,
+                                    color: AppColors.getAccentDeep(context, activeColor).withValues(alpha: 0.7),
                                   ),
-                                ),
-                              ],
-                            ),
-                            CustomSwitch(
-                              value: _isNotificationEnabled,
-                              activeColor: AppColors.getAccentDeep(context, activeColor),
-                              activeIcon: Icons.notifications_active_rounded,
-                              inactiveIcon: Icons.notifications_off_rounded,
-                              scalingFactor: scalingFactor * 0.9,
-                              onChanged: (val) async {
-                                if (val) {
-                                  final granted = await NotificationService()
-                                      .requestPermissions();
-                                  if (!granted && context.mounted) {
-                                    CustomNotification.warning(
-                                      context,
-                                      l10n.notificationPermissionDenied,
-                                    );
-                                    return;
-                                  }
-                                }
-                                HapticFeedback.mediumImpact();
-                                FocusManager.instance.primaryFocus?.unfocus();
-                                setState(() {
-                                  _isNotificationEnabled = val;
-                                });
-                              },
-                            ),
-                          ],
-                        ),
-                        AnimatedSize(
-                          duration: const Duration(milliseconds: 400),
-                          curve: Curves.easeInOutQuart,
-                          alignment: Alignment.topCenter,
-                          child: AnimatedSwitcher(
-                            duration: const Duration(milliseconds: 350),
-                            transitionBuilder:
-                                (Widget child, Animation<double> animation) {
-                                  return FadeTransition(
-                                    opacity: animation,
-                                    child: SlideTransition(
-                                      position:
-                                          Tween<Offset>(
-                                            begin: const Offset(0, 0.05),
-                                            end: Offset.zero,
-                                          ).animate(
-                                            CurvedAnimation(
-                                              parent: animation,
-                                              curve: Curves.easeOutQuart,
-                                            ),
-                                          ),
-                                      child: child,
+                                  const SizedBox(width: 12),
+                                  Text(
+                                    l10n.reminder.toSafeUpperCase(context),
+                                    style: TextStyle(
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.w900,
+                                      color: AppColors.getTextPrimary(
+                                        context,
+                                      ).withValues(alpha: 0.8),
+                                      letterSpacing: 0.5,
                                     ),
-                                  );
-                                },
-                            child: _isNotificationEnabled
-                                ? Column(
-                                    key: const ValueKey('reminder_enabled'),
-                                    children: [
-                                      const SizedBox(height: 16),
-                                      Divider(
-                                        height: 1,
-                                        thickness: 0.5,
-                                        color:
-                                            (isDark
-                                                    ? Colors.white
-                                                    : Colors.black)
-                                                .withValues(alpha: 0.08),
-                                      ),
-                                      const SizedBox(height: 16),
-                                      TransactionReminderDaysSelector(
-                                        selectedDays: _notificationReminderDays,
-                                        scalingFactor: scalingFactor,
-                                        onChanged: (days) => setState(
-                                          () =>
-                                              _notificationReminderDays = days,
-                                        ),
-                                      ),
-                                      const SizedBox(height: 16),
-                                      TransactionReminderTimeSelector(
-                                        selectedTime: _notificationTime,
-                                        scalingFactor: scalingFactor,
-                                        onChanged: (time) => setState(
-                                          () => _notificationTime = time,
-                                        ),
-                                      ),
-                                    ],
-                                  )
-                                : const SizedBox.shrink(
-                                    key: ValueKey('reminder_disabled'),
                                   ),
+                                ],
+                              ),
+                              CustomSwitch(
+                                value: _isNotificationEnabled,
+                                activeColor: AppColors.getAccentDeep(context, activeColor),
+                                activeIcon: Icons.notifications_active_rounded,
+                                inactiveIcon: Icons.notifications_off_rounded,
+                                scalingFactor: scalingFactor * 0.9,
+                                onChanged: (val) async {
+                                  if (val) {
+                                    final granted = await NotificationService()
+                                        .requestPermissions();
+                                    if (!granted && context.mounted) {
+                                      CustomNotification.warning(
+                                        context,
+                                        l10n.notificationPermissionDenied,
+                                      );
+                                      return;
+                                    }
+                                  }
+                                  HapticFeedback.mediumImpact();
+                                  FocusManager.instance.primaryFocus?.unfocus();
+                                  setState(() {
+                                    _isNotificationEnabled = val;
+                                  });
+                                },
+                              ),
+                            ],
                           ),
-                        ),
-                      ],
+                          AnimatedSize(
+                            duration: const Duration(milliseconds: 400),
+                            curve: Curves.easeInOutQuart,
+                            alignment: Alignment.topCenter,
+                            child: AnimatedSwitcher(
+                              duration: const Duration(milliseconds: 350),
+                              transitionBuilder:
+                                  (Widget child, Animation<double> animation) {
+                                    return FadeTransition(
+                                      opacity: animation,
+                                      child: SlideTransition(
+                                        position:
+                                            Tween<Offset>(
+                                              begin: const Offset(0, 0.05),
+                                              end: Offset.zero,
+                                            ).animate(
+                                              CurvedAnimation(
+                                                parent: animation,
+                                                curve: Curves.easeOutQuart,
+                                              ),
+                                            ),
+                                        child: child,
+                                      ),
+                                    );
+                                  },
+                              child: _isNotificationEnabled
+                                  ? Column(
+                                      key: const ValueKey('reminder_enabled'),
+                                      children: [
+                                        const SizedBox(height: 16),
+                                        Divider(
+                                          height: 1,
+                                          thickness: 0.5,
+                                          color:
+                                              (isDark
+                                                      ? Colors.white
+                                                      : Colors.black)
+                                                  .withValues(alpha: 0.08),
+                                        ),
+                                        const SizedBox(height: 16),
+                                        TransactionReminderDaysSelector(
+                                          selectedDays: _notificationReminderDays,
+                                          scalingFactor: scalingFactor,
+                                          onChanged: (days) => setState(
+                                            () =>
+                                                _notificationReminderDays = days,
+                                          ),
+                                        ),
+                                        const SizedBox(height: 16),
+                                        TransactionReminderTimeSelector(
+                                          selectedTime: _notificationTime,
+                                          scalingFactor: scalingFactor,
+                                          onChanged: (time) => setState(
+                                            () => _notificationTime = time,
+                                          ),
+                                        ),
+                                      ],
+                                    )
+                                  : const SizedBox.shrink(
+                                      key: ValueKey('reminder_disabled'),
+                                    ),
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
-                ),
+                ],
                 if (_errorMessage != null)
                   Padding(
                     padding: const EdgeInsets.symmetric(vertical: 12),

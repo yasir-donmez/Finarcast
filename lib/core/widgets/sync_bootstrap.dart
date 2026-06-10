@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../providers/settings_provider.dart';
+import '../providers/db_providers.dart';
 import '../services/auth_service.dart';
 import '../services/sync_coordinator.dart';
 import '../services/currency_service.dart';
@@ -25,7 +26,10 @@ class _SyncBootstrapState extends ConsumerState<SyncBootstrap>
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    WidgetsBinding.instance.addPostFrameCallback((_) => _trySync());
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      await _trySyncSettings();
+      await _trySync();
+    });
   }
 
   @override
@@ -61,6 +65,23 @@ class _SyncBootstrapState extends ConsumerState<SyncBootstrap>
 
   @override
   Widget build(BuildContext context) {
+    ref.listen(exchangeRatesProvider, (prev, next) {
+      if (next.hasValue) {
+        final rates = next.value!;
+        final now = DateTime.now();
+        if (rates.isEmpty) {
+          debugPrint('ℹ️ [SyncBootstrap] Döviz kurları veritabanında bulunamadı. Otomatik güncelleniyor...');
+          CurrencyService.updateRates(force: false);
+        } else {
+          final lastUpdate = rates.first.lastUpdated;
+          if (now.difference(lastUpdate).inHours >= 24) {
+            debugPrint('ℹ️ [SyncBootstrap] Döviz kurları 24 saatten eski. Otomatik güncelleniyor...');
+            CurrencyService.updateRates(force: false);
+          }
+        }
+      }
+    });
+
     ref.listen<bool>(settingsProvider.select((s) => s.isSyncEnabled),
         (prev, next) {
       if (next && prev != next) {

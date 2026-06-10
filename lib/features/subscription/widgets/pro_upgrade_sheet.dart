@@ -9,8 +9,7 @@ import '../../../shared/widgets/custom_bottom_sheet.dart';
 import '../../../shared/widgets/membership_orb.dart';
 import '../../../shared/widgets/glass_surface.dart';
 import '../../../shared/widgets/custom_dialog.dart';
-import '../../../core/services/auth_service.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import '../../../core/providers/auth_provider.dart';
 import '../../../l10n/app_localizations.dart';
 
 /// Finarcast "Pro Üyelik" (Paywall) Sayfası.
@@ -41,10 +40,8 @@ class ProUpgradeSheet extends ConsumerWidget {
           label: l10n.loginOrSignUp,
           onTap: () async {
             Navigator.pop(context); // Dialogu kapat
-            Navigator.pop(context); // Sheet\'i kapat
-            final prefs = await SharedPreferences.getInstance();
-            await prefs.setBool('Finarcast_is_guest_mode', false);
-            ref.read(guestModeProvider.notifier).state = false;
+            Navigator.pop(context); // Sheet'i kapat
+            await ref.read(authControllerProvider.notifier).exitGuestMode();
           },
           isPrimary: true,
         ),
