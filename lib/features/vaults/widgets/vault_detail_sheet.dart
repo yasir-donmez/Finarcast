@@ -103,14 +103,14 @@ class _VaultDetailSheetState extends ConsumerState<VaultDetailSheet> with Single
       if (targetCurrency != 'AUTO' && targetCurrency != baseCurrency) {
         var rates = await DatabaseService.getAllExchangeRates();
         final code = CurrencyUtils.symbolToCode(targetCurrency);
-        var hasRate = rates.any((r) => r.currencyCode == code && r.rate > 0);
+        var hasRate = code == 'TRY' || rates.any((r) => r.currencyCode == code && r.rate > 0);
         
         if (!hasRate) {
           // Kurlar yok, otomatik çekmeyi dene
           final success = await CurrencyService.updateRates();
           if (success) {
             rates = await DatabaseService.getAllExchangeRates();
-            hasRate = rates.any((r) => r.currencyCode == code && r.rate > 0);
+            hasRate = code == 'TRY' || rates.any((r) => r.currencyCode == code && r.rate > 0);
           }
         }
 
@@ -268,7 +268,7 @@ class _VaultDetailSheetState extends ConsumerState<VaultDetailSheet> with Single
         children: [
           if (!isMainVault)
             SegmentedControl(
-              tabs: [l10n.transactions, l10n.manage],
+              tabs: [l10n.analysis, l10n.manage],
               selectedIndex: _activeTab == VaultDetailTab.transactions ? 0 : 1,
               onTabChanged: (index) => _switchTab(index == 0 ? VaultDetailTab.transactions : VaultDetailTab.manage),
               scalingFactor: sf,
@@ -342,29 +342,6 @@ class _VaultDetailSheetState extends ConsumerState<VaultDetailSheet> with Single
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // === HEADER ===
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            child: Row(
-              children: [
-                Icon(
-                  Icons.account_balance_wallet_rounded,
-                  color: activeColor.withValues(alpha: 0.4),
-                  size: 22 * sf,
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: Text(
-                    _tempName ?? vault.name,
-                    style: TextStyle(fontSize: 18 * sf, fontWeight: FontWeight.w900, letterSpacing: -0.5, color: AppColors.getTextPrimary(context)),
-                  ),
-                ),
-              ],
-            ),
-          ),
-
-          const SizedBox(height: 8),
-
           // === 1. AYLIK NET BAKİYE (Hero Kart) ===
           CustomCard(
             scalingFactor: sf,
@@ -415,135 +392,153 @@ class _VaultDetailSheetState extends ConsumerState<VaultDetailSheet> with Single
           SizedBox(height: 10 * sf),
 
           // === 2. TASARRUF ORANI & YILLIK PROJEKSİYON (İkili Kart) ===
-          Row(
-            children: [
-              Expanded(
-                child: CustomCard(
-                  scalingFactor: sf,
-                  padding: EdgeInsets.all(14 * sf),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
+          IntrinsicHeight(
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Expanded(
+                  child: CustomCard(
+                    scalingFactor: sf,
+                    padding: EdgeInsets.all(14 * sf),
+                    child: ConstrainedBox(
+                      constraints: BoxConstraints(minHeight: 56 * sf),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Icon(Icons.savings_rounded, color: savingsRate >= 0 ? Colors.teal : AppColors.getExpense(context), size: 14 * sf),
-                          SizedBox(width: 6 * sf),
-                          Flexible(child: Text(l10n.savingsRate, style: TextStyle(fontSize: 8 * sf, fontWeight: FontWeight.w900, color: AppColors.getTextSecondary(context).withValues(alpha: isDark ? 0.5 : 0.8), letterSpacing: 0.8))),
+                          Row(
+                            children: [
+                              Icon(Icons.savings_rounded, color: savingsRate >= 0 ? Colors.teal : AppColors.getExpense(context), size: 14 * sf),
+                              SizedBox(width: 6 * sf),
+                              Flexible(child: Text(l10n.savingsRate, style: TextStyle(fontSize: 8 * sf, fontWeight: FontWeight.w900, color: AppColors.getTextSecondary(context).withValues(alpha: isDark ? 0.5 : 0.8), letterSpacing: 0.8))),
+                            ],
+                          ),
+                          SizedBox(height: 8 * sf),
+                          FittedBox(
+                            fit: BoxFit.scaleDown,
+                            alignment: Alignment.centerLeft,
+                            child: Text(
+                              incomeLoad > 0 
+                                  ? (isTr 
+                                      ? (savingsRate >= 0 ? '%${savingsRate.toStringAsFixed(1)}' : '-%${savingsRate.abs().toStringAsFixed(1)}')
+                                      : '${savingsRate.toStringAsFixed(1)}%')
+                                  : '—',
+                              style: TextStyle(fontSize: 22 * sf, fontWeight: FontWeight.w900, color: savingsRate >= 20 ? Colors.teal : savingsRate >= 0 ? Colors.orange : AppColors.getExpense(context)),
+                            ),
+                          ),
                         ],
                       ),
-                      SizedBox(height: 8 * sf),
-                      FittedBox(
-                        fit: BoxFit.scaleDown,
-                        alignment: Alignment.centerLeft,
-                        child: Text(
-                          incomeLoad > 0 
-                              ? (isTr 
-                                  ? (savingsRate >= 0 ? '%${savingsRate.toStringAsFixed(1)}' : '-%${savingsRate.abs().toStringAsFixed(1)}')
-                                  : '${savingsRate.toStringAsFixed(1)}%')
-                              : '—',
-                          style: TextStyle(fontSize: 22 * sf, fontWeight: FontWeight.w900, color: savingsRate >= 20 ? Colors.teal : savingsRate >= 0 ? Colors.orange : AppColors.getExpense(context)),
-                        ),
-                      ),
-                    ],
+                    ),
                   ),
                 ),
-              ),
-              SizedBox(width: 10 * sf),
-              Expanded(
-                child: CustomCard(
-                  scalingFactor: sf,
-                  padding: EdgeInsets.all(14 * sf),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
+                SizedBox(width: 10 * sf),
+                Expanded(
+                  child: CustomCard(
+                    scalingFactor: sf,
+                    padding: EdgeInsets.all(14 * sf),
+                    child: ConstrainedBox(
+                      constraints: BoxConstraints(minHeight: 56 * sf),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Icon(Icons.trending_up_rounded, color: yearlyProjection >= 0 ? AppColors.getIncome(context) : AppColors.getExpense(context), size: 14 * sf),
-                          SizedBox(width: 6 * sf),
-                          Flexible(child: Text(l10n.yearlyProjection, style: TextStyle(fontSize: 8 * sf, fontWeight: FontWeight.w900, color: AppColors.getTextSecondary(context).withValues(alpha: isDark ? 0.5 : 0.8), letterSpacing: 0.8))),
+                          Row(
+                            children: [
+                              Icon(Icons.trending_up_rounded, color: yearlyProjection >= 0 ? AppColors.getIncome(context) : AppColors.getExpense(context), size: 14 * sf),
+                              SizedBox(width: 6 * sf),
+                              Flexible(child: Text(l10n.yearlyProjection, style: TextStyle(fontSize: 8 * sf, fontWeight: FontWeight.w900, color: AppColors.getTextSecondary(context).withValues(alpha: isDark ? 0.5 : 0.8), letterSpacing: 0.8))),
+                            ],
+                          ),
+                          SizedBox(height: 8 * sf),
+                          FittedBox(
+                            fit: BoxFit.scaleDown,
+                            alignment: Alignment.centerLeft,
+                            child: Text(
+                              CurrencyUtils.formatFullAmount(yearlyProjection, symbol: currency),
+                              style: TextStyle(fontSize: 20 * sf, fontWeight: FontWeight.w900, color: yearlyProjection >= 0 ? AppColors.getIncome(context) : AppColors.getExpense(context)),
+                            ),
+                          ),
                         ],
                       ),
-                      SizedBox(height: 8 * sf),
-                      FittedBox(
-                        fit: BoxFit.scaleDown,
-                        alignment: Alignment.centerLeft,
-                        child: Text(
-                          CurrencyUtils.formatFullAmount(yearlyProjection, symbol: currency),
-                          style: TextStyle(fontSize: 20 * sf, fontWeight: FontWeight.w900, color: yearlyProjection >= 0 ? AppColors.getIncome(context) : AppColors.getExpense(context)),
-                        ),
-                      ),
-                    ],
+                    ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
 
           SizedBox(height: 10 * sf),
 
           // === 3. EN BÜYÜK GELİR & GİDER (İkili Kart) ===
-          Row(
-            children: [
-              Expanded(
-                child: CustomCard(
-                  scalingFactor: sf,
-                  padding: EdgeInsets.all(14 * sf),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(l10n.topIncome, style: TextStyle(fontSize: 8 * sf, fontWeight: FontWeight.w900, color: AppColors.getIncome(context).withValues(alpha: isDark ? 0.6 : 0.85), letterSpacing: 0.8)),
-                      SizedBox(height: 6 * sf),
-                      if (topIncome != null) ...[
-                        Row(
-                          children: [
-                            Icon(topIncome.icon, color: topIncome.color, size: 16 * sf),
-                            SizedBox(width: 6 * sf),
-                            Flexible(child: Text(topIncome.title, style: TextStyle(fontSize: 12 * sf, fontWeight: FontWeight.w800), maxLines: 1, overflow: TextOverflow.ellipsis)),
-                          ],
-                        ),
-                        SizedBox(height: 4 * sf),
-                        FittedBox(
-                          fit: BoxFit.scaleDown,
-                          alignment: Alignment.centerLeft,
-                          child: Text(CurrencyUtils.formatFullAmount(topIncome.getConvertedMonthlyEquivalent(currency, rates), symbol: currency), style: TextStyle(fontSize: 14 * sf, fontWeight: FontWeight.w900, color: AppColors.getIncome(context))),
-                        ),
-                      ] else
-                        Text('—', style: TextStyle(fontSize: 14 * sf, fontWeight: FontWeight.w700, color: AppColors.getTextSecondary(context).withValues(alpha: 0.3))),
-                    ],
+          IntrinsicHeight(
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Expanded(
+                  child: CustomCard(
+                    scalingFactor: sf,
+                    padding: EdgeInsets.all(14 * sf),
+                    child: ConstrainedBox(
+                      constraints: BoxConstraints(minHeight: 68 * sf),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(l10n.topIncome, style: TextStyle(fontSize: 8 * sf, fontWeight: FontWeight.w900, color: AppColors.getIncome(context).withValues(alpha: isDark ? 0.6 : 0.85), letterSpacing: 0.8)),
+                          SizedBox(height: 6 * sf),
+                          if (topIncome != null) ...[
+                            Row(
+                              children: [
+                                Icon(topIncome.icon, color: topIncome.color, size: 16 * sf),
+                                SizedBox(width: 6 * sf),
+                                Flexible(child: Text(topIncome.title, style: TextStyle(fontSize: 12 * sf, fontWeight: FontWeight.w800), maxLines: 1, overflow: TextOverflow.ellipsis)),
+                              ],
+                            ),
+                            SizedBox(height: 4 * sf),
+                            FittedBox(
+                              fit: BoxFit.scaleDown,
+                              alignment: Alignment.centerLeft,
+                              child: Text(CurrencyUtils.formatFullAmount(topIncome.getConvertedMonthlyEquivalent(currency, rates), symbol: currency), style: TextStyle(fontSize: 14 * sf, fontWeight: FontWeight.w900, color: AppColors.getIncome(context))),
+                            ),
+                          ] else
+                            Text('—', style: TextStyle(fontSize: 14 * sf, fontWeight: FontWeight.w700, color: AppColors.getTextSecondary(context).withValues(alpha: 0.3))),
+                        ],
+                      ),
+                    ),
                   ),
                 ),
-              ),
-              SizedBox(width: 10 * sf),
-              Expanded(
-                child: CustomCard(
-                  scalingFactor: sf,
-                  padding: EdgeInsets.all(14 * sf),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(l10n.topExpense, style: TextStyle(fontSize: 8 * sf, fontWeight: FontWeight.w900, color: AppColors.getExpense(context).withValues(alpha: isDark ? 0.6 : 0.85), letterSpacing: 0.8)),
-                      SizedBox(height: 6 * sf),
-                      if (topExpense != null) ...[
-                        Row(
-                          children: [
-                            Icon(topExpense.icon, color: topExpense.color, size: 16 * sf),
-                            SizedBox(width: 6 * sf),
-                            Flexible(child: Text(topExpense.title, style: TextStyle(fontSize: 12 * sf, fontWeight: FontWeight.w800), maxLines: 1, overflow: TextOverflow.ellipsis)),
-                          ],
-                        ),
-                        SizedBox(height: 4 * sf),
-                        FittedBox(
-                          fit: BoxFit.scaleDown,
-                          alignment: Alignment.centerLeft,
-                          child: Text(CurrencyUtils.formatFullAmount(topExpense.getConvertedMonthlyEquivalent(currency, rates), symbol: currency), style: TextStyle(fontSize: 14 * sf, fontWeight: FontWeight.w900, color: AppColors.getExpense(context))),
-                        ),
-                      ] else
-                        Text('—', style: TextStyle(fontSize: 14 * sf, fontWeight: FontWeight.w700, color: AppColors.getTextSecondary(context).withValues(alpha: 0.3))),
-                    ],
+                SizedBox(width: 10 * sf),
+                Expanded(
+                  child: CustomCard(
+                    scalingFactor: sf,
+                    padding: EdgeInsets.all(14 * sf),
+                    child: ConstrainedBox(
+                      constraints: BoxConstraints(minHeight: 68 * sf),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(l10n.topExpense, style: TextStyle(fontSize: 8 * sf, fontWeight: FontWeight.w900, color: AppColors.getExpense(context).withValues(alpha: isDark ? 0.6 : 0.85), letterSpacing: 0.8)),
+                          SizedBox(height: 6 * sf),
+                          if (topExpense != null) ...[
+                            Row(
+                              children: [
+                                Icon(topExpense.icon, color: topExpense.color, size: 16 * sf),
+                                SizedBox(width: 6 * sf),
+                                Flexible(child: Text(topExpense.title, style: TextStyle(fontSize: 12 * sf, fontWeight: FontWeight.w800), maxLines: 1, overflow: TextOverflow.ellipsis)),
+                              ],
+                            ),
+                            SizedBox(height: 4 * sf),
+                            FittedBox(
+                              fit: BoxFit.scaleDown,
+                              alignment: Alignment.centerLeft,
+                              child: Text(CurrencyUtils.formatFullAmount(topExpense.getConvertedMonthlyEquivalent(currency, rates), symbol: currency), style: TextStyle(fontSize: 14 * sf, fontWeight: FontWeight.w900, color: AppColors.getExpense(context))),
+                            ),
+                          ] else
+                            Text('—', style: TextStyle(fontSize: 14 * sf, fontWeight: FontWeight.w700, color: AppColors.getTextSecondary(context).withValues(alpha: 0.3))),
+                        ],
+                      ),
+                    ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
 
           SizedBox(height: 10 * sf),
@@ -692,20 +687,23 @@ class _VaultDetailSheetState extends ConsumerState<VaultDetailSheet> with Single
         color: (isPositive ? AppColors.getIncome(context) : AppColors.getExpense(context)).withValues(alpha: 0.06),
         borderRadius: BorderRadius.circular(10 * sf),
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(label, style: TextStyle(fontSize: 8 * sf, fontWeight: FontWeight.w900, color: AppColors.getTextSecondary(context).withValues(alpha: isDark ? 0.5 : 0.8), letterSpacing: 0.5)),
-          SizedBox(height: 4 * sf),
-          FittedBox(
-            fit: BoxFit.scaleDown,
-            alignment: Alignment.centerLeft,
-            child: Text(
-              CurrencyUtils.formatFullAmount(value, symbol: currency),
-              style: TextStyle(fontSize: 14 * sf, fontWeight: FontWeight.w900, color: isPositive ? AppColors.getIncome(context) : AppColors.getExpense(context)),
+      child: ConstrainedBox(
+        constraints: BoxConstraints(minHeight: 36 * sf),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(label, style: TextStyle(fontSize: 8 * sf, fontWeight: FontWeight.w900, color: AppColors.getTextSecondary(context).withValues(alpha: isDark ? 0.5 : 0.8), letterSpacing: 0.5)),
+            SizedBox(height: 4 * sf),
+            FittedBox(
+              fit: BoxFit.scaleDown,
+              alignment: Alignment.centerLeft,
+              child: Text(
+                CurrencyUtils.formatFullAmount(value, symbol: currency),
+                style: TextStyle(fontSize: 14 * sf, fontWeight: FontWeight.w900, color: isPositive ? AppColors.getIncome(context) : AppColors.getExpense(context)),
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

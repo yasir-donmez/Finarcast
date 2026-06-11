@@ -70,37 +70,36 @@ class SolidSurface extends ConsumerWidget {
         color: activeBorderColor.withValues(alpha: activeBorderColor.a * opacityMultiplier),
         width: borderWidth ?? 0.5,
       ),
+      boxShadow: showShadow ? shadows : null,
     );
 
     final innerPadding = padding ?? const EdgeInsets.all(AppSizes.paddingMedium);
 
-    return Container(
-      width: width,
-      height: height,
-      margin: margin,
-      child: CustomPaint(
-        painter: showShadow ? HollowShadowPainter(
-          borderRadius: borderRadius,
-          shadows: shadows,
-        ) : null,
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(borderRadius),
-          child: animationDuration == Duration.zero
-              ? Container(
-                  padding: innerPadding,
-                  decoration: decoration,
-                  child: child,
-                )
-              : AnimatedContainer(
-                  duration: animationDuration,
-                  curve: Curves.easeInOut,
-                  padding: innerPadding,
-                  decoration: decoration,
-                  child: child,
-                ),
-        ),
-      ),
-    );
+    return animationDuration == Duration.zero
+        ? Container(
+            width: width,
+            height: height,
+            margin: margin,
+            padding: innerPadding,
+            decoration: decoration,
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(borderRadius),
+              child: child,
+            ),
+          )
+        : AnimatedContainer(
+            duration: animationDuration,
+            curve: Curves.easeInOut,
+            width: width,
+            height: height,
+            margin: margin,
+            padding: innerPadding,
+            decoration: decoration,
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(borderRadius),
+              child: child,
+            ),
+          );
   }
 }
 

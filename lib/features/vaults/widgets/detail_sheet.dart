@@ -195,9 +195,8 @@ class _PrecisionDetailSheetState extends ConsumerState<DetailSheet> {
             child: Container(
               width: 80 * sf, height: 80 * sf,
               decoration: BoxDecoration(
-                color: isDark ? Colors.white.withValues(alpha: 0.05) : Colors.black.withValues(alpha: 0.02),
+                color: AppColors.getAccentDeep(context, tx.color).withValues(alpha: 0.15),
                 borderRadius: BorderRadius.circular(24 * sf),
-                border: Border.all(color: AppColors.getAccentDeep(context, tx.color).withValues(alpha: 0.3), width: 0.5),
               ),
               child: Icon(tx.icon, size: 36 * sf, color: AppColors.getAccentDeep(context, tx.color)),
             ),
@@ -291,7 +290,7 @@ class _PrecisionDetailSheetState extends ConsumerState<DetailSheet> {
               Divider(height: 16 * sf, thickness: 0.5),
               _buildInfoRow(context, icon: Icons.replay_rounded, label: l10n.period, value: _getDetailedPeriodLabel(tx, l10n, context), color: Colors.purple),
               
-              if (_isRecurring) ...[
+              if (_isRecurring && widget.isTemplateMode) ...[
                 if (_endDate != null) ...[
                   Divider(height: 16 * sf, thickness: 0.5),
                   _buildInfoRow(
@@ -320,6 +319,22 @@ class _PrecisionDetailSheetState extends ConsumerState<DetailSheet> {
                     color: Colors.deepOrange
                   ),
                 ],
+              ] else if (!widget.isTemplateMode && tx.installmentNumber != null) ...[
+                Divider(height: 16 * sf, thickness: 0.5),
+                _buildInfoRow(
+                  context,
+                  icon: Icons.numbers_rounded,
+                  label: _getInstallmentLabelForLanguage(
+                    Localizations.localeOf(context).languageCode,
+                    isInstallment: tx.totalInstallments != null,
+                  ),
+                  value: _getInstallmentValueForLanguage(
+                    Localizations.localeOf(context).languageCode,
+                    tx.installmentNumber!,
+                    tx.totalInstallments,
+                  ),
+                  color: Colors.teal,
+                ),
               ],
 
               if (tx.note != null && tx.note!.isNotEmpty) ...[
@@ -487,7 +502,7 @@ class _PrecisionDetailSheetState extends ConsumerState<DetailSheet> {
         SizedBox(height: 12 * sf),
 
         // 3.5 BİLDİRİM TOGGLE
-        if (_activeTemplate != null && _activeTemplate!.isNotificationEnabled) ...[
+        if (widget.isTemplateMode && _activeTemplate != null && _activeTemplate!.hasNotificationConfigured) ...[
           CustomCard(
             scalingFactor: sf,
             padding: EdgeInsets.symmetric(horizontal: 16 * sf, vertical: 12 * sf),
@@ -714,5 +729,33 @@ class _PrecisionDetailSheetState extends ConsumerState<DetailSheet> {
     if (langCode == 'fr') return '$count mensualités';
     if (langCode == 'es') return '$count cuotas';
     return '$count installments';
+  }
+
+  String _getInstallmentLabelForLanguage(String langCode, {required bool isInstallment}) {
+    if (isInstallment) {
+      if (langCode == 'tr') return 'Taksit';
+      if (langCode == 'de') return 'Rate';
+      if (langCode == 'fr') return 'Mensualité';
+      if (langCode == 'es') return 'Cuota';
+      return 'Installment';
+    } else {
+      if (langCode == 'tr') return 'Ödeme Sırası';
+      if (langCode == 'de') return 'Zahlungsreihenfolge';
+      if (langCode == 'fr') return 'Ordre de paiement';
+      if (langCode == 'es') return 'Orden de pago';
+      return 'Payment Order';
+    }
+  }
+
+  String _getInstallmentValueForLanguage(String langCode, int current, int? total) {
+    if (total != null) {
+      return '$current / $total';
+    } else {
+      if (langCode == 'tr') return '$current. Ödeme';
+      if (langCode == 'de') return '$current. Zahlung';
+      if (langCode == 'fr') return 'Paiement n°$current';
+      if (langCode == 'es') return 'Pago nº $current';
+      return 'Payment #$current';
+    }
   }
 }

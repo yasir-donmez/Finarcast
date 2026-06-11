@@ -160,17 +160,10 @@ class _SpendingGiantsWidgetState extends ConsumerState<SpendingGiantsWidget> wit
           Container(
             width: 24, height: 24,
             decoration: BoxDecoration(
-              color: AppColors.getAccentDeep(context, catColor),
+              color: catColor.withValues(alpha: 0.15),
               borderRadius: BorderRadius.circular(6),
-              boxShadow: [
-                BoxShadow(
-                  color: catColor.withValues(alpha: 0.3),
-                  blurRadius: 4,
-                  offset: const Offset(0, 2),
-                ),
-              ],
             ),
-            child: Icon(catIcon, size: 12, color: Colors.white),
+            child: Icon(catIcon, size: 12, color: AppColors.getAccentDeep(context, catColor)),
           ),
           const SizedBox(width: 8),
           Expanded(
@@ -319,6 +312,7 @@ class _AnalyticGiant {
   final bool isNew;
   _AnalyticGiant({this.categoryId, required this.amount, required this.percentage, required this.prevPercentage, required this.isNew});
 }
+
 class _TripleOverlapPainter extends CustomPainter {
   final List<_AnalyticGiant> giants;
   final double animationValue;
@@ -339,6 +333,8 @@ class _TripleOverlapPainter extends CustomPainter {
     const double spacing = 2.0;
     const double coreWidth = 3.5;
 
+    const double startAngle = -math.pi / 2; // Saat 12 yönünden başla
+
     for (int i = 0; i < giants.length; i++) {
       final g = giants[i];
       
@@ -350,7 +346,9 @@ class _TripleOverlapPainter extends CustomPainter {
         customCategories: customCategories,
       );
 
-      // 1. ZEMİN TRACK (Sönük arka plan halkası)
+      final double sweepAngle = 2 * math.pi * (g.percentage / 100.0) * animationValue;
+
+      // 1. ZEMİN TRACK (Sönük arka plan halkası - her çember için tam daire)
       final trackPaint = Paint()
         ..color = catColor.withValues(alpha: 0.15)
         ..style = PaintingStyle.stroke
@@ -359,8 +357,7 @@ class _TripleOverlapPainter extends CustomPainter {
       
       canvas.drawCircle(center, currentRadius, trackPaint);
 
-      // 2. ŞU ANKİ DÖNEM (Düz renkli ana halka)
-      final double sweepAngle = 2 * math.pi * (g.percentage / 100.0) * animationValue;
+      // 2. ŞU ANKİ DÖNEM (Düz renkli segment)
       if (sweepAngle > 0) {
         final currentPaint = Paint()
           ..color = catColor
@@ -370,14 +367,14 @@ class _TripleOverlapPainter extends CustomPainter {
         
         canvas.drawArc(
           Rect.fromCircle(center: center, radius: currentRadius),
-          -math.pi / 2,
+          startAngle,
           sweepAngle,
           false,
           currentPaint,
         );
       }
 
-      // 3. GEÇEN DÖNEM (İnce beyaz parlak çekirdek)
+      // 3. GEÇEN DÖNEM (İnce beyaz parlak segment çekirdeği)
       final double prevSweepAngle = 2 * math.pi * (g.prevPercentage / 100.0) * animationValue;
       if (prevSweepAngle > 0) {
         final prevPaint = Paint()
@@ -388,7 +385,7 @@ class _TripleOverlapPainter extends CustomPainter {
         
         canvas.drawArc(
           Rect.fromCircle(center: center, radius: currentRadius),
-          -math.pi / 2,
+          startAngle,
           prevSweepAngle,
           false,
           prevPaint,

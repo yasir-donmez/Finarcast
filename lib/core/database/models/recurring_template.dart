@@ -1,4 +1,4 @@
-import 'package:isar/isar.dart';
+import 'package:isar_community/isar.dart';
 import '../../domain/recurrence_rule.dart';
 import '../../utils/currency_utils.dart';
 import 'exchange_rate.dart';
@@ -35,6 +35,7 @@ class RecurringTemplate {
 
   // — Bildirim —
   bool isNotificationEnabled = false;
+  bool hasNotificationConfigured = false;
   int notificationReminderDays = 0;
   int notificationHour = 9;
   int notificationMinute = 0;

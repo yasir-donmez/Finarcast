@@ -365,21 +365,10 @@ class _HistoryRecordTileState extends State<HistoryRecordTile>
                     Container(
                       padding: const EdgeInsets.all(8),
                       decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                          colors: [
-                            tx.color.withValues(alpha: isDark ? 0.22 : 0.26),
-                            tx.color.withValues(alpha: isDark ? 0.05 : 0.07),
-                          ],
-                        ),
+                        color: AppColors.getAccentDeep(context, tx.color).withValues(alpha: 0.15),
                         borderRadius: BorderRadius.circular(10),
-                        border: Border.all(
-                          color: tx.color.withValues(alpha: isDark ? 0.25 : 0.35),
-                          width: 0.8,
-                        ),
                       ),
-                      child: Icon(tx.icon, color: tx.color, size: 18),
+                      child: Icon(tx.icon, color: AppColors.getAccentDeep(context, tx.color), size: 18),
                     ),
                     const SizedBox(width: 10),
                     Expanded(

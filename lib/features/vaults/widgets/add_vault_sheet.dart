@@ -100,6 +100,19 @@ class _AddVaultSheetState extends ConsumerState<AddVaultSheet> with SingleTicker
               ),
               
               SizedBox(height: 20 * sf),
+              CustomTextField(
+                controller: _balanceController,
+                hintText: l10n.initialBalance,
+                icon: Icons.payments_rounded,
+                suffixText: _selectedCurrency == 'AUTO' ? '' : _selectedCurrency,
+                keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                inputFormatters: [
+                  FilteringTextInputFormatter.allow(RegExp(r'[0-9.,]')),
+                ],
+                scalingFactor: sf,
+              ),
+              
+              SizedBox(height: 20 * sf),
               Padding(
                 padding: const EdgeInsets.only(left: 4),
                 child: Text(
@@ -151,19 +164,6 @@ class _AddVaultSheetState extends ConsumerState<AddVaultSheet> with SingleTicker
                   }).toList(),
                 ),
               ),
-              
-              SizedBox(height: 20 * sf),
-              CustomTextField(
-                controller: _balanceController,
-                hintText: l10n.initialBalance,
-                icon: Icons.payments_rounded,
-                suffixText: _selectedCurrency == 'AUTO' ? '' : _selectedCurrency,
-                keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                inputFormatters: [
-                  FilteringTextInputFormatter.allow(RegExp(r'[0-9.,]')),
-                ],
-                scalingFactor: sf,
-              ),
               SizedBox(height: 24 * sf),
               CustomButton(
                 label: l10n.createVault,
@@ -175,14 +175,14 @@ class _AddVaultSheetState extends ConsumerState<AddVaultSheet> with SingleTicker
                     if (targetCurrency != 'AUTO' && targetCurrency != baseCurrency) {
                       var rates = await DatabaseService.getAllExchangeRates();
                       final code = CurrencyUtils.symbolToCode(targetCurrency);
-                      var hasRate = rates.any((r) => r.currencyCode == code && r.rate > 0);
+                      var hasRate = code == 'TRY' || rates.any((r) => r.currencyCode == code && r.rate > 0);
 
                       if (!hasRate) {
                         // Kurlar yok, otomatik çekmeyi dene
                         final success = await CurrencyService.updateRates();
                         if (success) {
                           rates = await DatabaseService.getAllExchangeRates();
-                          hasRate = rates.any((r) => r.currencyCode == code && r.rate > 0);
+                          hasRate = code == 'TRY' || rates.any((r) => r.currencyCode == code && r.rate > 0);
                         }
                       }
 

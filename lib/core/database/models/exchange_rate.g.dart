@@ -27,11 +27,7 @@ const ExchangeRateSchema = CollectionSchema(
       name: r'lastUpdated',
       type: IsarType.dateTime,
     ),
-    r'rate': PropertySchema(
-      id: 2,
-      name: r'rate',
-      type: IsarType.double,
-    ),
+    r'rate': PropertySchema(id: 2, name: r'rate', type: IsarType.double),
     r'syncStatus': PropertySchema(
       id: 3,
       name: r'syncStatus',
@@ -41,8 +37,9 @@ const ExchangeRateSchema = CollectionSchema(
       id: 4,
       name: r'updatedAt',
       type: IsarType.dateTime,
-    )
+    ),
   },
+
   estimateSize: _exchangeRateEstimateSize,
   serialize: _exchangeRateSerialize,
   deserialize: _exchangeRateDeserialize,
@@ -59,16 +56,17 @@ const ExchangeRateSchema = CollectionSchema(
           name: r'currencyCode',
           type: IndexType.hash,
           caseSensitive: true,
-        )
+        ),
       ],
-    )
+    ),
   },
   links: {},
   embeddedSchemas: {},
+
   getId: _exchangeRateGetId,
   getLinks: _exchangeRateGetLinks,
   attach: _exchangeRateAttach,
-  version: '3.1.0+1',
+  version: '3.3.2',
 );
 
 int _exchangeRateEstimateSize(
@@ -141,7 +139,10 @@ List<IsarLinkBase<dynamic>> _exchangeRateGetLinks(ExchangeRate object) {
 }
 
 void _exchangeRateAttach(
-    IsarCollection<dynamic> col, Id id, ExchangeRate object) {
+  IsarCollection<dynamic> col,
+  Id id,
+  ExchangeRate object,
+) {
   object.id = id;
 }
 
@@ -163,13 +164,15 @@ extension ExchangeRateByIndex on IsarCollection<ExchangeRate> {
   }
 
   Future<List<ExchangeRate?>> getAllByCurrencyCode(
-      List<String> currencyCodeValues) {
+    List<String> currencyCodeValues,
+  ) {
     final values = currencyCodeValues.map((e) => [e]).toList();
     return getAllByIndex(r'currencyCode', values);
   }
 
   List<ExchangeRate?> getAllByCurrencyCodeSync(
-      List<String> currencyCodeValues) {
+    List<String> currencyCodeValues,
+  ) {
     final values = currencyCodeValues.map((e) => [e]).toList();
     return getAllByIndexSync(r'currencyCode', values);
   }
@@ -196,8 +199,10 @@ extension ExchangeRateByIndex on IsarCollection<ExchangeRate> {
     return putAllByIndex(r'currencyCode', objects);
   }
 
-  List<Id> putAllByCurrencyCodeSync(List<ExchangeRate> objects,
-      {bool saveLinks = true}) {
+  List<Id> putAllByCurrencyCodeSync(
+    List<ExchangeRate> objects, {
+    bool saveLinks = true,
+  }) {
     return putAllByIndexSync(r'currencyCode', objects, saveLinks: saveLinks);
   }
 }
@@ -215,15 +220,13 @@ extension ExchangeRateQueryWhere
     on QueryBuilder<ExchangeRate, ExchangeRate, QWhereClause> {
   QueryBuilder<ExchangeRate, ExchangeRate, QAfterWhereClause> idEqualTo(Id id) {
     return QueryBuilder.apply(this, (query) {
-      return query.addWhereClause(IdWhereClause.between(
-        lower: id,
-        upper: id,
-      ));
+      return query.addWhereClause(IdWhereClause.between(lower: id, upper: id));
     });
   }
 
   QueryBuilder<ExchangeRate, ExchangeRate, QAfterWhereClause> idNotEqualTo(
-      Id id) {
+    Id id,
+  ) {
     return QueryBuilder.apply(this, (query) {
       if (query.whereSort == Sort.asc) {
         return query
@@ -246,8 +249,9 @@ extension ExchangeRateQueryWhere
   }
 
   QueryBuilder<ExchangeRate, ExchangeRate, QAfterWhereClause> idGreaterThan(
-      Id id,
-      {bool include = false}) {
+    Id id, {
+    bool include = false,
+  }) {
     return QueryBuilder.apply(this, (query) {
       return query.addWhereClause(
         IdWhereClause.greaterThan(lower: id, includeLower: include),
@@ -255,8 +259,10 @@ extension ExchangeRateQueryWhere
     });
   }
 
-  QueryBuilder<ExchangeRate, ExchangeRate, QAfterWhereClause> idLessThan(Id id,
-      {bool include = false}) {
+  QueryBuilder<ExchangeRate, ExchangeRate, QAfterWhereClause> idLessThan(
+    Id id, {
+    bool include = false,
+  }) {
     return QueryBuilder.apply(this, (query) {
       return query.addWhereClause(
         IdWhereClause.lessThan(upper: id, includeUpper: include),
@@ -271,56 +277,68 @@ extension ExchangeRateQueryWhere
     bool includeUpper = true,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addWhereClause(IdWhereClause.between(
-        lower: lowerId,
-        includeLower: includeLower,
-        upper: upperId,
-        includeUpper: includeUpper,
-      ));
+      return query.addWhereClause(
+        IdWhereClause.between(
+          lower: lowerId,
+          includeLower: includeLower,
+          upper: upperId,
+          includeUpper: includeUpper,
+        ),
+      );
     });
   }
 
   QueryBuilder<ExchangeRate, ExchangeRate, QAfterWhereClause>
-      currencyCodeEqualTo(String currencyCode) {
+  currencyCodeEqualTo(String currencyCode) {
     return QueryBuilder.apply(this, (query) {
-      return query.addWhereClause(IndexWhereClause.equalTo(
-        indexName: r'currencyCode',
-        value: [currencyCode],
-      ));
+      return query.addWhereClause(
+        IndexWhereClause.equalTo(
+          indexName: r'currencyCode',
+          value: [currencyCode],
+        ),
+      );
     });
   }
 
   QueryBuilder<ExchangeRate, ExchangeRate, QAfterWhereClause>
-      currencyCodeNotEqualTo(String currencyCode) {
+  currencyCodeNotEqualTo(String currencyCode) {
     return QueryBuilder.apply(this, (query) {
       if (query.whereSort == Sort.asc) {
         return query
-            .addWhereClause(IndexWhereClause.between(
-              indexName: r'currencyCode',
-              lower: [],
-              upper: [currencyCode],
-              includeUpper: false,
-            ))
-            .addWhereClause(IndexWhereClause.between(
-              indexName: r'currencyCode',
-              lower: [currencyCode],
-              includeLower: false,
-              upper: [],
-            ));
+            .addWhereClause(
+              IndexWhereClause.between(
+                indexName: r'currencyCode',
+                lower: [],
+                upper: [currencyCode],
+                includeUpper: false,
+              ),
+            )
+            .addWhereClause(
+              IndexWhereClause.between(
+                indexName: r'currencyCode',
+                lower: [currencyCode],
+                includeLower: false,
+                upper: [],
+              ),
+            );
       } else {
         return query
-            .addWhereClause(IndexWhereClause.between(
-              indexName: r'currencyCode',
-              lower: [currencyCode],
-              includeLower: false,
-              upper: [],
-            ))
-            .addWhereClause(IndexWhereClause.between(
-              indexName: r'currencyCode',
-              lower: [],
-              upper: [currencyCode],
-              includeUpper: false,
-            ));
+            .addWhereClause(
+              IndexWhereClause.between(
+                indexName: r'currencyCode',
+                lower: [currencyCode],
+                includeLower: false,
+                upper: [],
+              ),
+            )
+            .addWhereClause(
+              IndexWhereClause.between(
+                indexName: r'currencyCode',
+                lower: [],
+                upper: [currencyCode],
+                includeUpper: false,
+              ),
+            );
       }
     });
   }
@@ -329,53 +347,56 @@ extension ExchangeRateQueryWhere
 extension ExchangeRateQueryFilter
     on QueryBuilder<ExchangeRate, ExchangeRate, QFilterCondition> {
   QueryBuilder<ExchangeRate, ExchangeRate, QAfterFilterCondition>
-      currencyCodeEqualTo(
-    String value, {
-    bool caseSensitive = true,
-  }) {
+  currencyCodeEqualTo(String value, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'currencyCode',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.equalTo(
+          property: r'currencyCode',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
     });
   }
 
   QueryBuilder<ExchangeRate, ExchangeRate, QAfterFilterCondition>
-      currencyCodeGreaterThan(
-    String value, {
-    bool include = false,
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        include: include,
-        property: r'currencyCode',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<ExchangeRate, ExchangeRate, QAfterFilterCondition>
-      currencyCodeLessThan(
+  currencyCodeGreaterThan(
     String value, {
     bool include = false,
     bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.lessThan(
-        include: include,
-        property: r'currencyCode',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(
+          include: include,
+          property: r'currencyCode',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
     });
   }
 
   QueryBuilder<ExchangeRate, ExchangeRate, QAfterFilterCondition>
-      currencyCodeBetween(
+  currencyCodeLessThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.lessThan(
+          include: include,
+          property: r'currencyCode',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<ExchangeRate, ExchangeRate, QAfterFilterCondition>
+  currencyCodeBetween(
     String lower,
     String upper, {
     bool includeLower = true,
@@ -383,94 +404,96 @@ extension ExchangeRateQueryFilter
     bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.between(
-        property: r'currencyCode',
-        lower: lower,
-        includeLower: includeLower,
-        upper: upper,
-        includeUpper: includeUpper,
-        caseSensitive: caseSensitive,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.between(
+          property: r'currencyCode',
+          lower: lower,
+          includeLower: includeLower,
+          upper: upper,
+          includeUpper: includeUpper,
+          caseSensitive: caseSensitive,
+        ),
+      );
     });
   }
 
   QueryBuilder<ExchangeRate, ExchangeRate, QAfterFilterCondition>
-      currencyCodeStartsWith(
-    String value, {
-    bool caseSensitive = true,
-  }) {
+  currencyCodeStartsWith(String value, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.startsWith(
-        property: r'currencyCode',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.startsWith(
+          property: r'currencyCode',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
     });
   }
 
   QueryBuilder<ExchangeRate, ExchangeRate, QAfterFilterCondition>
-      currencyCodeEndsWith(
-    String value, {
-    bool caseSensitive = true,
-  }) {
+  currencyCodeEndsWith(String value, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.endsWith(
-        property: r'currencyCode',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.endsWith(
+          property: r'currencyCode',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
     });
   }
 
   QueryBuilder<ExchangeRate, ExchangeRate, QAfterFilterCondition>
-      currencyCodeContains(String value, {bool caseSensitive = true}) {
+  currencyCodeContains(String value, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.contains(
-        property: r'currencyCode',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.contains(
+          property: r'currencyCode',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
     });
   }
 
   QueryBuilder<ExchangeRate, ExchangeRate, QAfterFilterCondition>
-      currencyCodeMatches(String pattern, {bool caseSensitive = true}) {
+  currencyCodeMatches(String pattern, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.matches(
-        property: r'currencyCode',
-        wildcard: pattern,
-        caseSensitive: caseSensitive,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.matches(
+          property: r'currencyCode',
+          wildcard: pattern,
+          caseSensitive: caseSensitive,
+        ),
+      );
     });
   }
 
   QueryBuilder<ExchangeRate, ExchangeRate, QAfterFilterCondition>
-      currencyCodeIsEmpty() {
+  currencyCodeIsEmpty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'currencyCode',
-        value: '',
-      ));
+      return query.addFilterCondition(
+        FilterCondition.equalTo(property: r'currencyCode', value: ''),
+      );
     });
   }
 
   QueryBuilder<ExchangeRate, ExchangeRate, QAfterFilterCondition>
-      currencyCodeIsNotEmpty() {
+  currencyCodeIsNotEmpty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        property: r'currencyCode',
-        value: '',
-      ));
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(property: r'currencyCode', value: ''),
+      );
     });
   }
 
   QueryBuilder<ExchangeRate, ExchangeRate, QAfterFilterCondition> idEqualTo(
-      Id value) {
+    Id value,
+  ) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'id',
-        value: value,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.equalTo(property: r'id', value: value),
+      );
     });
   }
 
@@ -479,11 +502,13 @@ extension ExchangeRateQueryFilter
     bool include = false,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        include: include,
-        property: r'id',
-        value: value,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(
+          include: include,
+          property: r'id',
+          value: value,
+        ),
+      );
     });
   }
 
@@ -492,11 +517,13 @@ extension ExchangeRateQueryFilter
     bool include = false,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.lessThan(
-        include: include,
-        property: r'id',
-        value: value,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.lessThan(
+          include: include,
+          property: r'id',
+          value: value,
+        ),
+      );
     });
   }
 
@@ -507,69 +534,70 @@ extension ExchangeRateQueryFilter
     bool includeUpper = true,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.between(
-        property: r'id',
-        lower: lower,
-        includeLower: includeLower,
-        upper: upper,
-        includeUpper: includeUpper,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.between(
+          property: r'id',
+          lower: lower,
+          includeLower: includeLower,
+          upper: upper,
+          includeUpper: includeUpper,
+        ),
+      );
     });
   }
 
   QueryBuilder<ExchangeRate, ExchangeRate, QAfterFilterCondition>
-      lastUpdatedEqualTo(DateTime value) {
+  lastUpdatedEqualTo(DateTime value) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'lastUpdated',
-        value: value,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.equalTo(property: r'lastUpdated', value: value),
+      );
     });
   }
 
   QueryBuilder<ExchangeRate, ExchangeRate, QAfterFilterCondition>
-      lastUpdatedGreaterThan(
-    DateTime value, {
-    bool include = false,
-  }) {
+  lastUpdatedGreaterThan(DateTime value, {bool include = false}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        include: include,
-        property: r'lastUpdated',
-        value: value,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(
+          include: include,
+          property: r'lastUpdated',
+          value: value,
+        ),
+      );
     });
   }
 
   QueryBuilder<ExchangeRate, ExchangeRate, QAfterFilterCondition>
-      lastUpdatedLessThan(
-    DateTime value, {
-    bool include = false,
-  }) {
+  lastUpdatedLessThan(DateTime value, {bool include = false}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.lessThan(
-        include: include,
-        property: r'lastUpdated',
-        value: value,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.lessThan(
+          include: include,
+          property: r'lastUpdated',
+          value: value,
+        ),
+      );
     });
   }
 
   QueryBuilder<ExchangeRate, ExchangeRate, QAfterFilterCondition>
-      lastUpdatedBetween(
+  lastUpdatedBetween(
     DateTime lower,
     DateTime upper, {
     bool includeLower = true,
     bool includeUpper = true,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.between(
-        property: r'lastUpdated',
-        lower: lower,
-        includeLower: includeLower,
-        upper: upper,
-        includeUpper: includeUpper,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.between(
+          property: r'lastUpdated',
+          lower: lower,
+          includeLower: includeLower,
+          upper: upper,
+          includeUpper: includeUpper,
+        ),
+      );
     });
   }
 
@@ -578,27 +606,33 @@ extension ExchangeRateQueryFilter
     double epsilon = Query.epsilon,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'rate',
-        value: value,
-        epsilon: epsilon,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.equalTo(
+          property: r'rate',
+          value: value,
+
+          epsilon: epsilon,
+        ),
+      );
     });
   }
 
   QueryBuilder<ExchangeRate, ExchangeRate, QAfterFilterCondition>
-      rateGreaterThan(
+  rateGreaterThan(
     double value, {
     bool include = false,
     double epsilon = Query.epsilon,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        include: include,
-        property: r'rate',
-        value: value,
-        epsilon: epsilon,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(
+          include: include,
+          property: r'rate',
+          value: value,
+
+          epsilon: epsilon,
+        ),
+      );
     });
   }
 
@@ -608,12 +642,15 @@ extension ExchangeRateQueryFilter
     double epsilon = Query.epsilon,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.lessThan(
-        include: include,
-        property: r'rate',
-        value: value,
-        epsilon: epsilon,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.lessThan(
+          include: include,
+          property: r'rate',
+          value: value,
+
+          epsilon: epsilon,
+        ),
+      );
     });
   }
 
@@ -625,162 +662,163 @@ extension ExchangeRateQueryFilter
     double epsilon = Query.epsilon,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.between(
-        property: r'rate',
-        lower: lower,
-        includeLower: includeLower,
-        upper: upper,
-        includeUpper: includeUpper,
-        epsilon: epsilon,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.between(
+          property: r'rate',
+          lower: lower,
+          includeLower: includeLower,
+          upper: upper,
+          includeUpper: includeUpper,
+
+          epsilon: epsilon,
+        ),
+      );
     });
   }
 
   QueryBuilder<ExchangeRate, ExchangeRate, QAfterFilterCondition>
-      syncStatusIsNull() {
+  syncStatusIsNull() {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(const FilterCondition.isNull(
-        property: r'syncStatus',
-      ));
+      return query.addFilterCondition(
+        const FilterCondition.isNull(property: r'syncStatus'),
+      );
     });
   }
 
   QueryBuilder<ExchangeRate, ExchangeRate, QAfterFilterCondition>
-      syncStatusIsNotNull() {
+  syncStatusIsNotNull() {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(const FilterCondition.isNotNull(
-        property: r'syncStatus',
-      ));
+      return query.addFilterCondition(
+        const FilterCondition.isNotNull(property: r'syncStatus'),
+      );
     });
   }
 
   QueryBuilder<ExchangeRate, ExchangeRate, QAfterFilterCondition>
-      syncStatusEqualTo(int? value) {
+  syncStatusEqualTo(int? value) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'syncStatus',
-        value: value,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.equalTo(property: r'syncStatus', value: value),
+      );
     });
   }
 
   QueryBuilder<ExchangeRate, ExchangeRate, QAfterFilterCondition>
-      syncStatusGreaterThan(
-    int? value, {
-    bool include = false,
-  }) {
+  syncStatusGreaterThan(int? value, {bool include = false}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        include: include,
-        property: r'syncStatus',
-        value: value,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(
+          include: include,
+          property: r'syncStatus',
+          value: value,
+        ),
+      );
     });
   }
 
   QueryBuilder<ExchangeRate, ExchangeRate, QAfterFilterCondition>
-      syncStatusLessThan(
-    int? value, {
-    bool include = false,
-  }) {
+  syncStatusLessThan(int? value, {bool include = false}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.lessThan(
-        include: include,
-        property: r'syncStatus',
-        value: value,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.lessThan(
+          include: include,
+          property: r'syncStatus',
+          value: value,
+        ),
+      );
     });
   }
 
   QueryBuilder<ExchangeRate, ExchangeRate, QAfterFilterCondition>
-      syncStatusBetween(
+  syncStatusBetween(
     int? lower,
     int? upper, {
     bool includeLower = true,
     bool includeUpper = true,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.between(
-        property: r'syncStatus',
-        lower: lower,
-        includeLower: includeLower,
-        upper: upper,
-        includeUpper: includeUpper,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.between(
+          property: r'syncStatus',
+          lower: lower,
+          includeLower: includeLower,
+          upper: upper,
+          includeUpper: includeUpper,
+        ),
+      );
     });
   }
 
   QueryBuilder<ExchangeRate, ExchangeRate, QAfterFilterCondition>
-      updatedAtIsNull() {
+  updatedAtIsNull() {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(const FilterCondition.isNull(
-        property: r'updatedAt',
-      ));
+      return query.addFilterCondition(
+        const FilterCondition.isNull(property: r'updatedAt'),
+      );
     });
   }
 
   QueryBuilder<ExchangeRate, ExchangeRate, QAfterFilterCondition>
-      updatedAtIsNotNull() {
+  updatedAtIsNotNull() {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(const FilterCondition.isNotNull(
-        property: r'updatedAt',
-      ));
+      return query.addFilterCondition(
+        const FilterCondition.isNotNull(property: r'updatedAt'),
+      );
     });
   }
 
   QueryBuilder<ExchangeRate, ExchangeRate, QAfterFilterCondition>
-      updatedAtEqualTo(DateTime? value) {
+  updatedAtEqualTo(DateTime? value) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'updatedAt',
-        value: value,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.equalTo(property: r'updatedAt', value: value),
+      );
     });
   }
 
   QueryBuilder<ExchangeRate, ExchangeRate, QAfterFilterCondition>
-      updatedAtGreaterThan(
-    DateTime? value, {
-    bool include = false,
-  }) {
+  updatedAtGreaterThan(DateTime? value, {bool include = false}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        include: include,
-        property: r'updatedAt',
-        value: value,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(
+          include: include,
+          property: r'updatedAt',
+          value: value,
+        ),
+      );
     });
   }
 
   QueryBuilder<ExchangeRate, ExchangeRate, QAfterFilterCondition>
-      updatedAtLessThan(
-    DateTime? value, {
-    bool include = false,
-  }) {
+  updatedAtLessThan(DateTime? value, {bool include = false}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.lessThan(
-        include: include,
-        property: r'updatedAt',
-        value: value,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.lessThan(
+          include: include,
+          property: r'updatedAt',
+          value: value,
+        ),
+      );
     });
   }
 
   QueryBuilder<ExchangeRate, ExchangeRate, QAfterFilterCondition>
-      updatedAtBetween(
+  updatedAtBetween(
     DateTime? lower,
     DateTime? upper, {
     bool includeLower = true,
     bool includeUpper = true,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.between(
-        property: r'updatedAt',
-        lower: lower,
-        includeLower: includeLower,
-        upper: upper,
-        includeUpper: includeUpper,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.between(
+          property: r'updatedAt',
+          lower: lower,
+          includeLower: includeLower,
+          upper: upper,
+          includeUpper: includeUpper,
+        ),
+      );
     });
   }
 }
@@ -800,7 +838,7 @@ extension ExchangeRateQuerySortBy
   }
 
   QueryBuilder<ExchangeRate, ExchangeRate, QAfterSortBy>
-      sortByCurrencyCodeDesc() {
+  sortByCurrencyCodeDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'currencyCode', Sort.desc);
     });
@@ -813,7 +851,7 @@ extension ExchangeRateQuerySortBy
   }
 
   QueryBuilder<ExchangeRate, ExchangeRate, QAfterSortBy>
-      sortByLastUpdatedDesc() {
+  sortByLastUpdatedDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'lastUpdated', Sort.desc);
     });
@@ -838,7 +876,7 @@ extension ExchangeRateQuerySortBy
   }
 
   QueryBuilder<ExchangeRate, ExchangeRate, QAfterSortBy>
-      sortBySyncStatusDesc() {
+  sortBySyncStatusDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'syncStatus', Sort.desc);
     });
@@ -866,7 +904,7 @@ extension ExchangeRateQuerySortThenBy
   }
 
   QueryBuilder<ExchangeRate, ExchangeRate, QAfterSortBy>
-      thenByCurrencyCodeDesc() {
+  thenByCurrencyCodeDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'currencyCode', Sort.desc);
     });
@@ -891,7 +929,7 @@ extension ExchangeRateQuerySortThenBy
   }
 
   QueryBuilder<ExchangeRate, ExchangeRate, QAfterSortBy>
-      thenByLastUpdatedDesc() {
+  thenByLastUpdatedDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'lastUpdated', Sort.desc);
     });
@@ -916,7 +954,7 @@ extension ExchangeRateQuerySortThenBy
   }
 
   QueryBuilder<ExchangeRate, ExchangeRate, QAfterSortBy>
-      thenBySyncStatusDesc() {
+  thenBySyncStatusDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'syncStatus', Sort.desc);
     });
@@ -937,8 +975,9 @@ extension ExchangeRateQuerySortThenBy
 
 extension ExchangeRateQueryWhereDistinct
     on QueryBuilder<ExchangeRate, ExchangeRate, QDistinct> {
-  QueryBuilder<ExchangeRate, ExchangeRate, QDistinct> distinctByCurrencyCode(
-      {bool caseSensitive = true}) {
+  QueryBuilder<ExchangeRate, ExchangeRate, QDistinct> distinctByCurrencyCode({
+    bool caseSensitive = true,
+  }) {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'currencyCode', caseSensitive: caseSensitive);
     });

@@ -1,6 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'dart:io';
-import 'package:isar/isar.dart';
+import 'package:isar_community/isar.dart';
 import 'package:path_provider/path_provider.dart';
 import 'models/transaction_record.dart';
 import 'models/recurring_template.dart';
@@ -48,8 +48,7 @@ class DatabaseService {
       await _seedDefaultVaults();
       debugPrint('✅ [DatabaseService] Veri tohumlama tamamlandı.');
 
-      // Yetim işlemleri temizle (hiçbir kasaya bağlı olmayanları sil)
-      await _cleanupOrphanTransactions();
+
     } catch (e, stack) {
       debugPrint('❌ [DatabaseService ERROR] Başlatma hatası: $e');
       debugPrint('📜 [DatabaseService ERROR] Stack Trace:\n$stack');
@@ -93,6 +92,7 @@ class DatabaseService {
         ..name = vaultName
         ..currency = defaultSettings.currencySymbol
         ..balance = 0.0
+        ..remoteId = const Uuid().v4()
         ..syncStatus = 1;
       await isar.writeTxn(() async {
         await isar.vaults.put(defaultVault);
@@ -682,26 +682,7 @@ class DatabaseService {
     await _seedDefaultVaults();
   }
 
-  /// Yetim işlemleri sil (hiçbir kasaya ait olmayanları veritabanından temizle)
-  static Future<void> _cleanupOrphanTransactions() async {
-    try {
-      final transactions = await isar.transactionRecords.where().findAll();
-      final orphanIds = <int>[];
-      for (final tx in transactions) {
-        if (tx.vaultId == null) {
-          orphanIds.add(tx.id);
-        }
-      }
-      if (orphanIds.isNotEmpty) {
-        debugPrint('🧹 [DatabaseService] Yetim kalan ${orphanIds.length} işlem tespit edildi ve siliniyor...');
-        for (final id in orphanIds) {
-          await deleteTransaction(id);
-        }
-      }
-    } catch (e) {
-      debugPrint('⚠️ [DatabaseService] Yetim temizliği sırasında hata (yutuldu): $e');
-    }
-  }
+
 
   /// Veritabanı dosyalarını diskten tamamen sil
   static Future<void> deleteDatabaseFiles() async {

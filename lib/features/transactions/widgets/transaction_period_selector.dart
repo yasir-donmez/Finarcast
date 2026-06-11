@@ -742,8 +742,10 @@ class _TransactionPeriodSelectorState extends State<TransactionPeriodSelector> {
 
 
 
-  void _showFullDatePicker(AppLocalizations l10n) {
+  void _showFullDatePicker(AppLocalizations l10n) async {
     FocusManager.instance.primaryFocus?.unfocus();
+    await Future.delayed(const Duration(milliseconds: 120));
+    if (!mounted) return;
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
     final minDate = widget.disablePastDates ? today : DateTime(now.year - 5, 1, 1);
@@ -817,8 +819,8 @@ class _TransactionPeriodSelectorState extends State<TransactionPeriodSelector> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     // Day
-                    SizedBox(
-                      width: 70,
+                    Expanded(
+                      flex: 7,
                       child: WheelPicker.strings(
                         key: ValueKey('day_${tempMonth}_$tempYear'),
                         items: dayItems,
@@ -830,8 +832,8 @@ class _TransactionPeriodSelectorState extends State<TransactionPeriodSelector> {
                     ),
                     const SizedBox(width: 10),
                     // Month
-                    SizedBox(
-                      width: 130,
+                    Expanded(
+                      flex: 13,
                       child: WheelPicker.strings(
                         key: ValueKey('month_$tempYear'),
                         items: monthItems,
@@ -845,8 +847,8 @@ class _TransactionPeriodSelectorState extends State<TransactionPeriodSelector> {
                     ),
                     const SizedBox(width: 10),
                     // Year
-                    SizedBox(
-                      width: 90,
+                    Expanded(
+                      flex: 9,
                       child: WheelPicker.strings(
                         items: yearItems,
                         initialItem: initialYearIndex,
@@ -886,8 +888,10 @@ class _TransactionPeriodSelectorState extends State<TransactionPeriodSelector> {
     l10n.friday, l10n.saturday, l10n.sunday,
   ];
 
-  void _showRecurrenceDayPicker(AppLocalizations l10n) {
+  void _showRecurrenceDayPicker(AppLocalizations l10n) async {
     FocusManager.instance.primaryFocus?.unfocus();
+    await Future.delayed(const Duration(milliseconds: 120));
+    if (!mounted) return;
     int tempDay = _selectedDay;
     final dayItems = List.generate(31, (i) => (i + 1).toString());
 
@@ -927,8 +931,10 @@ class _TransactionPeriodSelectorState extends State<TransactionPeriodSelector> {
     );
   }
 
-  void _showRecurrenceMonthDayPicker(AppLocalizations l10n) {
+  void _showRecurrenceMonthDayPicker(AppLocalizations l10n) async {
     FocusManager.instance.primaryFocus?.unfocus();
+    await Future.delayed(const Duration(milliseconds: 120));
+    if (!mounted) return;
     int tempDay = _selectedDateForRecurrence.day;
     int tempMonth = _selectedDateForRecurrence.month;
     final months = _getMonths(l10n);
@@ -951,8 +957,8 @@ class _TransactionPeriodSelectorState extends State<TransactionPeriodSelector> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     // Day
-                    SizedBox(
-                      width: 80,
+                    Expanded(
+                      flex: 8,
                       child: WheelPicker.strings(
                         key: ValueKey('recur_day_$tempMonth'),
                         items: dayItems,
@@ -964,8 +970,8 @@ class _TransactionPeriodSelectorState extends State<TransactionPeriodSelector> {
                     ),
                     const SizedBox(width: 16),
                     // Month
-                    SizedBox(
-                      width: 150,
+                    Expanded(
+                      flex: 15,
                       child: WheelPicker.strings(
                         items: months,
                         initialItem: tempMonth - 1,
@@ -1001,8 +1007,10 @@ class _TransactionPeriodSelectorState extends State<TransactionPeriodSelector> {
     );
   }
 
-  void _showRecurrenceWeekdayPicker(AppLocalizations l10n) {
+  void _showRecurrenceWeekdayPicker(AppLocalizations l10n) async {
     FocusManager.instance.primaryFocus?.unfocus();
+    await Future.delayed(const Duration(milliseconds: 120));
+    if (!mounted) return;
     int tempWeekday = _selectedDateForRecurrence.weekday;
     final weekdays = _getWeekdays(l10n);
 

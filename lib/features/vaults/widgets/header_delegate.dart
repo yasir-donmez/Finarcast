@@ -129,34 +129,9 @@ class TrueMorphDeckHeaderDelegate extends SliverPersistentHeaderDelegate {
                         alignment: Alignment.centerRight,
                         child: Row(
                           children: [
-                            Stack(
-                              clipBehavior: Clip.none,
-                              children: [
-                                HeaderIconButton(
-                                  icon: Icons.notifications_none_rounded,
-                                  onTap: onShowNotifications,
-                                ),
-                                if (unseenNotificationsCount > 0)
-                                  Positioned(
-                                    right: 6,
-                                    top: 6,
-                                    child: Container(
-                                      width: 8,
-                                      height: 8,
-                                      decoration: BoxDecoration(
-                                        color: AppColors.error,
-                                        shape: BoxShape.circle,
-                                        boxShadow: [
-                                          BoxShadow(
-                                            color: AppColors.error.withValues(alpha: 0.5),
-                                            blurRadius: 4,
-                                            spreadRadius: 1,
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ),
-                              ],
+                            PulsingNotificationButton(
+                              unseenCount: unseenNotificationsCount,
+                              onTap: onShowNotifications,
                             ),
                             const SizedBox(width: 8),
                             HeaderIconButton(icon: Icons.add_rounded, onTap: onAddVault),
@@ -186,6 +161,7 @@ class HeaderIconButton extends StatelessWidget {
   final VoidCallback onTap;
   final bool isSelected;
   final Color? activeColor;
+  final Color? iconColor;
   
   const HeaderIconButton({
     super.key,
@@ -193,6 +169,7 @@ class HeaderIconButton extends StatelessWidget {
     required this.onTap,
     this.isSelected = false,
     this.activeColor,
+    this.iconColor,
   });
 
   @override
@@ -236,10 +213,84 @@ class HeaderIconButton extends StatelessWidget {
                 size: 24, 
                 color: isPressed
                     ? (activeColor ?? AppColors.getPrimary(context))
-                    : AppColors.getTextPrimary(context).withValues(alpha: 0.8),
+                    : (iconColor ?? AppColors.getTextPrimary(context).withValues(alpha: 0.8)),
               ),
             ),
           ),
+        );
+      },
+    );
+  }
+}
+
+class PulsingNotificationButton extends StatefulWidget {
+  final int unseenCount;
+  final VoidCallback onTap;
+
+  const PulsingNotificationButton({
+    super.key,
+    required this.unseenCount,
+    required this.onTap,
+  });
+
+  @override
+  State<PulsingNotificationButton> createState() => _PulsingNotificationButtonState();
+}
+
+class _PulsingNotificationButtonState extends State<PulsingNotificationButton> with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1000),
+    );
+
+    if (widget.unseenCount > 0) {
+      _controller.repeat(reverse: true);
+    }
+  }
+
+  @override
+  void didUpdateWidget(covariant PulsingNotificationButton oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.unseenCount > 0 && !_controller.isAnimating) {
+      _controller.repeat(reverse: true);
+    } else if (widget.unseenCount == 0 && _controller.isAnimating) {
+      _controller.stop();
+      _controller.reset();
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final defaultIconColor = AppColors.getTextPrimary(context).withValues(alpha: 0.8);
+    final colorTween = ColorTween(
+      begin: defaultIconColor,
+      end: AppColors.error,
+    );
+
+    return AnimatedBuilder(
+      animation: _controller,
+      builder: (context, child) {
+        final currentColor = widget.unseenCount > 0
+            ? (colorTween.evaluate(_controller) ?? AppColors.error)
+            : defaultIconColor;
+
+        return HeaderIconButton(
+          icon: widget.unseenCount > 0 
+              ? Icons.notifications_active_rounded 
+              : Icons.notifications_none_rounded,
+          onTap: widget.onTap,
+          iconColor: currentColor,
         );
       },
     );

@@ -448,21 +448,10 @@ class _DismissibleDraftCardState extends State<DismissibleDraftCard>
                     Container(
                       padding: const EdgeInsets.all(8),
                       decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                          colors: [
-                            catColor.withValues(alpha: isDark ? 0.22 : 0.26),
-                            catColor.withValues(alpha: isDark ? 0.05 : 0.07),
-                          ],
-                        ),
+                        color: AppColors.getAccentDeep(context, catColor).withValues(alpha: 0.15),
                         borderRadius: BorderRadius.circular(10),
-                        border: Border.all(
-                          color: catColor.withValues(alpha: isDark ? 0.25 : 0.35),
-                          width: 0.8,
-                        ),
                       ),
-                      child: Icon(catIcon, color: catColor, size: 18),
+                      child: Icon(catIcon, color: AppColors.getAccentDeep(context, catColor), size: 18),
                     ),
                     const SizedBox(width: 10),
                     

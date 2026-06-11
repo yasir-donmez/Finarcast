@@ -127,24 +127,40 @@ class GlassSurface extends StatelessWidget {
       );
     }).toList();
 
-    final activeBlurSigma = blurSigma * opacityMultiplier;
+    final activeBlurSigma = blurSigma;
+
+    final activeBgColor = opacityMultiplier < 1.0 ? baseBgColor : bgColor;
+    final activeBrdColor = opacityMultiplier < 1.0 ? baseBrdColor : brdColor;
 
     final hasCustomBorders = !showTopBorder || !showBottomBorder || !showLeftBorder || !showRightBorder;
     final effectiveBorder = hasCustomBorders
         ? Border(
-            top: showTopBorder ? BorderSide(color: brdColor, width: borderWidth) : BorderSide.none,
-            bottom: showBottomBorder ? BorderSide(color: brdColor, width: borderWidth) : BorderSide.none,
-            left: showLeftBorder ? BorderSide(color: brdColor, width: borderWidth) : BorderSide.none,
-            right: showRightBorder ? BorderSide(color: brdColor, width: borderWidth) : BorderSide.none,
+            top: showTopBorder ? BorderSide(color: activeBrdColor, width: borderWidth) : BorderSide.none,
+            bottom: showBottomBorder ? BorderSide(color: activeBrdColor, width: borderWidth) : BorderSide.none,
+            left: showLeftBorder ? BorderSide(color: activeBrdColor, width: borderWidth) : BorderSide.none,
+            right: showRightBorder ? BorderSide(color: activeBrdColor, width: borderWidth) : BorderSide.none,
           )
         : Border.all(
-            color: brdColor,
+            color: activeBrdColor,
             width: borderWidth,
           );
 
     // ═══════════════════════════════════════════
     // Widget Hiyerarşisi
     // ═══════════════════════════════════════════
+    final glassContent = BackdropFilter(
+      filter: ImageFilter.blur(sigmaX: activeBlurSigma, sigmaY: activeBlurSigma),
+      child: Container(
+        padding: padding,
+        decoration: BoxDecoration(
+          color: activeBgColor,
+          borderRadius: BorderRadius.circular(borderRadius),
+          border: effectiveBorder,
+        ),
+        child: child,
+      ),
+    );
+
     return RepaintBoundary(
       child: Container(
         width: width,
@@ -158,18 +174,12 @@ class GlassSurface extends StatelessWidget {
             : null,
         child: ClipRRect(
           borderRadius: BorderRadius.circular(borderRadius),
-          child: BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: activeBlurSigma, sigmaY: activeBlurSigma),
-            child: Container(
-              padding: padding,
-              decoration: BoxDecoration(
-                color: bgColor,
-                borderRadius: BorderRadius.circular(borderRadius),
-                border: effectiveBorder,
-              ),
-              child: child,
-            ),
-          ),
+          child: opacityMultiplier < 1.0
+              ? Opacity(
+                  opacity: opacityMultiplier,
+                  child: glassContent,
+                )
+              : glassContent,
         ),
       ),
     );

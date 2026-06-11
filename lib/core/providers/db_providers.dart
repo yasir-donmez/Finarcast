@@ -19,7 +19,10 @@ final templatesStreamProvider = StreamProvider<List<RecurringTemplate>>((ref) {
 
 /// Tüm şablonların anlık listesi
 final allTemplatesProvider = Provider<List<RecurringTemplate>>((ref) {
-  return ref.watch(templatesStreamProvider).valueOrNull ?? [];
+  final templates = ref.watch(templatesStreamProvider).valueOrNull ?? [];
+  final vaults = ref.watch(allVaultsProvider);
+  final vaultIds = vaults.map((v) => v.id).toSet();
+  return templates.where((t) => t.vaultId == null || vaultIds.contains(t.vaultId)).toList();
 });
 
 /// === İŞLEM PROVİDER'LARI ===
@@ -33,7 +36,10 @@ final transactionsStreamProvider = StreamProvider<List<TransactionRecord>>((
 
 /// Tüm işlemlerin anlık listesi (kolayca erişim için)
 final allTransactionsProvider = Provider<List<TransactionRecord>>((ref) {
-  return ref.watch(transactionsStreamProvider).valueOrNull ?? [];
+  final transactions = ref.watch(transactionsStreamProvider).valueOrNull ?? [];
+  final vaults = ref.watch(allVaultsProvider);
+  final vaultIds = vaults.map((v) => v.id).toSet();
+  return transactions.where((t) => t.vaultId == null || vaultIds.contains(t.vaultId)).toList();
 });
 
 /// Gelir işlemleri (Atlanmamış olanlar)
@@ -117,7 +123,12 @@ final vaultsStreamProvider = StreamProvider<List<Vault>>((ref) {
 
 /// Kasaların anlık listesi
 final allVaultsProvider = Provider<List<Vault>>((ref) {
-  return ref.watch(vaultsStreamProvider).valueOrNull ?? [];
+  final vaults = ref.watch(vaultsStreamProvider).valueOrNull ?? [];
+  final isPro = ref.watch(subscriptionServiceProvider).isPro;
+  if (!isPro && vaults.length > 2) {
+    return vaults.take(2).toList();
+  }
+  return vaults;
 });
 
 /// Döviz kurlarını canlı dinle

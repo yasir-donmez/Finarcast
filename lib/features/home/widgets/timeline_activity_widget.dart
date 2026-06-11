@@ -220,13 +220,14 @@ class TimelineActivityWidget extends ConsumerWidget {
   }
 
   Widget _buildIcon(BuildContext context, IconData icon, Color color) {
+    final accentColor = AppColors.getAccentDeep(context, color);
     return Container(
       width: 17, height: 17,
       decoration: BoxDecoration(
-        color: AppColors.getAccentDeep(context, color), 
+        color: accentColor.withValues(alpha: 0.15), 
         borderRadius: BorderRadius.circular(5),
       ),
-      child: Icon(icon, size: 9, color: Colors.white),
+      child: Icon(icon, size: 9, color: accentColor),
     );
   }
 

@@ -139,6 +139,7 @@ class TemplateUI {
   final bool isPaused;
   final bool isArchived;
   final bool isNotificationEnabled;
+  final bool hasNotificationConfigured;
   final int notificationReminderDays;
   final int notificationHour;
   final int notificationMinute;
@@ -166,6 +167,7 @@ class TemplateUI {
     required this.isPaused,
     required this.isArchived,
     required this.isNotificationEnabled,
+    required this.hasNotificationConfigured,
     required this.notificationReminderDays,
     required this.notificationHour,
     required this.notificationMinute,
@@ -202,6 +204,7 @@ class TemplateUI {
       isPaused: t.isPaused,
       isArchived: t.isArchived,
       isNotificationEnabled: t.isNotificationEnabled,
+      hasNotificationConfigured: t.hasNotificationConfigured,
       notificationReminderDays: t.notificationReminderDays,
       notificationHour: t.notificationHour,
       notificationMinute: t.notificationMinute,
@@ -335,16 +338,14 @@ final transactionGroupsProvider = Provider<List<TransactionGroup>>((ref) {
 /// Seçili kasa (null = Ana Kasa / Tümü)
 final selectedVaultProvider = StateProvider<String?>((ref) => null);
 
-
-
-
 /// Seçili filtrelere göre şablonları listeler
 final filteredVaultTemplatesProvider = Provider<List<TemplateUI>>((ref) {
   final allTemplates = ref.watch(vaultTemplatesProvider);
   final filter = ref.watch(transactionFilterProvider);
   final selectedVaultId = ref.watch(selectedVaultProvider);
   final groups = ref.watch(transactionGroupsProvider);
-  final effectiveVaultId = selectedVaultId ?? (groups.isNotEmpty ? groups.first.id : null);
+  final isIdValid = selectedVaultId == null || groups.any((g) => g.id == selectedVaultId);
+  final effectiveVaultId = (isIdValid ? selectedVaultId : null) ?? (groups.isNotEmpty ? groups.first.id : null);
 
   // 1. Kasa Filtresi
   var filtered = effectiveVaultId == null
@@ -379,7 +380,8 @@ final filteredVaultTransactionsProvider = Provider<List<TransactionUI>>((ref) {
   final filter = ref.watch(transactionFilterProvider);
   final selectedVaultId = ref.watch(selectedVaultProvider);
   final groups = ref.watch(transactionGroupsProvider);
-  final effectiveVaultId = selectedVaultId ?? (groups.isNotEmpty ? groups.first.id : null);
+  final isIdValid = selectedVaultId == null || groups.any((g) => g.id == selectedVaultId);
+  final effectiveVaultId = (isIdValid ? selectedVaultId : null) ?? (groups.isNotEmpty ? groups.first.id : null);
 
   final today = DateTime.now();
   final todayNorm = DateTime(today.year, today.month, today.day);
@@ -411,7 +413,8 @@ final futureOneTimeTransactionsProvider = Provider<List<TransactionUI>>((ref) {
   final filter = ref.watch(transactionFilterProvider);
   final selectedVaultId = ref.watch(selectedVaultProvider);
   final groups = ref.watch(transactionGroupsProvider);
-  final effectiveVaultId = selectedVaultId ?? (groups.isNotEmpty ? groups.first.id : null);
+  final isIdValid = selectedVaultId == null || groups.any((g) => g.id == selectedVaultId);
+  final effectiveVaultId = (isIdValid ? selectedVaultId : null) ?? (groups.isNotEmpty ? groups.first.id : null);
 
   final today = DateTime.now();
   final todayNorm = DateTime(today.year, today.month, today.day);

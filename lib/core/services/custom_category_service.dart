@@ -1,4 +1,4 @@
-import 'package:isar/isar.dart';
+import 'package:isar_community/isar.dart';
 import '../database/database_service.dart';
 import '../database/models/custom_category.dart';
 import '../database/models/transaction_record.dart';

@@ -83,7 +83,7 @@ class _VaultsScreenState extends ConsumerState<VaultsScreen> {
     const double gapCardToFilters = 16.0;
     const double titleBarH = 42.0;
     const double cardH = 286.0;
-    const double filtersH = 92.0; // 2 satır chip filtre alanı yüksekliği
+    const double filtersH = 56.0; // 1 satır chip filtre alanı yüksekliği
     const double navbarH = 80.0;
 
     final topArea = topPadding + titleBarH + gapAB + cardH + gapCardToFilters + filtersH + gapCD;
@@ -177,56 +177,66 @@ class _VaultsScreenState extends ConsumerState<VaultsScreen> {
           children: [
             SizedBox(height: dynamicGap),
 
-            // Planlar / Geçmiş Chip Seçicileri
-            Row(
-              children: [
-                VaultFilterChip(
-                  label: _getPlansLabel(langCode),
-                  isActive: viewMode == VaultViewMode.templates,
-                  onTap: () {
-                    ref.read(vaultViewModeProvider.notifier).state = VaultViewMode.templates;
-                    HapticFeedback.lightImpact();
-                  },
-                  activeColor: activeColor,
-                ),
-                const SizedBox(width: 8),
-                VaultFilterChip(
-                  label: _getHistoryLabel(langCode),
-                  isActive: viewMode == VaultViewMode.history,
-                  onTap: () {
-                    ref.read(vaultViewModeProvider.notifier).state = VaultViewMode.history;
-                    HapticFeedback.lightImpact();
-                  },
-                  activeColor: activeColor,
-                ),
-              ],
-            ),
-            const SizedBox(height: 12),
-            
-            // 1. Satır: İşlem Yönü
-            Row(
-              children: [
-                VaultFilterChip(
-                  label: l10n.all,
-                  isActive: filter == TransactionFilter.all,
-                  onTap: () => ref.read(transactionFilterProvider.notifier).state = TransactionFilter.all,
-                  activeColor: activeColor,
-                ),
-                const SizedBox(width: 8),
-                VaultFilterChip(
-                  label: l10n.income,
-                  isActive: filter == TransactionFilter.income,
-                  onTap: () => ref.read(transactionFilterProvider.notifier).state = TransactionFilter.income,
-                  activeColor: AppColors.getIncome(context),
-                ),
-                const SizedBox(width: 8),
-                VaultFilterChip(
-                  label: l10n.expense,
-                  isActive: filter == TransactionFilter.expense,
-                  onTap: () => ref.read(transactionFilterProvider.notifier).state = TransactionFilter.expense,
-                  activeColor: AppColors.getExpense(context),
-                ),
-              ],
+            SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              physics: const BouncingScrollPhysics(),
+              padding: const EdgeInsets.symmetric(vertical: 6),
+              clipBehavior: Clip.none,
+              child: Row(
+                children: [
+                  VaultFilterChip(
+                    label: _getPlansLabel(langCode),
+                    isActive: viewMode == VaultViewMode.templates,
+                    onTap: () {
+                      ref.read(vaultViewModeProvider.notifier).state = VaultViewMode.templates;
+                      HapticFeedback.lightImpact();
+                    },
+                    activeColor: activeColor,
+                  ),
+                  const SizedBox(width: 8),
+                  VaultFilterChip(
+                    label: _getHistoryLabel(langCode),
+                    isActive: viewMode == VaultViewMode.history,
+                    onTap: () {
+                      ref.read(vaultViewModeProvider.notifier).state = VaultViewMode.history;
+                      HapticFeedback.lightImpact();
+                    },
+                    activeColor: activeColor,
+                  ),
+                  
+                  // Dikey Ayraç
+                  Container(
+                    height: 18 * scalingFactor,
+                    width: 1.5,
+                    margin: const EdgeInsets.symmetric(horizontal: 12),
+                    decoration: BoxDecoration(
+                      color: AppColors.getTextSecondary(context).withValues(alpha: 0.15),
+                      borderRadius: BorderRadius.circular(1),
+                    ),
+                  ),
+
+                  VaultFilterChip(
+                    label: l10n.all,
+                    isActive: filter == TransactionFilter.all,
+                    onTap: () => ref.read(transactionFilterProvider.notifier).state = TransactionFilter.all,
+                    activeColor: activeColor,
+                  ),
+                  const SizedBox(width: 8),
+                  VaultFilterChip(
+                    label: l10n.income,
+                    isActive: filter == TransactionFilter.income,
+                    onTap: () => ref.read(transactionFilterProvider.notifier).state = TransactionFilter.income,
+                    activeColor: AppColors.getIncome(context),
+                  ),
+                  const SizedBox(width: 8),
+                  VaultFilterChip(
+                    label: l10n.expense,
+                    isActive: filter == TransactionFilter.expense,
+                    onTap: () => ref.read(transactionFilterProvider.notifier).state = TransactionFilter.expense,
+                    activeColor: AppColors.getExpense(context),
+                  ),
+                ],
+              ),
             ),
           ],
         ),

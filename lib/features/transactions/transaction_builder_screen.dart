@@ -734,6 +734,7 @@ class _TransactionBuilderScreenState extends ConsumerState<TransactionBuilderScr
       // Yardımcı: Kur var mı kontrol et, yoksa otomatik çekmeyi dene
       Future<bool> ensureRate(String currencySymbol) async {
         final code = CurrencyUtils.symbolToCode(currencySymbol);
+        if (code == 'TRY' || code == 'AUTO') return true;
         var rates = await DatabaseService.getAllExchangeRates();
         var hasRate = rates.any((r) => r.currencyCode == code && r.rate > 0);
         if (!hasRate) {
@@ -814,6 +815,7 @@ class _TransactionBuilderScreenState extends ConsumerState<TransactionBuilderScr
             old.startDate = _periodData.selectedDateForRecurrence;
 
             old.isNotificationEnabled = _isNotificationEnabled;
+            old.hasNotificationConfigured = _isNotificationEnabled || old.hasNotificationConfigured;
             old.notificationReminderDays = _notificationReminderDays;
             old.notificationHour = _notificationTime.hour;
             old.notificationMinute = _notificationTime.minute;
@@ -839,6 +841,7 @@ class _TransactionBuilderScreenState extends ConsumerState<TransactionBuilderScr
             ..note = _noteController.text.isNotEmpty ? _noteController.text : null
             ..currency = _selectedCurrency
             ..isNotificationEnabled = _isNotificationEnabled
+            ..hasNotificationConfigured = _isNotificationEnabled
             ..notificationReminderDays = _notificationReminderDays
             ..notificationHour = _notificationTime.hour
             ..notificationMinute = _notificationTime.minute;

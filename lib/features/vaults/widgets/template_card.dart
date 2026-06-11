@@ -92,7 +92,6 @@ class TemplateCard extends ConsumerWidget {
     final amountColor = tx.isIncome
         ? AppColors.getIncome(context)
         : AppColors.getExpense(context);
-    final vaultCount = tx.vaultId != null ? 1 : 0;
 
     return GestureDetector(
       onTap: onTap,
@@ -271,53 +270,18 @@ class TemplateCard extends ConsumerWidget {
                               Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  if (tx.isNotificationEnabled) ...[
+                                  if (tx.hasNotificationConfigured)
                                     Icon(
                                       tx.isNotificationEnabled
                                           ? Icons.notifications_active_rounded
                                           : Icons.notifications_off_rounded,
                                       color: tx.isNotificationEnabled
                                           ? AppColors.getPrimary(context)
-                                          : AppColors.getTextSecondary(context).withValues(alpha: 0.3),
+                                          : AppColors.getTextSecondary(context).withValues(alpha: 0.35),
                                       size: 13 * sf,
                                     ),
-                                    if (vaultCount > 0)
-                                      SizedBox(width: 4 * sf),
-                                  ],
-                                  if (vaultCount > 0) ...[
-                                    Container(
-                                      padding: EdgeInsets.symmetric(
-                                        horizontal: 5 * sf,
-                                        vertical: 2 * sf,
-                                      ),
-                                      decoration: BoxDecoration(
-                                        color: (isDark ? Colors.white : Colors.black).withValues(alpha: 0.06),
-                                        borderRadius: BorderRadius.circular(5 * sf),
-                                      ),
-                                      child: Row(
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: [
-                                          Text(
-                                            '$vaultCount',
-                                            style: TextStyle(
-                                              fontSize: 8 * sf,
-                                              fontWeight: FontWeight.w900,
-                                              color: AppColors.getTextSecondary(context).withValues(alpha: 0.7),
-                                              letterSpacing: 0.4,
-                                            ),
-                                          ),
-                                          SizedBox(width: 3 * sf),
-                                          Icon(
-                                            Icons.account_balance_wallet_rounded,
-                                            size: 9 * sf,
-                                            color: AppColors.getTextSecondary(context).withValues(alpha: 0.5),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ],
                                   if (tx.isPaused) ...[
-                                    if (vaultCount > 0 || tx.isNotificationEnabled)
+                                    if (tx.hasNotificationConfigured)
                                       SizedBox(width: 4 * sf),
                                     Icon(
                                       Icons.pause_circle_filled_rounded,

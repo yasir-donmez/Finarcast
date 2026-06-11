@@ -47,3 +47,10 @@ flutter {
 dependencies {
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.4")
 }
+
+configurations.all {
+    resolutionStrategy {
+        force("androidx.datastore:datastore:1.1.1")
+        force("androidx.datastore:datastore-core:1.1.1")
+    }
+}

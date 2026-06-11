@@ -361,12 +361,8 @@ class _InAppNotificationsSheetState extends ConsumerState<InAppNotificationsShee
                 width: 32,
                 height: 32,
                 decoration: BoxDecoration(
-                  color: AppColors.getAccentDeep(context, tx.color).withValues(alpha: 0.12),
-                  shape: BoxShape.circle,
-                  border: Border.all(
-                    color: AppColors.getAccentDeep(context, tx.color).withValues(alpha: 0.25),
-                    width: 1,
-                  ),
+                  color: AppColors.getAccentDeep(context, tx.color).withValues(alpha: 0.15),
+                  borderRadius: BorderRadius.circular(8),
                 ),
                 child: Icon(
                   tx.icon,

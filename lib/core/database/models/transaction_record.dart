@@ -1,4 +1,4 @@
-import 'package:isar/isar.dart';
+import 'package:isar_community/isar.dart';
 import 'package:uuid/uuid.dart';
 import '../../utils/currency_utils.dart';
 import 'exchange_rate.dart';

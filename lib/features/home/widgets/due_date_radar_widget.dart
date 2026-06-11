@@ -327,10 +327,11 @@ class _DueDateRadarWidgetState extends ConsumerState<DueDateRadarWidget> {
   }
 
   Widget _buildIcon(BuildContext context, TransactionRecord tx, Color color, List<CustomCategory> customCategories) {
+    final accentColor = AppColors.getAccentDeep(context, color);
     return Container(
       width: 18, height: 18,
       decoration: BoxDecoration(
-        color: AppColors.getAccentDeep(context, color), 
+        color: accentColor.withValues(alpha: 0.15), 
         borderRadius: BorderRadius.circular(5),
       ),
       child: Icon(
@@ -340,7 +341,7 @@ class _DueDateRadarWidgetState extends ConsumerState<DueDateRadarWidget> {
           iconCode: tx.iconCode,
         ),
         size: 9,
-        color: Colors.white,
+        color: accentColor,
       ),
     );
   }
