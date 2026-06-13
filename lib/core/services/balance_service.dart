@@ -5,7 +5,7 @@ import '../database/models/transaction_status.dart';
 import '../utils/currency_utils.dart';
 
 class BalanceService {
-  /// Ana formül: vault başlangıç + Σ(kayıt) where status≠skipped AND date <= today
+  /// Ana formül: Σ(kayıt) where status≠skipped AND date <= today (Pure Ledger)
   static double calculateNetBalance({
     required List<Vault> vaults,
     required List<TransactionRecord> records,
@@ -15,10 +15,7 @@ class BalanceService {
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
 
-    double balance = vaults.fold(0.0, (sum, v) {
-      final cur = v.currency == 'AUTO' ? targetCurrency : v.currency;
-      return sum + CurrencyUtils.convert(v.balance, cur, targetCurrency, rates);
-    });
+    double balance = 0.0;
 
     for (final r in records) {
       if (r.status == TransactionStatus.skipped) continue;
@@ -26,6 +23,9 @@ class BalanceService {
       // Ensure transaction belongs to one of the vaults being summed
       final vaultExists = vaults.any((v) => v.id == r.vaultId);
       if (!vaultExists) continue;
+
+      // Transfer işlemleri toplam bakiyeyi etkilemez (para yer değiştirmiştir)
+      if (r.targetVaultId != null) continue;
 
       // Sadece bugüne kadar veya bugün gerçekleşmiş olanları dahil et (hybrid model)
       final paymentDate = DateTime(r.date.year, r.date.month, r.date.day);
@@ -50,22 +50,23 @@ class BalanceService {
         ? DateTime(untilDate.year, untilDate.month, untilDate.day)
         : DateTime(now.year, now.month, now.day);
 
-    double balance = CurrencyUtils.convert(
-      vault.balance, 
-      vault.currency == 'AUTO' ? targetCurrency : vault.currency, 
-      targetCurrency, 
-      rates
-    );
+    double balance = 0.0;
 
     for (final r in records) {
       if (r.status == TransactionStatus.skipped) continue;
-      if (r.vaultId != vault.id) continue;
+      if (r.vaultId != vault.id && r.targetVaultId != vault.id) continue;
 
       final paymentDate = DateTime(r.date.year, r.date.month, r.date.day);
       if (paymentDate.isAfter(limitDate)) continue;
 
       final amt = r.getConvertedAmount(targetCurrency, rates);
-      balance += r.isIncome ? amt : -amt;
+      if (r.targetVaultId != null) {
+        // Transfer: kaynak kasadan düşür, hedef kasaya ekle
+        if (r.vaultId == vault.id) balance -= amt;
+        if (r.targetVaultId == vault.id) balance += amt;
+      } else {
+        balance += r.isIncome ? amt : -amt;
+      }
     }
     return balance;
   }
@@ -80,16 +81,16 @@ class BalanceService {
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
 
-    double balance = vaults.fold(0.0, (sum, v) {
-      final cur = v.currency == 'AUTO' ? targetCurrency : v.currency;
-      return sum + CurrencyUtils.convert(v.balance, cur, targetCurrency, rates);
-    });
+    double balance = 0.0;
 
     for (final r in records) {
       if (r.status == TransactionStatus.skipped) continue;
       
       final vaultExists = vaults.any((v) => v.id == r.vaultId);
       if (!vaultExists) continue;
+
+      // Transfer işlemleri toplam bakiyeyi etkilemez
+      if (r.targetVaultId != null) continue;
 
       final paymentDate = DateTime(r.date.year, r.date.month, r.date.day);
       if (paymentDate.isAfter(today)) continue;
@@ -115,16 +116,16 @@ class BalanceService {
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
 
-    double balance = vaults.fold(0.0, (sum, v) {
-      final cur = v.currency == 'AUTO' ? targetCurrency : v.currency;
-      return sum + CurrencyUtils.convert(v.balance, cur, targetCurrency, rates);
-    });
+    double balance = 0.0;
 
     for (final r in records) {
       if (r.status == TransactionStatus.skipped) continue;
 
       final vaultExists = vaults.any((v) => v.id == r.vaultId);
       if (!vaultExists) continue;
+
+      // Transfer işlemleri toplam bakiyeyi etkilemez
+      if (r.targetVaultId != null) continue;
 
       final paymentDate = DateTime(r.date.year, r.date.month, r.date.day);
       if (paymentDate.isAfter(today)) continue;
@@ -153,25 +154,27 @@ class BalanceService {
         ? DateTime(untilDate.year, untilDate.month, untilDate.day)
         : DateTime(now.year, now.month, now.day);
 
-    double balance = CurrencyUtils.convert(
-      vault.balance,
-      vault.currency == 'AUTO' ? targetCurrency : vault.currency,
-      targetCurrency,
-      rates,
-    );
+    double balance = 0.0;
 
     for (final r in records) {
       if (r.status == TransactionStatus.skipped) continue;
-      if (r.vaultId != vault.id) continue;
+      if (r.vaultId != vault.id && r.targetVaultId != vault.id) continue;
       final paymentDate = DateTime(r.date.year, r.date.month, r.date.day);
       if (paymentDate.isAfter(limitDate)) continue;
 
-      if (r.isIncome) {
-        final val = r.minAmount ?? r.amount;
-        balance += CurrencyUtils.convert(val, r.currency ?? '₺', targetCurrency, rates);
-      } else {
+      if (r.targetVaultId != null) {
         final val = r.maxAmount ?? r.amount;
-        balance -= CurrencyUtils.convert(val, r.currency ?? '₺', targetCurrency, rates);
+        final amt = CurrencyUtils.convert(val, r.currency ?? '₺', targetCurrency, rates);
+        if (r.vaultId == vault.id) balance -= amt;
+        if (r.targetVaultId == vault.id) balance += amt;
+      } else {
+        if (r.isIncome) {
+          final val = r.minAmount ?? r.amount;
+          balance += CurrencyUtils.convert(val, r.currency ?? '₺', targetCurrency, rates);
+        } else {
+          final val = r.maxAmount ?? r.amount;
+          balance -= CurrencyUtils.convert(val, r.currency ?? '₺', targetCurrency, rates);
+        }
       }
     }
     return balance;
@@ -190,25 +193,27 @@ class BalanceService {
         ? DateTime(untilDate.year, untilDate.month, untilDate.day)
         : DateTime(now.year, now.month, now.day);
 
-    double balance = CurrencyUtils.convert(
-      vault.balance,
-      vault.currency == 'AUTO' ? targetCurrency : vault.currency,
-      targetCurrency,
-      rates,
-    );
+    double balance = 0.0;
 
     for (final r in records) {
       if (r.status == TransactionStatus.skipped) continue;
-      if (r.vaultId != vault.id) continue;
+      if (r.vaultId != vault.id && r.targetVaultId != vault.id) continue;
       final paymentDate = DateTime(r.date.year, r.date.month, r.date.day);
       if (paymentDate.isAfter(limitDate)) continue;
 
-      if (r.isIncome) {
-        final val = r.maxAmount ?? r.amount;
-        balance += CurrencyUtils.convert(val, r.currency ?? '₺', targetCurrency, rates);
-      } else {
+      if (r.targetVaultId != null) {
         final val = r.minAmount ?? r.amount;
-        balance -= CurrencyUtils.convert(val, r.currency ?? '₺', targetCurrency, rates);
+        final amt = CurrencyUtils.convert(val, r.currency ?? '₺', targetCurrency, rates);
+        if (r.vaultId == vault.id) balance -= amt;
+        if (r.targetVaultId == vault.id) balance += amt;
+      } else {
+        if (r.isIncome) {
+          final val = r.maxAmount ?? r.amount;
+          balance += CurrencyUtils.convert(val, r.currency ?? '₺', targetCurrency, rates);
+        } else {
+          final val = r.minAmount ?? r.amount;
+          balance -= CurrencyUtils.convert(val, r.currency ?? '₺', targetCurrency, rates);
+        }
       }
     }
     return balance;

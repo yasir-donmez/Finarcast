@@ -91,7 +91,6 @@ class DatabaseService {
       final defaultVault = Vault()
         ..name = vaultName
         ..currency = defaultSettings.currencySymbol
-        ..balance = 0.0
         ..remoteId = const Uuid().v4()
         ..syncStatus = 1;
       await isar.writeTxn(() async {

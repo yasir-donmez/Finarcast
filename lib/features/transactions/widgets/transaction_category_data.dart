@@ -62,6 +62,10 @@ class TransactionCategoryData {
       'exp_rent_mortgage': {'tr': 'Konut Kredisi', 'en': 'Mortgage'},
       'exp_rent_maintenance': {'tr': 'Tadilat', 'en': 'Maintenance'},
       'exp_rent_storage': {'tr': 'Depolama', 'en': 'Storage'},
+      'exp_rent_insurance': {'tr': 'Konut Sigortası', 'en': 'Home Insurance'},
+      'exp_rent_moving': {'tr': 'Taşınma', 'en': 'Moving'},
+      'exp_rent_dorm': {'tr': 'Yurt', 'en': 'Dormitory'},
+      'exp_rent_room': {'tr': 'Oda Kirası', 'en': 'Room Rent'},
       
       // Faturalar
       'exp_bill': {'tr': 'Faturalar', 'en': 'Bills'},
@@ -80,6 +84,8 @@ class TransactionCategoryData {
       'exp_grocery_drink': {'tr': 'İçecek', 'en': 'Drink'},
       'exp_grocery_pet': {'tr': 'Evcil Hayvan', 'en': 'Pet Care'},
       'exp_grocery_hygiene': {'tr': 'Kişisel Hijyen', 'en': 'Personal Hygiene'},
+      'exp_grocery_tobacco': {'tr': 'Tütün', 'en': 'Tobacco'},
+      'exp_grocery_alcohol': {'tr': 'Alkol', 'en': 'Alcohol'},
       
       // Yemek
       'exp_dining': {'tr': 'Yemek', 'en': 'Dining'},
@@ -119,6 +125,7 @@ class TransactionCategoryData {
       'exp_beauty_salon': {'tr': 'Kuaför', 'en': 'Hairdresser'},
       'exp_beauty_cosmetics': {'tr': 'Kozmetik', 'en': 'Cosmetics'},
       'exp_beauty_spa': {'tr': 'Spa', 'en': 'Spa'},
+      'exp_beauty_esthetics': {'tr': 'Estetik', 'en': 'Esthetics'},
       
       // Sağlık
       'exp_health': {'tr': 'Sağlık', 'en': 'Health'},
@@ -130,6 +137,7 @@ class TransactionCategoryData {
       'exp_health_veterinary': {'tr': 'Veteriner', 'en': 'Veterinary'},
       'exp_health_therapy': {'tr': 'Terapi', 'en': 'Therapy'},
       'exp_health_supplements': {'tr': 'Destek Gıda', 'en': 'Supplements'},
+      'exp_health_insurance': {'tr': 'Sağlık Sigortası', 'en': 'Health Insurance'},
       
       // Abonelikler
       'exp_sub': {'tr': 'Abonelikler', 'en': 'Subscriptions'},
@@ -138,6 +146,7 @@ class TransactionCategoryData {
       'exp_sub_gym': {'tr': 'Spor Salonu', 'en': 'Gym'},
       'exp_sub_software': {'tr': 'Yazılım', 'en': 'Software'},
       'exp_sub_publishing': {'tr': 'Yayın', 'en': 'Publishing'},
+      'exp_sub_cloud': {'tr': 'Bulut Depolama', 'en': 'Cloud Storage'},
       
       // Eğlence
       'exp_fun': {'tr': 'Eğlence', 'en': 'Entertainment'},
@@ -162,6 +171,9 @@ class TransactionCategoryData {
       'exp_family_toy': {'tr': 'Oyuncak', 'en': 'Toy'},
       'exp_family_allowance': {'tr': 'Harçlık', 'en': 'Allowance'},
       'exp_family_daycare': {'tr': 'Kreş', 'en': 'Daycare'},
+      'exp_family_support': {'tr': 'Aile Desteği', 'en': 'Family Support'},
+      'exp_family_care': {'tr': 'Bakıcı', 'en': 'Caregiver'},
+      'exp_family_alimony': {'tr': 'Nafaka', 'en': 'Alimony'},
       
       // Alışveriş
       'exp_shopping': {'tr': 'Alışveriş', 'en': 'Shopping'},
@@ -171,6 +183,8 @@ class TransactionCategoryData {
       'exp_shopping_kitchen': {'tr': 'Mutfak', 'en': 'Kitchenware'},
       'exp_shopping_gift': {'tr': 'Hediye', 'en': 'Gift'},
       'exp_shopping_general': {'tr': 'Genel', 'en': 'General'},
+      'exp_shopping_sports': {'tr': 'Spor Ekipmanı', 'en': 'Sports Equipment'},
+      'exp_shopping_shipping': {'tr': 'Kargo', 'en': 'Shipping'},
       
       // Seyahat
       'exp_travel': {'tr': 'Seyahat', 'en': 'Travel'},
@@ -184,6 +198,14 @@ class TransactionCategoryData {
       'exp_debt_credit_card': {'tr': 'Kredi Kartı', 'en': 'Credit Card'},
       'exp_debt_loan': {'tr': 'Kredi', 'en': 'Loan'},
       'exp_debt_personal': {'tr': 'Borç Ödeme', 'en': 'Personal Debt'},
+      'exp_debt_lending': {'tr': 'Borç Verme', 'en': 'Lending'},
+      
+      // Birikim ve Yatırım
+      'exp_invest': {'tr': 'Yatırım', 'en': 'Investment'},
+      'exp_invest_stocks': {'tr': 'Hisse Senedi', 'en': 'Stocks'},
+      'exp_invest_gold': {'tr': 'Altın', 'en': 'Gold'},
+      'exp_invest_crypto': {'tr': 'Kripto', 'en': 'Crypto'},
+      'exp_invest_pension': {'tr': 'Bireysel Emeklilik', 'en': 'Pension Savings'},
       
       // Vergiler
       'exp_tax': {'tr': 'Vergiler', 'en': 'Taxes'},
@@ -196,6 +218,7 @@ class TransactionCategoryData {
       'exp_other_general': {'tr': 'Genel Gider', 'en': 'General'},
       'exp_other_donation': {'tr': 'Bağış', 'en': 'Donation'},
       'exp_other_tip': {'tr': 'Bahşiş', 'en': 'Tip'},
+      'exp_other_bank_fee': {'tr': 'Banka Ücreti', 'en': 'Bank Fee'},
 
       // ==========================================
       // GELİRLER (INCOMES)
@@ -214,13 +237,15 @@ class TransactionCategoryData {
       'inc_extra_parttime': {'tr': 'Yarı Zamanlı', 'en': 'Part Time'},
       'inc_extra_commission': {'tr': 'Komisyon', 'en': 'Commission'},
       'inc_extra_content': {'tr': 'İçerik Üreticiliği', 'en': 'Content Creation'},
+      'inc_extra_affiliate': {'tr': 'Satış Ortaklığı', 'en': 'Affiliate'},
       
       // Yatırım Geliri
       'inc_invest': {'tr': 'Yatırım Geliri', 'en': 'Investment Income'},
       'inc_invest_stock': {'tr': 'Hisse Senedi', 'en': 'Stock'},
       'inc_invest_crypto': {'tr': 'Kripto', 'en': 'Crypto'},
       'inc_invest_interest': {'tr': 'Faiz', 'en': 'Interest'},
-      'inc_invest_gold': {'tr': 'Döviz Kârı', 'en': 'Forex'},
+      'inc_invest_gold': {'tr': 'Altın', 'en': 'Gold'},
+      'inc_invest_forex': {'tr': 'Döviz Kârı', 'en': 'Forex'},
       'inc_invest_bond': {'tr': 'Tahvil', 'en': 'Bond'},
       
       // Kira Geliri
@@ -250,6 +275,7 @@ class TransactionCategoryData {
       'inc_gift_award': {'tr': 'Ödül', 'en': 'Award'},
       'inc_gift_inheritance': {'tr': 'Miras', 'en': 'Inheritance'},
       'inc_gift_alimony': {'tr': 'Nafaka', 'en': 'Alimony'},
+      'inc_gift_allowance': {'tr': 'Harçlık', 'en': 'Allowance'},
       
       // Diğer Gelirler
       'inc_other': {'tr': 'Diğer Gelirler', 'en': 'Other Incomes'},
@@ -257,6 +283,8 @@ class TransactionCategoryData {
       'inc_other_refund': {'tr': 'İade', 'en': 'Refund'},
       'inc_other_lottery': {'tr': 'Şans Oyunları', 'en': 'Lottery'},
       'inc_other_collection': {'tr': 'Borç Tahsilatı', 'en': 'Debt Collection'},
+      'inc_other_cashback': {'tr': 'Cashback', 'en': 'Cashback'},
+      'inc_other_tax_refund': {'tr': 'Vergi İadesi', 'en': 'Tax Refund'},
     };
     
     final localized = names[id];
@@ -297,6 +325,26 @@ class TransactionCategoryData {
           'id': 'exp_rent_storage',
           'name': getCategoryName(context, 'exp_rent_storage'),
           'icon': IconUtils.getIcon('exp_rent_storage'),
+        },
+        {
+          'id': 'exp_rent_insurance',
+          'name': getCategoryName(context, 'exp_rent_insurance'),
+          'icon': IconUtils.getIcon('exp_rent_insurance'),
+        },
+        {
+          'id': 'exp_rent_moving',
+          'name': getCategoryName(context, 'exp_rent_moving'),
+          'icon': IconUtils.getIcon('exp_rent_moving'),
+        },
+        {
+          'id': 'exp_rent_dorm',
+          'name': getCategoryName(context, 'exp_rent_dorm'),
+          'icon': IconUtils.getIcon('exp_rent_dorm'),
+        },
+        {
+          'id': 'exp_rent_room',
+          'name': getCategoryName(context, 'exp_rent_room'),
+          'icon': IconUtils.getIcon('exp_rent_room'),
         },
       ],
     },
@@ -373,6 +421,16 @@ class TransactionCategoryData {
           'id': 'exp_grocery_hygiene',
           'name': getCategoryName(context, 'exp_grocery_hygiene'),
           'icon': IconUtils.getIcon('exp_grocery_hygiene'),
+        },
+        {
+          'id': 'exp_grocery_tobacco',
+          'name': getCategoryName(context, 'exp_grocery_tobacco'),
+          'icon': IconUtils.getIcon('exp_grocery_tobacco'),
+        },
+        {
+          'id': 'exp_grocery_alcohol',
+          'name': getCategoryName(context, 'exp_grocery_alcohol'),
+          'icon': IconUtils.getIcon('exp_grocery_alcohol'),
         },
       ],
     },
@@ -534,6 +592,11 @@ class TransactionCategoryData {
           'name': getCategoryName(context, 'exp_beauty_spa'),
           'icon': IconUtils.getIcon('exp_beauty_spa'),
         },
+        {
+          'id': 'exp_beauty_esthetics',
+          'name': getCategoryName(context, 'exp_beauty_esthetics'),
+          'icon': IconUtils.getIcon('exp_beauty_esthetics'),
+        },
       ],
     },
     {
@@ -582,6 +645,11 @@ class TransactionCategoryData {
           'name': getCategoryName(context, 'exp_health_supplements'),
           'icon': IconUtils.getIcon('exp_health_supplements'),
         },
+        {
+          'id': 'exp_health_insurance',
+          'name': getCategoryName(context, 'exp_health_insurance'),
+          'icon': IconUtils.getIcon('exp_health_insurance'),
+        },
       ],
     },
     {
@@ -614,6 +682,11 @@ class TransactionCategoryData {
           'id': 'exp_sub_publishing',
           'name': getCategoryName(context, 'exp_sub_publishing'),
           'icon': IconUtils.getIcon('exp_sub_publishing'),
+        },
+        {
+          'id': 'exp_sub_cloud',
+          'name': getCategoryName(context, 'exp_sub_cloud'),
+          'icon': IconUtils.getIcon('exp_sub_cloud'),
         },
       ],
     },
@@ -714,6 +787,21 @@ class TransactionCategoryData {
           'name': getCategoryName(context, 'exp_family_daycare'),
           'icon': IconUtils.getIcon('exp_family_daycare'),
         },
+        {
+          'id': 'exp_family_support',
+          'name': getCategoryName(context, 'exp_family_support'),
+          'icon': IconUtils.getIcon('exp_family_support'),
+        },
+        {
+          'id': 'exp_family_care',
+          'name': getCategoryName(context, 'exp_family_care'),
+          'icon': IconUtils.getIcon('exp_family_care'),
+        },
+        {
+          'id': 'exp_family_alimony',
+          'name': getCategoryName(context, 'exp_family_alimony'),
+          'icon': IconUtils.getIcon('exp_family_alimony'),
+        },
       ],
     },
     {
@@ -751,6 +839,16 @@ class TransactionCategoryData {
           'id': 'exp_shopping_general',
           'name': getCategoryName(context, 'exp_shopping_general'),
           'icon': IconUtils.getIcon('exp_shopping_general'),
+        },
+        {
+          'id': 'exp_shopping_sports',
+          'name': getCategoryName(context, 'exp_shopping_sports'),
+          'icon': IconUtils.getIcon('exp_shopping_sports'),
+        },
+        {
+          'id': 'exp_shopping_shipping',
+          'name': getCategoryName(context, 'exp_shopping_shipping'),
+          'icon': IconUtils.getIcon('exp_shopping_shipping'),
         },
       ],
     },
@@ -803,6 +901,39 @@ class TransactionCategoryData {
           'name': getCategoryName(context, 'exp_debt_personal'),
           'icon': IconUtils.getIcon('exp_debt_personal'),
         },
+        {
+          'id': 'exp_debt_lending',
+          'name': getCategoryName(context, 'exp_debt_lending'),
+          'icon': IconUtils.getIcon('exp_debt_lending'),
+        },
+      ],
+    },
+    {
+      'id': 'exp_invest',
+      'name': getCategoryName(context, 'exp_invest'),
+      'icon': IconUtils.getIcon('exp_invest'),
+      'color': IconUtils.getColor('exp_invest'),
+      'subModels': [
+        {
+          'id': 'exp_invest_stocks',
+          'name': getCategoryName(context, 'exp_invest_stocks'),
+          'icon': IconUtils.getIcon('exp_invest_stocks'),
+        },
+        {
+          'id': 'exp_invest_gold',
+          'name': getCategoryName(context, 'exp_invest_gold'),
+          'icon': IconUtils.getIcon('exp_invest_gold'),
+        },
+        {
+          'id': 'exp_invest_crypto',
+          'name': getCategoryName(context, 'exp_invest_crypto'),
+          'icon': IconUtils.getIcon('exp_invest_crypto'),
+        },
+        {
+          'id': 'exp_invest_pension',
+          'name': getCategoryName(context, 'exp_invest_pension'),
+          'icon': IconUtils.getIcon('exp_invest_pension'),
+        },
       ],
     },
     {
@@ -848,6 +979,11 @@ class TransactionCategoryData {
           'id': 'exp_other_tip',
           'name': getCategoryName(context, 'exp_other_tip'),
           'icon': IconUtils.getIcon('exp_other_tip'),
+        },
+        {
+          'id': 'exp_other_bank_fee',
+          'name': getCategoryName(context, 'exp_other_bank_fee'),
+          'icon': IconUtils.getIcon('exp_other_bank_fee'),
         },
       ],
     },
@@ -913,6 +1049,11 @@ class TransactionCategoryData {
           'name': getCategoryName(context, 'inc_extra_content'),
           'icon': IconUtils.getIcon('inc_extra_content'),
         },
+        {
+          'id': 'inc_extra_affiliate',
+          'name': getCategoryName(context, 'inc_extra_affiliate'),
+          'icon': IconUtils.getIcon('inc_extra_affiliate'),
+        },
       ],
     },
     {
@@ -940,6 +1081,11 @@ class TransactionCategoryData {
           'id': 'inc_invest_gold',
           'name': getCategoryName(context, 'inc_invest_gold'),
           'icon': IconUtils.getIcon('inc_invest_gold'),
+        },
+        {
+          'id': 'inc_invest_forex',
+          'name': getCategoryName(context, 'inc_invest_forex'),
+          'icon': IconUtils.getIcon('inc_invest_forex'),
         },
         {
           'id': 'inc_invest_bond',
@@ -1058,6 +1204,11 @@ class TransactionCategoryData {
           'name': getCategoryName(context, 'inc_gift_alimony'),
           'icon': IconUtils.getIcon('inc_gift_alimony'),
         },
+        {
+          'id': 'inc_gift_allowance',
+          'name': getCategoryName(context, 'inc_gift_allowance'),
+          'icon': IconUtils.getIcon('inc_gift_allowance'),
+        },
       ],
     },
     {
@@ -1085,6 +1236,16 @@ class TransactionCategoryData {
           'id': 'inc_other_collection',
           'name': getCategoryName(context, 'inc_other_collection'),
           'icon': IconUtils.getIcon('inc_other_collection'),
+        },
+        {
+          'id': 'inc_other_cashback',
+          'name': getCategoryName(context, 'inc_other_cashback'),
+          'icon': IconUtils.getIcon('inc_other_cashback'),
+        },
+        {
+          'id': 'inc_other_tax_refund',
+          'name': getCategoryName(context, 'inc_other_tax_refund'),
+          'icon': IconUtils.getIcon('inc_other_tax_refund'),
         },
       ],
     },

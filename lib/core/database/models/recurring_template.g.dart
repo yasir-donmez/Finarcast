@@ -28,9 +28,9 @@ const RecurringTemplateSchema = CollectionSchema(
       name: r'currency',
       type: IsarType.string,
     ),
-    r'hasNotificationConfigured': PropertySchema(
+    r'hasNotification': PropertySchema(
       id: 3,
-      name: r'hasNotificationConfigured',
+      name: r'hasNotification',
       type: IsarType.bool,
     ),
     r'iconCode': PropertySchema(
@@ -237,7 +237,7 @@ void _recurringTemplateSerialize(
   writer.writeDouble(offsets[0], object.amount);
   writer.writeString(offsets[1], object.categoryId);
   writer.writeString(offsets[2], object.currency);
-  writer.writeBool(offsets[3], object.hasNotificationConfigured);
+  writer.writeBool(offsets[3], object.hasNotification);
   writer.writeString(offsets[4], object.iconCode);
   writer.writeBool(offsets[5], object.isArchived);
   writer.writeBool(offsets[6], object.isIncome);
@@ -271,7 +271,7 @@ RecurringTemplate _recurringTemplateDeserialize(
   object.amount = reader.readDouble(offsets[0]);
   object.categoryId = reader.readStringOrNull(offsets[1]);
   object.currency = reader.readStringOrNull(offsets[2]);
-  object.hasNotificationConfigured = reader.readBool(offsets[3]);
+  object.hasNotification = reader.readBool(offsets[3]);
   object.iconCode = reader.readStringOrNull(offsets[4]);
   object.id = id;
   object.isArchived = reader.readBool(offsets[5]);
@@ -1276,13 +1276,10 @@ extension RecurringTemplateQueryFilter
   }
 
   QueryBuilder<RecurringTemplate, RecurringTemplate, QAfterFilterCondition>
-  hasNotificationConfiguredEqualTo(bool value) {
+  hasNotificationEqualTo(bool value) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
-        FilterCondition.equalTo(
-          property: r'hasNotificationConfigured',
-          value: value,
-        ),
+        FilterCondition.equalTo(property: r'hasNotification', value: value),
       );
     });
   }
@@ -2917,16 +2914,16 @@ extension RecurringTemplateQuerySortBy
   }
 
   QueryBuilder<RecurringTemplate, RecurringTemplate, QAfterSortBy>
-  sortByHasNotificationConfigured() {
+  sortByHasNotification() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'hasNotificationConfigured', Sort.asc);
+      return query.addSortBy(r'hasNotification', Sort.asc);
     });
   }
 
   QueryBuilder<RecurringTemplate, RecurringTemplate, QAfterSortBy>
-  sortByHasNotificationConfiguredDesc() {
+  sortByHasNotificationDesc() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'hasNotificationConfigured', Sort.desc);
+      return query.addSortBy(r'hasNotification', Sort.desc);
     });
   }
 
@@ -3270,16 +3267,16 @@ extension RecurringTemplateQuerySortThenBy
   }
 
   QueryBuilder<RecurringTemplate, RecurringTemplate, QAfterSortBy>
-  thenByHasNotificationConfigured() {
+  thenByHasNotification() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'hasNotificationConfigured', Sort.asc);
+      return query.addSortBy(r'hasNotification', Sort.asc);
     });
   }
 
   QueryBuilder<RecurringTemplate, RecurringTemplate, QAfterSortBy>
-  thenByHasNotificationConfiguredDesc() {
+  thenByHasNotificationDesc() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'hasNotificationConfigured', Sort.desc);
+      return query.addSortBy(r'hasNotification', Sort.desc);
     });
   }
 
@@ -3615,9 +3612,9 @@ extension RecurringTemplateQueryWhereDistinct
   }
 
   QueryBuilder<RecurringTemplate, RecurringTemplate, QDistinct>
-  distinctByHasNotificationConfigured() {
+  distinctByHasNotification() {
     return QueryBuilder.apply(this, (query) {
-      return query.addDistinctBy(r'hasNotificationConfigured');
+      return query.addDistinctBy(r'hasNotification');
     });
   }
 
@@ -3799,9 +3796,9 @@ extension RecurringTemplateQueryProperty
   }
 
   QueryBuilder<RecurringTemplate, bool, QQueryOperations>
-  hasNotificationConfiguredProperty() {
+  hasNotificationProperty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r'hasNotificationConfigured');
+      return query.addPropertyName(r'hasNotification');
     });
   }
 

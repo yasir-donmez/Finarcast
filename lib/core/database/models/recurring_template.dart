@@ -35,7 +35,7 @@ class RecurringTemplate {
 
   // — Bildirim —
   bool isNotificationEnabled = false;
-  bool hasNotificationConfigured = false;
+  bool hasNotification = false;
   int notificationReminderDays = 0;
   int notificationHour = 9;
   int notificationMinute = 0;

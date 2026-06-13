@@ -16,6 +16,7 @@ class HistoryRecordTile extends StatefulWidget {
   final Future<void> Function() onSkipped;
   final VoidCallback onTap;
   final VoidCallback onLongPress;
+  final String? selectedVaultId;
 
   const HistoryRecordTile({
     super.key,
@@ -24,6 +25,7 @@ class HistoryRecordTile extends StatefulWidget {
     required this.onSkipped,
     required this.onTap,
     required this.onLongPress,
+    this.selectedVaultId,
   });
 
   @override
@@ -296,13 +298,20 @@ class _HistoryRecordTileState extends State<HistoryRecordTile>
     final double opacity = isSkipped ? 0.45 : 1.0;
     final TextDecoration textDecoration = isSkipped ? TextDecoration.lineThrough : TextDecoration.none;
 
+    final isTransfer = tx.targetVaultId != null;
+    bool isIncoming = tx.isIncome;
+    if (isTransfer && widget.selectedVaultId != null && widget.selectedVaultId!.startsWith('v_')) {
+      final activeId = int.tryParse(widget.selectedVaultId!.replaceFirst('v_', ''));
+      isIncoming = activeId == tx.targetVaultId;
+    }
+
     final amountColor = isSkipped
         ? AppColors.getTextSecondary(context).withValues(alpha: 0.5)
-        : (tx.isIncome ? AppColors.getIncome(context) : AppColors.getExpense(context));
+        : (isIncoming ? AppColors.getIncome(context) : AppColors.getExpense(context));
 
     final String amountText = tx.minAmount != null && tx.maxAmount != null
-        ? "${tx.isIncome ? '+' : '-'}${CurrencyUtils.formatAmount(tx.minAmount!, currencySymbol: tx.currency ?? "₺")} - ${CurrencyUtils.formatAmount(tx.maxAmount!, currencySymbol: tx.currency ?? "₺")}"
-        : "${tx.isIncome ? '+' : '-'}${CurrencyUtils.formatAmount(tx.effectiveAmount, currencySymbol: tx.currency ?? "₺")}";
+        ? "${isIncoming ? '+' : '-'}${CurrencyUtils.formatAmount(tx.minAmount!, currencySymbol: tx.currency ?? "₺")} - ${CurrencyUtils.formatAmount(tx.maxAmount!, currencySymbol: tx.currency ?? "₺")}"
+        : "${isIncoming ? '+' : '-'}${CurrencyUtils.formatAmount(tx.effectiveAmount, currencySymbol: tx.currency ?? "₺")}";
 
     String? installmentLabel;
     if (tx.installmentNumber != null && tx.totalInstallments != null) {
@@ -397,7 +406,7 @@ class _HistoryRecordTileState extends State<HistoryRecordTile>
                           Row(
                             children: [
                               Text(
-                                tx.isIncome ? l10n.income : l10n.expense,
+                                isIncoming ? l10n.income : l10n.expense,
                                 style: TextStyle(
                                     fontSize: 10,
                                     fontWeight: FontWeight.bold,

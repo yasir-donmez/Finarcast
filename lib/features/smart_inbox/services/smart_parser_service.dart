@@ -13,6 +13,19 @@ class SmartParserService {
     final errorStr = e.toString();
     final lowerErrorStr = errorStr.toLowerCase();
     
+    // İnternet bağlantı hataları
+    if (lowerErrorStr.contains('socketexception') ||
+        lowerErrorStr.contains('failed host lookup') ||
+        lowerErrorStr.contains('clientexception') ||
+        lowerErrorStr.contains('httpexception') ||
+        lowerErrorStr.contains('handshakeexception') ||
+        lowerErrorStr.contains('network_error') ||
+        lowerErrorStr.contains('network error') ||
+        lowerErrorStr.contains('network') ||
+        lowerErrorStr.contains('authretryablefetchexception')) {
+      return Exception(l10n.syncErrorNoInternet);
+    }
+    
     // Server-side yetkilendirme veya kotalar (Edge Function'dan gelen)
     if (lowerErrorStr.contains('rate limit exceeded') || lowerErrorStr.contains('upgrade your plan')) {
       return Exception(l10n.aiErrorRateLimit);

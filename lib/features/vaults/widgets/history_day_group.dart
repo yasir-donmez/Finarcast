@@ -18,6 +18,7 @@ class HistoryDayGroup extends ConsumerWidget {
   final Future<void> Function(TransactionUI) onSkipped;
   final void Function(TransactionUI) onTap;
   final void Function(TransactionUI) onLongPress;
+  final String? selectedVaultId;
 
   const HistoryDayGroup({
     super.key,
@@ -27,6 +28,7 @@ class HistoryDayGroup extends ConsumerWidget {
     required this.onSkipped,
     required this.onTap,
     required this.onLongPress,
+    this.selectedVaultId,
   });
 
   @override
@@ -116,6 +118,7 @@ class HistoryDayGroup extends ConsumerWidget {
           return HistoryRecordTile(
             key: ValueKey(tx.id),
             transaction: tx,
+            selectedVaultId: selectedVaultId,
             onReviewed: () => onReviewed(tx),
             onSkipped: () => onSkipped(tx),
             onTap: () => onTap(tx),

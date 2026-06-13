@@ -41,6 +41,8 @@ class _SmartScanScreenState extends ConsumerState<SmartScanScreen> with WidgetsB
   
   // Her bir taslak kartı için seçilen kasa ID'sini tutar (-1 = Ana Kasa)
   final Map<String, int> _selectedVaultIdForDraft = {};
+  // Her bir transfer taslağı için seçilen hedef kasa ID'sini tutar
+  final Map<String, int> _selectedTargetVaultIdForDraft = {};
 
   @override
   void initState() {
@@ -250,6 +252,7 @@ class _SmartScanScreenState extends ConsumerState<SmartScanScreen> with WidgetsB
     final l10n = AppLocalizations.of(context)!;
     setState(() {
       _selectedVaultIdForDraft.remove(id);
+      _selectedTargetVaultIdForDraft.remove(id);
     });
     await ref.read(smartInboxDraftsProvider.notifier).deleteDraft(id);
     if (mounted) {
@@ -267,9 +270,11 @@ class _SmartScanScreenState extends ConsumerState<SmartScanScreen> with WidgetsB
     final vaultId = _selectedVaultIdForDraft[id] ?? defaultVaultId;
     final actualVaultId = vaultId == -1 ? null : vaultId;
 
-    // Get category name for the draft
+    // Get category name and targetVaultId for the draft
     final draftIndex = drafts.indexWhere((d) => d.id == id);
     String categoryName = l10n.otherCategory;
+    int? targetVaultId;
+    
     if (draftIndex != -1) {
       final draft = drafts[draftIndex];
       final customCategories = ref.read(customCategoriesProvider);
@@ -279,13 +284,23 @@ class _SmartScanScreenState extends ConsumerState<SmartScanScreen> with WidgetsB
         customCategories: customCategories,
         fallbackTitle: draft.title,
       );
+      if (draft.categoryId == 'transfer' && vaults.isNotEmpty) {
+        final otherVault = vaults.firstWhere((v) => v.id != vaultId, orElse: () => vaults.first);
+        targetVaultId = _selectedTargetVaultIdForDraft[id] ?? otherVault.id;
+      }
     }
 
     setState(() {
       _selectedVaultIdForDraft.remove(id);
+      _selectedTargetVaultIdForDraft.remove(id);
     });
 
-    final success = await DraftService.promoteToTransaction(id, actualVaultId, categoryName);
+    final success = await DraftService.promoteToTransaction(
+      id,
+      actualVaultId,
+      categoryName,
+      targetVaultId: targetVaultId,
+    );
     if (success) {
       await ref.read(smartInboxDraftsProvider.notifier).loadDrafts();
       if (mounted) {
@@ -332,6 +347,11 @@ class _SmartScanScreenState extends ConsumerState<SmartScanScreen> with WidgetsB
               : TransactionBuilderType.oneTime,
           initialVaultId: _selectedVaultIdForDraft[draft.id] != null && _selectedVaultIdForDraft[draft.id] != -1
               ? _selectedVaultIdForDraft[draft.id]! 
+              : null,
+          initialTargetVaultId: draft.categoryId == 'transfer'
+              ? (_selectedTargetVaultIdForDraft[draft.id] != null && _selectedTargetVaultIdForDraft[draft.id] != -1
+                  ? _selectedTargetVaultIdForDraft[draft.id]
+                  : null)
               : null,
           onSuccess: () {
             ref.read(smartInboxDraftsProvider.notifier).deleteDraft(draft.id);
@@ -384,6 +404,53 @@ class _SmartScanScreenState extends ConsumerState<SmartScanScreen> with WidgetsB
           }
         }
         _selectedVaultIdForDraft[draft.id] = matchedId;
+      }
+
+      // Transfer taslağı için hedef kasa eşleştirme
+      if (draft.categoryId == 'transfer' && !_selectedTargetVaultIdForDraft.containsKey(draft.id)) {
+        int? matchedTargetId;
+        if (draft.targetVaultName != null && draft.targetVaultName!.trim().isNotEmpty) {
+          final cleanDraft = draft.targetVaultName!.toLowerCase()
+              .replaceAll('kasa', '')
+              .replaceAll('hesap', '')
+              .replaceAll('ı', 'i')
+              .replaceAll('ş', 's')
+              .replaceAll('ğ', 'g')
+              .replaceAll('ü', 'u')
+              .replaceAll('ö', 'o')
+              .replaceAll('ç', 'c')
+              .trim();
+          if (cleanDraft.isNotEmpty) {
+            for (final vault in vaults) {
+              final cleanVault = vault.name.toLowerCase()
+                  .replaceAll('kasa', '')
+                  .replaceAll('hesap', '')
+                  .replaceAll('ı', 'i')
+                  .replaceAll('ş', 's')
+                  .replaceAll('ğ', 'g')
+                  .replaceAll('ü', 'u')
+                  .replaceAll('ö', 'o')
+                  .replaceAll('ç', 'c')
+                  .trim();
+              if (cleanVault.contains(cleanDraft) || cleanDraft.contains(cleanVault)) {
+                matchedTargetId = vault.id;
+                break;
+              }
+            }
+          }
+        }
+
+        final selectedVaultId = _selectedVaultIdForDraft[draft.id] ?? (vaults.isNotEmpty ? vaults.first.id : -1);
+        if (matchedTargetId != null && matchedTargetId != selectedVaultId) {
+          _selectedTargetVaultIdForDraft[draft.id] = matchedTargetId;
+        } else {
+          final otherVaults = vaults.where((v) => v.id != selectedVaultId).toList();
+          if (otherVaults.isNotEmpty) {
+            _selectedTargetVaultIdForDraft[draft.id] = otherVaults.first.id;
+          } else if (vaults.isNotEmpty) {
+            _selectedTargetVaultIdForDraft[draft.id] = vaults.first.id;
+          }
+        }
       }
     }
 
@@ -504,6 +571,7 @@ class _SmartScanScreenState extends ConsumerState<SmartScanScreen> with WidgetsB
                     ref.read(smartInboxDraftsProvider.notifier).clearAllDrafts();
                     setState(() {
                       _selectedVaultIdForDraft.clear();
+                      _selectedTargetVaultIdForDraft.clear();
                     });
                   },
                   child: Text(
@@ -521,6 +589,12 @@ class _SmartScanScreenState extends ConsumerState<SmartScanScreen> with WidgetsB
           ...drafts.map((draft) {
             final defaultVaultId = vaults.isNotEmpty ? vaults.first.id : -1;
             final selectedVaultId = _selectedVaultIdForDraft[draft.id] ?? defaultVaultId;
+            int? matchedTargetId;
+            if (draft.categoryId == 'transfer' && vaults.isNotEmpty) {
+              final otherVault = vaults.firstWhere((v) => v.id != selectedVaultId, orElse: () => vaults.first);
+              matchedTargetId = otherVault.id;
+            }
+            final selectedTargetVaultId = _selectedTargetVaultIdForDraft[draft.id] ?? matchedTargetId;
             final index = drafts.indexOf(draft);
             return StaggeredEntryAnim(
               key: ValueKey(draft.id),
@@ -531,9 +605,25 @@ class _SmartScanScreenState extends ConsumerState<SmartScanScreen> with WidgetsB
                 vaults: vaults,
                 currencySymbol: currencySymbol,
                 selectedVaultId: selectedVaultId,
+                selectedTargetVaultId: selectedTargetVaultId,
                 onVaultSelected: (vaultId) {
                   setState(() {
                     _selectedVaultIdForDraft[draft.id] = vaultId;
+                    final targetId = _selectedTargetVaultIdForDraft[draft.id] ?? matchedTargetId;
+                    if (draft.categoryId == 'transfer' && targetId == vaultId) {
+                      final other = vaults.firstWhere((v) => v.id != vaultId, orElse: () => vaults.first);
+                      _selectedTargetVaultIdForDraft[draft.id] = other.id;
+                    }
+                  });
+                },
+                onTargetVaultSelected: (targetId) {
+                  setState(() {
+                    _selectedTargetVaultIdForDraft[draft.id] = targetId;
+                    final sourceId = _selectedVaultIdForDraft[draft.id] ?? defaultVaultId;
+                    if (sourceId == targetId) {
+                      final other = vaults.firstWhere((v) => v.id != targetId, orElse: () => vaults.first);
+                      _selectedVaultIdForDraft[draft.id] = other.id;
+                    }
                   });
                 },
                 onEdit: () => _navigateToDetailedAdd(draft),

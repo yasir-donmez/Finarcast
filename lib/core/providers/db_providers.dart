@@ -65,7 +65,7 @@ final totalIncomeProvider = Provider<double>((ref) {
 
   return ref
       .watch(allTransactionsProvider)
-      .where((t) => t.isIncome && t.status != TransactionStatus.skipped && !t.occurrenceDate.isAfter(today))
+      .where((t) => t.isIncome && t.targetVaultId == null && t.status != TransactionStatus.skipped && !t.occurrenceDate.isAfter(today))
       .fold<double>(0, (sum, t) => sum + t.getConvertedAmount(targetCurrency, rates));
 });
 
@@ -78,7 +78,7 @@ final totalExpenseProvider = Provider<double>((ref) {
 
   return ref
       .watch(allTransactionsProvider)
-      .where((t) => !t.isIncome && t.status != TransactionStatus.skipped && !t.occurrenceDate.isAfter(today))
+      .where((t) => !t.isIncome && t.targetVaultId == null && t.status != TransactionStatus.skipped && !t.occurrenceDate.isAfter(today))
       .fold<double>(0, (sum, t) => sum + t.getConvertedAmount(targetCurrency, rates));
 });
 

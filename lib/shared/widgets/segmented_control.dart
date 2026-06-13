@@ -39,7 +39,10 @@ class SegmentedControl extends StatelessWidget {
           AnimatedAlign(
             duration: const Duration(milliseconds: 350),
             curve: Curves.easeInOutBack,
-            alignment: selectedIndex == 0 ? Alignment.centerLeft : Alignment.centerRight,
+            alignment: Alignment(
+              tabs.length <= 1 ? 0.0 : (selectedIndex / (tabs.length - 1)) * 2 - 1,
+              0,
+            ),
             child: FractionallySizedBox(
               widthFactor: tabs.isEmpty ? 0 : 1 / tabs.length,
               child: Container(

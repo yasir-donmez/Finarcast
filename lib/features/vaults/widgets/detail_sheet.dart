@@ -169,7 +169,14 @@ class _PrecisionDetailSheetState extends ConsumerState<DetailSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final selectedVaultId = ref.watch(selectedVaultProvider);
     final tx = widget.transaction;
+    final isTransfer = tx.targetVaultId != null;
+    bool isIncoming = tx.isIncome;
+    if (isTransfer && selectedVaultId != null && selectedVaultId.startsWith('v_')) {
+      final activeId = int.tryParse(selectedVaultId.replaceFirst('v_', ''));
+      isIncoming = activeId == tx.targetVaultId;
+    }
     final l10n = AppLocalizations.of(context)!;
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final screenHeight = MediaQuery.of(context).size.height;
@@ -244,7 +251,7 @@ class _PrecisionDetailSheetState extends ConsumerState<DetailSheet> {
                             style: TextStyle(
                               fontSize: 40 * sf,
                               fontWeight: FontWeight.w900,
-                              color: tx.isIncome ? AppColors.getIncome(context) : AppColors.getExpense(context),
+                              color: isIncoming ? AppColors.getIncome(context) : AppColors.getExpense(context),
                               letterSpacing: -1.5,
                             ),
                           ),
@@ -261,7 +268,7 @@ class _PrecisionDetailSheetState extends ConsumerState<DetailSheet> {
                     style: TextStyle(
                       fontSize: 40 * sf,
                       fontWeight: FontWeight.w900,
-                      color: tx.isIncome ? AppColors.getIncome(context) : AppColors.getExpense(context),
+                      color: isIncoming ? AppColors.getIncome(context) : AppColors.getExpense(context),
                       letterSpacing: -2, height: 1,
                     ),
                   ),
@@ -502,7 +509,7 @@ class _PrecisionDetailSheetState extends ConsumerState<DetailSheet> {
         SizedBox(height: 12 * sf),
 
         // 3.5 BİLDİRİM TOGGLE
-        if (widget.isTemplateMode && _activeTemplate != null && _activeTemplate!.hasNotificationConfigured) ...[
+        if (widget.isTemplateMode && _activeTemplate != null && _activeTemplate!.hasNotification) ...[
           CustomCard(
             scalingFactor: sf,
             padding: EdgeInsets.symmetric(horizontal: 16 * sf, vertical: 12 * sf),

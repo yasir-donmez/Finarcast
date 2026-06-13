@@ -18,6 +18,8 @@ class DismissibleDraftCard extends StatefulWidget {
   final String currencySymbol;
   final int selectedVaultId;
   final ValueChanged<int> onVaultSelected;
+  final int? selectedTargetVaultId;
+  final ValueChanged<int>? onTargetVaultSelected;
   final VoidCallback onEdit;
   final VoidCallback onApprove;
   final VoidCallback onDelete;
@@ -29,6 +31,8 @@ class DismissibleDraftCard extends StatefulWidget {
     required this.currencySymbol,
     required this.selectedVaultId,
     required this.onVaultSelected,
+    this.selectedTargetVaultId,
+    this.onTargetVaultSelected,
     required this.onEdit,
     required this.onApprove,
     required this.onDelete,
@@ -277,6 +281,11 @@ class _DismissibleDraftCardState extends State<DismissibleDraftCard>
 
   /// Taslak İşlem Kartı
   Widget _buildDraftCard(BuildContext context) {
+    final langCode = Localizations.localeOf(context).languageCode;
+    final isTr = langCode == 'tr';
+    final isPt = langCode == 'pt';
+    final bool isTransfer = widget.draft.categoryId == 'transfer';
+
     // Kategori detaylarını TransactionCategoryData'dan çekelim
     final categories = widget.draft.isIncome
         ? TransactionCategoryData.getIncomeCategories(context, AppLocalizations.of(context)!)
@@ -287,26 +296,32 @@ class _DismissibleDraftCardState extends State<DismissibleDraftCard>
     IconData catIcon = Icons.help_outline;
     Color catColor = AppColors.getTextFaint(context);
 
-    for (var c in categories) {
-      if (c['id'] == widget.draft.categoryId) {
-        parentCatName = c['name'] as String?;
-        catIcon = c['icon'] as IconData? ?? Icons.help_outline;
-        catColor = c['color'] as Color? ?? AppColors.getTextFaint(context);
-        break;
-      }
-      final subs = c['subModels'] as List?;
-      if (subs != null) {
-        for (var s in subs) {
-          if (s['id'] == widget.draft.categoryId) {
-            parentCatName = c['name'] as String?;
-            subCatName = s['name'] as String?;
-            catIcon = s['icon'] as IconData? ?? c['icon'] as IconData? ?? Icons.help_outline;
-            catColor = c['color'] as Color? ?? AppColors.getTextFaint(context);
-            break;
+    if (isTransfer) {
+      parentCatName = isTr ? "Kasa Transferi" : (isPt ? "Transferência" : "Vault Transfer");
+      catIcon = Icons.swap_horiz_rounded;
+      catColor = Colors.blue;
+    } else {
+      for (var c in categories) {
+        if (c['id'] == widget.draft.categoryId) {
+          parentCatName = c['name'] as String?;
+          catIcon = c['icon'] as IconData? ?? Icons.help_outline;
+          catColor = c['color'] as Color? ?? AppColors.getTextFaint(context);
+          break;
+        }
+        final subs = c['subModels'] as List?;
+        if (subs != null) {
+          for (var s in subs) {
+            if (s['id'] == widget.draft.categoryId) {
+              parentCatName = c['name'] as String?;
+              subCatName = s['name'] as String?;
+              catIcon = s['icon'] as IconData? ?? c['icon'] as IconData? ?? Icons.help_outline;
+              catColor = c['color'] as Color? ?? AppColors.getTextFaint(context);
+              break;
+            }
           }
         }
+        if (parentCatName != null) break;
       }
-      if (parentCatName != null) break;
     }
 
     final String finalCatName = parentCatName ?? AppLocalizations.of(context)!.otherCategory;
@@ -380,9 +395,56 @@ class _DismissibleDraftCardState extends State<DismissibleDraftCard>
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final screenHeight = MediaQuery.of(context).size.height;
     final sf = (screenHeight / 812.0).clamp(0.85, 1.0);
-    final typeColor = widget.draft.isIncome
-        ? AppColors.getIncome(context)
-        : AppColors.getExpense(context);
+    
+    final Color typeColor;
+    final Color amountColor;
+    if (isTransfer) {
+      typeColor = Colors.blue;
+      amountColor = AppColors.getTextPrimary(context);
+    } else {
+      typeColor = widget.draft.isIncome
+          ? AppColors.getIncome(context)
+          : AppColors.getExpense(context);
+      amountColor = typeColor;
+    }
+
+    // 1. Transaction Type Badge
+    final String typeText;
+    final IconData typeIcon;
+    final Color typeBadgeColor;
+
+    if (isTransfer) {
+      typeText = isTr ? "Transfer" : (isPt ? "Transferência" : "Transfer");
+      typeIcon = Icons.swap_horiz_rounded;
+      typeBadgeColor = Colors.blue.shade600;
+    } else if (widget.draft.isIncome) {
+      typeText = isTr ? "Gelir" : (isPt ? "Receita" : "Income");
+      typeIcon = Icons.arrow_upward_rounded;
+      typeBadgeColor = AppColors.getIncome(context);
+    } else {
+      typeText = isTr ? "Gider" : (isPt ? "Despesa" : "Expense");
+      typeIcon = Icons.arrow_downward_rounded;
+      typeBadgeColor = AppColors.getExpense(context);
+    }
+
+    // 2. Plan Badge (if periodType > 0)
+    final bool isPlan = widget.draft.periodType > 0;
+    final String planText;
+    final IconData planIcon;
+    final Color planColor = Colors.purple.shade600;
+
+    if (isPlan) {
+      if (widget.draft.remainingInstallments == 1) {
+        planText = isTr ? "Plan (Tek Seferlik)" : (isPt ? "Plano (Único)" : "Plan (One-Time)");
+        planIcon = Icons.calendar_today_rounded;
+      } else {
+        planText = isTr ? "Plan (Tekrarlı)" : (isPt ? "Plano (Recorrente)" : "Plan (Recurring)");
+        planIcon = Icons.sync_rounded;
+      }
+    } else {
+      planText = "";
+      planIcon = Icons.help;
+    }
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 10),
@@ -476,6 +538,17 @@ class _DismissibleDraftCardState extends State<DismissibleDraftCard>
                                 fontWeight: FontWeight.w500,
                               ),
                             ),
+                          const SizedBox(height: 5),
+                          // Rozetler (Gider, Gelir, Transfer & Plan Durumu)
+                          Wrap(
+                            spacing: 4,
+                            runSpacing: 4,
+                            children: [
+                              _buildBadge(context, typeText, typeIcon, typeBadgeColor),
+                              if (isPlan)
+                                _buildBadge(context, planText, planIcon, planColor),
+                            ],
+                          ),
                         ],
                       ),
                     ),
@@ -484,7 +557,7 @@ class _DismissibleDraftCardState extends State<DismissibleDraftCard>
                     // Sağ Üst: Tutar (En belirgin yer)
                     Text(
                       () {
-                        final sign = widget.draft.isIncome ? "+" : "-";
+                        final sign = isTransfer ? "" : (widget.draft.isIncome ? "+" : "-");
                         final curr = widget.draft.currency ?? widget.currencySymbol;
                         if (widget.draft.minAmount != null || widget.draft.maxAmount != null) {
                           final minStr = widget.draft.minAmount?.toStringAsFixed(0) ?? "0";
@@ -496,9 +569,7 @@ class _DismissibleDraftCardState extends State<DismissibleDraftCard>
                       style: TextStyle(
                         fontSize: 17,
                         fontWeight: FontWeight.w900,
-                        color: widget.draft.isIncome
-                            ? AppColors.getIncome(context)
-                            : AppColors.getExpense(context),
+                        color: amountColor,
                       ),
                     ),
                   ],
@@ -507,27 +578,87 @@ class _DismissibleDraftCardState extends State<DismissibleDraftCard>
                 const SizedBox(height: 10),
                 
                 // Alt Satır (Aksiyon ve Meta Veri): Sol alta kasa seçici, sağ alta ise tarihler
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  crossAxisAlignment: CrossAxisAlignment.center,
+                Wrap(
+                  alignment: WrapAlignment.spaceBetween,
+                  crossAxisAlignment: WrapCrossAlignment.center,
+                  spacing: 8,
+                  runSpacing: 8,
                   children: [
-                    // Sol Alt: Kasa Seçici (InlinePicker)
-                    SizedBox(
-                      width: 125,
-                      height: 36,
-                      child: InlinePicker(
-                        items: vaultNames,
-                        selectedIndex: selectedIndex,
-                        onChanged: (index) {
-                          if (index >= 0 && index < widget.vaults.length) {
-                            widget.onVaultSelected(widget.vaults[index].id);
-                          }
-                        },
+                    // Kasa Seçici(leri)
+                    if (isTransfer)
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          // Kaynak Kasa
+                          SizedBox(
+                            width: 100,
+                            height: 36,
+                            child: InlinePicker(
+                              items: vaultNames,
+                              selectedIndex: selectedIndex,
+                              onChanged: (index) {
+                                if (index >= 0 && index < widget.vaults.length) {
+                                  widget.onVaultSelected(widget.vaults[index].id);
+                                }
+                              },
+                              width: 100,
+                              height: 36,
+                              scalingFactor: 0.95,
+                            ),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 4),
+                            child: Icon(
+                              Icons.arrow_forward_rounded,
+                              size: 14,
+                              color: AppColors.getTextSecondary(context),
+                            ),
+                          ),
+                          // Hedef Kasa
+                          () {
+                            int targetSelectedIndex = 0;
+                            if (widget.vaults.isNotEmpty && widget.selectedTargetVaultId != null) {
+                              final index = widget.vaults.indexWhere((v) => v.id == widget.selectedTargetVaultId);
+                              if (index != -1) {
+                                targetSelectedIndex = index;
+                              }
+                            }
+                            return SizedBox(
+                              width: 100,
+                              height: 36,
+                              child: InlinePicker(
+                                items: vaultNames,
+                                selectedIndex: targetSelectedIndex,
+                                onChanged: (index) {
+                                  if (index >= 0 && index < widget.vaults.length && widget.onTargetVaultSelected != null) {
+                                    widget.onTargetVaultSelected!(widget.vaults[index].id);
+                                  }
+                                },
+                                width: 100,
+                                height: 36,
+                                scalingFactor: 0.95,
+                              ),
+                            );
+                          }(),
+                        ],
+                      )
+                    else
+                      SizedBox(
                         width: 125,
                         height: 36,
-                        scalingFactor: 0.95,
+                        child: InlinePicker(
+                          items: vaultNames,
+                          selectedIndex: selectedIndex,
+                          onChanged: (index) {
+                            if (index >= 0 && index < widget.vaults.length) {
+                              widget.onVaultSelected(widget.vaults[index].id);
+                            }
+                          },
+                          width: 125,
+                          height: 36,
+                          scalingFactor: 0.95,
+                        ),
                       ),
-                    ),
                     
                     // Sağ Alt: Tarihler ve Hatırlatıcılar
                     Row(
@@ -587,6 +718,37 @@ class _DismissibleDraftCardState extends State<DismissibleDraftCard>
     ),
   ),
 ),
+    );
+  }
+
+  Widget _buildBadge(BuildContext context, String text, IconData icon, Color color) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2.5),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(6),
+        border: Border.all(
+          color: color.withValues(alpha: 0.2),
+          width: 0.5,
+        ),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Icon(icon, size: 10, color: color),
+          const SizedBox(width: 3),
+          Text(
+            text,
+            style: TextStyle(
+              fontSize: 8,
+              fontWeight: FontWeight.w800,
+              color: color,
+              height: 1.1,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

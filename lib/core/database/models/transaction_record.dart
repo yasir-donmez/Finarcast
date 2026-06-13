@@ -38,6 +38,10 @@ class TransactionRecord {
   @Index()
   int? vaultId;
 
+  /// Transfer işlemlerinde hedef kasa ID'si (null = normal işlem)
+  @Index()
+  int? targetVaultId;
+
   /// İlişkili Şablon ID (null = tek seferlik/manuel)
   @Index()
   int? templateId;

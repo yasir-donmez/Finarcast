@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/app_constants.dart';
 import '../../../core/database/database_service.dart';
 import '../../../core/database/models/vault.dart';
+import '../../../core/database/models/transaction_record.dart';
 import '../../../core/providers/settings_provider.dart';
 import '../../../core/utils/currency_utils.dart';
 import '../../../core/utils/string_utils.dart';
@@ -12,6 +13,8 @@ import '../../../shared/widgets/custom_text_field.dart';
 import '../../../shared/widgets/custom_button.dart';
 import '../../auth/widgets/auth_wave.dart';
 import '../../../l10n/app_localizations.dart';
+import 'package:intl/intl.dart';
+import '../../transactions/widgets/transaction_amount_input.dart';
 
 class AddVaultSheet extends ConsumerStatefulWidget {
   const AddVaultSheet({super.key});
@@ -107,7 +110,7 @@ class _AddVaultSheetState extends ConsumerState<AddVaultSheet> with SingleTicker
                 suffixText: _selectedCurrency == 'AUTO' ? '' : _selectedCurrency,
                 keyboardType: const TextInputType.numberWithOptions(decimal: true),
                 inputFormatters: [
-                  FilteringTextInputFormatter.allow(RegExp(r'[0-9.,]')),
+                  LocaleCurrencyFormatter(Localizations.localeOf(context).toString()),
                 ],
                 scalingFactor: sf,
               ),
@@ -168,6 +171,7 @@ class _AddVaultSheetState extends ConsumerState<AddVaultSheet> with SingleTicker
               CustomButton(
                 label: l10n.createVault,
                 onTap: () async {
+                  final locale = Localizations.localeOf(context).toString();
                   if (_nameController.text.isNotEmpty) {
                     final baseCurrency = ref.read(settingsProvider).currencySymbol;
                     final targetCurrency = _selectedCurrency;
@@ -201,14 +205,45 @@ class _AddVaultSheetState extends ConsumerState<AddVaultSheet> with SingleTicker
                       }
                     }
 
-                    final double? initialBalance = double.tryParse(_balanceController.text.replaceAll(',', '.'));
+                    final balanceText = _balanceController.text.trim();
+                    double? initialBalance;
+                    if (balanceText.isNotEmpty) {
+                      final format = NumberFormat.decimalPattern(locale);
+                      final decimalSep = format.symbols.DECIMAL_SEP;
+                      final groupSep = format.symbols.GROUP_SEP;
+
+                      String clean = balanceText.replaceAll(groupSep, '');
+                      if (decimalSep != '.') {
+                        clean = clean.replaceAll(decimalSep, '.');
+                      }
+                      initialBalance = double.tryParse(clean);
+                    }
                     
                     final newVault = Vault()
                       ..name = _nameController.text.trim()
-                      ..currency = _selectedCurrency
-                      ..balance = initialBalance ?? 0.0;
+                      ..currency = _selectedCurrency;
                     
-                    await DatabaseService.addVault(newVault);
+                    final vaultId = await DatabaseService.addVault(newVault);
+
+                    // Başlangıç bakiyesi varsa otomatik bir "Başlangıç Bakiyesi" işlemi oluştur (Pure Ledger)
+                    if (initialBalance != null && initialBalance != 0) {
+                      final now = DateTime.now();
+                      final tx = TransactionRecord()
+                        ..title = l10n.initialBalance
+                        ..amount = initialBalance.abs()
+                        ..isIncome = initialBalance > 0
+                        ..date = now
+                        ..occurrenceDate = DateTime(now.year, now.month, now.day)
+                        ..vaultId = vaultId
+                        ..currency = _selectedCurrency == 'AUTO' ? baseCurrency : _selectedCurrency
+                        ..categoryId = initialBalance > 0 ? 'inc_other_general' : 'exp_other_general'
+                        ..iconCode = 'account_balance_wallet_rounded'
+                        ..status = 0
+                        ..isReviewed = true
+                        ..occurrenceKey = TransactionRecord.generateManualKey();
+                      await DatabaseService.addTransaction(tx);
+                    }
+
                     _nameController.clear();
                     _balanceController.clear();
                     if (context.mounted) Navigator.pop(context);

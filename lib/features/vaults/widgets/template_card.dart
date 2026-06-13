@@ -270,7 +270,7 @@ class TemplateCard extends ConsumerWidget {
                               Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  if (tx.hasNotificationConfigured)
+                                  if (tx.hasNotification)
                                     Icon(
                                       tx.isNotificationEnabled
                                           ? Icons.notifications_active_rounded
@@ -281,7 +281,7 @@ class TemplateCard extends ConsumerWidget {
                                       size: 13 * sf,
                                     ),
                                   if (tx.isPaused) ...[
-                                    if (tx.hasNotificationConfigured)
+                                    if (tx.hasNotification)
                                       SizedBox(width: 4 * sf),
                                     Icon(
                                       Icons.pause_circle_filled_rounded,

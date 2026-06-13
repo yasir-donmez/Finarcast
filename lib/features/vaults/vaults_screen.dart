@@ -110,12 +110,23 @@ class _VaultsScreenState extends ConsumerState<VaultsScreen> {
               _buildHeader(groups, selectedVaultId, activeColor, unseenNotificationsCount, gapAB, l10n, context),
               _buildFilters(viewMode, filter, activeColor, scalingFactor, gapCardToFilters, l10n, context),
               
-              if (isEmpty)
-                _buildEmptyState(activeColor, isDark, l10n)
-              else if (viewMode == VaultViewMode.templates)
-                _buildTemplateGrid(filteredTemplates, dynamicAspectRatio, context)
-              else
-                _buildTransactionHistoryList(filteredTransactions, context),
+              TweenAnimationBuilder<double>(
+                key: ValueKey('$selectedVaultId-$viewMode-$filter'),
+                tween: Tween(begin: 0.0, end: 1.0),
+                duration: const Duration(milliseconds: 240),
+                curve: Curves.easeOut,
+                builder: (context, value, child) {
+                  return SliverOpacity(
+                    opacity: value,
+                    sliver: child!,
+                  );
+                },
+                child: isEmpty
+                    ? _buildEmptyState(activeColor, isDark, l10n)
+                    : (viewMode == VaultViewMode.templates
+                        ? _buildTemplateGrid(filteredTemplates, dynamicAspectRatio, context)
+                        : _buildTransactionHistoryList(filteredTransactions, context)),
+              ),
 
               _buildSmartSpacing(maxHeaderHeight, minHeaderHeight),
             ],
@@ -371,6 +382,7 @@ class _VaultsScreenState extends ConsumerState<VaultsScreen> {
 
   Widget _buildTransactionHistoryList(List<TransactionUI> transactions, BuildContext context) {
     final bottomPadding = MediaQuery.of(context).padding.bottom;
+    final selectedVaultId = ref.read(selectedVaultProvider);
     
     // Group transactions by day
     final Map<DateTime, List<TransactionUI>> grouped = {};
@@ -396,6 +408,7 @@ class _VaultsScreenState extends ConsumerState<VaultsScreen> {
             return HistoryDayGroup(
               date: date,
               transactions: txs,
+              selectedVaultId: selectedVaultId,
               onReviewed: (tx) async {
                 if (tx.dbId != null) {
                   final record = await DatabaseService.getTransaction(tx.dbId!);
@@ -658,9 +671,11 @@ class _VaultsScreenState extends ConsumerState<VaultsScreen> {
       final selectedVaultId = ref.read(selectedVaultProvider);
       final groups = ref.read(transactionGroupsProvider);
       final effectiveVaultId = selectedVaultId ?? (groups.isNotEmpty ? groups.first.id : null);
-      int? currentVaultId = tx.groupIds.isNotEmpty
-          ? int.tryParse(tx.groupIds.first.replaceFirst('v_', ''))
-          : null;
+      int? currentVaultId = tx.vaultId;
+      
+      if (currentVaultId == null && tx.groupIds.isNotEmpty) {
+        currentVaultId = int.tryParse(tx.groupIds.first.replaceFirst('v_', ''));
+      }
       
       if (currentVaultId == null && effectiveVaultId != null) {
         currentVaultId = int.tryParse(effectiveVaultId.replaceFirst('v_', ''));
@@ -677,6 +692,7 @@ class _VaultsScreenState extends ConsumerState<VaultsScreen> {
             initialMaxAmount: tx.maxAmount,
             initialIsIncome: tx.isIncome,
             initialVaultId: currentVaultId,
+            initialTargetVaultId: tx.targetVaultId,
             initialCategoryId: tx.categoryId,
             initialNote: tx.note,
             initialCurrency: tx.currency,
@@ -748,6 +764,7 @@ class _VaultsScreenState extends ConsumerState<VaultsScreen> {
     CustomBottomSheet.show(
       context: context,
       title: AppLocalizations.of(context)!.addNewVault,
+      hasInput: true,
       child: const AddVaultSheet(),
     );
   }

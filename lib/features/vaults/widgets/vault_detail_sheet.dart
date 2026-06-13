@@ -178,7 +178,7 @@ class _VaultDetailSheetState extends ConsumerState<VaultDetailSheet> with Single
           ..currency = tempCurrency
           ..categoryId = difference > 0 ? 'inc_other_general' : 'exp_other_general'
           ..iconCode = 'account_balance_wallet_rounded'
-          ..note = l10n.balanceAdjustmentNote(oldBalanceStr, newBalanceStr)
+          ..note = l10n.balanceAdjustmentNote(newBalanceStr, oldBalanceStr)
           ..status = 0
           ..isReviewed = true
           ..occurrenceKey = TransactionRecord.generateManualKey();

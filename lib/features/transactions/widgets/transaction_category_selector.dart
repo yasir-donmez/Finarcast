@@ -178,12 +178,30 @@ class TransactionCategorySelector extends StatelessWidget {
         // --- ALT KATEGORİ ŞERİDİ ---
         AnimatedSize(
           duration: const Duration(milliseconds: 400),
-          curve: Curves.easeOutCubic,
-          child: isExpanded && hasSubModels
-              ? AnimatedOpacity(
-                  duration: const Duration(milliseconds: 300),
-                  opacity: isExpanded ? 1.0 : 0.0,
-                  child: Container(
+          curve: Curves.easeInOutQuart,
+          alignment: Alignment.topCenter,
+          child: AnimatedSwitcher(
+            duration: const Duration(milliseconds: 350),
+            transitionBuilder: (Widget child, Animation<double> animation) {
+              return FadeTransition(
+                opacity: animation,
+                child: SlideTransition(
+                  position: Tween<Offset>(
+                    begin: const Offset(0, 0.05),
+                    end: Offset.zero,
+                  ).animate(
+                    CurvedAnimation(
+                      parent: animation,
+                      curve: Curves.easeOutQuart,
+                    ),
+                  ),
+                  child: child,
+                ),
+              );
+            },
+            child: isExpanded && hasSubModels
+                ? Container(
+                    key: const ValueKey('subcategories_visible'),
                     margin: const EdgeInsets.only(top: 8, bottom: 8),
                     height: 36,
                     child: ListView.builder(
@@ -336,9 +354,9 @@ class TransactionCategorySelector extends StatelessWidget {
                         );
                       },
                     ),
-                  ),
-                )
-              : const SizedBox.shrink(),
+                  )
+                : const SizedBox.shrink(key: ValueKey('subcategories_hidden')),
+          ),
         ),
       ],
     );

@@ -34,6 +34,14 @@ class IconUtils {
         return Icons.build_rounded;
       case 'exp_rent_storage':
         return Icons.warehouse_rounded;
+      case 'exp_rent_insurance':
+        return Icons.security_rounded;
+      case 'exp_rent_moving':
+        return Icons.local_shipping_rounded;
+      case 'exp_rent_dorm':
+        return Icons.home_work_rounded;
+      case 'exp_rent_room':
+        return Icons.single_bed_rounded;
       
       // Faturalar
       case 'exp_bill':
@@ -66,6 +74,10 @@ class IconUtils {
         return Icons.pets_rounded;
       case 'exp_grocery_hygiene':
         return Icons.clean_hands_rounded;
+      case 'exp_grocery_tobacco':
+        return Icons.smoking_rooms_rounded;
+      case 'exp_grocery_alcohol':
+        return Icons.wine_bar_rounded;
 
       // Yemek
       case 'exp_dining':
@@ -134,6 +146,8 @@ class IconUtils {
         return Icons.brush_rounded;
       case 'exp_beauty_spa':
         return Icons.spa_rounded;
+      case 'exp_beauty_esthetics':
+        return Icons.face_retouching_natural_rounded;
 
       // Sağlık
       case 'exp_health':
@@ -154,6 +168,8 @@ class IconUtils {
         return Icons.psychology_rounded;
       case 'exp_health_supplements':
         return Icons.medication_liquid_rounded;
+      case 'exp_health_insurance':
+        return Icons.health_and_safety_rounded;
 
       // Abonelikler
       case 'exp_sub':
@@ -168,6 +184,8 @@ class IconUtils {
         return Icons.code_rounded;
       case 'exp_sub_publishing':
         return Icons.newspaper_rounded;
+      case 'exp_sub_cloud':
+        return Icons.cloud_rounded;
 
       // Eğlence
       case 'exp_fun':
@@ -210,6 +228,12 @@ class IconUtils {
         return Icons.savings_rounded;
       case 'exp_family_daycare':
         return Icons.escalator_warning_rounded;
+      case 'exp_family_support':
+        return Icons.elderly_rounded;
+      case 'exp_family_care':
+        return Icons.supervised_user_circle_rounded;
+      case 'exp_family_alimony':
+        return Icons.balance_rounded;
 
       // Alışveriş
       case 'exp_shopping':
@@ -226,6 +250,10 @@ class IconUtils {
         return Icons.card_giftcard_rounded;
       case 'exp_shopping_general':
         return Icons.shopping_cart_rounded;
+      case 'exp_shopping_sports':
+        return Icons.fitness_center_rounded;
+      case 'exp_shopping_shipping':
+        return Icons.local_post_office_rounded;
 
       // Seyahat
       case 'exp_travel':
@@ -248,6 +276,20 @@ class IconUtils {
         return Icons.account_balance_rounded;
       case 'exp_debt_personal':
         return Icons.handshake_rounded;
+      case 'exp_debt_lending':
+        return Icons.outbox_rounded;
+
+      // Birikim ve Yatırım
+      case 'exp_invest':
+        return Icons.savings_rounded;
+      case 'exp_invest_stocks':
+        return Icons.show_chart_rounded;
+      case 'exp_invest_gold':
+        return Icons.workspace_premium_rounded;
+      case 'exp_invest_crypto':
+        return Icons.currency_bitcoin_rounded;
+      case 'exp_invest_pension':
+        return Icons.wb_sunny_rounded;
 
       // Vergiler
       case 'exp_tax':
@@ -268,6 +310,8 @@ class IconUtils {
         return Icons.volunteer_activism_rounded;
       case 'exp_other_tip':
         return Icons.monetization_on_rounded;
+      case 'exp_other_bank_fee':
+        return Icons.percent_rounded;
 
       // --- GELİR (INCOME) ---
       // Maaş
@@ -295,6 +339,8 @@ class IconUtils {
         return Icons.handshake_rounded;
       case 'inc_extra_content':
         return Icons.video_library_rounded;
+      case 'inc_extra_affiliate':
+        return Icons.campaign_rounded;
 
       // Yatırım Geliri
       case 'inc_invest':
@@ -306,6 +352,8 @@ class IconUtils {
       case 'inc_invest_interest':
         return Icons.savings_rounded;
       case 'inc_invest_gold':
+        return Icons.workspace_premium_rounded;
+      case 'inc_invest_forex':
         return Icons.currency_exchange_rounded;
       case 'inc_invest_bond':
         return Icons.description_rounded;
@@ -357,6 +405,8 @@ class IconUtils {
         return Icons.account_balance_rounded;
       case 'inc_gift_alimony':
         return Icons.handshake_rounded;
+      case 'inc_gift_allowance':
+        return Icons.savings_rounded;
 
       // Diğer Gelirler
       case 'inc_other':
@@ -369,6 +419,14 @@ class IconUtils {
         return Icons.casino_rounded;
       case 'inc_other_collection':
         return Icons.assignment_turned_in_rounded;
+      case 'inc_other_cashback':
+        return Icons.loyalty_rounded;
+      case 'inc_other_tax_refund':
+        return Icons.price_check_rounded;
+      
+      // --- TRANSFER ---
+      case 'transfer':
+        return Icons.swap_horiz_rounded;
     }
 
     // ==========================================
@@ -382,6 +440,8 @@ class IconUtils {
     if (code == null || code.isEmpty) return AppColors.darkTextSecondary;
 
     final lowerCode = code.toLowerCase();
+
+    if (lowerCode == 'transfer') return Colors.blueGrey;
 
     // ==========================================
     // 1. STANDARDIZED CATEGORY IDs (PREFERRED)

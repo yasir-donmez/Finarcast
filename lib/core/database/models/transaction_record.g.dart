@@ -82,23 +82,28 @@ const TransactionRecordSchema = CollectionSchema(
       name: r'syncStatus',
       type: IsarType.long,
     ),
-    r'templateId': PropertySchema(
+    r'targetVaultId': PropertySchema(
       id: 17,
+      name: r'targetVaultId',
+      type: IsarType.long,
+    ),
+    r'templateId': PropertySchema(
+      id: 18,
       name: r'templateId',
       type: IsarType.long,
     ),
-    r'title': PropertySchema(id: 18, name: r'title', type: IsarType.string),
+    r'title': PropertySchema(id: 19, name: r'title', type: IsarType.string),
     r'totalInstallments': PropertySchema(
-      id: 19,
+      id: 20,
       name: r'totalInstallments',
       type: IsarType.long,
     ),
     r'updatedAt': PropertySchema(
-      id: 20,
+      id: 21,
       name: r'updatedAt',
       type: IsarType.dateTime,
     ),
-    r'vaultId': PropertySchema(id: 21, name: r'vaultId', type: IsarType.long),
+    r'vaultId': PropertySchema(id: 22, name: r'vaultId', type: IsarType.long),
   },
 
   estimateSize: _transactionRecordEstimateSize,
@@ -128,6 +133,19 @@ const TransactionRecordSchema = CollectionSchema(
       properties: [
         IndexPropertySchema(
           name: r'vaultId',
+          type: IndexType.value,
+          caseSensitive: false,
+        ),
+      ],
+    ),
+    r'targetVaultId': IndexSchema(
+      id: -150656434833661031,
+      name: r'targetVaultId',
+      unique: false,
+      replace: false,
+      properties: [
+        IndexPropertySchema(
+          name: r'targetVaultId',
           type: IndexType.value,
           caseSensitive: false,
         ),
@@ -298,11 +316,12 @@ void _transactionRecordSerialize(
   writer.writeString(offsets[14], object.remoteId);
   writer.writeLong(offsets[15], object.status);
   writer.writeLong(offsets[16], object.syncStatus);
-  writer.writeLong(offsets[17], object.templateId);
-  writer.writeString(offsets[18], object.title);
-  writer.writeLong(offsets[19], object.totalInstallments);
-  writer.writeDateTime(offsets[20], object.updatedAt);
-  writer.writeLong(offsets[21], object.vaultId);
+  writer.writeLong(offsets[17], object.targetVaultId);
+  writer.writeLong(offsets[18], object.templateId);
+  writer.writeString(offsets[19], object.title);
+  writer.writeLong(offsets[20], object.totalInstallments);
+  writer.writeDateTime(offsets[21], object.updatedAt);
+  writer.writeLong(offsets[22], object.vaultId);
 }
 
 TransactionRecord _transactionRecordDeserialize(
@@ -330,11 +349,12 @@ TransactionRecord _transactionRecordDeserialize(
   object.remoteId = reader.readStringOrNull(offsets[14]);
   object.status = reader.readLong(offsets[15]);
   object.syncStatus = reader.readLong(offsets[16]);
-  object.templateId = reader.readLongOrNull(offsets[17]);
-  object.title = reader.readString(offsets[18]);
-  object.totalInstallments = reader.readLongOrNull(offsets[19]);
-  object.updatedAt = reader.readDateTime(offsets[20]);
-  object.vaultId = reader.readLongOrNull(offsets[21]);
+  object.targetVaultId = reader.readLongOrNull(offsets[17]);
+  object.templateId = reader.readLongOrNull(offsets[18]);
+  object.title = reader.readString(offsets[19]);
+  object.totalInstallments = reader.readLongOrNull(offsets[20]);
+  object.updatedAt = reader.readDateTime(offsets[21]);
+  object.vaultId = reader.readLongOrNull(offsets[22]);
   return object;
 }
 
@@ -382,12 +402,14 @@ P _transactionRecordDeserializeProp<P>(
     case 17:
       return (reader.readLongOrNull(offset)) as P;
     case 18:
-      return (reader.readString(offset)) as P;
-    case 19:
       return (reader.readLongOrNull(offset)) as P;
+    case 19:
+      return (reader.readString(offset)) as P;
     case 20:
-      return (reader.readDateTime(offset)) as P;
+      return (reader.readLongOrNull(offset)) as P;
     case 21:
+      return (reader.readDateTime(offset)) as P;
+    case 22:
       return (reader.readLongOrNull(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -494,6 +516,15 @@ extension TransactionRecordQueryWhereSort
     return QueryBuilder.apply(this, (query) {
       return query.addWhereClause(
         const IndexWhereClause.any(indexName: r'vaultId'),
+      );
+    });
+  }
+
+  QueryBuilder<TransactionRecord, TransactionRecord, QAfterWhere>
+  anyTargetVaultId() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(
+        const IndexWhereClause.any(indexName: r'targetVaultId'),
       );
     });
   }
@@ -832,6 +863,132 @@ extension TransactionRecordQueryWhere
           lower: [lowerVaultId],
           includeLower: includeLower,
           upper: [upperVaultId],
+          includeUpper: includeUpper,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<TransactionRecord, TransactionRecord, QAfterWhereClause>
+  targetVaultIdIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(
+        IndexWhereClause.equalTo(indexName: r'targetVaultId', value: [null]),
+      );
+    });
+  }
+
+  QueryBuilder<TransactionRecord, TransactionRecord, QAfterWhereClause>
+  targetVaultIdIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(
+        IndexWhereClause.between(
+          indexName: r'targetVaultId',
+          lower: [null],
+          includeLower: false,
+          upper: [],
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<TransactionRecord, TransactionRecord, QAfterWhereClause>
+  targetVaultIdEqualTo(int? targetVaultId) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(
+        IndexWhereClause.equalTo(
+          indexName: r'targetVaultId',
+          value: [targetVaultId],
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<TransactionRecord, TransactionRecord, QAfterWhereClause>
+  targetVaultIdNotEqualTo(int? targetVaultId) {
+    return QueryBuilder.apply(this, (query) {
+      if (query.whereSort == Sort.asc) {
+        return query
+            .addWhereClause(
+              IndexWhereClause.between(
+                indexName: r'targetVaultId',
+                lower: [],
+                upper: [targetVaultId],
+                includeUpper: false,
+              ),
+            )
+            .addWhereClause(
+              IndexWhereClause.between(
+                indexName: r'targetVaultId',
+                lower: [targetVaultId],
+                includeLower: false,
+                upper: [],
+              ),
+            );
+      } else {
+        return query
+            .addWhereClause(
+              IndexWhereClause.between(
+                indexName: r'targetVaultId',
+                lower: [targetVaultId],
+                includeLower: false,
+                upper: [],
+              ),
+            )
+            .addWhereClause(
+              IndexWhereClause.between(
+                indexName: r'targetVaultId',
+                lower: [],
+                upper: [targetVaultId],
+                includeUpper: false,
+              ),
+            );
+      }
+    });
+  }
+
+  QueryBuilder<TransactionRecord, TransactionRecord, QAfterWhereClause>
+  targetVaultIdGreaterThan(int? targetVaultId, {bool include = false}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(
+        IndexWhereClause.between(
+          indexName: r'targetVaultId',
+          lower: [targetVaultId],
+          includeLower: include,
+          upper: [],
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<TransactionRecord, TransactionRecord, QAfterWhereClause>
+  targetVaultIdLessThan(int? targetVaultId, {bool include = false}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(
+        IndexWhereClause.between(
+          indexName: r'targetVaultId',
+          lower: [],
+          upper: [targetVaultId],
+          includeUpper: include,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<TransactionRecord, TransactionRecord, QAfterWhereClause>
+  targetVaultIdBetween(
+    int? lowerTargetVaultId,
+    int? upperTargetVaultId, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(
+        IndexWhereClause.between(
+          indexName: r'targetVaultId',
+          lower: [lowerTargetVaultId],
+          includeLower: includeLower,
+          upper: [upperTargetVaultId],
           includeUpper: includeUpper,
         ),
       );
@@ -3019,6 +3176,79 @@ extension TransactionRecordQueryFilter
   }
 
   QueryBuilder<TransactionRecord, TransactionRecord, QAfterFilterCondition>
+  targetVaultIdIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        const FilterCondition.isNull(property: r'targetVaultId'),
+      );
+    });
+  }
+
+  QueryBuilder<TransactionRecord, TransactionRecord, QAfterFilterCondition>
+  targetVaultIdIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        const FilterCondition.isNotNull(property: r'targetVaultId'),
+      );
+    });
+  }
+
+  QueryBuilder<TransactionRecord, TransactionRecord, QAfterFilterCondition>
+  targetVaultIdEqualTo(int? value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.equalTo(property: r'targetVaultId', value: value),
+      );
+    });
+  }
+
+  QueryBuilder<TransactionRecord, TransactionRecord, QAfterFilterCondition>
+  targetVaultIdGreaterThan(int? value, {bool include = false}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(
+          include: include,
+          property: r'targetVaultId',
+          value: value,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<TransactionRecord, TransactionRecord, QAfterFilterCondition>
+  targetVaultIdLessThan(int? value, {bool include = false}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.lessThan(
+          include: include,
+          property: r'targetVaultId',
+          value: value,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<TransactionRecord, TransactionRecord, QAfterFilterCondition>
+  targetVaultIdBetween(
+    int? lower,
+    int? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.between(
+          property: r'targetVaultId',
+          lower: lower,
+          includeLower: includeLower,
+          upper: upper,
+          includeUpper: includeUpper,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<TransactionRecord, TransactionRecord, QAfterFilterCondition>
   templateIdIsNull() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
@@ -3681,6 +3911,20 @@ extension TransactionRecordQuerySortBy
   }
 
   QueryBuilder<TransactionRecord, TransactionRecord, QAfterSortBy>
+  sortByTargetVaultId() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'targetVaultId', Sort.asc);
+    });
+  }
+
+  QueryBuilder<TransactionRecord, TransactionRecord, QAfterSortBy>
+  sortByTargetVaultIdDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'targetVaultId', Sort.desc);
+    });
+  }
+
+  QueryBuilder<TransactionRecord, TransactionRecord, QAfterSortBy>
   sortByTemplateId() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'templateId', Sort.asc);
@@ -4005,6 +4249,20 @@ extension TransactionRecordQuerySortThenBy
   }
 
   QueryBuilder<TransactionRecord, TransactionRecord, QAfterSortBy>
+  thenByTargetVaultId() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'targetVaultId', Sort.asc);
+    });
+  }
+
+  QueryBuilder<TransactionRecord, TransactionRecord, QAfterSortBy>
+  thenByTargetVaultIdDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'targetVaultId', Sort.desc);
+    });
+  }
+
+  QueryBuilder<TransactionRecord, TransactionRecord, QAfterSortBy>
   thenByTemplateId() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'templateId', Sort.asc);
@@ -4201,6 +4459,13 @@ extension TransactionRecordQueryWhereDistinct
   }
 
   QueryBuilder<TransactionRecord, TransactionRecord, QDistinct>
+  distinctByTargetVaultId() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'targetVaultId');
+    });
+  }
+
+  QueryBuilder<TransactionRecord, TransactionRecord, QDistinct>
   distinctByTemplateId() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'templateId');
@@ -4352,6 +4617,13 @@ extension TransactionRecordQueryProperty
   QueryBuilder<TransactionRecord, int, QQueryOperations> syncStatusProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'syncStatus');
+    });
+  }
+
+  QueryBuilder<TransactionRecord, int?, QQueryOperations>
+  targetVaultIdProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'targetVaultId');
     });
   }
 

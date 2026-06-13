@@ -21,6 +21,7 @@ import 'core/widgets/sync_bootstrap.dart';
 import 'core/services/materialization_service.dart';
 import 'package:dynamic_color/dynamic_color.dart';
 import 'shared/widgets/custom_notification.dart';
+import 'shared/widgets/custom_button.dart';
 
 void main() async {
   try {
@@ -222,17 +223,22 @@ class FinarcastApp extends ConsumerWidget {
                     backgroundColor: Colors.transparent, // Builder'daki renk görünecek
                     body: Center(child: CircularProgressIndicator()),
                   ),
-                  error: (e, st) => Scaffold(
-                    key: ValueKey('error_screen'),
-                    backgroundColor: Colors.transparent,
-                    body: Center(
-                      child: Text(
-                        AppLocalizations.of(context) != null
-                            ? AppLocalizations.of(context)!.errorGeneric(e.toString())
-                            : 'Hata: $e',
-                      ),
-                    ),
-                  ),
+                  error: (e, st) {
+                    final session = Supabase.instance.client.auth.currentSession;
+                    if (session != null || isGuest) {
+                      return const SyncBootstrap(
+                        key: ValueKey('main_scaffold'),
+                        child: MainScaffold(),
+                      );
+                    }
+                    return NetworkOrAuthErrorScreen(
+                      error: e,
+                      onRetry: () => ref.invalidate(authStateProvider),
+                      onProceedGuest: () {
+                        ref.read(guestModeProvider.notifier).state = true;
+                      },
+                    );
+                  },
                 );
 
                 return AnimatedSwitcher(
@@ -270,6 +276,156 @@ class FinarcastApp extends ConsumerWidget {
       case 2: return ThemeMode.dark;
       default: return ThemeMode.system;
     }
+  }
+}
+
+class NetworkOrAuthErrorScreen extends StatefulWidget {
+  final Object error;
+  final VoidCallback onRetry;
+  final VoidCallback onProceedGuest;
+
+  const NetworkOrAuthErrorScreen({
+    super.key,
+    required this.error,
+    required this.onRetry,
+    required this.onProceedGuest,
+  });
+
+  @override
+  State<NetworkOrAuthErrorScreen> createState() => _NetworkOrAuthErrorScreenState();
+}
+
+class _NetworkOrAuthErrorScreenState extends State<NetworkOrAuthErrorScreen> {
+  bool _showDetails = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final bgColor = isDark ? AppColors.darkBackground : AppColors.lightBackground;
+    final textSecondaryStyle = TextStyle(
+      color: isDark ? AppColors.darkTextSecondary : AppColors.lightTextSecondary,
+      fontSize: 14,
+      height: 1.5,
+    );
+
+    final errorStr = widget.error.toString();
+    final isNetworkError = errorStr.toLowerCase().contains('socketexception') ||
+        errorStr.toLowerCase().contains('failed host lookup') ||
+        errorStr.toLowerCase().contains('network') ||
+        errorStr.toLowerCase().contains('authretryablefetchexception') ||
+        errorStr.toLowerCase().contains('clientexception');
+
+    return Scaffold(
+      backgroundColor: bgColor,
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 32.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Spacer(),
+              Container(
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color: isNetworkError
+                      ? (isDark ? Colors.blue.withValues(alpha: 0.1) : Colors.blue.withValues(alpha: 0.15))
+                      : (isDark ? Colors.red.withValues(alpha: 0.1) : Colors.red.withValues(alpha: 0.15)),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  isNetworkError ? Icons.wifi_off_rounded : Icons.warning_amber_rounded,
+                  color: isNetworkError ? Colors.blueAccent : Colors.redAccent,
+                  size: 64,
+                ),
+              ),
+              const SizedBox(height: 32),
+              Text(
+                isNetworkError 
+                    ? (AppLocalizations.of(context)?.syncErrorNoInternet ?? 'İnternet Bağlantısı Yok')
+                    : 'Sistemsel Bir Hata Oluştu',
+                style: TextStyle(
+                  color: isDark ? Colors.white : AppColors.lightTextPrimary,
+                  fontSize: 22,
+                  fontWeight: FontWeight.w900,
+                  letterSpacing: -0.5,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 16),
+              Text(
+                isNetworkError
+                    ? 'Lütfen internet bağlantınızı kontrol edip tekrar deneyin. Çevrimdışı modda devam ederek verilerinizi yerel olarak yönetmeye devam edebilirsiniz.'
+                    : 'Uygulama başlatılırken beklenmedik bir hata oluştu. Lütfen tekrar deneyin veya çevrimdışı devam edin.',
+                textAlign: TextAlign.center,
+                style: textSecondaryStyle,
+              ),
+              const SizedBox(height: 32),
+              CustomButton(
+                label: 'Tekrar Dene',
+                onTap: widget.onRetry,
+                isPrimary: true,
+              ),
+              const SizedBox(height: 12),
+              CustomButton(
+                label: 'Çevrimdışı Devam Et',
+                onTap: widget.onProceedGuest,
+                isPrimary: false,
+              ),
+              const Spacer(),
+              Align(
+                alignment: Alignment.center,
+                child: TextButton.icon(
+                  onPressed: () {
+                    setState(() {
+                      _showDetails = !_showDetails;
+                    });
+                  },
+                  icon: Icon(
+                    _showDetails ? Icons.expand_less : Icons.expand_more,
+                    size: 18,
+                    color: isDark ? Colors.white54 : Colors.black54,
+                  ),
+                  label: Text(
+                    _showDetails ? 'Detayları Gizle' : 'Hata Detayını Göster',
+                    style: TextStyle(
+                      color: isDark ? Colors.white54 : Colors.black54,
+                      fontSize: 12,
+                    ),
+                  ),
+                ),
+              ),
+              if (_showDetails) ...[
+                const SizedBox(height: 8),
+                Container(
+                  width: double.infinity,
+                  constraints: const BoxConstraints(maxHeight: 120),
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: isDark ? const Color(0xFF16161A) : Colors.black.withValues(alpha: 0.05),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: isDark ? Colors.white10 : Colors.black12,
+                    ),
+                  ),
+                  child: SingleChildScrollView(
+                    physics: const BouncingScrollPhysics(),
+                    child: SelectableText(
+                      errorStr,
+                      style: TextStyle(
+                        color: Colors.redAccent.withValues(alpha: 0.8),
+                        fontFamily: 'monospace',
+                        fontSize: 11,
+                        height: 1.4,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ],
+          ),
+        ),
+      ),
+    );
   }
 }
 

@@ -12,6 +12,7 @@ class CustomBottomSheet extends ConsumerWidget {
   final double? height;
   final bool showHandle;
   final bool isFullScreen;
+  final bool hasInput;
 
   const CustomBottomSheet({
     super.key,
@@ -21,6 +22,7 @@ class CustomBottomSheet extends ConsumerWidget {
     this.height,
     this.showHandle = true,
     this.isFullScreen = false,
+    this.hasInput = false,
   });
 
   /// Statik bir yardımcı metod ile kolayca çağrılabilir
@@ -32,6 +34,7 @@ class CustomBottomSheet extends ConsumerWidget {
     double? height,
     bool showHandle = true,
     bool isFullScreen = false,
+    bool hasInput = false,
   }) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return showModalBottomSheet<T>(
@@ -51,16 +54,30 @@ class CustomBottomSheet extends ConsumerWidget {
         height: height,
         showHandle: showHandle,
         isFullScreen: isFullScreen,
+        hasInput: hasInput,
         child: child,
       ),
     );
   }
 
+  static double _lastKnownKeyboardHeight = 290.0; // Makul bir varsayılan klavye yüksekliği
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final bottomPadding = MediaQuery.of(context).viewInsets.bottom;
+
+    // ═══ Granüler MediaQuery — sadece ilgili alan değişince rebuild ═══
+    final viewInsetsBottom = MediaQuery.viewInsetsOf(context).bottom;
+    final screenHeight = MediaQuery.sizeOf(context).height;
+    final safePadding = MediaQuery.paddingOf(context);
+    final safeBottom = safePadding.bottom;
+    final safeTop = safePadding.top;
     
+    // Klavye yüksekliğini kaydet (sadece gerçek klavye yüksekliği geldiğinde güncelle)
+    if (viewInsetsBottom > 0) {
+      _lastKnownKeyboardHeight = viewInsetsBottom;
+    }
+
     final bgColorStyle = ref.watch(settingsProvider.select((s) => s.bgColorStyle));
 
     final Color activeBgColor;
@@ -76,11 +93,39 @@ class CustomBottomSheet extends ConsumerWidget {
       activeBorderColor = AppColors.getThemeBorder(context, 1);
     }
 
-    final double keyboardHeight = bottomPadding;
-    final double bottomMargin = keyboardHeight > 0
-        ? keyboardHeight + 16.0
-        : MediaQuery.of(context).padding.bottom + 16.0;
-    
+    // ═══════════════════════════════════════════════════════════════════
+    // NATIVE-LEVEL KEYBOARD TRACKING
+    // ═══════════════════════════════════════════════════════════════════
+    // viewInsets.bottom OS'un her animasyon karesinde güncellenir.
+    // Direkt Padding'e vererek kare-kare senkronize takip sağlanır.
+    // AnimatedContainer KULLANILMAZ — çift animasyon jank yaratır.
+    // ═══════════════════════════════════════════════════════════════════
+
+    final route = ModalRoute.of(context);
+    final bool isEntering = route?.animation?.status == AnimationStatus.forward;
+
+    // Sheet'in alt kenarı klavyenin tam üstünde oturmalı (native davranış).
+    final double keyboardOffset;
+    if (hasInput && isEntering && viewInsetsBottom == 0) {
+      // Klavye henüz açılmadı ama açılacak — önceden konumla
+      keyboardOffset = _lastKnownKeyboardHeight;
+    } else {
+      // Normal durum: OS'un kare-kare verdiği değeri direkt kullan
+      keyboardOffset = viewInsetsBottom;
+    }
+
+    final double bottomMargin = keyboardOffset > 0
+        ? keyboardOffset + 16.0
+        : safeBottom + 16.0;
+
+    // ═══ Kullanılabilir alan: ekran - alt boşluk - üst güvenli alan - nefes payı ═══
+    // Sheet hiçbir zaman status bar / notch / Dynamic Island'ın arkasına girmemeli.
+    final double availableHeight = screenHeight - bottomMargin - safeTop - 8.0;
+    final double desiredHeight = height ?? (isFullScreen
+        ? availableHeight
+        : screenHeight * 0.85);
+    final double maxSheetHeight = desiredHeight.clamp(0.0, availableHeight);
+
     return PrecisionSheetScope(
       child: Stack(
         alignment: Alignment.bottomCenter,
@@ -93,25 +138,19 @@ class CustomBottomSheet extends ConsumerWidget {
             ),
           ),
           
-          // Yüzen Gövde
+          // Yüzen Gövde — Padding ile kare-kare klavye takibi
           Padding(
             padding: EdgeInsets.only(
               left: 16.0,
               right: 16.0,
               bottom: bottomMargin,
             ),
-            child: AnimatedContainer(
-              duration: const Duration(milliseconds: 300),
-              curve: Curves.easeInOut,
-              constraints: BoxConstraints(
-                maxHeight: height ?? (isFullScreen 
-                    ? MediaQuery.of(context).size.height - bottomMargin - 16.0
-                    : MediaQuery.of(context).size.height * 0.85),
-              ),
+            child: Container(
+              constraints: BoxConstraints(maxHeight: maxSheetHeight),
               width: double.infinity,
               decoration: BoxDecoration(
                 color: activeBgColor,
-                borderRadius: BorderRadius.circular(28.0), // Tamamen yuvarlatılmış köşeler
+                borderRadius: BorderRadius.circular(28.0),
                 border: Border.all(
                   color: activeBorderColor,
                   width: 1.0,
@@ -214,7 +253,7 @@ class CustomBottomSheet extends ConsumerWidget {
                       padding: const EdgeInsets.only(
                         left: AppSizes.paddingLarge,
                         right: AppSizes.paddingLarge,
-                        bottom: 0.0, // Alt dolguyu sıfırlayarak çift boşluğu önlüyoruz
+                        bottom: 0.0,
                       ),
                       child: child,
                     ),

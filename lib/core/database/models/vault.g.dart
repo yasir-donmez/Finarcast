@@ -17,25 +17,24 @@ const VaultSchema = CollectionSchema(
   name: r'Vault',
   id: -4342956630933593564,
   properties: {
-    r'balance': PropertySchema(id: 0, name: r'balance', type: IsarType.double),
     r'currency': PropertySchema(
-      id: 1,
+      id: 0,
       name: r'currency',
       type: IsarType.string,
     ),
-    r'name': PropertySchema(id: 2, name: r'name', type: IsarType.string),
+    r'name': PropertySchema(id: 1, name: r'name', type: IsarType.string),
     r'remoteId': PropertySchema(
-      id: 3,
+      id: 2,
       name: r'remoteId',
       type: IsarType.string,
     ),
     r'syncStatus': PropertySchema(
-      id: 4,
+      id: 3,
       name: r'syncStatus',
       type: IsarType.long,
     ),
     r'updatedAt': PropertySchema(
-      id: 5,
+      id: 4,
       name: r'updatedAt',
       type: IsarType.dateTime,
     ),
@@ -119,12 +118,11 @@ void _vaultSerialize(
   List<int> offsets,
   Map<Type, List<int>> allOffsets,
 ) {
-  writer.writeDouble(offsets[0], object.balance);
-  writer.writeString(offsets[1], object.currency);
-  writer.writeString(offsets[2], object.name);
-  writer.writeString(offsets[3], object.remoteId);
-  writer.writeLong(offsets[4], object.syncStatus);
-  writer.writeDateTime(offsets[5], object.updatedAt);
+  writer.writeString(offsets[0], object.currency);
+  writer.writeString(offsets[1], object.name);
+  writer.writeString(offsets[2], object.remoteId);
+  writer.writeLong(offsets[3], object.syncStatus);
+  writer.writeDateTime(offsets[4], object.updatedAt);
 }
 
 Vault _vaultDeserialize(
@@ -134,13 +132,12 @@ Vault _vaultDeserialize(
   Map<Type, List<int>> allOffsets,
 ) {
   final object = Vault();
-  object.balance = reader.readDouble(offsets[0]);
-  object.currency = reader.readString(offsets[1]);
+  object.currency = reader.readString(offsets[0]);
   object.id = id;
-  object.name = reader.readString(offsets[2]);
-  object.remoteId = reader.readStringOrNull(offsets[3]);
-  object.syncStatus = reader.readLong(offsets[4]);
-  object.updatedAt = reader.readDateTime(offsets[5]);
+  object.name = reader.readString(offsets[1]);
+  object.remoteId = reader.readStringOrNull(offsets[2]);
+  object.syncStatus = reader.readLong(offsets[3]);
+  object.updatedAt = reader.readDateTime(offsets[4]);
   return object;
 }
 
@@ -152,16 +149,14 @@ P _vaultDeserializeProp<P>(
 ) {
   switch (propertyId) {
     case 0:
-      return (reader.readDouble(offset)) as P;
+      return (reader.readString(offset)) as P;
     case 1:
       return (reader.readString(offset)) as P;
     case 2:
-      return (reader.readString(offset)) as P;
-    case 3:
       return (reader.readStringOrNull(offset)) as P;
-    case 4:
+    case 3:
       return (reader.readLong(offset)) as P;
-    case 5:
+    case 4:
       return (reader.readDateTime(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -560,80 +555,6 @@ extension VaultQueryWhere on QueryBuilder<Vault, Vault, QWhereClause> {
 }
 
 extension VaultQueryFilter on QueryBuilder<Vault, Vault, QFilterCondition> {
-  QueryBuilder<Vault, Vault, QAfterFilterCondition> balanceEqualTo(
-    double value, {
-    double epsilon = Query.epsilon,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.equalTo(
-          property: r'balance',
-          value: value,
-
-          epsilon: epsilon,
-        ),
-      );
-    });
-  }
-
-  QueryBuilder<Vault, Vault, QAfterFilterCondition> balanceGreaterThan(
-    double value, {
-    bool include = false,
-    double epsilon = Query.epsilon,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.greaterThan(
-          include: include,
-          property: r'balance',
-          value: value,
-
-          epsilon: epsilon,
-        ),
-      );
-    });
-  }
-
-  QueryBuilder<Vault, Vault, QAfterFilterCondition> balanceLessThan(
-    double value, {
-    bool include = false,
-    double epsilon = Query.epsilon,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.lessThan(
-          include: include,
-          property: r'balance',
-          value: value,
-
-          epsilon: epsilon,
-        ),
-      );
-    });
-  }
-
-  QueryBuilder<Vault, Vault, QAfterFilterCondition> balanceBetween(
-    double lower,
-    double upper, {
-    bool includeLower = true,
-    bool includeUpper = true,
-    double epsilon = Query.epsilon,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.between(
-          property: r'balance',
-          lower: lower,
-          includeLower: includeLower,
-          upper: upper,
-          includeUpper: includeUpper,
-
-          epsilon: epsilon,
-        ),
-      );
-    });
-  }
-
   QueryBuilder<Vault, Vault, QAfterFilterCondition> currencyEqualTo(
     String value, {
     bool caseSensitive = true,
@@ -1269,18 +1190,6 @@ extension VaultQueryObject on QueryBuilder<Vault, Vault, QFilterCondition> {}
 extension VaultQueryLinks on QueryBuilder<Vault, Vault, QFilterCondition> {}
 
 extension VaultQuerySortBy on QueryBuilder<Vault, Vault, QSortBy> {
-  QueryBuilder<Vault, Vault, QAfterSortBy> sortByBalance() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'balance', Sort.asc);
-    });
-  }
-
-  QueryBuilder<Vault, Vault, QAfterSortBy> sortByBalanceDesc() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'balance', Sort.desc);
-    });
-  }
-
   QueryBuilder<Vault, Vault, QAfterSortBy> sortByCurrency() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'currency', Sort.asc);
@@ -1343,18 +1252,6 @@ extension VaultQuerySortBy on QueryBuilder<Vault, Vault, QSortBy> {
 }
 
 extension VaultQuerySortThenBy on QueryBuilder<Vault, Vault, QSortThenBy> {
-  QueryBuilder<Vault, Vault, QAfterSortBy> thenByBalance() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'balance', Sort.asc);
-    });
-  }
-
-  QueryBuilder<Vault, Vault, QAfterSortBy> thenByBalanceDesc() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'balance', Sort.desc);
-    });
-  }
-
   QueryBuilder<Vault, Vault, QAfterSortBy> thenByCurrency() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'currency', Sort.asc);
@@ -1429,12 +1326,6 @@ extension VaultQuerySortThenBy on QueryBuilder<Vault, Vault, QSortThenBy> {
 }
 
 extension VaultQueryWhereDistinct on QueryBuilder<Vault, Vault, QDistinct> {
-  QueryBuilder<Vault, Vault, QDistinct> distinctByBalance() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addDistinctBy(r'balance');
-    });
-  }
-
   QueryBuilder<Vault, Vault, QDistinct> distinctByCurrency({
     bool caseSensitive = true,
   }) {
@@ -1476,12 +1367,6 @@ extension VaultQueryProperty on QueryBuilder<Vault, Vault, QQueryProperty> {
   QueryBuilder<Vault, int, QQueryOperations> idProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'id');
-    });
-  }
-
-  QueryBuilder<Vault, double, QQueryOperations> balanceProperty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r'balance');
     });
   }
 

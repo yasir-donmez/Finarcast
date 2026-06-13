@@ -7,8 +7,6 @@ create table if not exists public.vaults (
   user_id uuid not null references auth.users(id) on delete cascade,
   name text not null default '',
   currency text not null default 'AUTO',
-  balance double precision not null default 0,
-  icon_code text,
   updated_at timestamptz not null default now()
 );
 
@@ -37,7 +35,6 @@ create table if not exists public.recurring_templates (
   notification_hour int not null default 9,
   notification_minute int not null default 0,
   vault_id uuid references public.vaults(id) on delete set null,
-  vault_ids uuid[],
   updated_at timestamptz not null default now()
 );
 
@@ -61,7 +58,7 @@ create table if not exists public.transaction_records (
   is_reviewed boolean not null default false,
   is_archived boolean not null default false,
   vault_id uuid references public.vaults(id) on delete set null,
-  vault_ids uuid[],
+  target_vault_id uuid references public.vaults(id) on delete set null,
   note text,
   currency text,
   updated_at timestamptz not null default now(),

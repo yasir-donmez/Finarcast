@@ -12,9 +12,6 @@ class Vault {
   /// Kasanın Ana Birimi (Örn: "TRY", "USD", "GRAM", "AUTO")
   String currency = 'AUTO';
 
-  /// Kasadaki Toplam Miktar (Örn: 25000.0)
-  double balance = 0.0;
-
 
 
 

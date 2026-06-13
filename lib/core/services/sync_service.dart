@@ -381,7 +381,6 @@ class SyncService {
     final List<TransactionRecord> pushedTxs = [];
     for (final tx in pending) {
       try {
-        // FK Güvenliği: İşlemin bağlı olduğu cüzdanın bulutta var olduğunu doğrula
         bool hasUnsyncedVault = false;
         if (tx.vaultId != null) {
           final vault = await DatabaseService.isar.vaults.get(tx.vaultId!);
@@ -389,6 +388,12 @@ class SyncService {
             if (vault.syncStatus == 1) {
               hasUnsyncedVault = true;
             }
+          }
+        }
+        if (tx.targetVaultId != null) {
+          final targetVault = await DatabaseService.isar.vaults.get(tx.targetVaultId!);
+          if (targetVault != null && targetVault.syncStatus == 1) {
+            hasUnsyncedVault = true;
           }
         }
         if (hasUnsyncedVault) {
@@ -667,6 +672,7 @@ class SyncService {
     dest.isReviewed = source.isReviewed;
     dest.isArchived = source.isArchived;
     dest.vaultId = source.vaultId;
+    dest.targetVaultId = source.targetVaultId;
     dest.note = source.note;
     dest.currency = source.currency;
     dest.updatedAt = source.updatedAt;
@@ -1031,7 +1037,6 @@ class SyncService {
       'user_id': userId,
       'name': vault.name,
       'currency': vault.currency,
-      'balance': vault.balance,
       'updated_at': vault.updatedAt.toUtc().toIso8601String(),
     };
   }
@@ -1039,7 +1044,6 @@ class SyncService {
   void _applyVaultFromRemote(Vault vault, Map<String, dynamic> raw) {
     vault.name = raw['name'] ?? vault.name;
     vault.currency = raw['currency'] ?? vault.currency;
-    vault.balance = (raw['balance'] as num?)?.toDouble() ?? vault.balance;
     final remoteUpdated = _parseRemoteTime(raw['updated_at']);
     if (remoteUpdated != null) vault.updatedAt = remoteUpdated;
   }
@@ -1053,6 +1057,14 @@ class SyncService {
       final vault = await DatabaseService.isar.vaults.get(tx.vaultId!);
       if (vault?.remoteId != null) {
         vaultRemoteId = vault!.remoteId!;
+      }
+    }
+
+    String? targetVaultRemoteId;
+    if (tx.targetVaultId != null) {
+      final targetVault = await DatabaseService.isar.vaults.get(tx.targetVaultId!);
+      if (targetVault?.remoteId != null) {
+        targetVaultRemoteId = targetVault!.remoteId!;
       }
     }
 
@@ -1082,6 +1094,7 @@ class SyncService {
       'is_reviewed': tx.isReviewed,
       'is_archived': tx.isArchived,
       'vault_id': vaultRemoteId,
+      'target_vault_id': targetVaultRemoteId,
       'note': tx.note,
       'currency': tx.currency,
       'updated_at': tx.updatedAt.toUtc().toIso8601String(),
@@ -1146,6 +1159,21 @@ class SyncService {
       tx.vaultId = null;
     }
 
+    final targetVaultRemoteId = raw['target_vault_id'] as String?;
+    if (targetVaultRemoteId != null) {
+      final targetVault = await DatabaseService.isar.vaults
+          .filter()
+          .remoteIdEqualTo(targetVaultRemoteId)
+          .findFirst();
+      if (targetVault != null) {
+        tx.targetVaultId = targetVault.id;
+      } else {
+        tx.targetVaultId = null;
+      }
+    } else {
+      tx.targetVaultId = null;
+    }
+
     final remoteUpdated = _parseRemoteTime(raw['updated_at']);
     if (remoteUpdated != null) tx.updatedAt = remoteUpdated;
   }
@@ -1171,7 +1199,7 @@ class SyncService {
       'is_paused': t.isPaused,
       'is_archived': t.isArchived,
       'is_notification_enabled': t.isNotificationEnabled,
-      'has_notification': t.hasNotificationConfigured,
+      'has_notification': t.hasNotification,
       'notification_reminder_days': t.notificationReminderDays,
       'notification_hour': t.notificationHour,
       'notification_minute': t.notificationMinute,
@@ -1208,7 +1236,7 @@ class SyncService {
     t.isPaused = raw['is_paused'] ?? t.isPaused;
     t.isArchived = raw['is_archived'] ?? t.isArchived;
     t.isNotificationEnabled = raw['is_notification_enabled'] ?? t.isNotificationEnabled;
-    t.hasNotificationConfigured = raw['has_notification'] ?? t.hasNotificationConfigured;
+    t.hasNotification = raw['has_notification'] ?? t.hasNotification;
     t.notificationReminderDays = raw['notification_reminder_days'] ?? t.notificationReminderDays;
     t.notificationHour = raw['notification_hour'] ?? t.notificationHour;
     t.notificationMinute = raw['notification_minute'] ?? t.notificationMinute;

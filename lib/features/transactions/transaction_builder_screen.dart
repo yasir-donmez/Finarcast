@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -38,6 +37,7 @@ import '../../shared/widgets/custom_bottom_sheet.dart';
 import '../../shared/widgets/glass_surface.dart';
 import '../../shared/widgets/custom_notification.dart';
 import '../../shared/widgets/custom_dialog.dart';
+import '../../../shared/widgets/picker_field.dart';
 
 enum TransactionBuilderType { oneTime, recurring }
 
@@ -49,6 +49,7 @@ class TransactionBuilderScreen extends ConsumerStatefulWidget {
   final double? initialMaxAmount;
   final bool? initialIsIncome;
   final int? initialVaultId;
+  final int? initialTargetVaultId;
   final String? initialCategoryId;
   final String? initialNote;
   final String? initialCurrency;
@@ -78,6 +79,7 @@ class TransactionBuilderScreen extends ConsumerStatefulWidget {
     this.initialMaxAmount,
     this.initialIsIncome,
     this.initialVaultId,
+    this.initialTargetVaultId,
     this.initialCategoryId,
     this.initialNote,
     this.initialCurrency,
@@ -100,11 +102,15 @@ class TransactionBuilderScreen extends ConsumerStatefulWidget {
       _TransactionBuilderScreenState();
 }
 
-class _TransactionBuilderScreenState extends ConsumerState<TransactionBuilderScreen> {
+class _TransactionBuilderScreenState
+    extends ConsumerState<TransactionBuilderScreen> {
   int _tabIndex = 0;
   List<Vault> _vaults = [];
   List<int> _selectedVaultIds = [];
+  int? _targetVaultId;
   List<Map<String, String>> _customSubs = [];
+
+  bool get _isTransfer => _tabIndex == 2;
 
   final TextEditingController _amountController = TextEditingController();
   final TextEditingController _minController = TextEditingController();
@@ -151,7 +157,8 @@ class _TransactionBuilderScreenState extends ConsumerState<TransactionBuilderScr
     }
 
     int initialPeriod = widget.initialPeriodType ?? 0;
-    if (_builderType == TransactionBuilderType.recurring && initialPeriod == 0) {
+    if (_builderType == TransactionBuilderType.recurring &&
+        initialPeriod == 0) {
       initialPeriod = 301;
     }
 
@@ -174,7 +181,9 @@ class _TransactionBuilderScreenState extends ConsumerState<TransactionBuilderScr
 
   Future<void> _loadReviewedCount() async {
     if (widget.initialId != null) {
-      final records = await DatabaseService.getRecordsForTemplate(widget.initialId!);
+      final records = await DatabaseService.getRecordsForTemplate(
+        widget.initialId!,
+      );
       final reviewedCount = records.where((r) => r.isReviewed).length;
       if (mounted) {
         setState(() {
@@ -214,33 +223,46 @@ class _TransactionBuilderScreenState extends ConsumerState<TransactionBuilderScr
     final format = NumberFormat.decimalPattern(locale);
     final decimalSep = format.symbols.DECIMAL_SEP;
 
-    // Convert raw double to a simple localized string (e.g. 213412.5 -> "213412,5")
     String rawText = val.toStringAsFixed(decimals).replaceAll('.', decimalSep);
 
-    // Trigger the input formatter programmatically
     final formatter = LocaleCurrencyFormatter(locale);
-    return formatter.formatEditUpdate(
-      TextEditingValue.empty,
-      TextEditingValue(text: rawText),
-    ).text;
+    return formatter
+        .formatEditUpdate(
+          TextEditingValue.empty,
+          TextEditingValue(text: rawText),
+        )
+        .text;
   }
 
   void _prefillIfEditing() {
-    // 1. DÜZENLEME MODU (Mevcut İşlem)
     if (widget.initialId != null) {
-      _tabIndex = widget.initialIsIncome == true ? 1 : 0;
+      if (widget.initialTargetVaultId != null) {
+        _tabIndex = 2;
+        _targetVaultId = widget.initialTargetVaultId;
+      } else {
+        _tabIndex = widget.initialIsIncome == true ? 1 : 0;
+      }
       if (widget.initialCurrency != null) {
         _selectedCurrency = widget.initialCurrency!;
       }
       if (widget.initialAmount != null) {
-        _amountController.text = _formatAmount(widget.initialAmount!, _selectedCurrency);
+        _amountController.text = _formatAmount(
+          widget.initialAmount!,
+          _selectedCurrency,
+        );
       }
       if (widget.initialMinAmount != null) {
-        _minController.text = _formatAmount(widget.initialMinAmount!, _selectedCurrency);
+        _minController.text = _formatAmount(
+          widget.initialMinAmount!,
+          _selectedCurrency,
+        );
         _isFlexibleAmount = true;
       }
       if (widget.initialMaxAmount != null) {
-        _maxController.text = _formatAmount(widget.initialMaxAmount!, _selectedCurrency);
+        _maxController.text = _formatAmount(
+          widget.initialMaxAmount!,
+          _selectedCurrency,
+        );
         _isFlexibleAmount = true;
       }
       if (widget.initialNote != null) {
@@ -249,6 +271,7 @@ class _TransactionBuilderScreenState extends ConsumerState<TransactionBuilderScr
       if (widget.initialVaultId != null) {
         _selectedVaultIds = [widget.initialVaultId!];
       }
+
       if (widget.initialPeriodType != null && widget.initialPeriodType != 0) {
         _periodData = TransactionPeriodData(
           periodType: widget.initialPeriodType!,
@@ -272,23 +295,34 @@ class _TransactionBuilderScreenState extends ConsumerState<TransactionBuilderScr
 
       _matchInitialCategory();
     }
-    // 2. YENİ KAYIT MODU (Parametreler Varsa)
     else {
-      if (widget.initialIsIncome != null) {
+      if (widget.initialTargetVaultId != null || widget.initialCategoryId == 'transfer') {
+        _tabIndex = 2;
+        _targetVaultId = widget.initialTargetVaultId;
+      } else if (widget.initialIsIncome != null) {
         _tabIndex = widget.initialIsIncome! ? 1 : 0;
       }
       if (widget.initialCurrency != null) {
         _selectedCurrency = widget.initialCurrency!;
       }
       if (widget.initialAmount != null && widget.initialAmount! > 0) {
-        _amountController.text = _formatAmount(widget.initialAmount!, _selectedCurrency);
+        _amountController.text = _formatAmount(
+          widget.initialAmount!,
+          _selectedCurrency,
+        );
       }
       if (widget.initialMinAmount != null && widget.initialMinAmount! > 0) {
-        _minController.text = _formatAmount(widget.initialMinAmount!, _selectedCurrency);
+        _minController.text = _formatAmount(
+          widget.initialMinAmount!,
+          _selectedCurrency,
+        );
         _isFlexibleAmount = true;
       }
       if (widget.initialMaxAmount != null && widget.initialMaxAmount! > 0) {
-        _maxController.text = _formatAmount(widget.initialMaxAmount!, _selectedCurrency);
+        _maxController.text = _formatAmount(
+          widget.initialMaxAmount!,
+          _selectedCurrency,
+        );
         _isFlexibleAmount = true;
       }
       String? combinedNote;
@@ -296,7 +330,8 @@ class _TransactionBuilderScreenState extends ConsumerState<TransactionBuilderScr
           widget.initialName!.isNotEmpty &&
           widget.initialName != '__EMPTY_DRAFT__' &&
           widget.initialName != '__RECEIPT_EXPENSE__') {
-        combinedNote = widget.initialNote != null && widget.initialNote!.isNotEmpty
+        combinedNote =
+            widget.initialNote != null && widget.initialNote!.isNotEmpty
             ? '${widget.initialName} - ${widget.initialNote}'
             : widget.initialName;
       } else {
@@ -349,6 +384,15 @@ class _TransactionBuilderScreenState extends ConsumerState<TransactionBuilderScr
             _selectedVaultIds = [widget.initialVaultId!];
           } else if (v.isNotEmpty) {
             _selectedVaultIds = [v.first.id];
+          }
+        }
+        if (_targetVaultId == null && v.isNotEmpty) {
+          if (widget.initialTargetVaultId != null) {
+            _targetVaultId = widget.initialTargetVaultId;
+          } else {
+            final sourceId = _selectedVaultIds.firstOrNull;
+            final otherVault = v.firstWhere((vault) => vault.id != sourceId, orElse: () => v.first);
+            _targetVaultId = otherVault.id;
           }
         }
       });
@@ -406,12 +450,13 @@ class _TransactionBuilderScreenState extends ConsumerState<TransactionBuilderScr
       return;
     }
 
-    final controller = TextEditingController();
     final parentCat = _getMergedCategories().firstWhere(
       (c) => c['id'] == parentCategoryId,
       orElse: () => <String, dynamic>{},
     );
     if (parentCat.isEmpty) return;
+
+    final controller = TextEditingController();
 
     final parentColor = parentCat['color'] as Color;
     final parentIcon = parentCat['icon'] as IconData;
@@ -424,6 +469,7 @@ class _TransactionBuilderScreenState extends ConsumerState<TransactionBuilderScr
     final result = await CustomBottomSheet.show<Map<String, dynamic>>(
       context: context,
       title: l10n.addCustomCategory,
+      hasInput: true,
       child: StatefulBuilder(
         builder: (context, setDialogState) {
           final isDark = Theme.of(context).brightness == Brightness.dark;
@@ -456,7 +502,6 @@ class _TransactionBuilderScreenState extends ConsumerState<TransactionBuilderScr
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Üst Bilgi (Kategori İsmi)
               Container(
                 padding: const EdgeInsets.symmetric(
                   horizontal: 12,
@@ -485,7 +530,6 @@ class _TransactionBuilderScreenState extends ConsumerState<TransactionBuilderScr
               ),
               const SizedBox(height: 20),
 
-              // Giriş Alanı
               TextField(
                 controller: controller,
                 autofocus: true,
@@ -554,11 +598,12 @@ class _TransactionBuilderScreenState extends ConsumerState<TransactionBuilderScr
                   child: GridView.builder(
                     padding: EdgeInsets.zero,
                     physics: const BouncingScrollPhysics(),
-                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 6,
-                      mainAxisSpacing: 12,
-                      crossAxisSpacing: 12,
-                    ),
+                    gridDelegate:
+                        const SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 6,
+                          mainAxisSpacing: 12,
+                          crossAxisSpacing: 12,
+                        ),
                     itemCount: iconOptions.length,
                     itemBuilder: (context, index) {
                       final icon = iconOptions[index];
@@ -574,7 +619,7 @@ class _TransactionBuilderScreenState extends ConsumerState<TransactionBuilderScr
                             color: isSelected
                                 ? parentColor.withValues(alpha: 0.2)
                                 : (isDark ? Colors.white : Colors.black)
-                                    .withValues(alpha: 0.04),
+                                      .withValues(alpha: 0.04),
                             borderRadius: BorderRadius.circular(16),
                             border: Border.all(
                               color: isSelected
@@ -599,7 +644,6 @@ class _TransactionBuilderScreenState extends ConsumerState<TransactionBuilderScr
 
               const SizedBox(height: 32),
 
-              // Onay Butonu
               CustomButton(
                 label: l10n.ok,
                 onTap: () {
@@ -643,6 +687,7 @@ class _TransactionBuilderScreenState extends ConsumerState<TransactionBuilderScr
       });
     }
     HapticFeedback.mediumImpact();
+    controller.dispose();
   }
 
   Future<void> _handleRemoveCustomCategory(String subcategoryId) async {
@@ -674,6 +719,7 @@ class _TransactionBuilderScreenState extends ConsumerState<TransactionBuilderScr
   }
 
   Future<void> _saveTransaction() async {
+    final isTr = Localizations.localeOf(context).languageCode == 'tr';
     try {
       final amountStr = _amountController.text.trim();
       final minStr = _minController.text.trim();
@@ -686,9 +732,7 @@ class _TransactionBuilderScreenState extends ConsumerState<TransactionBuilderScr
         final decimalSep = format.symbols.DECIMAL_SEP;
         final groupSep = format.symbols.GROUP_SEP;
 
-        // Remove all grouping separators
         String clean = input.replaceAll(groupSep, '');
-        // Replace decimal separator with standard '.' if it is not '.'
         if (decimalSep != '.') {
           clean = clean.replaceAll(decimalSep, '.');
         }
@@ -728,17 +772,25 @@ class _TransactionBuilderScreenState extends ConsumerState<TransactionBuilderScr
         }
       }
 
-      // Doviz kuru kontrolü
+      if (_isTransfer) {
+        if (_targetVaultId == null) {
+          _showValidationError(isTr ? "Lütfen geçerli bir hedef kasa seçin." : "Please select a valid target vault.");
+          return;
+        }
+        if (_selectedVaultIds.isNotEmpty && _targetVaultId == _selectedVaultIds.first) {
+          _showValidationError(isTr ? "Kaynak kasa ile hedef kasa aynı olamaz." : "Source and target vaults cannot be the same.");
+          return;
+        }
+      }
+
       final baseCurrency = ref.read(settingsProvider).currencySymbol;
 
-      // Yardımcı: Kur var mı kontrol et, yoksa otomatik çekmeyi dene
       Future<bool> ensureRate(String currencySymbol) async {
         final code = CurrencyUtils.symbolToCode(currencySymbol);
         if (code == 'TRY' || code == 'AUTO') return true;
         var rates = await DatabaseService.getAllExchangeRates();
         var hasRate = rates.any((r) => r.currencyCode == code && r.rate > 0);
         if (!hasRate) {
-          // Kurlar yok, otomatik çekmeyi dene
           final success = await CurrencyService.updateRates();
           if (success) {
             rates = await DatabaseService.getAllExchangeRates();
@@ -748,7 +800,6 @@ class _TransactionBuilderScreenState extends ConsumerState<TransactionBuilderScr
         return hasRate;
       }
 
-      // 1. İşlemin kendi para birimi için kontrol
       if (_selectedCurrency != baseCurrency) {
         final hasRate = await ensureRate(_selectedCurrency);
         if (!hasRate) {
@@ -757,15 +808,37 @@ class _TransactionBuilderScreenState extends ConsumerState<TransactionBuilderScr
         }
       }
 
-      // 2. İşlemin eklendiği kasaların para birimi için kontrol
       for (final vaultId in _selectedVaultIds) {
         final vault = _vaults.where((v) => v.id == vaultId).firstOrNull;
         if (vault != null) {
-          final vaultCurrency = vault.currency == 'AUTO' ? baseCurrency : vault.currency;
+          final vaultCurrency = vault.currency == 'AUTO'
+              ? baseCurrency
+              : vault.currency;
           if (vaultCurrency != baseCurrency) {
             final hasRate = await ensureRate(vaultCurrency);
             if (!hasRate) {
-              _showValidationError(l10n.vaultCurrencyRateNotLoaded(vault.currency));
+              _showValidationError(
+                l10n.vaultCurrencyRateNotLoaded(vault.currency),
+              );
+              return;
+            }
+          }
+        }
+      }
+
+      // Transfer işlemlerinde hedef kasa para birimi kurunun yüklü olduğunu kontrol et
+      if (_isTransfer && _targetVaultId != null) {
+        final targetVault = _vaults.where((v) => v.id == _targetVaultId).firstOrNull;
+        if (targetVault != null) {
+          final targetCurrency = targetVault.currency == 'AUTO'
+              ? baseCurrency
+              : targetVault.currency;
+          if (targetCurrency != baseCurrency) {
+            final hasRate = await ensureRate(targetCurrency);
+            if (!hasRate) {
+              _showValidationError(
+                l10n.vaultCurrencyRateNotLoaded(targetVault.currency),
+              );
               return;
             }
           }
@@ -776,23 +849,32 @@ class _TransactionBuilderScreenState extends ConsumerState<TransactionBuilderScr
       final finalMin = _isFlexibleAmount ? minAmount : null;
       final finalMax = _isFlexibleAmount ? maxAmount : null;
 
-      final categories = _getMergedCategories();
-      final cat = categories[_selectedCategoryIndex];
-      final subModel = _selectedSubModelIndex != -1
-          ? (cat['subModels'] as List)[_selectedSubModelIndex]
-          : null;
-      final String categoryId = subModel != null
-          ? subModel['id'] as String
-          : cat['id'] as String;
+      final categories = _isTransfer ? [] : _getMergedCategories();
+      final cat = _isTransfer ? null : categories[_selectedCategoryIndex];
+      final subModel = _isTransfer
+          ? null
+          : (_selectedSubModelIndex != -1
+                ? (cat!['subModels'] as List)[_selectedSubModelIndex]
+                : null);
+      final String categoryId = _isTransfer
+          ? 'transfer'
+          : (subModel != null
+                ? subModel['id'] as String
+                : cat!['id'] as String);
 
-      final isCustom = subModel != null && subModel['isCustom'] == true;
-      final String? iconCodeStr = isCustom && subModel['icon'] is IconData
-          ? (subModel['icon'] as IconData).codePoint.toString()
-          : null;
+      final isCustom =
+          !_isTransfer && subModel != null && subModel['isCustom'] == true;
+      final String? iconCodeStr = _isTransfer
+          ? 'transfer'
+          : (isCustom && subModel!['icon'] is IconData
+                ? (subModel['icon'] as IconData).codePoint.toString()
+                : null);
 
-      final catName = subModel != null
-          ? subModel['name'] as String
-          : cat['name'] as String;
+      final catName = _isTransfer
+          ? "Kasa Transferi"
+          : (subModel != null
+                ? subModel['name'] as String
+                : cat!['name'] as String);
 
       if (_builderType == TransactionBuilderType.recurring) {
         if (widget.initialId != null && widget.isTemplateEdit == true) {
@@ -810,12 +892,15 @@ class _TransactionBuilderScreenState extends ConsumerState<TransactionBuilderScr
             old.recurrenceDay = _periodData.selectedDay;
             old.recurrenceDate = _periodData.selectedDateForRecurrence;
             old.totalInstallments = _periodData.totalInstallments;
-            old.note = _noteController.text.isNotEmpty ? _noteController.text : null;
+            old.note = _noteController.text.isNotEmpty
+                ? _noteController.text
+                : null;
             old.currency = _selectedCurrency;
             old.startDate = _periodData.selectedDateForRecurrence;
 
             old.isNotificationEnabled = _isNotificationEnabled;
-            old.hasNotificationConfigured = _isNotificationEnabled || old.hasNotificationConfigured;
+            old.hasNotification =
+                _isNotificationEnabled || old.hasNotification;
             old.notificationReminderDays = _notificationReminderDays;
             old.notificationHour = _notificationTime.hour;
             old.notificationMinute = _notificationTime.minute;
@@ -838,10 +923,12 @@ class _TransactionBuilderScreenState extends ConsumerState<TransactionBuilderScr
             ..recurrenceDay = _periodData.selectedDay
             ..recurrenceDate = _periodData.selectedDateForRecurrence
             ..totalInstallments = _periodData.totalInstallments
-            ..note = _noteController.text.isNotEmpty ? _noteController.text : null
+            ..note = _noteController.text.isNotEmpty
+                ? _noteController.text
+                : null
             ..currency = _selectedCurrency
             ..isNotificationEnabled = _isNotificationEnabled
-            ..hasNotificationConfigured = _isNotificationEnabled
+            ..hasNotification = _isNotificationEnabled
             ..notificationReminderDays = _notificationReminderDays
             ..notificationHour = _notificationTime.hour
             ..notificationMinute = _notificationTime.minute;
@@ -857,11 +944,14 @@ class _TransactionBuilderScreenState extends ConsumerState<TransactionBuilderScr
             old.amount = finalAmount;
             old.minAmount = finalMin;
             old.maxAmount = finalMax;
-            old.isIncome = _tabIndex == 1;
+            old.isIncome = _isTransfer ? false : _tabIndex == 1;
             old.vaultId = _selectedVaultIds.firstOrNull;
+            old.targetVaultId = _isTransfer ? _targetVaultId : null;
             old.categoryId = categoryId;
             old.iconCode = iconCodeStr;
-            old.note = _noteController.text.isNotEmpty ? _noteController.text : null;
+            old.note = _noteController.text.isNotEmpty
+                ? _noteController.text
+                : null;
             old.currency = _selectedCurrency;
             old.date = _periodData.selectedDateForRecurrence;
             old.occurrenceDate = DateTime(
@@ -878,7 +968,7 @@ class _TransactionBuilderScreenState extends ConsumerState<TransactionBuilderScr
             ..amount = finalAmount
             ..minAmount = finalMin
             ..maxAmount = finalMax
-            ..isIncome = _tabIndex == 1
+            ..isIncome = _isTransfer ? false : _tabIndex == 1
             ..date = _periodData.selectedDateForRecurrence
             ..occurrenceDate = DateTime(
               _periodData.selectedDateForRecurrence.year,
@@ -886,9 +976,12 @@ class _TransactionBuilderScreenState extends ConsumerState<TransactionBuilderScr
               _periodData.selectedDateForRecurrence.day,
             )
             ..vaultId = _selectedVaultIds.firstOrNull
+            ..targetVaultId = _isTransfer ? _targetVaultId : null
             ..categoryId = categoryId
             ..iconCode = iconCodeStr
-            ..note = _noteController.text.isNotEmpty ? _noteController.text : null
+            ..note = _noteController.text.isNotEmpty
+                ? _noteController.text
+                : null
             ..currency = _selectedCurrency
             ..occurrenceKey = TransactionRecord.generateManualKey()
             ..isReviewed = true;
@@ -910,7 +1003,6 @@ class _TransactionBuilderScreenState extends ConsumerState<TransactionBuilderScr
       _showValidationError(l10n.transactionSaveError(e.toString()));
     }
   }
-
 
   void _onCurrencyChanged(String newCurrency) {
     if (newCurrency == _selectedCurrency) return;
@@ -971,487 +1063,644 @@ class _TransactionBuilderScreenState extends ConsumerState<TransactionBuilderScr
         Scaffold(
           backgroundColor: Colors.transparent,
           body: CustomScrollView(
-        physics: const BouncingScrollPhysics(),
-        slivers: [
-          SliverAppBar(
-            expandedHeight: 200,
-            pinned: true,
-            stretch: true,
-            backgroundColor: Colors.transparent,
-            elevation: 0,
-            automaticallyImplyLeading: false,
-            flexibleSpace: LayoutBuilder(
-              builder: (context, constraints) {
-                final double currentH = constraints.biggest.height;
-                final double minH = kToolbarHeight + safeTop;
-                final double totalRange = (200 + safeTop - minH);
+            physics: const BouncingScrollPhysics(),
+            slivers: [
+              SliverAppBar(
+                expandedHeight: 200,
+                pinned: true,
+                stretch: true,
+                backgroundColor: Colors.transparent,
+                elevation: 0,
+                automaticallyImplyLeading: false,
+                flexibleSpace: LayoutBuilder(
+                  builder: (context, constraints) {
+                    final double currentH = constraints.biggest.height;
+                    final double minH = kToolbarHeight + safeTop;
+                    final double totalRange = (200 + safeTop - minH);
 
-                // Güvenlik: Payda 0 ise t=0 kabul et
-                double t = totalRange > 0
-                    ? ((currentH - minH) / totalRange).clamp(0.0, 1.0)
-                    : 0.0;
+                    double t = totalRange > 0
+                        ? ((currentH - minH) / totalRange).clamp(0.0, 1.0)
+                        : 0.0;
 
-                // NaN kontrolü
-                if (t.isNaN) t = 0.0;
+                    if (t.isNaN) t = 0.0;
 
-                final double revT = 1.0 - t;
-                final double buttonAnim = t;
+                    final double revT = 1.0 - t;
+                    final double buttonAnim = t;
 
-                return Stack(
-                  fit: StackFit.expand,
-                  clipBehavior: Clip.none,
-                  children: [
-                    // Solid Background Layer: Glass surface with dynamic opacity
-                    Positioned.fill(
-                      child: GlassSurface(
-                        borderRadius: 0,
-                        showShadow: false,
-                        opacityMultiplier: revT,
-                        borderColor: (isDark ? Colors.white : Colors.black).withValues(
-                          alpha: revT > 0.95 ? (revT - 0.95) * 2 : 0.0,
-                        ),
-                        showTopBorder: false,
-                        showLeftBorder: false,
-                        showRightBorder: false,
-                        child: const SizedBox.expand(),
-                      ),
-                    ),
-                    // Content Layer
-                    Positioned.fill(
-                      child: Stack(
-                        fit: StackFit.expand,
-                        clipBehavior: Clip.none,
-                        children: [
-                          // Gradient background
-                          Positioned.fill(
-                            child: Opacity(
-                              opacity: t,
-                              child: DecoratedBox(
-                                decoration: BoxDecoration(
-                                  gradient: LinearGradient(
-                                    begin: Alignment.topCenter,
-                                    end: Alignment.bottomCenter,
-                                    colors: [
-                                      activeColor.withValues(alpha: 0.15),
-                                      activeColor.withValues(alpha: 0.03),
-                                      Colors.transparent,
-                                    ],
-                                  ),
+                    return Stack(
+                      fit: StackFit.expand,
+                      clipBehavior: Clip.none,
+                      children: [
+                        Positioned.fill(
+                          child: GlassSurface(
+                            borderRadius: 0,
+                            showShadow: false,
+                            opacityMultiplier: revT,
+                            borderColor: (isDark ? Colors.white : Colors.black)
+                                .withValues(
+                                  alpha: revT > 0.95 ? (revT - 0.95) * 2 : 0.0,
                                 ),
-                              ),
-                            ),
+                            showTopBorder: false,
+                            showLeftBorder: false,
+                            showRightBorder: false,
+                            child: const SizedBox.expand(),
                           ),
-
-                          // Title Morphing
-                          Positioned(
-                            top: safeTop + (kToolbarHeight - 20) / 2 + (t * 70),
-                            left: 0,
-                            right: 0,
-                            child: IgnorePointer(
-                              child: Text(
-                          _getAppBarTitle()
-                                    .toSafeUpperCase(context),
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                  color: AppColors.getTextPrimary(context),
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w900,
-                                  letterSpacing: 2.0 + (t * 2),
-                                ),
-                              ),
-                            ),
-                          ),
-
-                          // Back Button
-                          if (buttonAnim > 0.01)
-                            Positioned(
-                              top: safeTop + 10,
-                              left: 20 - ((1.0 - t) * 80),
-                              child: Opacity(
-                                opacity: buttonAnim,
-                                child: Transform.scale(
-                                  scale: buttonAnim,
-                                  alignment: Alignment.centerLeft,
-                                  child: _HeaderBackButton(activeColor: activeColor),
-                                ),
-                              ),
-                            ),
-                        ],
-                      ),
-                    ),
-                  ],
-                );
-              },
-            ),
-          ),
-          SliverToBoxAdapter(
-            child: Column(
-              children: [
-                const SizedBox(height: 8),
-                TransactionTypeToggle(
-                  tabIndex: _tabIndex,
-                  onTabChanged: widget.initialId != null
-                      ? null
-                      : (index) {
-                          HapticFeedback.selectionClick();
-                          FocusManager.instance.primaryFocus?.unfocus();
-                          setState(() {
-                            _tabIndex = index;
-                            _selectedCategoryIndex = 0;
-                            _expandedCategoryIndex = -1;
-                            _selectedSubModelIndex = -1;
-                          });
-                        },
-                ),
-                const SizedBox(height: 12),
-                TransactionAmountInput(
-                  isFlexibleAmount: _isFlexibleAmount,
-                  currency: _selectedCurrency,
-                  amountController: _amountController,
-                  minController: _minController,
-                  maxController: _maxController,
-                  amountFocusNode: _amountFocusNode,
-                ),
-                const SizedBox(height: 12),
-                Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: AppSizes.paddingMedium,
-                  ),
-                  child: CustomCard(
-                    scalingFactor: scalingFactor,
-                    padding: const EdgeInsets.all(16),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Row(
-                          children: [
-                            Icon(
-                              Icons.linear_scale_rounded,
-                              size: 20,
-                              color: AppColors.getAccentDeep(context, activeColor).withValues(alpha: 0.7),
-                            ),
-                            const SizedBox(width: 12),
-                            Text(
-                              l10n.flexibleAmount,
-                              style: TextStyle(
-                                fontSize: 15,
-                                fontWeight: FontWeight.w600,
-                                color: AppColors.getTextPrimary(context),
-                              ),
-                            ),
-                          ],
                         ),
-                        CustomSwitch(
-                          value: _isFlexibleAmount,
-                          activeColor: AppColors.getAccentDeep(context, activeColor),
-                          activeIcon: Icons.pause_rounded,
-                          inactiveIcon: Icons.stop_rounded,
-                          scalingFactor: scalingFactor * 0.9,
-                          onChanged: (val) {
-                            HapticFeedback.mediumImpact();
-                            FocusManager.instance.primaryFocus?.unfocus();
-                            setState(() {
-                              _isFlexibleAmount = val;
-                            });
-                          },
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 12),
-                TransactionCategorySelector(
-                  categories: activeCategories,
-                  selectedCategoryIndex: _selectedCategoryIndex,
-                  selectedSubModelIndex: _selectedSubModelIndex,
-                  expandedCategoryIndex: _expandedCategoryIndex,
-                  isPro: ref.watch(subscriptionServiceProvider).isPro,
-                  onChanged: (catIndex, subIndex, expIndex) {
-                    HapticFeedback.lightImpact();
-                    FocusManager.instance.primaryFocus?.unfocus();
-                    setState(() {
-                      _selectedCategoryIndex = catIndex;
-                      _selectedSubModelIndex = subIndex;
-                      _expandedCategoryIndex = expIndex;
-                    });
-                  },
-                  onAddCustomSubcategory: _showAddCustomCategoryDialog,
-                  onRemoveCustomSubcategory: _handleRemoveCustomCategory,
-                ),
-                const SizedBox(height: 12),
-                Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: AppSizes.paddingMedium,
-                  ),
-                  child: CustomCard(
-                    scalingFactor: scalingFactor,
-                    padding: const EdgeInsets.all(16),
-                    child: Column(
-                      children: [
-                        TransactionVaultSelector(
-                          vaults: _vaults,
-                          selectedVaultIds: _selectedVaultIds,
-                          scalingFactor: scalingFactor,
-                          onChanged: (ids) {
-                            FocusManager.instance.primaryFocus?.unfocus();
-                            setState(() {
-                              _selectedVaultIds = ids;
-                              if (ids.isNotEmpty) {
-                                final sv = _vaults.firstWhere(
-                                  (v) => v.id == ids.first,
-                                );
-                                if (sv.currency != 'AUTO') {
-                                  _onCurrencyChanged(sv.currency);
-                                }
-                              }
-                            });
-                          },
-                        ),
-                        const SizedBox(height: 12),
-                        TransactionCurrencySelector(
-                          selectedCurrency: _selectedCurrency,
-                          scalingFactor: scalingFactor,
-                          onChanged: _onCurrencyChanged,
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 12),
-                Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: AppSizes.paddingMedium,
-                  ),
-                  child: CustomCard(
-                    scalingFactor: scalingFactor,
-                    padding: const EdgeInsets.all(16),
-                    child: TransactionPeriodSelector(
-                      initialData: _periodData,
-                      scalingFactor: scalingFactor,
-                      hidePeriodSelection: _builderType == TransactionBuilderType.oneTime,
-                      hideOneTime: _builderType == TransactionBuilderType.recurring,
-                      disableFutureDates: _builderType == TransactionBuilderType.oneTime,
-                      readOnlyPeriod: widget.isTemplateEdit == true,
-                      minDuration: _reviewedCount,
-                      onChanged: (data) {
-                        HapticFeedback.mediumImpact();
-                        FocusManager.instance.primaryFocus?.unfocus();
-                        setState(() => _periodData = data);
-                      },
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 12),
-                Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: AppSizes.paddingMedium,
-                  ),
-                  child: CustomCard(
-                    scalingFactor: scalingFactor,
-                    padding: const EdgeInsets.all(16),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            Icon(
-                              Icons.notes_rounded,
-                              size: 20,
-                              color: AppColors.getAccentDeep(context, activeColor).withValues(alpha: 0.7),
-                            ),
-                            const SizedBox(width: 12),
-                            Text(
-                              l10n.description.toSafeUpperCase(context),
-                              style: TextStyle(
-                                fontSize: 13,
-                                fontWeight: FontWeight.w900,
-                                color: AppColors.getTextPrimary(
-                                  context,
-                                ).withValues(alpha: 0.8),
-                                letterSpacing: 0.5,
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 12),
-                        CustomTextField(
-                          controller: _noteController,
-                          hintText: l10n.transactionNoteHint,
-                          icon: Icons.edit_note_rounded,
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                if (_builderType == TransactionBuilderType.recurring) ...[
-                  const SizedBox(height: 12),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: AppSizes.paddingMedium,
-                    ),
-                    child: CustomCard(
-                      scalingFactor: scalingFactor,
-                      padding: const EdgeInsets.all(16),
-                      child: Column(
-                        children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        Positioned.fill(
+                          child: Stack(
+                            fit: StackFit.expand,
+                            clipBehavior: Clip.none,
                             children: [
-                              Row(
-                                children: [
-                                  Icon(
-                                    Icons.notifications_active_rounded,
-                                    size: 20,
-                                    color: AppColors.getAccentDeep(context, activeColor).withValues(alpha: 0.7),
+                              Positioned.fill(
+                                child: Opacity(
+                                  opacity: t,
+                                  child: DecoratedBox(
+                                    decoration: BoxDecoration(
+                                      gradient: LinearGradient(
+                                        begin: Alignment.topCenter,
+                                        end: Alignment.bottomCenter,
+                                        colors: [
+                                          activeColor.withValues(alpha: 0.15),
+                                          activeColor.withValues(alpha: 0.03),
+                                          Colors.transparent,
+                                        ],
+                                      ),
+                                    ),
                                   ),
-                                  const SizedBox(width: 12),
-                                  Text(
-                                    l10n.reminder.toSafeUpperCase(context),
+                                ),
+                              ),
+
+                              Positioned(
+                                top:
+                                    safeTop +
+                                    (kToolbarHeight - 20) / 2 +
+                                    (t * 70),
+                                left: 0,
+                                right: 0,
+                                child: IgnorePointer(
+                                  child: Text(
+                                    _getAppBarTitle().toSafeUpperCase(context),
+                                    textAlign: TextAlign.center,
                                     style: TextStyle(
-                                      fontSize: 13,
+                                      color: AppColors.getTextPrimary(context),
+                                      fontSize: 14,
                                       fontWeight: FontWeight.w900,
-                                      color: AppColors.getTextPrimary(
-                                        context,
-                                      ).withValues(alpha: 0.8),
-                                      letterSpacing: 0.5,
+                                      letterSpacing: 2.0 + (t * 2),
+                                    ),
+                                  ),
+                                ),
+                              ),
+
+                              if (buttonAnim > 0.01)
+                                Positioned(
+                                  top: safeTop + 10,
+                                  left: 20 - ((1.0 - t) * 80),
+                                  child: Opacity(
+                                    opacity: buttonAnim,
+                                    child: Transform.scale(
+                                      scale: buttonAnim,
+                                      alignment: Alignment.centerLeft,
+                                      child: _HeaderBackButton(
+                                        activeColor: activeColor,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    );
+                  },
+                ),
+              ),
+              SliverToBoxAdapter(
+                child: Column(
+                  children: [
+                    const SizedBox(height: 8),
+                    TransactionTypeToggle(
+                      tabIndex: _tabIndex,
+                      isTransferAllowed: _builderType == TransactionBuilderType.oneTime,
+                      onTabChanged: widget.initialId != null
+                          ? null
+                          : (index) {
+                              HapticFeedback.selectionClick();
+                              FocusManager.instance.primaryFocus?.unfocus();
+                              setState(() {
+                                _tabIndex = index;
+                                _selectedCategoryIndex = 0;
+                                _expandedCategoryIndex = -1;
+                                _selectedSubModelIndex = -1;
+                                if (index == 2) {
+                                  _isFlexibleAmount = false;
+                                }
+                              });
+                            },
+                    ),
+                    const SizedBox(height: 12),
+                    TransactionAmountInput(
+                      isFlexibleAmount: _isFlexibleAmount,
+                      currency: _selectedCurrency,
+                      amountController: _amountController,
+                      minController: _minController,
+                      maxController: _maxController,
+                      amountFocusNode: _amountFocusNode,
+                    ),
+                    AnimatedSize(
+                      duration: const Duration(milliseconds: 400),
+                      curve: Curves.easeInOutQuart,
+                      alignment: Alignment.topCenter,
+                      child: AnimatedSwitcher(
+                        duration: const Duration(milliseconds: 350),
+                        transitionBuilder: (Widget child, Animation<double> animation) {
+                          return FadeTransition(
+                            opacity: animation,
+                            child: SlideTransition(
+                              position: Tween<Offset>(
+                                begin: const Offset(0, 0.05),
+                                end: Offset.zero,
+                              ).animate(
+                                CurvedAnimation(
+                                  parent: animation,
+                                  curve: Curves.easeOutQuart,
+                                ),
+                              ),
+                              child: child,
+                            ),
+                          );
+                        },
+                        child: !_isTransfer
+                            ? Column(
+                                key: const ValueKey('flexible_amount_visible'),
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  const SizedBox(height: 12),
+                                  Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: AppSizes.paddingMedium,
+                                    ),
+                                    child: CustomCard(
+                                      scalingFactor: scalingFactor,
+                                      padding: const EdgeInsets.all(16),
+                                      child: Row(
+                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          Row(
+                                            children: [
+                                              Icon(
+                                                Icons.linear_scale_rounded,
+                                                size: 20,
+                                                color: AppColors.getAccentDeep(
+                                                  context,
+                                                  activeColor,
+                                                ).withValues(alpha: 0.7),
+                                              ),
+                                              const SizedBox(width: 12),
+                                              Text(
+                                                l10n.flexibleAmount,
+                                                style: TextStyle(
+                                                  fontSize: 15,
+                                                  fontWeight: FontWeight.w600,
+                                                  color: AppColors.getTextPrimary(context),
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                          CustomSwitch(
+                                            value: _isFlexibleAmount,
+                                            activeColor: AppColors.getAccentDeep(
+                                              context,
+                                              activeColor,
+                                            ),
+                                            activeIcon: Icons.pause_rounded,
+                                            inactiveIcon: Icons.stop_rounded,
+                                            scalingFactor: scalingFactor * 0.9,
+                                            onChanged: (val) {
+                                              HapticFeedback.mediumImpact();
+                                              FocusManager.instance.primaryFocus?.unfocus();
+                                              setState(() {
+                                                _isFlexibleAmount = val;
+                                              });
+                                            },
+                                          ),
+                                        ],
+                                      ),
                                     ),
                                   ),
                                 ],
-                              ),
-                              CustomSwitch(
-                                value: _isNotificationEnabled,
-                                activeColor: AppColors.getAccentDeep(context, activeColor),
-                                activeIcon: Icons.notifications_active_rounded,
-                                inactiveIcon: Icons.notifications_off_rounded,
-                                scalingFactor: scalingFactor * 0.9,
-                                onChanged: (val) async {
-                                  if (val) {
-                                    final granted = await NotificationService()
-                                        .requestPermissions();
-                                    if (!granted && context.mounted) {
-                                      CustomNotification.warning(
-                                        context,
-                                        l10n.notificationPermissionDenied,
-                                      );
-                                      return;
-                                    }
-                                  }
-                                  HapticFeedback.mediumImpact();
-                                  FocusManager.instance.primaryFocus?.unfocus();
-                                  setState(() {
-                                    _isNotificationEnabled = val;
-                                  });
-                                },
-                              ),
-                            ],
-                          ),
-                          AnimatedSize(
-                            duration: const Duration(milliseconds: 400),
-                            curve: Curves.easeInOutQuart,
-                            alignment: Alignment.topCenter,
-                            child: AnimatedSwitcher(
-                              duration: const Duration(milliseconds: 350),
-                              transitionBuilder:
-                                  (Widget child, Animation<double> animation) {
-                                    return FadeTransition(
-                                      opacity: animation,
-                                      child: SlideTransition(
-                                        position:
-                                            Tween<Offset>(
-                                              begin: const Offset(0, 0.05),
-                                              end: Offset.zero,
-                                            ).animate(
-                                              CurvedAnimation(
-                                                parent: animation,
-                                                curve: Curves.easeOutQuart,
-                                              ),
-                                            ),
-                                        child: child,
-                                      ),
-                                    );
-                                  },
-                              child: _isNotificationEnabled
-                                  ? Column(
-                                      key: const ValueKey('reminder_enabled'),
-                                      children: [
-                                        const SizedBox(height: 16),
-                                        Divider(
-                                          height: 1,
-                                          thickness: 0.5,
-                                          color:
-                                              (isDark
-                                                      ? Colors.white
-                                                      : Colors.black)
-                                                  .withValues(alpha: 0.08),
-                                        ),
-                                        const SizedBox(height: 16),
-                                        TransactionReminderDaysSelector(
-                                          selectedDays: _notificationReminderDays,
-                                          scalingFactor: scalingFactor,
-                                          onChanged: (days) => setState(
-                                            () =>
-                                                _notificationReminderDays = days,
-                                          ),
-                                        ),
-                                        const SizedBox(height: 16),
-                                        TransactionReminderTimeSelector(
-                                          selectedTime: _notificationTime,
-                                          scalingFactor: scalingFactor,
-                                          onChanged: (time) => setState(
-                                            () => _notificationTime = time,
-                                          ),
-                                        ),
-                                      ],
-                                    )
-                                  : const SizedBox.shrink(
-                                      key: ValueKey('reminder_disabled'),
-                                    ),
-                            ),
-                          ),
-                        ],
+                              )
+                            : const SizedBox.shrink(key: ValueKey('flexible_amount_hidden')),
                       ),
                     ),
-                  ),
-                ],
-                if (_errorMessage != null)
-                  Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 12),
-                    child: Container(
+                    AnimatedSize(
+                      duration: const Duration(milliseconds: 400),
+                      curve: Curves.easeInOutQuart,
+                      alignment: Alignment.topCenter,
+                      child: AnimatedSwitcher(
+                        duration: const Duration(milliseconds: 350),
+                        transitionBuilder: (Widget child, Animation<double> animation) {
+                          return FadeTransition(
+                            opacity: animation,
+                            child: SlideTransition(
+                              position: Tween<Offset>(
+                                begin: const Offset(0, 0.05),
+                                end: Offset.zero,
+                              ).animate(
+                                CurvedAnimation(
+                                  parent: animation,
+                                  curve: Curves.easeOutQuart,
+                                ),
+                              ),
+                              child: child,
+                            ),
+                          );
+                        },
+                        child: !_isTransfer
+                            ? Column(
+                                key: const ValueKey('category_selector_visible'),
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  const SizedBox(height: 12),
+                                  TransactionCategorySelector(
+                                    categories: activeCategories,
+                                    selectedCategoryIndex: _selectedCategoryIndex,
+                                    selectedSubModelIndex: _selectedSubModelIndex,
+                                    expandedCategoryIndex: _expandedCategoryIndex,
+                                    isPro: ref.watch(subscriptionServiceProvider).isPro,
+                                    onChanged: (catIndex, subIndex, expIndex) {
+                                      HapticFeedback.lightImpact();
+                                      FocusManager.instance.primaryFocus?.unfocus();
+                                      setState(() {
+                                        _selectedCategoryIndex = catIndex;
+                                        _selectedSubModelIndex = subIndex;
+                                        _expandedCategoryIndex = expIndex;
+                                      });
+                                    },
+                                    onAddCustomSubcategory: _showAddCustomCategoryDialog,
+                                    onRemoveCustomSubcategory: _handleRemoveCustomCategory,
+                                  ),
+                                ],
+                              )
+                            : const SizedBox.shrink(key: ValueKey('category_selector_hidden')),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    Padding(
                       padding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 8,
+                        horizontal: AppSizes.paddingMedium,
                       ),
-                      decoration: BoxDecoration(
-                        color: AppColors.error.withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Text(
-                        _errorMessage!,
-                        style: const TextStyle(
-                          color: AppColors.error,
-                          fontWeight: FontWeight.bold,
+                      child: CustomCard(
+                        scalingFactor: scalingFactor,
+                        padding: const EdgeInsets.all(16),
+                        child: Column(
+                          children: [
+                            TransactionVaultSelector(
+                              vaults: _vaults,
+                              selectedVaultIds: _selectedVaultIds,
+                              scalingFactor: scalingFactor,
+                              onChanged: (ids) {
+                                FocusManager.instance.primaryFocus?.unfocus();
+                                setState(() {
+                                  _selectedVaultIds = ids;
+                                  if (ids.isNotEmpty) {
+                                    final sv = _vaults.firstWhere(
+                                      (v) => v.id == ids.first,
+                                    );
+                                    if (sv.currency != 'AUTO') {
+                                      _onCurrencyChanged(sv.currency);
+                                    }
+                                    if (_targetVaultId == ids.first) {
+                                      final otherVault = _vaults.firstWhere(
+                                        (v) => v.id != ids.first,
+                                        orElse: () => _vaults.first,
+                                      );
+                                      _targetVaultId = otherVault.id;
+                                    }
+                                  }
+                                });
+                              },
+                            ),
+                            AnimatedSize(
+                              duration: const Duration(milliseconds: 400),
+                              curve: Curves.easeInOutQuart,
+                              alignment: Alignment.topCenter,
+                              child: AnimatedSwitcher(
+                                duration: const Duration(milliseconds: 350),
+                                transitionBuilder: (Widget child, Animation<double> animation) {
+                                  return FadeTransition(
+                                    opacity: animation,
+                                    child: SlideTransition(
+                                      position: Tween<Offset>(
+                                        begin: const Offset(0, 0.05),
+                                        end: Offset.zero,
+                                      ).animate(
+                                        CurvedAnimation(
+                                          parent: animation,
+                                          curve: Curves.easeOutQuart,
+                                        ),
+                                      ),
+                                      child: child,
+                                    ),
+                                  );
+                                },
+                                child: _isTransfer
+                                    ? Column(
+                                        key: const ValueKey('target_vault_visible'),
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          const SizedBox(height: 12),
+                                          PickerField(
+                                            icon: Icons.account_balance_wallet_rounded,
+                                            label: Localizations.localeOf(context).languageCode == 'tr' ? "Hedef Kasa" : "Target Vault",
+                                            items: _vaults.map((v) => v.name).toList(),
+                                            selectedIndex: _vaults.isEmpty
+                                                ? 0
+                                                : _vaults
+                                                    .indexWhere((v) => v.id == _targetVaultId)
+                                                    .clamp(0, _vaults.length - 1),
+                                            scalingFactor: scalingFactor,
+                                            onChanged: (index) {
+                                              if (index >= 0 && index < _vaults.length) {
+                                                setState(() {
+                                                  _targetVaultId = _vaults[index].id;
+                                                });
+                                              }
+                                            },
+                                          ),
+                                        ],
+                                      )
+                                    : const SizedBox.shrink(key: ValueKey('target_vault_hidden')),
+                              ),
+                            ),
+                            const SizedBox(height: 12),
+                            TransactionCurrencySelector(
+                              selectedCurrency: _selectedCurrency,
+                              scalingFactor: scalingFactor,
+                              onChanged: _onCurrencyChanged,
+                            ),
+                          ],
                         ),
                       ),
                     ),
-                  ),
-                const SizedBox(height: 20),
-                Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: AppSizes.paddingMedium,
-                  ),
-                  child: CustomButton(
-                    onTap: _saveTransaction,
-                    label: l10n.save,
-                    activeColor: activeColor,
-                  ),
+                    const SizedBox(height: 12),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: AppSizes.paddingMedium,
+                      ),
+                      child: CustomCard(
+                        scalingFactor: scalingFactor,
+                        padding: const EdgeInsets.all(16),
+                        child: TransactionPeriodSelector(
+                          initialData: _periodData,
+                          scalingFactor: scalingFactor,
+                          hidePeriodSelection:
+                              _builderType == TransactionBuilderType.oneTime,
+                          hideOneTime:
+                              _builderType == TransactionBuilderType.recurring,
+                          disableFutureDates:
+                              _builderType == TransactionBuilderType.oneTime,
+                          readOnlyPeriod: widget.isTemplateEdit == true,
+                          minDuration: _reviewedCount,
+                          onChanged: (data) {
+                            HapticFeedback.mediumImpact();
+                            FocusManager.instance.primaryFocus?.unfocus();
+                            setState(() => _periodData = data);
+                          },
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: AppSizes.paddingMedium,
+                      ),
+                      child: CustomCard(
+                        scalingFactor: scalingFactor,
+                        padding: const EdgeInsets.all(16),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                Icon(
+                                  Icons.notes_rounded,
+                                  size: 20,
+                                  color: AppColors.getAccentDeep(
+                                    context,
+                                    activeColor,
+                                  ).withValues(alpha: 0.7),
+                                ),
+                                const SizedBox(width: 12),
+                                Text(
+                                  l10n.description.toSafeUpperCase(context),
+                                  style: TextStyle(
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w900,
+                                    color: AppColors.getTextPrimary(
+                                      context,
+                                    ).withValues(alpha: 0.8),
+                                    letterSpacing: 0.5,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 12),
+                            CustomTextField(
+                              controller: _noteController,
+                              hintText: l10n.transactionNoteHint,
+                              icon: Icons.edit_note_rounded,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    if (_builderType == TransactionBuilderType.recurring) ...[
+                      const SizedBox(height: 12),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: AppSizes.paddingMedium,
+                        ),
+                        child: CustomCard(
+                          scalingFactor: scalingFactor,
+                          padding: const EdgeInsets.all(16),
+                          child: Column(
+                            children: [
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Row(
+                                    children: [
+                                      Icon(
+                                        Icons.notifications_active_rounded,
+                                        size: 20,
+                                        color: AppColors.getAccentDeep(
+                                          context,
+                                          activeColor,
+                                        ).withValues(alpha: 0.7),
+                                      ),
+                                      const SizedBox(width: 12),
+                                      Text(
+                                        l10n.reminder.toSafeUpperCase(context),
+                                        style: TextStyle(
+                                          fontSize: 13,
+                                          fontWeight: FontWeight.w900,
+                                          color: AppColors.getTextPrimary(
+                                            context,
+                                          ).withValues(alpha: 0.8),
+                                          letterSpacing: 0.5,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  CustomSwitch(
+                                    value: _isNotificationEnabled,
+                                    activeColor: AppColors.getAccentDeep(
+                                      context,
+                                      activeColor,
+                                    ),
+                                    activeIcon:
+                                        Icons.notifications_active_rounded,
+                                    inactiveIcon:
+                                        Icons.notifications_off_rounded,
+                                    scalingFactor: scalingFactor * 0.9,
+                                    onChanged: (val) async {
+                                      if (val) {
+                                        final granted =
+                                            await NotificationService()
+                                                .requestPermissions();
+                                        if (!granted && context.mounted) {
+                                          CustomNotification.warning(
+                                            context,
+                                            l10n.notificationPermissionDenied,
+                                          );
+                                          return;
+                                        }
+                                      }
+                                      HapticFeedback.mediumImpact();
+                                      FocusManager.instance.primaryFocus
+                                          ?.unfocus();
+                                      setState(() {
+                                        _isNotificationEnabled = val;
+                                      });
+                                    },
+                                  ),
+                                ],
+                              ),
+                              AnimatedSize(
+                                duration: const Duration(milliseconds: 400),
+                                curve: Curves.easeInOutQuart,
+                                alignment: Alignment.topCenter,
+                                child: AnimatedSwitcher(
+                                  duration: const Duration(milliseconds: 350),
+                                  transitionBuilder:
+                                      (
+                                        Widget child,
+                                        Animation<double> animation,
+                                      ) {
+                                        return FadeTransition(
+                                          opacity: animation,
+                                          child: SlideTransition(
+                                            position:
+                                                Tween<Offset>(
+                                                  begin: const Offset(0, 0.05),
+                                                  end: Offset.zero,
+                                                ).animate(
+                                                  CurvedAnimation(
+                                                    parent: animation,
+                                                    curve: Curves.easeOutQuart,
+                                                  ),
+                                                ),
+                                            child: child,
+                                          ),
+                                        );
+                                      },
+                                  child: _isNotificationEnabled
+                                      ? Column(
+                                          key: const ValueKey(
+                                            'reminder_enabled',
+                                          ),
+                                          children: [
+                                            const SizedBox(height: 16),
+                                            Divider(
+                                              height: 1,
+                                              thickness: 0.5,
+                                              color:
+                                                  (isDark
+                                                          ? Colors.white
+                                                          : Colors.black)
+                                                      .withValues(alpha: 0.08),
+                                            ),
+                                            const SizedBox(height: 16),
+                                            TransactionReminderDaysSelector(
+                                              selectedDays:
+                                                  _notificationReminderDays,
+                                              scalingFactor: scalingFactor,
+                                              onChanged: (days) => setState(
+                                                () =>
+                                                    _notificationReminderDays =
+                                                        days,
+                                              ),
+                                            ),
+                                            const SizedBox(height: 16),
+                                            TransactionReminderTimeSelector(
+                                              selectedTime: _notificationTime,
+                                              scalingFactor: scalingFactor,
+                                              onChanged: (time) => setState(
+                                                () => _notificationTime = time,
+                                              ),
+                                            ),
+                                          ],
+                                        )
+                                      : const SizedBox.shrink(
+                                          key: ValueKey('reminder_disabled'),
+                                        ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                    if (_errorMessage != null)
+                      Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 8,
+                          ),
+                          decoration: BoxDecoration(
+                            color: AppColors.error.withValues(alpha: 0.1),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Text(
+                            _errorMessage!,
+                            style: const TextStyle(
+                              color: AppColors.error,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ),
+                    const SizedBox(height: 20),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: AppSizes.paddingMedium,
+                      ),
+                      child: CustomButton(
+                        onTap: _saveTransaction,
+                        label: l10n.save,
+                        activeColor: activeColor,
+                      ),
+                    ),
+                    const SizedBox(height: 50),
+                  ],
                 ),
-                const SizedBox(height: 50),
-              ],
-            ),
+              ),
+            ],
           ),
-        ],
-      ),
-    ),
+        ),
       ],
     );
   }
@@ -1461,13 +1710,21 @@ class _TransactionBuilderScreenState extends ConsumerState<TransactionBuilderScr
     final isTr = l10n.localeName == 'tr';
     if (_builderType == TransactionBuilderType.recurring) {
       if (isEdit) {
-        return isTr ? 'Planı Düzenle' : (l10n.localeName == 'de' ? 'Plan bearbeiten' : 'Edit Plan');
+        return isTr
+            ? 'Planı Düzenle'
+            : (l10n.localeName == 'de' ? 'Plan bearbeiten' : 'Edit Plan');
       } else {
-        return isTr ? 'Yeni Plan' : (l10n.localeName == 'de' ? 'Neuer Plan' : 'New Plan');
+        return isTr
+            ? 'Yeni Plan'
+            : (l10n.localeName == 'de' ? 'Neuer Plan' : 'New Plan');
       }
     } else {
       if (isEdit) {
-        return isTr ? 'İşlemi Düzenle' : (l10n.localeName == 'de' ? 'Transaktion bearbeiten' : 'Edit Transaction');
+        return isTr
+            ? 'İşlemi Düzenle'
+            : (l10n.localeName == 'de'
+                  ? 'Transaktion bearbeiten'
+                  : 'Edit Transaction');
       } else {
         return isTr ? 'Yeni İşlem' : l10n.addTransaction;
       }
@@ -1501,17 +1758,22 @@ class _HeaderBackButton extends StatelessWidget {
               showShadow: true,
               backgroundColor: isPressed
                   ? (isDark
-                      ? AppColors.getThemeSurface(context, 2).withValues(alpha: 0.75)
-                      : Colors.grey[200]!.withValues(alpha: 0.85))
+                        ? AppColors.getThemeSurface(
+                            context,
+                            2,
+                          ).withValues(alpha: 0.75)
+                        : Colors.grey[200]!.withValues(alpha: 0.85))
                   : (isDark
-                      ? Colors.black.withValues(alpha: 0.35)
-                      : Colors.white.withValues(alpha: 0.65)),
+                        ? Colors.black.withValues(alpha: 0.35)
+                        : Colors.white.withValues(alpha: 0.65)),
               borderColor: isPressed
                   ? activeColor.withValues(alpha: 0.3)
                   : null,
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withValues(alpha: isPressed ? 0.03 : 0.08),
+                  color: Colors.black.withValues(
+                    alpha: isPressed ? 0.03 : 0.08,
+                  ),
                   blurRadius: isPressed ? 4 : 8,
                   offset: Offset(0, isPressed ? 1 : 2),
                 ),

@@ -36,7 +36,7 @@ class TimelineActivityWidget extends ConsumerWidget {
     if (selectedVaultId != null && selectedVaultId!.startsWith('v_')) {
       final filterVaultId = int.tryParse(selectedVaultId!.replaceFirst('v_', ''));
       if (filterVaultId != null) {
-        vaultFilteredTxs = sortedTxs.where((tx) => tx.vaultId == filterVaultId).toList();
+        vaultFilteredTxs = sortedTxs.where((tx) => tx.vaultId == filterVaultId || tx.targetVaultId == filterVaultId).toList();
       }
     }
     
@@ -50,8 +50,24 @@ class TimelineActivityWidget extends ConsumerWidget {
     }).toList();
     
     // Gelir ve Giderleri ayır (Kesinlikle max 7şer adet)
-    final incomeTxs = filteredTxs.where((tx) => tx.isIncome).take(7).toList();
-    final expenseTxs = filteredTxs.where((tx) => !tx.isIncome).take(7).toList();
+    // Transfer işlemlerini kasa seçiliyse doğru tarafa at, seçili değilse gider tarafında göster
+    final filterVaultId = selectedVaultId != null && selectedVaultId!.startsWith('v_') 
+        ? int.tryParse(selectedVaultId!.replaceFirst('v_', '')) 
+        : null;
+
+    final incomeTxs = filteredTxs.where((tx) {
+      if (tx.targetVaultId != null && filterVaultId != null) {
+        return tx.targetVaultId == filterVaultId;
+      }
+      return tx.isIncome;
+    }).take(7).toList();
+
+    final expenseTxs = filteredTxs.where((tx) {
+      if (tx.targetVaultId != null && filterVaultId != null) {
+        return tx.vaultId == filterVaultId;
+      }
+      return !tx.isIncome;
+    }).take(7).toList();
 
     if (filteredTxs.isEmpty) {
       return _buildEmptyState(context);
@@ -129,8 +145,8 @@ class TimelineActivityWidget extends ConsumerWidget {
     List<CustomCategory> customCategories, {
     required bool isLeft,
   }) {
-    final isIncome = tx.isIncome;
-    final Color semanticColor = isIncome ? AppColors.getIncome(context) : AppColors.getExpense(context);
+    final isIncoming = tx.targetVaultId != null ? isLeft : tx.isIncome;
+    final Color semanticColor = isIncoming ? AppColors.getIncome(context) : AppColors.getExpense(context);
     final Color categoryColor = CategoryUtils.getCategoryColor(
       categoryId: tx.categoryId,
       customCategories: customCategories,

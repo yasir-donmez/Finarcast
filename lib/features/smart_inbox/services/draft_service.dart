@@ -23,6 +23,7 @@ class DraftTransaction {
   final int notificationHour;
   final int notificationMinute;
   final String? vaultName;
+  final String? targetVaultName;
   final int periodType;
   final int? remainingInstallments;
   final int? recurrenceDay;
@@ -45,6 +46,7 @@ class DraftTransaction {
     this.notificationHour = 9,
     this.notificationMinute = 0,
     this.vaultName,
+    this.targetVaultName,
     this.periodType = 0,
     this.remainingInstallments,
     this.recurrenceDay,
@@ -68,6 +70,7 @@ class DraftTransaction {
         'notificationHour': notificationHour,
         'notificationMinute': notificationMinute,
         'vaultName': vaultName,
+        'targetVaultName': targetVaultName,
         'periodType': periodType,
         'remainingInstallments': remainingInstallments,
         'recurrenceDay': recurrenceDay,
@@ -91,6 +94,7 @@ class DraftTransaction {
         notificationHour: json['notificationHour'] as int? ?? 9,
         notificationMinute: json['notificationMinute'] as int? ?? 0,
         vaultName: json['vaultName'] as String?,
+        targetVaultName: json['targetVaultName'] as String?,
         periodType: json['periodType'] as int? ?? 0,
         remainingInstallments: json['remainingInstallments'] as int?,
         recurrenceDay: json['recurrenceDay'] as int?,
@@ -142,7 +146,7 @@ class DraftService {
   }
 
   /// Taslağı onaylayıp gerçek bir harcamaya dönüştürür
-  static Future<bool> promoteToTransaction(String draftId, int? vaultId, String categoryName) async {
+  static Future<bool> promoteToTransaction(String draftId, int? vaultId, String categoryName, {int? targetVaultId}) async {
     try {
       final drafts = await getDrafts();
       final index = drafts.indexWhere((d) => d.id == draftId);
@@ -209,8 +213,9 @@ class DraftService {
           ..categoryId = draft.categoryId
           ..date = draft.date
           ..occurrenceDate = DateTime(draft.date.year, draft.date.month, draft.date.day)
-          ..isIncome = draft.isIncome
+          ..isIncome = draft.categoryId == 'transfer' ? false : draft.isIncome
           ..vaultId = finalVaultId
+          ..targetVaultId = draft.categoryId == 'transfer' ? targetVaultId : null
           ..currency = draft.currency ?? currency
           ..note = finalNote
           ..status = 0 // confirmed

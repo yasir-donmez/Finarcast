@@ -29,6 +29,9 @@ class TransactionUI {
   final String? categoryId; // Multi-language desteği için benzersiz anahtar
   final String? iconCode;   // İkon referansı (ID veya özel kod)
   
+  final int? vaultId;
+  final int? targetVaultId;
+
   final String? note;
   final String? currency;
 
@@ -55,6 +58,8 @@ class TransactionUI {
     this.dbId,
     this.categoryId,
     this.iconCode,
+    this.vaultId,
+    this.targetVaultId,
     this.note,
     this.currency,
     required this.status,
@@ -103,6 +108,8 @@ class TransactionUI {
       dbId: record.id,
       categoryId: record.categoryId,
       iconCode: record.iconCode,
+      vaultId: record.vaultId,
+      targetVaultId: record.targetVaultId,
       note: record.note,
       currency: record.currency,
       status: record.status,
@@ -112,7 +119,10 @@ class TransactionUI {
       installmentNumber: record.installmentNumber,
       totalInstallments: record.totalInstallments,
       isArchived: record.isArchived,
-      groupIds: [if (record.vaultId != null) 'v_${record.vaultId}'],
+      groupIds: [
+        if (record.vaultId != null) 'v_${record.vaultId}',
+        if (record.targetVaultId != null) 'v_${record.targetVaultId}',
+      ],
     );
   }
 }
@@ -139,7 +149,7 @@ class TemplateUI {
   final bool isPaused;
   final bool isArchived;
   final bool isNotificationEnabled;
-  final bool hasNotificationConfigured;
+  final bool hasNotification;
   final int notificationReminderDays;
   final int notificationHour;
   final int notificationMinute;
@@ -167,7 +177,7 @@ class TemplateUI {
     required this.isPaused,
     required this.isArchived,
     required this.isNotificationEnabled,
-    required this.hasNotificationConfigured,
+    required this.hasNotification,
     required this.notificationReminderDays,
     required this.notificationHour,
     required this.notificationMinute,
@@ -204,7 +214,7 @@ class TemplateUI {
       isPaused: t.isPaused,
       isArchived: t.isArchived,
       isNotificationEnabled: t.isNotificationEnabled,
-      hasNotificationConfigured: t.hasNotificationConfigured,
+      hasNotification: t.hasNotification,
       notificationReminderDays: t.notificationReminderDays,
       notificationHour: t.notificationHour,
       notificationMinute: t.notificationMinute,
@@ -574,10 +584,23 @@ final vaultCardDataProvider = Provider<Map<String?, VaultCardData>>((ref) {
     for (final t in activeTxs) {
       if (t.date.year == now.year && t.date.month == now.month) {
         final amt = t.getConvertedAmount(targetCurrency, rates);
-        if (t.isIncome) {
-          income += amt;
+        final isTransfer = t.targetVaultId != null;
+        if (isTransfer) {
+          if (vaultId != null) {
+            final activeDbId = int.tryParse(vaultId.replaceFirst('v_', ''));
+            if (t.targetVaultId == activeDbId) {
+              income += amt;
+            } else if (t.vaultId == activeDbId) {
+              expense += amt;
+            }
+          }
+          // Genel bakiyede transfer işlemleri gelir/gider akışına dahil edilmez
         } else {
-          expense += amt;
+          if (t.isIncome) {
+            income += amt;
+          } else {
+            expense += amt;
+          }
         }
       }
     }

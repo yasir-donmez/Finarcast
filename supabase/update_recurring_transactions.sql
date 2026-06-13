@@ -27,7 +27,6 @@ create table if not exists public.recurring_templates (
   notification_hour int not null default 9,
   notification_minute int not null default 0,
   vault_id uuid references public.vaults(id) on delete set null,
-  vault_ids uuid[],
   updated_at timestamptz not null default now()
 );
 
@@ -65,8 +64,7 @@ alter table public.transaction_records
   add column if not exists installment_number int,
   add column if not exists total_installments int,
   add column if not exists status int not null default 0,
-  add column if not exists is_reviewed boolean not null default false,
-  add column if not exists vault_ids uuid[];
+  add column if not exists is_reviewed boolean not null default false;
 
 -- 4) Eski işlemlerin occurrence_date ve occurrence_key değerlerini doldur (varsayılan)
 update public.transaction_records
