@@ -409,40 +409,32 @@ class _DismissibleDraftCardState extends State<DismissibleDraftCard>
     }
 
     // 1. Transaction Type Badge
-    final String typeText;
     final IconData typeIcon;
     final Color typeBadgeColor;
 
     if (isTransfer) {
-      typeText = isTr ? "Transfer" : (isPt ? "Transferência" : "Transfer");
       typeIcon = Icons.swap_horiz_rounded;
       typeBadgeColor = Colors.blue.shade600;
     } else if (widget.draft.isIncome) {
-      typeText = isTr ? "Gelir" : (isPt ? "Receita" : "Income");
       typeIcon = Icons.arrow_upward_rounded;
       typeBadgeColor = AppColors.getIncome(context);
     } else {
-      typeText = isTr ? "Gider" : (isPt ? "Despesa" : "Expense");
       typeIcon = Icons.arrow_downward_rounded;
       typeBadgeColor = AppColors.getExpense(context);
     }
 
     // 2. Plan Badge (if periodType > 0)
     final bool isPlan = widget.draft.periodType > 0;
-    final String planText;
     final IconData planIcon;
     final Color planColor = Colors.purple.shade600;
 
     if (isPlan) {
       if (widget.draft.remainingInstallments == 1) {
-        planText = isTr ? "Plan (Tek Seferlik)" : (isPt ? "Plano (Único)" : "Plan (One-Time)");
         planIcon = Icons.calendar_today_rounded;
       } else {
-        planText = isTr ? "Plan (Tekrarlı)" : (isPt ? "Plano (Recorrente)" : "Plan (Recurring)");
         planIcon = Icons.sync_rounded;
       }
     } else {
-      planText = "";
       planIcon = Icons.help;
     }
 
@@ -517,7 +509,7 @@ class _DismissibleDraftCardState extends State<DismissibleDraftCard>
                     ),
                     const SizedBox(width: 10),
                     
-                    // Orta/Üst Sütun: Kategori Adı ve Kısaltılmış İşlem Notu
+                    // Orta/Üst Sütun: Kategori Adı ve Kısaltılmış İşlem Notu + Plan İkonu
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -526,27 +518,33 @@ class _DismissibleDraftCardState extends State<DismissibleDraftCard>
                           // Kategori Adı (Market • Gıda)
                           categoryHeaderWidget,
                           const SizedBox(height: 3),
-                          // Kısaltılmış İşlem Notu (cardNote)
-                          if (cardNote != null && cardNote.isNotEmpty)
-                            Text(
-                              cardNote,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: TextStyle(
-                                fontSize: 10,
-                                color: AppColors.getTextFaint(context),
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                          const SizedBox(height: 5),
-                          // Rozetler (Gider, Gelir, Transfer & Plan Durumu)
-                          Wrap(
-                            spacing: 4,
-                            runSpacing: 4,
+                          // Kısaltılmış İşlem Notu (cardNote) + Plan İkonu (Aynı Satırda Kompakt Gösterim)
+                          Row(
+                            mainAxisSize: MainAxisSize.min,
+                            crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
-                              _buildBadge(context, typeText, typeIcon, typeBadgeColor),
-                              if (isPlan)
-                                _buildBadge(context, planText, planIcon, planColor),
+                              if (cardNote != null && cardNote.isNotEmpty)
+                                Flexible(
+                                  child: Text(
+                                    cardNote,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: TextStyle(
+                                      fontSize: 10,
+                                      color: AppColors.getTextFaint(context),
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                ),
+                              if (isPlan) ...[
+                                if (cardNote != null && cardNote.isNotEmpty)
+                                  const SizedBox(width: 4),
+                                Icon(
+                                  planIcon,
+                                  size: 10,
+                                  color: planColor,
+                                ),
+                              ],
                             ],
                           ),
                         ],
@@ -554,23 +552,35 @@ class _DismissibleDraftCardState extends State<DismissibleDraftCard>
                     ),
                     const SizedBox(width: 10),
                     
-                    // Sağ Üst: Tutar (En belirgin yer)
-                    Text(
-                      () {
-                        final sign = isTransfer ? "" : (widget.draft.isIncome ? "+" : "-");
-                        final curr = widget.draft.currency ?? widget.currencySymbol;
-                        if (widget.draft.minAmount != null || widget.draft.maxAmount != null) {
-                          final minStr = widget.draft.minAmount?.toStringAsFixed(0) ?? "0";
-                          final maxStr = widget.draft.maxAmount?.toStringAsFixed(0) ?? "0";
-                          return "$sign$minStr-$maxStr $curr";
-                        }
-                        return "$sign${widget.draft.amount.toStringAsFixed(0)} $curr";
-                      }(),
-                      style: TextStyle(
-                        fontSize: 17,
-                        fontWeight: FontWeight.w900,
-                        color: amountColor,
-                      ),
+                    // Sağ Üst: Tutar ve Tip İkonu (Yazısız, sadece ikon ile kompakt gösterim)
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Icon(
+                          typeIcon,
+                          color: typeBadgeColor.withValues(alpha: 0.85),
+                          size: 13,
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          () {
+                            final sign = isTransfer ? "" : (widget.draft.isIncome ? "+" : "-");
+                            final curr = widget.draft.currency ?? widget.currencySymbol;
+                            if (widget.draft.minAmount != null || widget.draft.maxAmount != null) {
+                              final minStr = widget.draft.minAmount?.toStringAsFixed(0) ?? "0";
+                              final maxStr = widget.draft.maxAmount?.toStringAsFixed(0) ?? "0";
+                              return "$sign$minStr-$maxStr $curr";
+                            }
+                            return "$sign${widget.draft.amount.toStringAsFixed(0)} $curr";
+                          }(),
+                          style: TextStyle(
+                            fontSize: 17,
+                            fontWeight: FontWeight.w900,
+                            color: amountColor,
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),
@@ -578,11 +588,9 @@ class _DismissibleDraftCardState extends State<DismissibleDraftCard>
                 const SizedBox(height: 10),
                 
                 // Alt Satır (Aksiyon ve Meta Veri): Sol alta kasa seçici, sağ alta ise tarihler
-                Wrap(
-                  alignment: WrapAlignment.spaceBetween,
-                  crossAxisAlignment: WrapCrossAlignment.center,
-                  spacing: 8,
-                  runSpacing: 8,
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     // Kasa Seçici(leri)
                     if (isTransfer)
@@ -591,7 +599,7 @@ class _DismissibleDraftCardState extends State<DismissibleDraftCard>
                         children: [
                           // Kaynak Kasa
                           SizedBox(
-                            width: 100,
+                            width: 80,
                             height: 36,
                             child: InlinePicker(
                               items: vaultNames,
@@ -601,16 +609,16 @@ class _DismissibleDraftCardState extends State<DismissibleDraftCard>
                                   widget.onVaultSelected(widget.vaults[index].id);
                                 }
                               },
-                              width: 100,
+                              width: 80,
                               height: 36,
                               scalingFactor: 0.95,
                             ),
                           ),
                           Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 4),
+                            padding: const EdgeInsets.symmetric(horizontal: 2),
                             child: Icon(
                               Icons.arrow_forward_rounded,
-                              size: 14,
+                              size: 12,
                               color: AppColors.getTextSecondary(context),
                             ),
                           ),
@@ -624,7 +632,7 @@ class _DismissibleDraftCardState extends State<DismissibleDraftCard>
                               }
                             }
                             return SizedBox(
-                              width: 100,
+                              width: 80,
                               height: 36,
                               child: InlinePicker(
                                 items: vaultNames,
@@ -634,7 +642,7 @@ class _DismissibleDraftCardState extends State<DismissibleDraftCard>
                                     widget.onTargetVaultSelected!(widget.vaults[index].id);
                                   }
                                 },
-                                width: 100,
+                                width: 80,
                                 height: 36,
                                 scalingFactor: 0.95,
                               ),
@@ -660,53 +668,61 @@ class _DismissibleDraftCardState extends State<DismissibleDraftCard>
                         ),
                       ),
                     
-                    // Sağ Alt: Tarihler ve Hatırlatıcılar
-                    Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        // Hatırlatıcı varsa solunda gösterilsin
-                        if (widget.draft.isNotificationEnabled) ...[
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
-                            decoration: BoxDecoration(
-                              color: Colors.amber.shade700.withValues(alpha: 0.12),
-                              borderRadius: BorderRadius.circular(5),
-                              border: Border.all(
-                                color: Colors.amber.shade700.withValues(alpha: 0.2),
-                                width: 0.5,
-                              ),
-                            ),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Icon(
-                                  Icons.notifications_active_rounded,
-                                  size: 9,
-                                  color: Colors.amber.shade700,
-                                ),
-                                const SizedBox(width: 2.5),
-                                Text(
-                                  '${widget.draft.notificationReminderDays == 0 ? AppLocalizations.of(context)!.today : "${widget.draft.notificationReminderDays}g"} ${widget.draft.notificationHour.toString().padLeft(2, '0')}:${widget.draft.notificationMinute.toString().padLeft(2, '0')}',
-                                  style: TextStyle(
-                                    fontSize: 7.5,
-                                    fontWeight: FontWeight.w900,
-                                    color: Colors.amber.shade800,
+                    const SizedBox(width: 4),
+
+                    // Sağ Alt: Tarihler ve Hatırlatıcılar (FittedBox ile taşmayı önler ve tek satırda tutar)
+                    Flexible(
+                      child: FittedBox(
+                        fit: BoxFit.scaleDown,
+                        alignment: Alignment.centerRight,
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            // Hatırlatıcı varsa solunda gösterilsin
+                            if (widget.draft.isNotificationEnabled) ...[
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
+                                decoration: BoxDecoration(
+                                  color: Colors.amber.shade700.withValues(alpha: 0.12),
+                                  borderRadius: BorderRadius.circular(5),
+                                  border: Border.all(
+                                    color: Colors.amber.shade700.withValues(alpha: 0.2),
+                                    width: 0.5,
                                   ),
                                 ),
-                              ],
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(
+                                      Icons.notifications_active_rounded,
+                                      size: 9,
+                                      color: Colors.amber.shade700,
+                                    ),
+                                    const SizedBox(width: 2.5),
+                                    Text(
+                                      '${widget.draft.notificationReminderDays == 0 ? AppLocalizations.of(context)!.today : "${widget.draft.notificationReminderDays}g"} ${widget.draft.notificationHour.toString().padLeft(2, '0')}:${widget.draft.notificationMinute.toString().padLeft(2, '0')}',
+                                      style: TextStyle(
+                                        fontSize: 7.5,
+                                        fontWeight: FontWeight.w900,
+                                        color: Colors.amber.shade800,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              const SizedBox(width: 6),
+                            ],
+                            Text(
+                              DateFormat('dd MMM, HH:mm').format(widget.draft.date),
+                              style: TextStyle(
+                                fontSize: 8.5,
+                                fontWeight: FontWeight.w600,
+                                color: AppColors.getTextFaint(context),
+                              ),
                             ),
-                          ),
-                          const SizedBox(width: 6),
-                        ],
-                        Text(
-                          DateFormat('dd MMM, HH:mm').format(widget.draft.date),
-                          style: TextStyle(
-                            fontSize: 8.5,
-                            fontWeight: FontWeight.w600,
-                            color: AppColors.getTextFaint(context),
-                          ),
+                          ],
                         ),
-                      ],
+                      ),
                     ),
                   ],
                 ),
@@ -721,36 +737,7 @@ class _DismissibleDraftCardState extends State<DismissibleDraftCard>
     );
   }
 
-  Widget _buildBadge(BuildContext context, String text, IconData icon, Color color) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2.5),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(6),
-        border: Border.all(
-          color: color.withValues(alpha: 0.2),
-          width: 0.5,
-        ),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          Icon(icon, size: 10, color: color),
-          const SizedBox(width: 3),
-          Text(
-            text,
-            style: TextStyle(
-              fontSize: 8,
-              fontWeight: FontWeight.w800,
-              color: color,
-              height: 1.1,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
+
 }
 
 // ==========================================
