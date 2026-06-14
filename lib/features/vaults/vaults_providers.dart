@@ -317,7 +317,17 @@ final transactionFilterProvider = StateProvider<TransactionFilter>(
 final vaultTransactionsProvider = Provider<List<TransactionUI>>((ref) {
   final dbRecords = ref.watch(allTransactionsProvider);
   final customCategories = ref.watch(customCategoriesProvider);
-  return dbRecords.map((r) => TransactionUI.fromDB(r, customCategories)).toList();
+  final list = dbRecords.map((r) => TransactionUI.fromDB(r, customCategories)).toList();
+  list.sort((a, b) {
+    final dateCompare = b.date.compareTo(a.date);
+    if (dateCompare != 0) {
+      return dateCompare;
+    }
+    final aId = a.dbId ?? 0;
+    final bId = b.dbId ?? 0;
+    return bId.compareTo(aId);
+  });
+  return list;
 });
 
 /// DB'den gelen şablonları UI modeline çeviren provider

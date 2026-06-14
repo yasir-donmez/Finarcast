@@ -297,7 +297,9 @@ class _DueDateRadarWidgetState extends ConsumerState<DueDateRadarWidget> {
                   style: TextStyle(
                     fontSize: 8.5, 
                     fontWeight: FontWeight.w900, 
-                    color: tx.isIncome ? Colors.green.withValues(alpha: 0.8) : Colors.orange.withValues(alpha: 0.8)
+                    color: tx.targetVaultId != null
+                        ? Colors.blueGrey
+                        : (tx.isIncome ? AppColors.getIncome(context) : AppColors.getExpense(context)),
                   ),
                 ),
               ],

@@ -4,6 +4,7 @@ import '../../../core/theme/app_constants.dart';
 import '../../../shared/widgets/clickable_action.dart';
 import '../../../shared/widgets/custom_switch.dart';
 import '../../../shared/widgets/custom_animated_icon.dart';
+import '../../../l10n/app_localizations.dart';
 
 enum SettingType {
   membership,
@@ -115,6 +116,9 @@ class SettingsListItems {
   static Widget buildSetting({
     required IconData icon,
     required String title,
+    String? subtitle,
+    Widget? subtitleWidget,
+    Color? subtitleColor,
     String? trailing,
     required VoidCallback onTap,
     required Color activeColor,
@@ -141,13 +145,33 @@ class SettingsListItems {
             ),
             const SizedBox(width: 16),
             Expanded(
-              child: Text(
-                title,
-                style: TextStyle(
-                  color: isDestructive ? activeColor : AppColors.getTextPrimary(context),
-                  fontSize: 16,
-                  fontWeight: FontWeight.w700,
-                ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    title,
+                    style: TextStyle(
+                      color: isDestructive ? activeColor : AppColors.getTextPrimary(context),
+                      fontSize: 16,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  if (subtitleWidget != null) ...[
+                    const SizedBox(height: 2),
+                    subtitleWidget,
+                  ] else if (subtitle != null) ...[
+                    const SizedBox(height: 2),
+                    Text(
+                      subtitle,
+                      style: TextStyle(
+                        color: subtitleColor ?? AppColors.getTextSecondary(context).withValues(alpha: 0.5),
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
+                ],
               ),
             ),
             if (trailing != null) ...[
@@ -165,7 +189,9 @@ class SettingsListItems {
                   trailing,
                   key: ValueKey(trailing),
                   style: TextStyle(
-                    color: activeColor,
+                    color: (trailing == AppLocalizations.of(context)?.premiumBadge)
+                        ? const Color(0xFFFFB300)
+                        : activeColor,
                     fontSize: 14,
                     fontWeight: FontWeight.w800,
                   ),

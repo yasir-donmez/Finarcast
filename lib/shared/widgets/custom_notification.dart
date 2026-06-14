@@ -167,14 +167,20 @@ class _NotificationWidgetState extends State<_NotificationWidget> with SingleTic
           position: _offsetAnimation,
           child: FadeTransition(
             opacity: _opacityAnimation,
-            child: GestureDetector(
-              onTap: _dismiss,
-              onVerticalDragEnd: (details) {
-                if (details.primaryVelocity! < 0) {
-                  _dismiss();
-                }
+            child: Dismissible(
+              key: UniqueKey(),
+              direction: DismissDirection.horizontal,
+              onDismissed: (_) {
+                widget.onDismiss();
               },
-              child: GlassSurface(
+              child: GestureDetector(
+                onTap: _dismiss,
+                onVerticalDragEnd: (details) {
+                  if (details.primaryVelocity! < 0) {
+                    _dismiss();
+                  }
+                },
+                child: GlassSurface(
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                 borderRadius: 20,
                 blurSigma: 20,
@@ -211,6 +217,7 @@ class _NotificationWidgetState extends State<_NotificationWidget> with SingleTic
                   ],
                 ),
               ),
+            ),
             ),
           ),
         ),

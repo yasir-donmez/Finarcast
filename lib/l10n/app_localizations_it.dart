@@ -992,6 +992,10 @@ class AppLocalizationsIt extends AppLocalizations {
       'Le regole di conservazione, archiviazione e cancellazione automatica dei dati sono disponibili solo per i membri Premium.';
 
   @override
+  String get premiumExportDesc =>
+      'L\'esportazione dei dati in formato Excel o CSV è disponibile solo per i membri Premium.';
+
+  @override
   String get later => 'Dopo';
 
   @override
@@ -1325,11 +1329,24 @@ class AppLocalizationsIt extends AppLocalizations {
       'Tutti i tuoi dati finanziari e le impostazioni verranno eliminati definitivamente. Questa azione non può essere annullata.';
 
   @override
+  String get resetCloudBackup => 'Elimina anche il backup cloud (Supabase)';
+
+  @override
+  String get resetOnlyDevice => 'Ripristina solo questo dispositivo';
+
+  @override
+  String get resetDeviceAndCloud => 'Ripristina dispositivo e cloud';
+
+  @override
   String get deleteAll => 'Cancella Tutti';
 
   @override
   String get resetSuccess =>
       'Tutti i dati e le impostazioni sono stati ripristinati correttamente.';
+
+  @override
+  String get noTransactionsToExport =>
+      'Nessun record di transazione trovato da esportare.';
 
   @override
   String get supportEmailCopied =>
@@ -2028,4 +2045,96 @@ class AppLocalizationsIt extends AppLocalizations {
   String aiErrorGeneric(Object error) {
     return 'Analisi AI non riuscita: $error';
   }
+
+  @override
+  String get vaultTransfer => 'Trasferimento di conto';
+
+  @override
+  String daysShort(Object count) {
+    return '${count}g';
+  }
+
+  @override
+  String get recurrenceDay => 'Giorno di ricorrenza';
+
+  @override
+  String dayOfMonthFormatted(Object day) {
+    return 'Giorno $day del mese';
+  }
+
+  @override
+  String get recurrenceDate => 'Data di ricorrenza';
+
+  @override
+  String occurrencesCount(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count ricorrenze',
+      one: '1 ricorrenza',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get plans => 'Piani';
+
+  @override
+  String installmentsCount(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count rate',
+      one: '1 rata',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get installment => 'Rata';
+
+  @override
+  String get paymentOrder => 'Ordine di pagamento';
+
+  @override
+  String paymentNumber(Object number) {
+    return 'Pagamento n°$number';
+  }
+
+  @override
+  String percentFormat(Object value) {
+    return '$value%';
+  }
+
+  @override
+  String get selectValidTargetVault =>
+      'Seleziona un conto di destinazione valido.';
+
+  @override
+  String get sourceAndTargetVaultSame =>
+      'Il conto di origine e quello di destinazione não possono coincidere.';
+
+  @override
+  String get targetVault => 'Conto di destinazione';
+
+  @override
+  String get editPlan => 'Modifica piano';
+
+  @override
+  String get newPlan => 'Nuovo piano';
+
+  @override
+  String get editTransaction => 'Modifica transazione';
+
+  @override
+  String get navDashboard => 'Dashboard';
+
+  @override
+  String get navVaults => 'Cassaforti';
+
+  @override
+  String get navSmartScan => 'Scansione';
+
+  @override
+  String get navSettings => 'Impostazioni';
 }

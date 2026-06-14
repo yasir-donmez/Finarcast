@@ -969,6 +969,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get premiumRetentionDesc => '数据保留、存档和自动删除规则仅适用于高级会员。';
 
   @override
+  String get premiumExportDesc => 'Excel或CSV格式的数据导出仅供高级会员使用。';
+
+  @override
   String get later => '之后';
 
   @override
@@ -1282,10 +1285,22 @@ class AppLocalizationsZh extends AppLocalizations {
   String get resetDataDesc => '您的所有财务数据和设置都将被永久删除。此操作无法撤消。';
 
   @override
+  String get resetCloudBackup => '同时删除云端备份 (Supabase)';
+
+  @override
+  String get resetOnlyDevice => '仅重置此设备';
+
+  @override
+  String get resetDeviceAndCloud => '重置设备和云端';
+
+  @override
   String get deleteAll => '全部删除';
 
   @override
   String get resetSuccess => '所有数据和设置均已成功重置。';
+
+  @override
+  String get noTransactionsToExport => '没有找到可导出的交易记录。';
 
   @override
   String get supportEmailCopied =>
@@ -1938,4 +1953,92 @@ class AppLocalizationsZh extends AppLocalizations {
   String aiErrorGeneric(Object error) {
     return 'AI 分析失败：$error';
   }
+
+  @override
+  String get vaultTransfer => '账户转账';
+
+  @override
+  String daysShort(Object count) {
+    return '$count天';
+  }
+
+  @override
+  String get recurrenceDay => '重复日';
+
+  @override
+  String dayOfMonthFormatted(Object day) {
+    return '每月 $day 日';
+  }
+
+  @override
+  String get recurrenceDate => '重复日期';
+
+  @override
+  String occurrencesCount(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count 次',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get plans => '计划';
+
+  @override
+  String installmentsCount(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count 期分期',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get installment => '分期';
+
+  @override
+  String get paymentOrder => '付款顺序';
+
+  @override
+  String paymentNumber(Object number) {
+    return '第 $number 次付款';
+  }
+
+  @override
+  String percentFormat(Object value) {
+    return '$value%';
+  }
+
+  @override
+  String get selectValidTargetVault => '请选择有效的目标账户。';
+
+  @override
+  String get sourceAndTargetVaultSame => '源账户与目标账户不能相同。';
+
+  @override
+  String get targetVault => '目标账户';
+
+  @override
+  String get editPlan => '编辑计划';
+
+  @override
+  String get newPlan => '新建计划';
+
+  @override
+  String get editTransaction => '编辑交易';
+
+  @override
+  String get navDashboard => '仪表盘';
+
+  @override
+  String get navVaults => '金库';
+
+  @override
+  String get navSmartScan => '扫描';
+
+  @override
+  String get navSettings => '设置';
 }

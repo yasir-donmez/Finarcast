@@ -22,6 +22,8 @@ class SyncBootstrap extends ConsumerStatefulWidget {
 
 class _SyncBootstrapState extends ConsumerState<SyncBootstrap>
     with WidgetsBindingObserver {
+  Timer? _syncDebounce;
+
   @override
   void initState() {
     super.initState();
@@ -34,6 +36,7 @@ class _SyncBootstrapState extends ConsumerState<SyncBootstrap>
 
   @override
   void dispose() {
+    _syncDebounce?.cancel();
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
@@ -41,10 +44,20 @@ class _SyncBootstrapState extends ConsumerState<SyncBootstrap>
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
-      _trySync();
+      _debouncedSync();
       // Uygulama arka plandan geldiğinde döviz kurlarını güncelle
       CurrencyService.updateRates();
     }
+  }
+
+  /// Birden fazla kaynaktan gelen eşzamanlı sync tetiklemelerini önler.
+  /// 500ms debounce ile son tetiklemeyi bekleyip tek bir sync çalıştırır.
+  void _debouncedSync() {
+    _syncDebounce?.cancel();
+    _syncDebounce = Timer(const Duration(milliseconds: 500), () async {
+      await _trySyncSettings();
+      await _trySync();
+    });
   }
 
   Future<void> _trySync() async {
@@ -85,24 +98,28 @@ class _SyncBootstrapState extends ConsumerState<SyncBootstrap>
     ref.listen<bool>(settingsProvider.select((s) => s.isSyncEnabled),
         (prev, next) {
       if (next && prev != next) {
-        unawaited(_trySync());
+        _debouncedSync();
       }
     });
 
+    // Premium durumu değiştiğinde tam senkronizasyon başlat.
+    // Önceki hatalı davranış: sadece _trySyncSettings çağrılıyordu ve
+    // ayarlar zaten çekilmişse syncNow asla tetiklenmiyordu.
     ref.listen<bool>(subscriptionServiceProvider.select((s) => s.isPro),
         (prev, next) {
       if (next && prev != next) {
-        unawaited(_trySyncSettings());
+        debugPrint('[SyncBootstrap] ✅ Premium aktif oldu, tam senkronizasyon tetikleniyor...');
+        _debouncedSync();
       }
     });
 
     ref.listen(authStateProvider, (prev, next) {
       if (next.hasValue && next.value!.session != null) {
-        unawaited(_trySyncSettings());
-        unawaited(_trySync());
+        _debouncedSync();
       }
     });
 
     return widget.child;
   }
 }
+

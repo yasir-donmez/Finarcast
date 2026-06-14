@@ -145,8 +145,13 @@ class TimelineActivityWidget extends ConsumerWidget {
     List<CustomCategory> customCategories, {
     required bool isLeft,
   }) {
-    final isIncoming = tx.targetVaultId != null ? isLeft : tx.isIncome;
-    final Color semanticColor = isIncoming ? AppColors.getIncome(context) : AppColors.getExpense(context);
+    final isTransfer = tx.targetVaultId != null;
+    final isIncoming = isTransfer ? isLeft : tx.isIncome;
+    final Color semanticColor = isTransfer
+        ? Colors.blueGrey
+        : (isIncoming ? AppColors.getIncome(context) : AppColors.getExpense(context));
+    final String amountText = CurrencyUtils.formatAmount(tx.effectiveAmount, currencySymbol: tx.currency ?? '₺');
+
     final Color categoryColor = CategoryUtils.getCategoryColor(
       categoryId: tx.categoryId,
       customCategories: customCategories,
@@ -202,7 +207,7 @@ class TimelineActivityWidget extends ConsumerWidget {
                   overflow: TextOverflow.ellipsis,
                 ),
                 Text(
-                  CurrencyUtils.formatAmount(tx.effectiveAmount, currencySymbol: tx.currency ?? '₺'),
+                  amountText,
                   style: TextStyle(
                     fontSize: 8, 
                     fontWeight: FontWeight.w900, 

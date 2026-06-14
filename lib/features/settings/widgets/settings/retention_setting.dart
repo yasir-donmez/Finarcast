@@ -12,6 +12,7 @@ import '../settings_list_items.dart';
 import '../../../../core/services/subscription_service.dart';
 import '../../../../shared/widgets/custom_dialog.dart';
 import '../../../subscription/widgets/pro_upgrade_sheet.dart';
+import '../../../../shared/widgets/animated_premium_badge.dart';
 
 final _retentionExpandedProvider = StateProvider.autoDispose<bool>((ref) => false);
 
@@ -75,14 +76,7 @@ class RetentionSetting extends ConsumerWidget {
                       ),
                       if (!isPro) ...[
                         const SizedBox(height: 2),
-                        Text(
-                          l10n.premiumBadge,
-                          style: const TextStyle(
-                            color: Colors.amber,
-                            fontSize: 12,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
+                        const AnimatedPremiumBadge(),
                       ] else
                         AnimatedSwitcher(
                           duration: const Duration(milliseconds: 300),

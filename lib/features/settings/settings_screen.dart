@@ -19,7 +19,6 @@ import 'widgets/settings/color_theme_setting.dart';
 import 'widgets/settings/background_setting.dart';
 import '../auth/utils/auth_error_helper.dart';
 
-import 'widgets/etched_liquid_text.dart';
 import 'widgets/settings/subscription_setting.dart';
 import 'widgets/settings_list_items.dart';
 import '../../core/providers/auth_provider.dart';
@@ -33,6 +32,10 @@ import 'widgets/settings/sync_setting.dart';
 import 'widgets/settings/retention_setting.dart';
 import 'widgets/settings/purge_setting.dart';
 import 'widgets/settings/reset_setting.dart';
+import '../../core/services/export_service.dart';
+import '../subscription/widgets/pro_upgrade_sheet.dart';
+import '../../core/services/subscription_service.dart';
+import '../../shared/widgets/animated_premium_badge.dart';
 
 class SettingsScreen extends ConsumerStatefulWidget {
   const SettingsScreen({super.key});
@@ -73,6 +76,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
 
     final authService = ref.watch(authServiceProvider);
     final user = authService.currentUser;
+    final isPro = ref.watch(subscriptionServiceProvider).isPro;
 
     return SafeArea(
       bottom: false,
@@ -82,19 +86,15 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         slivers: [
           SliverToBoxAdapter(
             child: Padding(
-              padding: const EdgeInsets.only(top: 120, bottom: 40),
+              padding: const EdgeInsets.only(top: 120, bottom: 24),
               child: Center(
-                child: RepaintBoundary(
-                  child: ValueListenableBuilder<double>(
-                    valueListenable: _scrollOffset,
-                    builder: (context, offset, _) {
-                      return EtchedLiquidText(
-                        progress: (offset / 120).clamp(0.0, 1.0),
-                        activeColor: activeColor,
-                        text: l10n.settings,
-                        fontSize: 44,
-                      );
-                    },
+                child: Text(
+                  l10n.settings,
+                  style: TextStyle(
+                    fontSize: 28,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: -0.8,
+                    color: AppColors.getTextPrimary(context),
                   ),
                 ),
               ),
@@ -417,21 +417,20 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       const SyncSetting(),
                       SettingsListItems.buildDivider(isDark),
                       SettingsListItems.buildSetting(
-                        icon: Icons.cloud_upload_outlined,
-                        title: l10n.driveBackup,
-                        onTap: () => _showComingSoon(l10n.driveBackup, l10n),
-                        activeColor: SettingsListItems.getSettingColor(context, SettingType.backup, activeColor),
-                        context: context,
-                        isAction: true,
-                      ),
-                      SettingsListItems.buildDivider(isDark),
-                      SettingsListItems.buildSetting(
                         icon: Icons.table_view_rounded,
                         title: l10n.exportExcel,
-                        onTap: () => _showComingSoon(l10n.exportExcel, l10n),
+                        subtitleWidget: isPro ? null : const AnimatedPremiumBadge(),
+                        onTap: () {
+                          if (isPro) {
+                            ExportService.exportTransactionsToCsv(context, ref);
+                          } else {
+                            HapticFeedback.heavyImpact();
+                            _showPremiumRequiredDialog(context, l10n);
+                          }
+                        },
                         activeColor: SettingsListItems.getSettingColor(context, SettingType.export, activeColor),
                         context: context,
-                        isAction: true,
+                        isAction: isPro,
                       ),
                       SettingsListItems.buildDivider(isDark),
                       const RetentionSetting(),
@@ -875,20 +874,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     );
   }
 
-  void _showComingSoon(String feature, AppLocalizations l10n) {
-    showCustomDialog(
-      context: context,
-      title: l10n.comingSoon,
-      content: l10n.comingSoonDesc(feature),
-      actions: [
-        PrecisionDialogAction(
-          label: l10n.ok,
-          onTap: () => Navigator.pop(context),
-        ),
-      ],
-    );
-  }
-
   Future<void> _launchEmail() async {
     final Uri emailLaunchUri = Uri(
       scheme: 'mailto',
@@ -914,5 +899,29 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         CustomNotification.info(context, l10n.supportEmailCopied);
       }
     }
+  }
+
+  void _showPremiumRequiredDialog(BuildContext context, AppLocalizations l10n) {
+    showCustomDialog(
+      context: context,
+      accentColor: const Color(0xFFFFB300), // Altın rengi
+      title: l10n.premiumRequired,
+      content: l10n.premiumExportDesc,
+      actions: [
+        PrecisionDialogAction(
+          label: l10n.later,
+          onTap: () => Navigator.pop(context),
+          isPrimary: false,
+        ),
+        PrecisionDialogAction(
+          label: l10n.upgradeToPro,
+          onTap: () {
+            Navigator.pop(context);
+            ProUpgradeSheet.show(context);
+          },
+          isPrimary: true,
+        ),
+      ],
+    );
   }
 }

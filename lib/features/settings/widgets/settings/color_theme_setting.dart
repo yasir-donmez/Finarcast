@@ -9,6 +9,8 @@ import '../../../home/home_providers.dart';
 import '../settings_list_items.dart';
 import '../../../../shared/widgets/custom_dialog.dart';
 import '../../../subscription/widgets/pro_upgrade_sheet.dart';
+import '../../../../shared/widgets/animated_premium_badge.dart';
+import '../../../../shared/widgets/animated_premium_star_badge.dart';
 
 class ThemeColorOption {
   final Color primaryColor;
@@ -119,14 +121,7 @@ class ColorThemeSetting extends ConsumerWidget {
                     ),
                     if (!isPro) ...[
                       const SizedBox(height: 2),
-                      Text(
-                        l10n.premiumBadge,
-                        style: const TextStyle(
-                          color: Colors.amber,
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
+                      const AnimatedPremiumBadge(),
                     ],
                   ],
                 ),
@@ -369,20 +364,12 @@ class _LiquidColorDropState extends State<LiquidColorDrop> {
 
                   // Kilitli Premium İşareti (Sağ Üstte Küçük Altın Yıldız)
                   if (widget.isPremium && !widget.isPro)
-                    Positioned(
+                    const Positioned(
                       top: -2,
                       right: -2,
-                      child: Container(
-                        padding: const EdgeInsets.all(2.5),
-                        decoration: const BoxDecoration(
-                          color: Color(0xFFFFB300), // Altın sarısı
-                          shape: BoxShape.circle,
-                        ),
-                        child: const Icon(
-                          Icons.star_rounded,
-                          color: Colors.white,
-                          size: 8,
-                        ),
+                      child: AnimatedPremiumStarBadge(
+                        size: 8,
+                        padding: 2.5,
                       ),
                     ),
                 ],

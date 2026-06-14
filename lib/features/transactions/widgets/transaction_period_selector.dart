@@ -172,7 +172,6 @@ class _TransactionPeriodSelectorState extends State<TransactionPeriodSelector> {
     final l10n = AppLocalizations.of(context)!;
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final scalingFactor = widget.scalingFactor;
-    final langCode = Localizations.localeOf(context).languageCode;
 
     return Column(
       children: [
@@ -317,21 +316,21 @@ class _TransactionPeriodSelectorState extends State<TransactionPeriodSelector> {
             SizedBox(height: 8 * scalingFactor),
             if (_periodType ~/ 100 == 3) // Monthly
               _buildStandardRow(
-                langCode == 'tr' ? 'Tekrarlama Günü' : 'Day of Month',
-                langCode == 'tr' ? 'Ayın $_selectedDay. Günü' : 'Day $_selectedDay of Month',
+                l10n.recurrenceDay,
+                l10n.dayOfMonthFormatted(_selectedDay),
                 Icons.calendar_month_rounded,
                 () => _showRecurrenceDayPicker(l10n),
               ),
             if (_periodType ~/ 100 == 4) // Yearly
               _buildStandardRow(
-                langCode == 'tr' ? 'Tekrarlama Tarihi' : 'Yearly Date',
+                l10n.recurrenceDate,
                 "${_selectedDateForRecurrence.day} ${_getMonths(l10n)[_selectedDateForRecurrence.month - 1]}",
                 Icons.calendar_month_rounded,
                 () => _showRecurrenceMonthDayPicker(l10n),
               ),
             if (_periodType ~/ 100 == 2 && ![250, 251].contains(_periodType)) // Weekly
               _buildStandardRow(
-                langCode == 'tr' ? 'Haftanın Günü' : 'Day of Week',
+                l10n.dayOfWeek,
                 _getWeekdays(l10n)[_selectedDateForRecurrence.weekday - 1],
                 Icons.calendar_view_week_rounded,
                 () => _showRecurrenceWeekdayPicker(l10n),
@@ -382,7 +381,7 @@ class _TransactionPeriodSelectorState extends State<TransactionPeriodSelector> {
                                     ),
                                     SizedBox(width: 12 * scalingFactor),
                                     Text(
-                                      (langCode == 'tr' ? 'Bitiş Süresi' : l10n.duration).toSafeUpperCase(context),
+                                      l10n.duration.toSafeUpperCase(context),
                                       style: TextStyle(
                                         fontSize: 11 * scalingFactor,
                                         fontWeight: FontWeight.w900,
@@ -397,8 +396,8 @@ class _TransactionPeriodSelectorState extends State<TransactionPeriodSelector> {
                                   padding: EdgeInsets.only(left: 30 * scalingFactor),
                                   child: Text(
                                     _duration == 0 
-                                      ? (langCode == 'tr' ? 'Sürekli Tekrar Eder' : 'Repeats Indefinitely')
-                                      : (langCode == 'tr' ? '$_duration Kez / Taksit' : '$_duration Occurrences'),
+                                      ? l10n.repeatsIndefinitely
+                                      : l10n.occurrencesCount(_duration),
                                     style: TextStyle(
                                       fontSize: 11 * scalingFactor,
                                       color: AppColors.getTextSecondary(context).withValues(alpha: 0.5),

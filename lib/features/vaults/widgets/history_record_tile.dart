@@ -3,14 +3,19 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../../shared/widgets/custom_dismissible.dart';
 import '../../../../core/theme/app_constants.dart';
 import '../../../../core/utils/currency_utils.dart';
 import '../../../../shared/widgets/custom_card.dart';
 import '../vaults_providers.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../../core/database/models/transaction_status.dart';
+import '../../../../core/providers/db_providers.dart';
+import '../../../../core/utils/category_utils.dart';
 
-class HistoryRecordTile extends StatefulWidget {
+
+class HistoryRecordTile extends ConsumerStatefulWidget {
   final TransactionUI transaction;
   final Future<void> Function() onReviewed;
   final Future<void> Function() onSkipped;
@@ -29,192 +34,74 @@ class HistoryRecordTile extends StatefulWidget {
   });
 
   @override
-  State<HistoryRecordTile> createState() => _HistoryRecordTileState();
+  ConsumerState<HistoryRecordTile> createState() => _HistoryRecordTileState();
 }
 
-class _HistoryRecordTileState extends State<HistoryRecordTile>
-    with SingleTickerProviderStateMixin {
-  double _dragExtent = 0.0;
+class _HistoryRecordTileState extends ConsumerState<HistoryRecordTile> {
   double _scale = 1.0;
-  late AnimationController _animController;
-  late Animation<double> _animation;
-  bool _dismissed = false;
-  bool _hasTriggeredStartHaptic = false;
-  bool _hasTriggeredThresholdHaptic = false;
-  double _cardWidth = 300.0;
-
-  static const double _dismissThreshold = 0.20;
 
   @override
-  void initState() {
-    super.initState();
-    _animController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 300),
-    );
-    _animation = _animController.drive(Tween(begin: 0.0, end: 0.0));
-    _animController.addListener(() {
-      if (mounted) {
-        setState(() {
-          _dragExtent = _animation.value;
-        });
-      }
-    });
-  }
-
-  @override
-  void dispose() {
-    _animController.dispose();
-    super.dispose();
-  }
-
-  void _onDragStart(DragStartDetails details) {
-    _animController.stop();
-    _hasTriggeredStartHaptic = false;
-    _hasTriggeredThresholdHaptic = false;
-  }
-
-  void _onDragUpdate(DragUpdateDetails details) {
+  Widget build(BuildContext context) {
     final tx = widget.transaction;
     final bool isSkipped = tx.status == TransactionStatus.skipped;
     final bool isReviewed = tx.isReviewed;
 
-    double delta = details.primaryDelta!;
-    setState(() {
-      _dragExtent += delta;
-      if (isSkipped) {
-        // Skipped transactions can only be swiped right (to review/unskip)
-        _dragExtent = _dragExtent.clamp(0.0, double.infinity);
-      } else if (isReviewed) {
-        // Reviewed transactions can only be swiped left (to skip)
-        _dragExtent = _dragExtent.clamp(-double.infinity, 0.0);
-      }
-    });
+    final bool enableLeftToRight = !isReviewed || isSkipped;
+    final bool enableRightToLeft = !isSkipped;
 
-    final ratio = _dragExtent.abs() / _cardWidth;
 
-    if (!_hasTriggeredStartHaptic && _dragExtent.abs() > 8) {
-      _hasTriggeredStartHaptic = true;
-      HapticFeedback.lightImpact();
-    }
-
-    if (!_hasTriggeredThresholdHaptic && ratio >= _dismissThreshold) {
-      _hasTriggeredThresholdHaptic = true;
-      HapticFeedback.mediumImpact();
-    } else if (_hasTriggeredThresholdHaptic && ratio < _dismissThreshold) {
-      _hasTriggeredThresholdHaptic = false;
-    }
-  }
-
-  void _onDragEnd(DragEndDetails details) {
-    if (_dismissed) return;
-
-    final ratio = _dragExtent.abs() / _cardWidth;
-    final velocity = details.primaryVelocity ?? 0;
-
-    if (ratio > _dismissThreshold || velocity.abs() > 1200) {
-      final target = _dragExtent > 0 ? _cardWidth * 1.2 : -_cardWidth * 1.2;
-      _dismissed = true;
-
-      _animation = Tween(begin: _dragExtent, end: target).animate(
-        CurvedAnimation(parent: _animController, curve: Curves.easeInCubic),
-      );
-      _animController.forward(from: 0).then((_) {
-        if (_dragExtent > 0) {
-          widget.onReviewed().then((_) {
-            if (mounted) {
-              setState(() {
-                _dragExtent = 0.0;
-                _dismissed = false;
-              });
-            }
-          });
+    return CustomDismissible(
+      enableLeftToRight: enableLeftToRight,
+      enableRightToLeft: enableRightToLeft,
+      onDismissed: (direction) async {
+        if (direction == SwipeDismissDirection.leftToRight) {
+          await widget.onReviewed();
         } else {
-          widget.onSkipped().then((_) {
-            if (mounted) {
-              setState(() {
-                _dragExtent = 0.0;
-                _dismissed = false;
-              });
-            }
-          });
+          await widget.onSkipped();
         }
-      });
-      HapticFeedback.mediumImpact();
-    } else {
-      _animation = Tween(begin: _dragExtent, end: 0.0).animate(
-        CurvedAnimation(parent: _animController, curve: Curves.easeOutCubic),
-      );
-      _animController.forward(from: 0);
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        _cardWidth = constraints.maxWidth;
-        final progress = (_dragExtent.abs() / _cardWidth).clamp(0.0, 1.0);
-        final isLeftToRight = _dragExtent > 0;
-        final showBackground = _dragExtent.abs() > 2;
-
-        return Stack(
-          children: [
-            if (showBackground)
-              Positioned.fill(
-                child: _buildSwipeBackground(
-                  isLeftToRight: isLeftToRight,
-                  progress: progress,
-                ),
-              ),
-
-            Transform.translate(
-              offset: Offset(_dragExtent, 0),
-              child: GestureDetector(
-                onHorizontalDragStart: _onDragStart,
-                onHorizontalDragUpdate: _onDragUpdate,
-                onHorizontalDragEnd: _onDragEnd,
-                onTapDown: (_) {
-                  setState(() {
-                    _scale = 0.98;
-                  });
-                },
-                onTapUp: (_) {
-                  setState(() {
-                    _scale = 1.0;
-                  });
-                },
-                onTapCancel: () {
-                  setState(() {
-                    _scale = 1.0;
-                  });
-                },
-                onTap: () {
-                  HapticFeedback.lightImpact();
-                  widget.onTap();
-                },
-                onLongPress: () {
-                  HapticFeedback.heavyImpact();
-                  widget.onLongPress();
-                },
-                child: AnimatedScale(
-                  scale: _scale,
-                  duration: const Duration(milliseconds: 100),
-                  curve: Curves.easeInOut,
-                  child: _buildCardContent(context),
-                ),
-              ),
-            ),
-          ],
-        );
       },
+      leftToRightBackgroundBuilder: (context, progress, isThresholdReached) =>
+          _buildSwipeBackground(isLeftToRight: true, progress: progress, isThresholdReached: isThresholdReached),
+      rightToLeftBackgroundBuilder: (context, progress, isThresholdReached) =>
+          _buildSwipeBackground(isLeftToRight: false, progress: progress, isThresholdReached: isThresholdReached),
+      child: GestureDetector(
+        onTapDown: (_) {
+          setState(() {
+            _scale = 0.98;
+          });
+        },
+        onTapUp: (_) {
+          setState(() {
+            _scale = 1.0;
+          });
+        },
+        onTapCancel: () {
+          setState(() {
+            _scale = 1.0;
+          });
+        },
+        onTap: () {
+          HapticFeedback.lightImpact();
+          widget.onTap();
+        },
+        onLongPress: () {
+          HapticFeedback.heavyImpact();
+          widget.onLongPress();
+        },
+        child: AnimatedScale(
+          scale: _scale,
+          duration: const Duration(milliseconds: 100),
+          curve: Curves.easeInOut,
+          child: _buildCardContent(context),
+        ),
+      ),
     );
   }
 
   Widget _buildSwipeBackground({
     required bool isLeftToRight,
     required double progress,
+    required bool isThresholdReached,
   }) {
     final color = isLeftToRight
         ? const Color(0xFF10B981)
@@ -231,15 +118,13 @@ class _HistoryRecordTileState extends State<HistoryRecordTile>
     final slideProgress = (progress / 0.25).clamp(0.0, 1.0);
     final xOffset = 30.0 * (1.0 - slideProgress) * slideSign;
 
-    final bool isThresholdReached = _hasTriggeredThresholdHaptic;
-    
     final double bgAlpha = isThresholdReached
         ? 0.22
-        : (progress / _dismissThreshold).clamp(0.0, 1.0) * 0.08;
+        : (progress / 0.20).clamp(0.0, 1.0) * 0.08;
         
     final double borderAlpha = isThresholdReached
         ? 0.45
-        : (progress / _dismissThreshold).clamp(0.0, 1.0) * 0.12;
+        : (progress / 0.20).clamp(0.0, 1.0) * 0.12;
 
     final Color bgColor = color.withValues(alpha: bgAlpha);
     final Color borderColor = color.withValues(alpha: borderAlpha);
@@ -287,7 +172,23 @@ class _HistoryRecordTileState extends State<HistoryRecordTile>
   }
 
   Widget _buildCardContent(BuildContext context) {
+    final customCategories = ref.watch(customCategoriesProvider);
     final tx = widget.transaction;
+    final categoryName = CategoryUtils.getCategoryName(
+      categoryId: tx.categoryId,
+      context: context,
+      customCategories: customCategories,
+      fallbackTitle: tx.name,
+    );
+    final parentId = tx.categoryId?.split('_').take(2).join('_');
+    final parentName = parentId != null
+        ? CategoryUtils.getCategoryName(
+            categoryId: parentId,
+            context: context,
+            customCategories: customCategories,
+          )
+        : null;
+    final bool hasSubCategory = parentName != null && parentName != categoryName;
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final l10n = AppLocalizations.of(context)!;
     final locale = Localizations.localeOf(context).languageCode;
@@ -307,11 +208,13 @@ class _HistoryRecordTileState extends State<HistoryRecordTile>
 
     final amountColor = isSkipped
         ? AppColors.getTextSecondary(context).withValues(alpha: 0.5)
-        : (isIncoming ? AppColors.getIncome(context) : AppColors.getExpense(context));
+        : (isTransfer
+            ? Colors.blueGrey
+            : (isIncoming ? AppColors.getIncome(context) : AppColors.getExpense(context)));
 
     final String amountText = tx.minAmount != null && tx.maxAmount != null
-        ? "${isIncoming ? '+' : '-'}${CurrencyUtils.formatAmount(tx.minAmount!, currencySymbol: tx.currency ?? "₺")} - ${CurrencyUtils.formatAmount(tx.maxAmount!, currencySymbol: tx.currency ?? "₺")}"
-        : "${isIncoming ? '+' : '-'}${CurrencyUtils.formatAmount(tx.effectiveAmount, currencySymbol: tx.currency ?? "₺")}";
+        ? "${CurrencyUtils.formatAmount(tx.minAmount!, currencySymbol: tx.currency ?? "₺")} ~ ${CurrencyUtils.formatAmount(tx.maxAmount!, currencySymbol: tx.currency ?? "₺")}"
+        : CurrencyUtils.formatAmount(tx.effectiveAmount, currencySymbol: tx.currency ?? "₺");
 
     String? installmentLabel;
     if (tx.installmentNumber != null && tx.totalInstallments != null) {
@@ -389,11 +292,13 @@ class _HistoryRecordTileState extends State<HistoryRecordTile>
                             children: [
                               Expanded(
                                 child: Text(
-                                  tx.name,
+                                  categoryName,
                                   style: TextStyle(
                                     fontSize: 13,
                                     fontWeight: FontWeight.w900,
-                                    color: AppColors.getTextPrimary(context),
+                                    color: hasSubCategory
+                                        ? AppColors.getAccentDeep(context, tx.color)
+                                        : AppColors.getTextPrimary(context),
                                     decoration: textDecoration,
                                   ),
                                   maxLines: 1,
@@ -524,188 +429,4 @@ class _HistoryRecordTileState extends State<HistoryRecordTile>
   }
 }
 
-// ==========================================
-// CUSTOM ANIMATED ICONS FOR SWIPE ACTIONS
-// ==========================================
 
-class AnimatedCheckIcon extends StatelessWidget {
-  final double progress;
-  final Color color;
-  const AnimatedCheckIcon({super.key, required this.progress, required this.color});
-
-  @override
-  Widget build(BuildContext context) {
-    final checkProgress = ((progress - 0.05) / 0.20).clamp(0.0, 1.0);
-
-    return SizedBox(
-      width: 28,
-      height: 28,
-      child: CustomPaint(
-        painter: _CheckIconPainter(
-          checkProgress: checkProgress,
-          color: color,
-        ),
-      ),
-    );
-  }
-}
-
-class _CheckIconPainter extends CustomPainter {
-  final double checkProgress;
-  final Color color;
-
-  _CheckIconPainter({
-    required this.checkProgress,
-    required this.color,
-  });
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final center = Offset(size.width / 2, size.height / 2);
-    final radius = size.width / 2 - 1.5;
-
-    final bgPaint = Paint()
-      ..color = color.withValues(alpha: 0.12)
-      ..style = PaintingStyle.fill;
-    canvas.drawCircle(center, radius, bgPaint);
-
-    final outlinePaint = Paint()
-      ..color = color
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 2.0;
-    canvas.drawCircle(center, radius, outlinePaint);
-
-    if (checkProgress > 0) {
-      final path = Path();
-      final start = Offset(size.width * 0.28, size.height * 0.5);
-      final turn = Offset(size.width * 0.45, size.height * 0.68);
-      final end = Offset(size.width * 0.72, size.height * 0.35);
-
-      final checkPaint = Paint()
-        ..color = color
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = 2.5
-        ..strokeCap = StrokeCap.round
-        ..strokeJoin = StrokeJoin.round;
-
-      if (checkProgress < 0.4) {
-        final t = checkProgress / 0.4;
-        final p = Offset.lerp(start, turn, t)!;
-        path.moveTo(start.dx, start.dy);
-        path.lineTo(p.dx, p.dy);
-      } else {
-        final t = (checkProgress - 0.4) / 0.6;
-        final p = Offset.lerp(turn, end, t)!;
-        path.moveTo(start.dx, start.dy);
-        path.lineTo(turn.dx, turn.dy);
-        path.lineTo(p.dx, p.dy);
-      }
-      canvas.drawPath(path, checkPaint);
-    }
-  }
-
-  @override
-  bool shouldRepaint(_CheckIconPainter oldDelegate) {
-    return oldDelegate.checkProgress != checkProgress || oldDelegate.color != color;
-  }
-}
-
-class AnimatedSkipIcon extends StatelessWidget {
-  final double progress;
-  final Color color;
-  const AnimatedSkipIcon({super.key, required this.progress, required this.color});
-
-  @override
-  Widget build(BuildContext context) {
-    final skipProgress = ((progress - 0.05) / 0.20).clamp(0.0, 1.0);
-
-    return SizedBox(
-      width: 28,
-      height: 28,
-      child: CustomPaint(
-        painter: _SkipIconPainter(
-          skipProgress: skipProgress,
-          color: color,
-        ),
-      ),
-    );
-  }
-}
-
-class _SkipIconPainter extends CustomPainter {
-  final double skipProgress;
-  final Color color;
-
-  _SkipIconPainter({
-    required this.skipProgress,
-    required this.color,
-  });
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final center = Offset(size.width / 2, size.height / 2);
-    final radius = size.width / 2 - 1.5;
-
-    final bgPaint = Paint()
-      ..color = color.withValues(alpha: 0.12)
-      ..style = PaintingStyle.fill;
-    canvas.drawCircle(center, radius, bgPaint);
-
-    final outlinePaint = Paint()
-      ..color = color
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 2.0;
-    canvas.drawCircle(center, radius, outlinePaint);
-
-    if (skipProgress > 0) {
-      final paint = Paint()
-        ..color = color
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = 2.5
-        ..strokeCap = StrokeCap.round
-        ..strokeJoin = StrokeJoin.round;
-
-      // Draw two chevrons pointing to the right (fast forward)
-      final start1 = Offset(size.width * 0.32, size.height * 0.32);
-      final mid1 = Offset(size.width * 0.5, size.height * 0.5);
-      final end1 = Offset(size.width * 0.32, size.height * 0.68);
-
-      final start2 = Offset(size.width * 0.54, size.height * 0.32);
-      final mid2 = Offset(size.width * 0.72, size.height * 0.5);
-      final end2 = Offset(size.width * 0.54, size.height * 0.68);
-
-      if (skipProgress < 0.5) {
-        final t = skipProgress / 0.5;
-        final pStart = Offset.lerp(start1, mid1, t)!;
-        final pEnd = Offset.lerp(end1, mid1, t)!;
-        final path = Path()
-          ..moveTo(start1.dx, start1.dy)
-          ..lineTo(pStart.dx, pStart.dy)
-          ..moveTo(end1.dx, end1.dy)
-          ..lineTo(pEnd.dx, pEnd.dy);
-        canvas.drawPath(path, paint);
-      } else {
-        final path1 = Path()
-          ..moveTo(start1.dx, start1.dy)
-          ..lineTo(mid1.dx, mid1.dy)
-          ..lineTo(end1.dx, end1.dy);
-        canvas.drawPath(path1, paint);
-
-        final t = (skipProgress - 0.5) / 0.5;
-        final pStart = Offset.lerp(start2, mid2, t)!;
-        final pEnd = Offset.lerp(end2, mid2, t)!;
-        final path2 = Path()
-          ..moveTo(start2.dx, start2.dy)
-          ..lineTo(pStart.dx, pStart.dy)
-          ..moveTo(end2.dx, end2.dy)
-          ..lineTo(pEnd.dx, pEnd.dy);
-        canvas.drawPath(path2, paint);
-      }
-    }
-  }
-
-  @override
-  bool shouldRepaint(_SkipIconPainter oldDelegate) {
-    return oldDelegate.skipProgress != skipProgress || oldDelegate.color != color;
-  }
-}

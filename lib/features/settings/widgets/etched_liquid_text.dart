@@ -24,6 +24,7 @@ class _EtchedLiquidTextState extends State<EtchedLiquidText>
     with TickerProviderStateMixin {
   late AnimationController _waveController;
   late AnimationController _levelController;
+  late Listenable _mergeListenable;
 
   @override
   void initState() {
@@ -39,9 +40,13 @@ class _EtchedLiquidTextState extends State<EtchedLiquidText>
       duration: const Duration(seconds: 4),
     );
 
+    _mergeListenable = Listenable.merge([_waveController, _levelController]);
+
     // İlk açılışta dolsun, sonra yavaşça inip çıksın
     _levelController.forward().then((_) {
-      _levelController.repeat(reverse: true);
+      if (mounted) {
+        _levelController.repeat(reverse: true);
+      }
     });
   }
 
@@ -55,7 +60,7 @@ class _EtchedLiquidTextState extends State<EtchedLiquidText>
   @override
   Widget build(BuildContext context) {
     return AnimatedBuilder(
-      animation: Listenable.merge([_waveController, _levelController]),
+      animation: _mergeListenable,
       builder: (context, child) {
         // progress 0 ise animasyonlu seviyeyi kullan (0.45 - 0.65 arası)
         // Start from the bottom (base level) when at the top

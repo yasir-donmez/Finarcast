@@ -25,6 +25,21 @@ class SyncCoordinator {
   static int _retryCount = 0;
   static Timer? _retryTimer;
 
+  /// Canlı premium durumu — SubscriptionService tarafından güncellenir.
+  /// SharedPreferences'a yazılması async olduğu için race condition oluşabilir.
+  /// Bu alan, sync sırasında güncel premium durumunu garantilemek için kullanılır.
+  static bool _liveProStatus = false;
+
+  /// SubscriptionService veya SyncBootstrap tarafından çağrılır.
+  /// SharedPreferences henüz yazılmamış olsa bile syncNow doğru isPro değerini görür.
+  static void updateProStatus(bool isPro) {
+    final changed = _liveProStatus != isPro;
+    _liveProStatus = isPro;
+    if (changed && isPro) {
+      debugPrint('[SyncCoordinator] ✅ Premium durumu güncellendi: isPro=$isPro');
+    }
+  }
+
   static void scheduleSync() {
     _debounce?.cancel();
     _retryTimer?.cancel();
@@ -51,7 +66,15 @@ class SyncCoordinator {
       }
 
       final prefs = await SharedPreferences.getInstance();
-      final isPro = prefs.getBool('Finarcast_is_pro_user') ?? false;
+      // Premium kontrolü: hem SharedPreferences hem de canlı durumu kontrol et.
+      // RevenueCat doğrulaması async olduğu için prefs henüz güncellenmemiş olabilir.
+      final prefsIsPro = prefs.getBool('Finarcast_is_pro_user') ?? false;
+      final isPro = prefsIsPro || _liveProStatus;
+
+      if (kDebugMode) {
+        debugPrint('[SyncCoordinator] isPro kontrol: prefs=$prefsIsPro, live=$_liveProStatus → isPro=$isPro');
+      }
+
       final settings = await DatabaseService.getSettings();
 
       // Eğer kullanıcı Premium değilse veya genel veri eşitleme kapalıysa sadece ayarları eşitleriz.
@@ -87,11 +110,16 @@ class SyncCoordinator {
         lastSyncTime = DateTime.tryParse(lastSyncStr);
       }
 
+      debugPrint('[SyncCoordinator] 🔄 Tam senkronizasyon başlatılıyor... '
+          '(lastSyncTime=${lastSyncTime?.toIso8601String() ?? 'null → full sync'})');
+
       final result = await _syncService.syncAll(lastSyncTime: lastSyncTime);
       lastResult = result;
 
+      debugPrint('[SyncCoordinator] ${result.summary} '
+          '(pushed=${result.pushedCount}, pulled=${result.pulledCount}, '
+          'deleted=${result.deletedCount}, errors=${result.errorCount})');
       if (kDebugMode) {
-        debugPrint('[SyncCoordinator] ${result.summary}');
         for (final err in result.errors) {
           debugPrint('[SyncCoordinator] Hata: $err');
         }
@@ -131,6 +159,7 @@ class SyncCoordinator {
   }
 
   /// Giriş yapıldığında veya premium statüsü doğrulandığında ayarları senkronize et
+  /// ve ardından tam senkronizasyonu başlat.
   static Future<void> syncSettingsOnLoginOrPro() async {
     try {
       final user = Supabase.instance.client.auth.currentUser;
@@ -140,15 +169,25 @@ class SyncCoordinator {
       final settingsUpdated = await _syncService.pullSettingsOnLogin(user.id);
       if (settingsUpdated) {
         debugPrint('[SyncCoordinator] Bulut ayarları başarıyla yerel veritabanına uygulandı.');
-        final settings = await DatabaseService.getSettings();
-        if (settings.isSyncEnabled) {
-          debugPrint('[SyncCoordinator] Ayarlarda bulut eşitleme etkin, tam senkronizasyon başlatılıyor...');
-          unawaited(syncNow());
-        }
+      }
+
+      // Ayarlar güncellensin ya da güncellenmesin, sync etkinse tam senkronizasyonu başlat.
+      // Önceki hatalı davranış: settingsUpdated=false ise syncNow hiç çağrılmıyordu.
+      // Bu durum özellikle oturum kapatıp açtıktan sonra premium doğrulanana kadar
+      // ayarların zaten çekilmiş olması nedeniyle tam sync'in asla çalışmamasına yol açıyordu.
+      final settings = await DatabaseService.getSettings();
+      if (settings.isSyncEnabled) {
+        debugPrint('[SyncCoordinator] Ayarlarda bulut eşitleme etkin, tam senkronizasyon başlatılıyor...');
+        await syncNow();
       }
     } catch (e) {
       debugPrint('[SyncCoordinator] syncSettingsOnLoginOrPro hatası: $e');
     }
+  }
+
+  /// Supabase'deki tüm kullanıcı verilerini temizle
+  static Future<void> clearRemoteData(String userId) async {
+    await _syncService.clearRemoteData(userId);
   }
 
   static String _parseError(dynamic e, [AppLocalizations? l10n]) {

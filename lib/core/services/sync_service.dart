@@ -1337,6 +1337,22 @@ class SyncService {
     category.name = raw['name'] ?? category.name;
     category.iconCode = raw['icon_code'] ?? category.iconCode;
   }
+
+  /// Supabase'deki tüm kullanıcı verilerini temizle
+  Future<void> clearRemoteData(String userId) async {
+    try {
+      debugPrint('[SyncService] 🗑️ Bulut verileri temizleniyor (User: $userId)...');
+      await _supabase.from('transaction_records').delete().eq('user_id', userId);
+      await _supabase.from('recurring_templates').delete().eq('user_id', userId);
+      await _supabase.from('vaults').delete().eq('user_id', userId);
+      await _supabase.from('custom_categories').delete().eq('user_id', userId);
+      await _supabase.from('app_settings').delete().eq('user_id', userId);
+      debugPrint('[SyncService] ✅ Bulut verileri başarıyla temizlendi.');
+    } catch (e) {
+      debugPrint('[SyncService] ❌ Bulut verileri temizlenirken hata: $e');
+      rethrow;
+    }
+  }
 }
 
 final syncServiceProvider = Provider<SyncService>((ref) => SyncService());

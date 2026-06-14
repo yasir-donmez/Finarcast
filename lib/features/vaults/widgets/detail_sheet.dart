@@ -16,6 +16,7 @@ import '../../../../shared/widgets/custom_button.dart';
 import '../../../../shared/widgets/custom_icon_button.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../../core/utils/string_utils.dart';
+import '../../../../core/utils/currency_utils.dart';
 import '../../../../shared/widgets/custom_switch.dart';
 import '../../../../shared/widgets/clickable_action.dart';
 import '../../../../shared/widgets/custom_animated_icon.dart';
@@ -247,11 +248,13 @@ class _PrecisionDetailSheetState extends ConsumerState<DetailSheet> {
                         child: FittedBox(
                           fit: BoxFit.scaleDown,
                           child: Text(
-                            '${tx.currency ?? "₺"}${_formatFull(tx.effectiveAmount, context)}',
+                            CurrencyUtils.formatFullAmount(tx.effectiveAmount, symbol: tx.currency),
                             style: TextStyle(
                               fontSize: 40 * sf,
                               fontWeight: FontWeight.w900,
-                              color: isIncoming ? AppColors.getIncome(context) : AppColors.getExpense(context),
+                              color: isTransfer
+                                  ? Colors.blueGrey
+                                  : (isIncoming ? AppColors.getIncome(context) : AppColors.getExpense(context)),
                               letterSpacing: -1.5,
                             ),
                           ),
@@ -264,11 +267,13 @@ class _PrecisionDetailSheetState extends ConsumerState<DetailSheet> {
               : FittedBox(
                   fit: BoxFit.scaleDown,
                   child: Text(
-                    '${tx.currency ?? "₺"}${_formatFull(tx.effectiveAmount, context)}',
+                    CurrencyUtils.formatFullAmount(tx.effectiveAmount, symbol: tx.currency),
                     style: TextStyle(
                       fontSize: 40 * sf,
                       fontWeight: FontWeight.w900,
-                      color: isIncoming ? AppColors.getIncome(context) : AppColors.getExpense(context),
+                      color: isTransfer
+                          ? Colors.blueGrey
+                          : (isIncoming ? AppColors.getIncome(context) : AppColors.getExpense(context)),
                       letterSpacing: -2, height: 1,
                     ),
                   ),
@@ -331,15 +336,12 @@ class _PrecisionDetailSheetState extends ConsumerState<DetailSheet> {
                 _buildInfoRow(
                   context,
                   icon: Icons.numbers_rounded,
-                  label: _getInstallmentLabelForLanguage(
-                    Localizations.localeOf(context).languageCode,
-                    isInstallment: tx.totalInstallments != null,
-                  ),
-                  value: _getInstallmentValueForLanguage(
-                    Localizations.localeOf(context).languageCode,
-                    tx.installmentNumber!,
-                    tx.totalInstallments,
-                  ),
+                  label: tx.totalInstallments != null
+                      ? l10n.installment
+                      : l10n.paymentOrder,
+                  value: tx.totalInstallments != null
+                      ? '${tx.installmentNumber} / ${tx.totalInstallments}'
+                      : l10n.paymentNumber(tx.installmentNumber!),
                   color: Colors.teal,
                 ),
               ],
@@ -599,12 +601,7 @@ class _PrecisionDetailSheetState extends ConsumerState<DetailSheet> {
     );
   }
 
-  String _formatFull(double val, BuildContext context) {
-    // Kısaltma yapmadan binlik ayırıcı ile göster
-    final locale = Localizations.localeOf(context).toString();
-    final format = NumberFormat.decimalPattern(locale);
-    return format.format(val.toInt());
-  }
+
 
   Widget _buildRangeValue(String label, double value, String? currency, double sf, bool isDark) {
     return Column(
@@ -622,7 +619,7 @@ class _PrecisionDetailSheetState extends ConsumerState<DetailSheet> {
         FittedBox(
           fit: BoxFit.scaleDown,
           child: Text(
-            '${currency ?? "₺"}${_formatFull(value, context)}',
+            CurrencyUtils.formatFullAmount(value, symbol: currency),
             style: TextStyle(
               fontSize: 14 * sf,
               fontWeight: FontWeight.w700,
@@ -718,8 +715,7 @@ class _PrecisionDetailSheetState extends ConsumerState<DetailSheet> {
       }
       
       if (t.totalInstallments != null) {
-        final langCode = Localizations.localeOf(context).languageCode;
-        details.add(_getInstallmentsLabel(langCode, t.totalInstallments!));
+        details.add(l10n.installmentsCount(t.totalInstallments!));
       } else {
         details.add(l10n.indefinitely);
       }
@@ -730,39 +726,5 @@ class _PrecisionDetailSheetState extends ConsumerState<DetailSheet> {
     return base;
   }
 
-  String _getInstallmentsLabel(String langCode, int count) {
-    if (langCode == 'tr') return '$count Taksit';
-    if (langCode == 'de') return '$count Raten';
-    if (langCode == 'fr') return '$count mensualités';
-    if (langCode == 'es') return '$count cuotas';
-    return '$count installments';
-  }
 
-  String _getInstallmentLabelForLanguage(String langCode, {required bool isInstallment}) {
-    if (isInstallment) {
-      if (langCode == 'tr') return 'Taksit';
-      if (langCode == 'de') return 'Rate';
-      if (langCode == 'fr') return 'Mensualité';
-      if (langCode == 'es') return 'Cuota';
-      return 'Installment';
-    } else {
-      if (langCode == 'tr') return 'Ödeme Sırası';
-      if (langCode == 'de') return 'Zahlungsreihenfolge';
-      if (langCode == 'fr') return 'Ordre de paiement';
-      if (langCode == 'es') return 'Orden de pago';
-      return 'Payment Order';
-    }
-  }
-
-  String _getInstallmentValueForLanguage(String langCode, int current, int? total) {
-    if (total != null) {
-      return '$current / $total';
-    } else {
-      if (langCode == 'tr') return '$current. Ödeme';
-      if (langCode == 'de') return '$current. Zahlung';
-      if (langCode == 'fr') return 'Paiement n°$current';
-      if (langCode == 'es') return 'Pago nº $current';
-      return 'Payment #$current';
-    }
-  }
 }

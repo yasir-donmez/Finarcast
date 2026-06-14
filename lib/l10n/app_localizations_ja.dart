@@ -973,6 +973,10 @@ class AppLocalizationsJa extends AppLocalizations {
       'データの保持、アーカイブ、および自動削除ルールは、プレミアム メンバーのみが利用できます。';
 
   @override
+  String get premiumExportDesc =>
+      'ExcelまたはCSV形式でのデータエクスポートは、プレミアムメンバーのみが利用できます。';
+
+  @override
   String get later => '後で';
 
   @override
@@ -1295,10 +1299,22 @@ class AppLocalizationsJa extends AppLocalizations {
   String get resetDataDesc => 'すべての財務データと設定は完全に削除されます。この操作は元に戻すことができません。';
 
   @override
+  String get resetCloudBackup => 'クラウドバックアップも削除する (Supabase)';
+
+  @override
+  String get resetOnlyDevice => 'このデバイスのみをリセット';
+
+  @override
+  String get resetDeviceAndCloud => 'デバイスとクラウドをリセット';
+
+  @override
   String get deleteAll => 'すべて削除';
 
   @override
   String get resetSuccess => 'すべてのデータと設定が正常にリセットされました。';
+
+  @override
+  String get noTransactionsToExport => 'エクスポートする取引履歴が見つかりませんでした。';
 
   @override
   String get supportEmailCopied =>
@@ -1962,4 +1978,92 @@ class AppLocalizationsJa extends AppLocalizations {
   String aiErrorGeneric(Object error) {
     return 'AI 分析が失敗しました: $error';
   }
+
+  @override
+  String get vaultTransfer => '口座間移動';
+
+  @override
+  String daysShort(Object count) {
+    return '$count日';
+  }
+
+  @override
+  String get recurrenceDay => '繰り返し日';
+
+  @override
+  String dayOfMonthFormatted(Object day) {
+    return '毎月$day日';
+  }
+
+  @override
+  String get recurrenceDate => '繰り返し日';
+
+  @override
+  String occurrencesCount(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count回',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get plans => 'プラン';
+
+  @override
+  String installmentsCount(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count回払い',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get installment => '分割払い';
+
+  @override
+  String get paymentOrder => '支払い順序';
+
+  @override
+  String paymentNumber(Object number) {
+    return '第$number回目の支払い';
+  }
+
+  @override
+  String percentFormat(Object value) {
+    return '$value%';
+  }
+
+  @override
+  String get selectValidTargetVault => '有効な移動先口座を選択してください。';
+
+  @override
+  String get sourceAndTargetVaultSame => '移動元口座と移動先口座は同じにできません。';
+
+  @override
+  String get targetVault => '移動先口座';
+
+  @override
+  String get editPlan => 'プランを編集';
+
+  @override
+  String get newPlan => '新規プラン';
+
+  @override
+  String get editTransaction => '取引を編集';
+
+  @override
+  String get navDashboard => 'ダッシュボード';
+
+  @override
+  String get navVaults => '金庫';
+
+  @override
+  String get navSmartScan => 'スキャン';
+
+  @override
+  String get navSettings => '設定';
 }

@@ -8,7 +8,11 @@ class CurrencyUtils {
   /// Tutar formatlama (Kısa gösterim)
   static String formatAmount(double val, {String? currencySymbol}) {
     if (val.abs() >= 1000000) {
-      final formatted = (val / 1000000).toStringAsFixed(1).replaceAll(RegExp(r'\.0$'), '');
+      final locale = Intl.defaultLocale ?? 'en_US';
+      final formatter = NumberFormat.decimalPattern(locale);
+      formatter.minimumFractionDigits = 0;
+      formatter.maximumFractionDigits = 1;
+      final formatted = formatter.format(val / 1000000);
       return currencySymbol != null ? '$currencySymbol${formatted}M' : '${formatted}M';
     }
     
@@ -23,14 +27,15 @@ class CurrencyUtils {
     // Para birimi kodunu belirle
     final code = symbolToCode(symbol ?? 'TRY');
     
-    // JPY ve KRW için ondalık basamak her zaman 0 olmalı
+    // JPY ve KRW için ondalık basamak her zaman 0 olmalı, KWD için 3, diğerleri için 2
     int decimalDigits = includeDecimals ? 2 : 0;
     if (code == 'JPY' || code == 'KRW') {
       decimalDigits = 0;
+    } else if (code == 'KWD') {
+      decimalDigits = includeDecimals ? 3 : 0;
     }
 
-    // Locale tespiti (Basit bir mantık: EUR ise de_DE, USD ise en_US, TRY ise tr_TR vb.)
-    // Aslında uygulama diline (Intl.defaultLocale) göre formatlamak daha doğru.
+    // Locale tespiti
     final locale = Intl.defaultLocale ?? 'en_US';
 
     final formatter = NumberFormat.currency(

@@ -48,7 +48,7 @@ class CustomTextField extends StatefulWidget {
   State<CustomTextField> createState() => _PrecisionInputState();
 }
 
-class _PrecisionInputState extends State<CustomTextField> with SingleTickerProviderStateMixin {
+class _PrecisionInputState extends State<CustomTextField> {
   FocusNode? _localFocusNode;
   FocusNode get _effectiveFocusNode => widget.focusNode ?? (_localFocusNode ??= FocusNode());
   bool _isFocused = false;

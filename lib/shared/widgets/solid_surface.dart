@@ -82,10 +82,8 @@ class SolidSurface extends ConsumerWidget {
             margin: margin,
             padding: innerPadding,
             decoration: decoration,
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(borderRadius),
-              child: child,
-            ),
+            clipBehavior: Clip.antiAlias,
+            child: child,
           )
         : AnimatedContainer(
             duration: animationDuration,
@@ -95,10 +93,8 @@ class SolidSurface extends ConsumerWidget {
             margin: margin,
             padding: innerPadding,
             decoration: decoration,
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(borderRadius),
-              child: child,
-            ),
+            clipBehavior: Clip.antiAlias,
+            child: child,
           );
   }
 }

@@ -9,6 +9,8 @@ import '../../../../shared/widgets/custom_dialog.dart';
 import '../../../subscription/widgets/pro_upgrade_sheet.dart';
 import '../settings_list_items.dart';
 import '../../../../l10n/app_localizations.dart';
+import '../../../../shared/widgets/animated_premium_badge.dart';
+import '../../../../shared/widgets/animated_premium_star_badge.dart';
 
 class BackgroundSetting extends ConsumerWidget {
   const BackgroundSetting({super.key});
@@ -60,14 +62,7 @@ class BackgroundSetting extends ConsumerWidget {
                     ),
                     if (!isPro) ...[
                       const SizedBox(height: 2),
-                      Text(
-                        l10n.premiumBadge,
-                        style: const TextStyle(
-                          color: Colors.amber,
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
+                      const AnimatedPremiumBadge(),
                     ],
                     const SizedBox(height: 2),
                     Text(
@@ -365,20 +360,12 @@ class BackgroundPreviewCard extends StatelessWidget {
 
                       // Premium Kilit / Yıldız Simgesi
                       if (isPremium && !isPro)
-                        Positioned(
+                        const Positioned(
                           top: 6,
                           right: 6,
-                          child: Container(
-                            padding: const EdgeInsets.all(2.5),
-                            decoration: const BoxDecoration(
-                              color: Color(0xFFFFB300), // Altın sarısı
-                              shape: BoxShape.circle,
-                            ),
-                            child: const Icon(
-                              Icons.star_rounded,
-                              color: Colors.white,
-                              size: 10,
-                            ),
+                          child: AnimatedPremiumStarBadge(
+                            size: 10,
+                            padding: 2.5,
                           ),
                         ),
                     ],

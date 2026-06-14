@@ -9,6 +9,8 @@ class MembershipOrb extends StatefulWidget {
   final double morphFactor;
   final double wobbleValue;
   final bool showParticles;
+  final double? sheenVal;
+  final Color? particleColor;
 
   const MembershipOrb({
     super.key,
@@ -17,6 +19,8 @@ class MembershipOrb extends StatefulWidget {
     this.morphFactor = 1.0,
     this.wobbleValue = -1,
     this.showParticles = true,
+    this.sheenVal,
+    this.particleColor,
   });
 
   @override
@@ -54,6 +58,8 @@ class _PrecisionMembershipOrbState extends State<MembershipOrb> with SingleTicke
             morphFactor: widget.morphFactor,
             wobbleValue: currentWobble,
             showParticles: widget.showParticles,
+            sheenVal: widget.sheenVal,
+            particleColor: widget.particleColor,
           ),
         );
       },
@@ -66,12 +72,16 @@ class _WaterDropPainter extends CustomPainter {
   final double morphFactor;
   final double wobbleValue;
   final bool showParticles;
+  final double? sheenVal;
+  final Color? particleColor;
 
   _WaterDropPainter({
     required this.color, 
     required this.morphFactor,
     required this.wobbleValue,
     required this.showParticles,
+    this.sheenVal,
+    this.particleColor,
   });
 
   @override
@@ -117,6 +127,27 @@ class _WaterDropPainter extends CustomPainter {
       _drawLiquidParticle(canvas, center, radius, morphFactor, t * 1.0, 4.5, 1.0, 8.0, 0.9); // 1.0 Tam tur
     }
  
+    // 5. PARLAMA SÜPÜRME EFEKTİ (Sliding Sheen Sweep)
+    if (sheenVal != null && morphFactor > 0.1) {
+      final double st = sheenVal!;
+      final beginAlignment = Alignment(-3.5 + st * 5.5, -0.5);
+      final endAlignment = Alignment(-2.0 + st * 5.5, 0.5);
+      
+      final sheenPaint = Paint()
+        ..shader = LinearGradient(
+          colors: [
+            Colors.transparent,
+            Colors.white.withValues(alpha: 0.35 * morphFactor),
+            Colors.transparent,
+          ],
+          stops: const [0.0, 0.5, 1.0],
+          begin: beginAlignment,
+          end: endAlignment,
+        ).createShader(Rect.fromCircle(center: center, radius: radius * morphFactor));
+        
+      canvas.drawCircle(center, radius * morphFactor * 0.95, sheenPaint);
+    }
+
     // 6. KENAR IŞIĞI (Rim Light - Glass Edge)
     final rimPaint = Paint()
       ..style = PaintingStyle.stroke
@@ -148,8 +179,9 @@ class _WaterDropPainter extends CustomPainter {
     final dy = math.sin(t + offset) * (radius * 0.4 * scale) * morph;
     final pos = center + Offset(dx, dy);
     
+    final pColor = particleColor ?? Colors.white;
     final paint = Paint()
-      ..color = Colors.white.withValues(alpha: opacity * morph)
+      ..color = pColor.withValues(alpha: opacity * morph)
       ..maskFilter = MaskFilter.blur(BlurStyle.normal, (1 - opacity) * 4 + 1);
     
     final s = size * (1.0 + 0.05 * math.sin(t * 2)) * morph;
@@ -173,5 +205,7 @@ class _WaterDropPainter extends CustomPainter {
   bool shouldRepaint(_WaterDropPainter oldDelegate) => 
     oldDelegate.morphFactor != morphFactor || 
     oldDelegate.wobbleValue != wobbleValue ||
-    oldDelegate.showParticles != showParticles;
+    oldDelegate.showParticles != showParticles ||
+    oldDelegate.sheenVal != sheenVal ||
+    oldDelegate.particleColor != particleColor;
 }

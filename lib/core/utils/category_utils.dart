@@ -16,6 +16,34 @@ class CategoryUtils {
       return fallbackTitle ?? AppLocalizations.of(context)?.other ?? 'Diğer';
     }
 
+    final l10n = AppLocalizations.of(context);
+    if (l10n != null && (categoryId == 'inc_other_general' || categoryId == 'exp_other_general')) {
+      final initialBalanceNames = {
+        'Başlangıç Bakiyesi',
+        'Initial Balance',
+        'Anfangsbilanz',
+        'Saldo inicial',
+        'Solde initial',
+        'Saldo Inizlale',
+        '初期残高',
+        '초기 잔액',
+        'Saldo Inicial',
+        '初始余额',
+      };
+      if (fallbackTitle != null) {
+        if (initialBalanceNames.contains(fallbackTitle)) {
+          return l10n.initialBalance;
+        }
+        final genericNames = {
+          'Genel Gelir', 'Other', 'Sonstiges', 'Otros', 'Autre', 'Altro', 'その他雑収入', '일반 수입', 'Geral', '一般杂项收入',
+          'Genel Gider', 'General', 'Allgemein', 'Général', 'Generale', '一般雑費', '일반 지출', '一般杂项'
+        };
+        if (!genericNames.contains(fallbackTitle)) {
+          return fallbackTitle;
+        }
+      }
+    }
+
     // 1. Check custom categories
     for (final c in customCategories) {
       if (c.uniqueId == categoryId) {
@@ -35,8 +63,11 @@ class CategoryUtils {
       );
     }
 
-    final l10n = AppLocalizations.of(context);
     if (l10n == null) return fallbackTitle ?? 'Diğer';
+
+    if (categoryId == 'transfer') {
+      return l10n.vaultTransfer;
+    }
 
     // 3. Check built-in expense categories
     final expenses = TransactionCategoryData.getExpenseCategories(context, l10n);

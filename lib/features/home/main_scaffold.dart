@@ -38,6 +38,8 @@ class _MainScaffoldState extends ConsumerState<MainScaffold> with TickerProvider
   late final ShareHandlerService _shareHandlerService;
 
   late final AnimationController _pillController;
+  late final AnimationController _sheenController;
+  late final Animation<double> _sheenAnimation;
   double _sourceIndex = 0.0;
   double _targetIndex = 0.0;
   bool _isSlidingTransition = true;
@@ -76,6 +78,14 @@ class _MainScaffoldState extends ConsumerState<MainScaffold> with TickerProvider
     _pillController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 350),
+    );
+    _sheenController = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 3),
+    )..repeat();
+    _sheenAnimation = CurvedAnimation(
+      parent: _sheenController,
+      curve: const Interval(0.0, 0.6, curve: Curves.easeInOut),
     );
     _sourceIndex = _currentIndex.toDouble();
     _targetIndex = _currentIndex.toDouble();
@@ -177,6 +187,7 @@ class _MainScaffoldState extends ConsumerState<MainScaffold> with TickerProvider
   @override
   void dispose() {
     _pillController.dispose();
+    _sheenController.dispose();
     _shareHandlerService.dispose();
     // ref kullanmadan güvenli temizlik
     _scrollController?.removeListener(_onScroll);
@@ -276,9 +287,6 @@ class _MainScaffoldState extends ConsumerState<MainScaffold> with TickerProvider
   @override
   Widget build(BuildContext context) {
     final subscription = ref.watch(subscriptionServiceProvider);
-    final rotaryColor = ref.watch(rotaryColorProvider);
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final activeColor = isDark ? rotaryColor : AppColors.getAccentDeep(context, rotaryColor);
     
     final isKeyboardVisible = MediaQuery.of(context).viewInsets.bottom > 0;
     final bottomPadding = MediaQuery.of(context).padding.bottom;
@@ -353,10 +361,16 @@ class _MainScaffoldState extends ConsumerState<MainScaffold> with TickerProvider
                           enabled: shouldShowProButton && scaleFactor > 0.5,
                           child: Hero(
                             tag: 'pro_orb',
-                            child: MembershipOrb(
-                              color: activeColor,
-                              size: 60,
-                              morphFactor: scaleFactor,
+                            child: AnimatedBuilder(
+                              animation: _sheenAnimation,
+                              builder: (context, child) {
+                                return MembershipOrb(
+                                  color: const Color(0xFFFFB300),
+                                  sheenVal: _sheenAnimation.value,
+                                  size: 60,
+                                  morphFactor: scaleFactor,
+                                );
+                              },
                             ),
                           ),
                         ),
@@ -407,7 +421,7 @@ class _MainScaffoldState extends ConsumerState<MainScaffold> with TickerProvider
     
     final screenWidth = MediaQuery.of(context).size.width;
     final navWidth = screenWidth - 32; 
-    const internalPadding = 20.0; 
+    const internalPadding = 12.0; 
     final availableWidth = navWidth - internalPadding;
     final itemWidth = availableWidth / 4;
     
@@ -459,7 +473,7 @@ class _MainScaffoldState extends ConsumerState<MainScaffold> with TickerProvider
                       rightIndex = _sourceIndex + (_targetIndex - _sourceIndex) * valTrailing;
                     }
                     
-                    final double left = 10 + (leftIndex * itemWidth) + pillHorizontalMargin;
+                    final double left = 6 + (leftIndex * itemWidth) + pillHorizontalMargin;
                     final double width = (rightIndex - leftIndex) * itemWidth + (itemWidth - (2 * pillHorizontalMargin));
                     
                     return Stack(
@@ -476,7 +490,7 @@ class _MainScaffoldState extends ConsumerState<MainScaffold> with TickerProvider
                   } else {
                     // FADE/SCALE HYBRID ANIMATION (for distance > 1)
                     if (!_pillController.isAnimating) {
-                      final double left = 10 + (_targetIndex * itemWidth) + pillHorizontalMargin;
+                      final double left = 6 + (_targetIndex * itemWidth) + pillHorizontalMargin;
                       final double width = itemWidth - (2 * pillHorizontalMargin);
                       return Stack(
                         children: [
@@ -491,8 +505,8 @@ class _MainScaffoldState extends ConsumerState<MainScaffold> with TickerProvider
                       );
                     }
                     
-                    final sourceLeft = 10 + (_sourceIndex * itemWidth) + pillHorizontalMargin;
-                    final targetLeft = 10 + (_targetIndex * itemWidth) + pillHorizontalMargin;
+                    final sourceLeft = 6 + (_sourceIndex * itemWidth) + pillHorizontalMargin;
+                    final targetLeft = 6 + (_targetIndex * itemWidth) + pillHorizontalMargin;
                     final width = itemWidth - (2 * pillHorizontalMargin);
                     
                     // ZİRVE HİSSİYAT: Eski hap ilk %40'lık dilimde hızlıca sönüyor.
@@ -537,20 +551,20 @@ class _MainScaffoldState extends ConsumerState<MainScaffold> with TickerProvider
               ),
               
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 10),
+                padding: const EdgeInsets.symmetric(horizontal: 6),
                 child: Row(
                   children: [
-                    _buildNavItem(0, Icons.dashboard_rounded, Icons.dashboard_outlined, AppLocalizations.of(context)!.dashboard, itemWidth, maxLabelWidth),
-                    _buildNavItem(1, Icons.account_balance_wallet_rounded, Icons.account_balance_wallet_outlined, AppLocalizations.of(context)!.vaults, itemWidth, maxLabelWidth),
+                    _buildNavItem(0, Icons.dashboard_rounded, Icons.dashboard_outlined, AppLocalizations.of(context)!.navDashboard, itemWidth, maxLabelWidth),
+                    _buildNavItem(1, Icons.account_balance_wallet_rounded, Icons.account_balance_wallet_outlined, AppLocalizations.of(context)!.navVaults, itemWidth, maxLabelWidth),
                     _buildNavItem(
                       2,
                       Icons.auto_awesome_rounded,
                       Icons.auto_awesome_outlined,
-                      AppLocalizations.of(context)!.smartScanTitle,
+                      AppLocalizations.of(context)!.navSmartScan,
                       itemWidth,
                       maxLabelWidth,
                     ),
-                    _buildNavItem(3, Icons.settings_rounded, Icons.settings_outlined, AppLocalizations.of(context)!.settings, itemWidth, maxLabelWidth),
+                    _buildNavItem(3, Icons.settings_rounded, Icons.settings_outlined, AppLocalizations.of(context)!.navSettings, itemWidth, maxLabelWidth),
                   ],
                 ),
               ),

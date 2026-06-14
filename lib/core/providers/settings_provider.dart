@@ -64,6 +64,7 @@ class SettingsNotifier extends StateNotifier<AppSettings> {
 
   Future<void> _loadSettings() async {
     var settings = await DatabaseService.getSettings();
+    if (!mounted) return;
     final subService = _ref.read(subscriptionServiceProvider);
 
     // Eğer abonelik servisi henüz başlatılıyorsa veya giriş işlemi yapılıyorsa,
@@ -110,6 +111,7 @@ class SettingsNotifier extends StateNotifier<AppSettings> {
 
     if (needsSave) {
       await DatabaseService.saveSettings(settings);
+      if (!mounted) return;
     }
 
     state = settings;
@@ -231,6 +233,7 @@ class SettingsNotifier extends StateNotifier<AppSettings> {
 
   Future<void> _save(AppSettings settings) async {
     await DatabaseService.saveSettings(settings);
+    if (!mounted) return;
     // Directly assign the new state to notify listeners properly
     state = settings;
   }

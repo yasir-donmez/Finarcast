@@ -23,7 +23,7 @@ class ExchangeRateSetting extends ConsumerStatefulWidget {
   ConsumerState<ExchangeRateSetting> createState() => _ExchangeRateSettingState();
 }
 
-class _ExchangeRateSettingState extends ConsumerState<ExchangeRateSetting> with SingleTickerProviderStateMixin {
+class _ExchangeRateSettingState extends ConsumerState<ExchangeRateSetting> {
   bool _isExpanded = false;
   bool _isUpdating = false;
   bool _showAllRates = false;

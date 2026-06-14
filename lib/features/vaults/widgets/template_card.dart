@@ -89,9 +89,7 @@ class TemplateCard extends ConsumerWidget {
         : null;
     final hasSubCategory = parentName != null && parentName != categoryName;
 
-    final amountColor = tx.isIncome
-        ? AppColors.getIncome(context)
-        : AppColors.getExpense(context);
+    final amountColor = tx.isIncome ? AppColors.getIncome(context) : AppColors.getExpense(context);
 
     return GestureDetector(
       onTap: onTap,
@@ -199,60 +197,68 @@ class TemplateCard extends ConsumerWidget {
                         padding: EdgeInsets.symmetric(vertical: 4 * sf),
                         child: FittedBox(
                           fit: BoxFit.scaleDown,
-                          child: tx.minAmount != null && tx.maxAmount != null
-                              ? Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Text(
-                                      CurrencyUtils.formatAmount(tx.effectiveAmount, currencySymbol: tx.currency ?? "₺"),
-                                      style: TextStyle(
-                                        fontSize: 36 * sf,
-                                        fontWeight: FontWeight.w900,
-                                        color: amountColor,
-                                        letterSpacing: -1.2,
-                                        height: 1.1,
-                                      ),
+                          child: () {
+                            final prefix = '';
+                            final effectiveText = '$prefix${CurrencyUtils.formatAmount(tx.effectiveAmount, currencySymbol: tx.currency ?? "₺")}';
+                            if (tx.minAmount != null && tx.maxAmount != null) {
+                              final minText = '$prefix${CurrencyUtils.formatAmount(tx.minAmount!, currencySymbol: tx.currency ?? "₺")}';
+                              final maxText = CurrencyUtils.formatAmount(tx.maxAmount!, currencySymbol: tx.currency ?? "₺");
+                              return Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Text(
+                                    effectiveText,
+                                    style: TextStyle(
+                                      fontSize: 36 * sf,
+                                      fontWeight: FontWeight.w900,
+                                      color: amountColor,
+                                      letterSpacing: -1.2,
+                                      height: 1.1,
                                     ),
-                                    Row(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        Text(
-                                          CurrencyUtils.formatAmount(tx.minAmount!, currencySymbol: tx.currency ?? "₺"),
-                                          style: TextStyle(
-                                            fontSize: 10.5 * sf,
-                                            fontWeight: FontWeight.w800,
-                                            color: AppColors.getTextSecondary(context).withValues(alpha: 0.6),
-                                          ),
-                                        ),
-                                        Text(
-                                          ' – ',
-                                          style: TextStyle(
-                                            fontSize: 10 * sf,
-                                            color: AppColors.getTextSecondary(context).withValues(alpha: 0.3),
-                                          ),
-                                        ),
-                                        Text(
-                                          CurrencyUtils.formatAmount(tx.maxAmount!, currencySymbol: tx.currency ?? "₺"),
-                                          style: TextStyle(
-                                            fontSize: 10.5 * sf,
-                                            fontWeight: FontWeight.w800,
-                                            color: AppColors.getTextSecondary(context).withValues(alpha: 0.6),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ],
-                                )
-                              : Text(
-                                  CurrencyUtils.formatAmount(tx.effectiveAmount, currencySymbol: tx.currency ?? "₺"),
-                                  style: TextStyle(
-                                    fontSize: 44 * sf,
-                                    fontWeight: FontWeight.w900,
-                                    color: amountColor,
-                                    letterSpacing: -1.8,
-                                    height: 1.1,
                                   ),
+                                  Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Text(
+                                        minText,
+                                        style: TextStyle(
+                                          fontSize: 10.5 * sf,
+                                          fontWeight: FontWeight.w800,
+                                          color: AppColors.getTextSecondary(context).withValues(alpha: 0.6),
+                                        ),
+                                      ),
+                                      Text(
+                                        ' ~ ',
+                                        style: TextStyle(
+                                          fontSize: 10 * sf,
+                                          color: AppColors.getTextSecondary(context).withValues(alpha: 0.3),
+                                        ),
+                                      ),
+                                      Text(
+                                        maxText,
+                                        style: TextStyle(
+                                          fontSize: 10.5 * sf,
+                                          fontWeight: FontWeight.w800,
+                                          color: AppColors.getTextSecondary(context).withValues(alpha: 0.6),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              );
+                            } else {
+                              return Text(
+                                effectiveText,
+                                style: TextStyle(
+                                  fontSize: 44 * sf,
+                                  fontWeight: FontWeight.w900,
+                                  color: amountColor,
+                                  letterSpacing: -1.8,
+                                  height: 1.1,
                                 ),
+                              );
+                            }
+                          }(),
                         ),
                       ),
                     ),

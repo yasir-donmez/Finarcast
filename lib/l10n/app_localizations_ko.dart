@@ -972,6 +972,10 @@ class AppLocalizationsKo extends AppLocalizations {
   String get premiumRetentionDesc => '데이터 보관, 보관, 자동 삭제 규칙은 프리미엄 회원에게만 제공됩니다.';
 
   @override
+  String get premiumExportDesc =>
+      'Excel 또는 CSV 형식의 데이터 내보내기는 프리미엄 회원만 사용할 수 있습니다.';
+
+  @override
   String get later => '나중에';
 
   @override
@@ -1291,10 +1295,22 @@ class AppLocalizationsKo extends AppLocalizations {
   String get resetDataDesc => '모든 금융 데이터 및 설정이 영구적으로 삭제됩니다. 이 작업은 취소할 수 없습니다.';
 
   @override
+  String get resetCloudBackup => '클라우드 백업도 삭제 (Supabase)';
+
+  @override
+  String get resetOnlyDevice => '이 기기만 초기화';
+
+  @override
+  String get resetDeviceAndCloud => '기기 및 클라우드 초기화';
+
+  @override
   String get deleteAll => '모두 삭제';
 
   @override
   String get resetSuccess => '모든 데이터와 설정이 성공적으로 재설정되었습니다.';
+
+  @override
+  String get noTransactionsToExport => '내보낼 거래 기록이 없습니다.';
 
   @override
   String get supportEmailCopied =>
@@ -1959,4 +1975,92 @@ class AppLocalizationsKo extends AppLocalizations {
   String aiErrorGeneric(Object error) {
     return 'AI 분석 실패: $error';
   }
+
+  @override
+  String get vaultTransfer => '계좌 이체';
+
+  @override
+  String daysShort(Object count) {
+    return '$count일';
+  }
+
+  @override
+  String get recurrenceDay => '반복일';
+
+  @override
+  String dayOfMonthFormatted(Object day) {
+    return '매월 $day일';
+  }
+
+  @override
+  String get recurrenceDate => '반복 날짜';
+
+  @override
+  String occurrencesCount(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count회',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get plans => '계획';
+
+  @override
+  String installmentsCount(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count회 할부',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get installment => '할부';
+
+  @override
+  String get paymentOrder => '결제 순서';
+
+  @override
+  String paymentNumber(Object number) {
+    return '제$number회 결제';
+  }
+
+  @override
+  String percentFormat(Object value) {
+    return '$value%';
+  }
+
+  @override
+  String get selectValidTargetVault => '올바른 이체 대상 계좌를 선택하십시오.';
+
+  @override
+  String get sourceAndTargetVaultSame => '출금 계좌와 입금 계좌는 같을 수 없습니다.';
+
+  @override
+  String get targetVault => '이체 대상 계좌';
+
+  @override
+  String get editPlan => '계획 편집';
+
+  @override
+  String get newPlan => '새 계획';
+
+  @override
+  String get editTransaction => '거래 편집';
+
+  @override
+  String get navDashboard => '대시보드';
+
+  @override
+  String get navVaults => '금고';
+
+  @override
+  String get navSmartScan => '스캔';
+
+  @override
+  String get navSettings => '설정';
 }

@@ -20,6 +20,7 @@ import '../../../home/home_providers.dart';
 import '../settings_list_items.dart';
 import '../../../subscription/widgets/pro_upgrade_sheet.dart';
 import '../../../../l10n/app_localizations.dart';
+import '../../../../shared/widgets/animated_premium_badge.dart';
 
 final _syncExpandedProvider = StateProvider.autoDispose<bool>((ref) => false);
 
@@ -134,21 +135,21 @@ class _SyncSettingState extends ConsumerState<SyncSetting> {
                           ],
                         ),
                         transitionBuilder: (child, animation) => FadeTransition(opacity: animation, child: child),
-                        child: Text(
-                          !isPro
-                              ? l10n.premiumBadge
-                              : (!isLoggedIn
-                                  ? l10n.loginRequiredLabel
-                                  : (isSyncEnabled ? l10n.active : l10n.disabled)),
-                          key: ValueKey('$isPro-$isLoggedIn-$isSyncEnabled'),
-                          style: TextStyle(
-                            color: !isPro 
-                                ? Colors.amber 
-                                : AppColors.getTextSecondary(context).withValues(alpha: 0.5),
-                            fontSize: 12,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
+                        child: !isPro
+                            ? const AnimatedPremiumBadge(
+                                key: ValueKey('premium-badge'),
+                              )
+                            : Text(
+                                !isLoggedIn
+                                    ? l10n.loginRequiredLabel
+                                    : (isSyncEnabled ? l10n.active : l10n.disabled),
+                                key: ValueKey('$isLoggedIn-$isSyncEnabled'),
+                                style: TextStyle(
+                                  color: AppColors.getTextSecondary(context).withValues(alpha: 0.5),
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
                       ),
                     ],
                   ),

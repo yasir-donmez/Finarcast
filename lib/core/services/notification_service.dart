@@ -264,7 +264,7 @@ class NotificationService {
       final l10n = await AppLocalizations.delegate.load(Locale(settings.languageCode));
 
       final String amountText = template.minAmount != null && template.maxAmount != null
-          ? "${CurrencyUtils.formatAmount(template.minAmount!, currencySymbol: template.currency ?? "₺")} - ${CurrencyUtils.formatAmount(template.maxAmount!, currencySymbol: template.currency ?? "₺")}"
+          ? "${CurrencyUtils.formatAmount(template.minAmount!, currencySymbol: template.currency ?? "₺")} ~ ${CurrencyUtils.formatAmount(template.maxAmount!, currencySymbol: template.currency ?? "₺")}"
           : CurrencyUtils.formatAmount(template.effectiveAmount, currencySymbol: template.currency ?? "₺");
 
       final String dateText;

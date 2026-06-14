@@ -8,6 +8,7 @@ import '../../../../core/providers/db_providers.dart';
 import '../../../../core/providers/settings_provider.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../vaults_providers.dart';
+import 'staggered_entry_anim.dart';
 import 'history_record_tile.dart';
 import '../../../../core/database/models/transaction_status.dart';
 
@@ -19,6 +20,8 @@ class HistoryDayGroup extends ConsumerWidget {
   final void Function(TransactionUI) onTap;
   final void Function(TransactionUI) onLongPress;
   final String? selectedVaultId;
+  final int startIndex;
+  final Set<String> animatedTxIds;
 
   const HistoryDayGroup({
     super.key,
@@ -28,6 +31,8 @@ class HistoryDayGroup extends ConsumerWidget {
     required this.onSkipped,
     required this.onTap,
     required this.onLongPress,
+    required this.startIndex,
+    required this.animatedTxIds,
     this.selectedVaultId,
   });
 
@@ -114,15 +119,30 @@ class HistoryDayGroup extends ConsumerWidget {
         ),
 
         // Record Tiles List
-        ...transactions.map((tx) {
-          return HistoryRecordTile(
-            key: ValueKey(tx.id),
-            transaction: tx,
-            selectedVaultId: selectedVaultId,
-            onReviewed: () => onReviewed(tx),
-            onSkipped: () => onSkipped(tx),
-            onTap: () => onTap(tx),
-            onLongPress: () => onLongPress(tx),
+        ...transactions.asMap().entries.map((entry) {
+          final txIndex = entry.key;
+          final tx = entry.value;
+          final globalIndex = startIndex + txIndex;
+          
+          final txId = 'tx_${tx.id}';
+          final shouldAnimate = !animatedTxIds.contains(txId);
+          if (shouldAnimate) {
+            animatedTxIds.add(txId);
+          }
+
+          return StaggeredEntryAnim(
+            key: ValueKey(txId),
+            index: globalIndex,
+            animate: shouldAnimate,
+            child: HistoryRecordTile(
+              key: ValueKey(tx.id),
+              transaction: tx,
+              selectedVaultId: selectedVaultId,
+              onReviewed: () => onReviewed(tx),
+              onSkipped: () => onSkipped(tx),
+              onTap: () => onTap(tx),
+              onLongPress: () => onLongPress(tx),
+            ),
           );
         }),
         const SizedBox(height: 12),

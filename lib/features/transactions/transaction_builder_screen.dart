@@ -719,8 +719,8 @@ class _TransactionBuilderScreenState
   }
 
   Future<void> _saveTransaction() async {
-    final isTr = Localizations.localeOf(context).languageCode == 'tr';
     try {
+      final l10n = AppLocalizations.of(context)!;
       final amountStr = _amountController.text.trim();
       final minStr = _minController.text.trim();
       final maxStr = _maxController.text.trim();
@@ -774,11 +774,11 @@ class _TransactionBuilderScreenState
 
       if (_isTransfer) {
         if (_targetVaultId == null) {
-          _showValidationError(isTr ? "Lütfen geçerli bir hedef kasa seçin." : "Please select a valid target vault.");
+          _showValidationError(l10n.selectValidTargetVault);
           return;
         }
         if (_selectedVaultIds.isNotEmpty && _targetVaultId == _selectedVaultIds.first) {
-          _showValidationError(isTr ? "Kaynak kasa ile hedef kasa aynı olamaz." : "Source and target vaults cannot be the same.");
+          _showValidationError(l10n.sourceAndTargetVaultSame);
           return;
         }
       }
@@ -871,7 +871,7 @@ class _TransactionBuilderScreenState
                 : null);
 
       final catName = _isTransfer
-          ? "Kasa Transferi"
+          ? l10n.vaultTransfer
           : (subModel != null
                 ? subModel['name'] as String
                 : cat!['name'] as String);
@@ -1411,7 +1411,7 @@ class _TransactionBuilderScreenState
                                           const SizedBox(height: 12),
                                           PickerField(
                                             icon: Icons.account_balance_wallet_rounded,
-                                            label: Localizations.localeOf(context).languageCode == 'tr' ? "Hedef Kasa" : "Target Vault",
+                                            label: l10n.targetVault,
                                             items: _vaults.map((v) => v.name).toList(),
                                             selectedIndex: _vaults.isEmpty
                                                 ? 0
@@ -1707,27 +1707,10 @@ class _TransactionBuilderScreenState
 
   String _getAppBarTitle() {
     final isEdit = widget.initialId != null;
-    final isTr = l10n.localeName == 'tr';
     if (_builderType == TransactionBuilderType.recurring) {
-      if (isEdit) {
-        return isTr
-            ? 'Planı Düzenle'
-            : (l10n.localeName == 'de' ? 'Plan bearbeiten' : 'Edit Plan');
-      } else {
-        return isTr
-            ? 'Yeni Plan'
-            : (l10n.localeName == 'de' ? 'Neuer Plan' : 'New Plan');
-      }
+      return isEdit ? l10n.editPlan : l10n.newPlan;
     } else {
-      if (isEdit) {
-        return isTr
-            ? 'İşlemi Düzenle'
-            : (l10n.localeName == 'de'
-                  ? 'Transaktion bearbeiten'
-                  : 'Edit Transaction');
-      } else {
-        return isTr ? 'Yeni İşlem' : l10n.addTransaction;
-      }
+      return isEdit ? l10n.editTransaction : l10n.addTransaction;
     }
   }
 }

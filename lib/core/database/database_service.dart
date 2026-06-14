@@ -669,6 +669,8 @@ class DatabaseService {
     await prefs.remove('last_sync_time');
     await prefs.remove('last_checked_notifications_time');
     await prefs.remove('Finarcast_last_ai_usage_timestamp');
+    await prefs.remove('home_widget_layout');
+    await prefs.remove('dismissed_in_app_notifications');
     await prefs.setBool('Finarcast_is_pro_user', false);
 
     final keys = prefs.getKeys();

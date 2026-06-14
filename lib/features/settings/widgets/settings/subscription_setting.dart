@@ -14,6 +14,7 @@ import '../../../../shared/widgets/custom_notification.dart';
 import '../../../../shared/widgets/custom_dialog.dart';
 import '../../../home/home_providers.dart';
 import '../settings_list_items.dart';
+import '../../../../shared/widgets/animated_premium_badge.dart';
 
 class SubscriptionSetting extends ConsumerStatefulWidget {
   const SubscriptionSetting({super.key});
@@ -54,20 +55,6 @@ class _SubscriptionSettingState extends ConsumerState<SubscriptionSetting> {
           duration: const Duration(milliseconds: 400),
           firstCurve: Curves.easeOutCubic,
           secondCurve: Curves.easeInCubic,
-        ),
-        SettingsListItems.buildDivider(isDark),
-        SettingsListItems.buildSetting(
-          icon: Icons.restore_rounded,
-          title: l10n.restorePurchases,
-          onTap: () async {
-            await ref.read(subscriptionServiceProvider).restorePurchases();
-            if (context.mounted) {
-              CustomNotification.success(context, l10n.done);
-            }
-          },
-          activeColor: activeColor,
-          context: context,
-          isAction: true,
         ),
       ],
     );
@@ -123,7 +110,7 @@ class _SubscriptionSettingState extends ConsumerState<SubscriptionSetting> {
               _buildComparisonRow(context, l10n.limitCloudSync, "-", l10n.yes, activeColor),
               _buildComparisonRow(context, l10n.limitDataRetention, "-", l10n.limitDataRetentionPro, activeColor),
               _buildComparisonRow(context, l10n.limitCustomThemes, "-", l10n.yes, activeColor),
-              _buildComparisonRow(context, l10n.limitAdFree, "-", l10n.yes, activeColor),
+              _buildComparisonRow(context, l10n.exportExcel, "-", l10n.yes, activeColor),
               
               if (subscription.isPro) ...[
                 const SizedBox(height: 24),
@@ -135,6 +122,31 @@ class _SubscriptionSettingState extends ConsumerState<SubscriptionSetting> {
                     height: 40,
                     fontSize: 12,
                     letterSpacing: 1.0,
+                  ),
+                ),
+              ] else ...[
+                const SizedBox(height: 16),
+                Center(
+                  child: TextButton(
+                    onPressed: () async {
+                      await ref.read(subscriptionServiceProvider).restorePurchases();
+                      if (context.mounted) {
+                        CustomNotification.success(context, l10n.done);
+                      }
+                    },
+                    style: TextButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    ),
+                    child: Text(
+                      l10n.restorePurchases,
+                      style: TextStyle(
+                        color: activeColor.withValues(alpha: 0.8),
+                        fontSize: 13,
+                        fontWeight: FontWeight.w700,
+                        decoration: TextDecoration.underline,
+                        decorationColor: activeColor.withValues(alpha: 0.8),
+                      ),
+                    ),
                   ),
                 ),
               ],
@@ -155,7 +167,7 @@ class _SubscriptionSettingState extends ConsumerState<SubscriptionSetting> {
           Expanded(
             flex: 3,
             child: Text(
-              "FREE",
+              "Free",
               textAlign: TextAlign.center,
               style: TextStyle(fontSize: 10, fontWeight: FontWeight.w900, color: AppColors.getTextSecondary(context).withValues(alpha: 0.5)),
             ),
@@ -163,7 +175,7 @@ class _SubscriptionSettingState extends ConsumerState<SubscriptionSetting> {
           Expanded(
             flex: 3,
             child: Text(
-              "PREMIUM",
+              "Premium",
               textAlign: TextAlign.center,
               style: TextStyle(fontSize: 10, fontWeight: FontWeight.w900, color: ref.watch(rotaryColorProvider)),
             ),
@@ -374,22 +386,27 @@ class _SubscriptionSettingState extends ConsumerState<SubscriptionSetting> {
               ),
             ),
             const SizedBox(width: 8),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-              decoration: BoxDecoration(
-                color: (isPro ? activeColor : AppColors.getTextSecondary(context)).withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Text(
-                isPro ? "PREMIUM" : "FREE",
-                style: TextStyle(
-                  color: isPro ? activeColor : AppColors.getTextSecondary(context),
-                  fontSize: 10,
-                  fontWeight: FontWeight.w900,
-                  letterSpacing: 0.5,
-                ),
-              ),
-            ),
+            isPro
+                ? const AnimatedPremiumBadge(
+                    isCapsule: true,
+                    fontSize: 10,
+                  )
+                : Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: AppColors.getTextSecondary(context).withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Text(
+                      "Free",
+                      style: TextStyle(
+                        color: AppColors.getTextSecondary(context),
+                        fontSize: 10,
+                        fontWeight: FontWeight.w900,
+                        letterSpacing: 0.5,
+                      ),
+                    ),
+                  ),
             const SizedBox(width: 8),
             AnimatedRotation(
               turns: _isExpanded ? 0.25 : 0.0,

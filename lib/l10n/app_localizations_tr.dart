@@ -989,6 +989,10 @@ class AppLocalizationsTr extends AppLocalizations {
       'Veri saklama, arşivleme ve otomatik temizleme kuralları sadece Premium üyelerin erişimine açıktır.';
 
   @override
+  String get premiumExportDesc =>
+      'Excel veya CSV formatında veri aktarımı özelliği sadece Premium üyelerin erişimine açıktır.';
+
+  @override
   String get later => 'Daha Sonra';
 
   @override
@@ -1318,10 +1322,23 @@ class AppLocalizationsTr extends AppLocalizations {
       'Tüm finansal verileriniz ve ayarlarınız kalıcı olarak silinecek. Bu işlem geri alınamaz.';
 
   @override
+  String get resetCloudBackup => 'Bulut yedeklerini de sil (Supabase)';
+
+  @override
+  String get resetOnlyDevice => 'Sadece Bu Cihazı Sıfırla';
+
+  @override
+  String get resetDeviceAndCloud => 'Cihazı ve Bulutu Sıfırla';
+
+  @override
   String get deleteAll => 'Hepsini Sil';
 
   @override
   String get resetSuccess => 'Tüm veriler ve ayarlar başarıyla sıfırlandı.';
+
+  @override
+  String get noTransactionsToExport =>
+      'Dışa aktarılacak işlem kaydı bulunamadı.';
 
   @override
   String get supportEmailCopied =>
@@ -2005,4 +2022,95 @@ class AppLocalizationsTr extends AppLocalizations {
   String aiErrorGeneric(Object error) {
     return 'Yapay Zeka analizi başarısız oldu: $error';
   }
+
+  @override
+  String get vaultTransfer => 'Kasa Transferi';
+
+  @override
+  String daysShort(Object count) {
+    return '${count}g';
+  }
+
+  @override
+  String get recurrenceDay => 'Tekrarlama Günü';
+
+  @override
+  String dayOfMonthFormatted(Object day) {
+    return 'Ayın $day. Günü';
+  }
+
+  @override
+  String get recurrenceDate => 'Tekrarlama Tarihi';
+
+  @override
+  String occurrencesCount(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count Kez / Taksit',
+      one: '1 Kez',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get plans => 'Planlar';
+
+  @override
+  String installmentsCount(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count Taksit',
+      one: '1 Taksit',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get installment => 'Taksit';
+
+  @override
+  String get paymentOrder => 'Ödeme Sırası';
+
+  @override
+  String paymentNumber(Object number) {
+    return '$number. Ödeme';
+  }
+
+  @override
+  String percentFormat(Object value) {
+    return '%$value';
+  }
+
+  @override
+  String get selectValidTargetVault => 'Lütfen geçerli bir hedef kasa seçin.';
+
+  @override
+  String get sourceAndTargetVaultSame =>
+      'Kaynak kasa ile hedef kasa aynı olamaz.';
+
+  @override
+  String get targetVault => 'Hedef Kasa';
+
+  @override
+  String get editPlan => 'Planı Düzenle';
+
+  @override
+  String get newPlan => 'Yeni Plan';
+
+  @override
+  String get editTransaction => 'İşlemi Düzenle';
+
+  @override
+  String get navDashboard => 'Dashboard';
+
+  @override
+  String get navVaults => 'Kasalar';
+
+  @override
+  String get navSmartScan => 'Tarama';
+
+  @override
+  String get navSettings => 'Ayarlar';
 }

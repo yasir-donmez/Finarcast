@@ -1974,6 +1974,12 @@ abstract class AppLocalizations {
   /// **'Veri saklama, arşivleme ve otomatik temizleme kuralları sadece Premium üyelerin erişimine açıktır.'**
   String get premiumRetentionDesc;
 
+  /// No description provided for @premiumExportDesc.
+  ///
+  /// In tr, this message translates to:
+  /// **'Excel veya CSV formatında veri aktarımı özelliği sadece Premium üyelerin erişimine açıktır.'**
+  String get premiumExportDesc;
+
   /// No description provided for @later.
   ///
   /// In tr, this message translates to:
@@ -2568,6 +2574,24 @@ abstract class AppLocalizations {
   /// **'Tüm finansal verileriniz ve ayarlarınız kalıcı olarak silinecek. Bu işlem geri alınamaz.'**
   String get resetDataDesc;
 
+  /// No description provided for @resetCloudBackup.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bulut yedeklerini de sil (Supabase)'**
+  String get resetCloudBackup;
+
+  /// No description provided for @resetOnlyDevice.
+  ///
+  /// In tr, this message translates to:
+  /// **'Sadece Bu Cihazı Sıfırla'**
+  String get resetOnlyDevice;
+
+  /// No description provided for @resetDeviceAndCloud.
+  ///
+  /// In tr, this message translates to:
+  /// **'Cihazı ve Bulutu Sıfırla'**
+  String get resetDeviceAndCloud;
+
   /// No description provided for @deleteAll.
   ///
   /// In tr, this message translates to:
@@ -2579,6 +2603,12 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'Tüm veriler ve ayarlar başarıyla sıfırlandı.'**
   String get resetSuccess;
+
+  /// No description provided for @noTransactionsToExport.
+  ///
+  /// In tr, this message translates to:
+  /// **'Dışa aktarılacak işlem kaydı bulunamadı.'**
+  String get noTransactionsToExport;
 
   /// No description provided for @supportEmailCopied.
   ///
@@ -3671,6 +3701,138 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'Yapay Zeka analizi başarısız oldu: {error}'**
   String aiErrorGeneric(Object error);
+
+  /// No description provided for @vaultTransfer.
+  ///
+  /// In tr, this message translates to:
+  /// **'Kasa Transferi'**
+  String get vaultTransfer;
+
+  /// No description provided for @daysShort.
+  ///
+  /// In tr, this message translates to:
+  /// **'{count}g'**
+  String daysShort(Object count);
+
+  /// No description provided for @recurrenceDay.
+  ///
+  /// In tr, this message translates to:
+  /// **'Tekrarlama Günü'**
+  String get recurrenceDay;
+
+  /// No description provided for @dayOfMonthFormatted.
+  ///
+  /// In tr, this message translates to:
+  /// **'Ayın {day}. Günü'**
+  String dayOfMonthFormatted(Object day);
+
+  /// No description provided for @recurrenceDate.
+  ///
+  /// In tr, this message translates to:
+  /// **'Tekrarlama Tarihi'**
+  String get recurrenceDate;
+
+  /// No description provided for @occurrencesCount.
+  ///
+  /// In tr, this message translates to:
+  /// **'{count, plural, =1{1 Kez} other{{count} Kez / Taksit}}'**
+  String occurrencesCount(num count);
+
+  /// No description provided for @plans.
+  ///
+  /// In tr, this message translates to:
+  /// **'Planlar'**
+  String get plans;
+
+  /// No description provided for @installmentsCount.
+  ///
+  /// In tr, this message translates to:
+  /// **'{count, plural, =1{1 Taksit} other{{count} Taksit}}'**
+  String installmentsCount(num count);
+
+  /// No description provided for @installment.
+  ///
+  /// In tr, this message translates to:
+  /// **'Taksit'**
+  String get installment;
+
+  /// No description provided for @paymentOrder.
+  ///
+  /// In tr, this message translates to:
+  /// **'Ödeme Sırası'**
+  String get paymentOrder;
+
+  /// No description provided for @paymentNumber.
+  ///
+  /// In tr, this message translates to:
+  /// **'{number}. Ödeme'**
+  String paymentNumber(Object number);
+
+  /// No description provided for @percentFormat.
+  ///
+  /// In tr, this message translates to:
+  /// **'%{value}'**
+  String percentFormat(Object value);
+
+  /// No description provided for @selectValidTargetVault.
+  ///
+  /// In tr, this message translates to:
+  /// **'Lütfen geçerli bir hedef kasa seçin.'**
+  String get selectValidTargetVault;
+
+  /// No description provided for @sourceAndTargetVaultSame.
+  ///
+  /// In tr, this message translates to:
+  /// **'Kaynak kasa ile hedef kasa aynı olamaz.'**
+  String get sourceAndTargetVaultSame;
+
+  /// No description provided for @targetVault.
+  ///
+  /// In tr, this message translates to:
+  /// **'Hedef Kasa'**
+  String get targetVault;
+
+  /// No description provided for @editPlan.
+  ///
+  /// In tr, this message translates to:
+  /// **'Planı Düzenle'**
+  String get editPlan;
+
+  /// No description provided for @newPlan.
+  ///
+  /// In tr, this message translates to:
+  /// **'Yeni Plan'**
+  String get newPlan;
+
+  /// No description provided for @editTransaction.
+  ///
+  /// In tr, this message translates to:
+  /// **'İşlemi Düzenle'**
+  String get editTransaction;
+
+  /// No description provided for @navDashboard.
+  ///
+  /// In tr, this message translates to:
+  /// **'Dashboard'**
+  String get navDashboard;
+
+  /// No description provided for @navVaults.
+  ///
+  /// In tr, this message translates to:
+  /// **'Kasalar'**
+  String get navVaults;
+
+  /// No description provided for @navSmartScan.
+  ///
+  /// In tr, this message translates to:
+  /// **'Tarama'**
+  String get navSmartScan;
+
+  /// No description provided for @navSettings.
+  ///
+  /// In tr, this message translates to:
+  /// **'Ayarlar'**
+  String get navSettings;
 }
 
 class _AppLocalizationsDelegate

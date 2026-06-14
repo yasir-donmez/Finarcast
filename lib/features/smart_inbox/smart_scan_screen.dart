@@ -43,6 +43,8 @@ class _SmartScanScreenState extends ConsumerState<SmartScanScreen> with WidgetsB
   final Map<String, int> _selectedVaultIdForDraft = {};
   // Her bir transfer taslağı için seçilen hedef kasa ID'sini tutar
   final Map<String, int> _selectedTargetVaultIdForDraft = {};
+  // Animasyonların sadece bir kez çalışmasını kontrol etmek için
+  final Set<String> _animatedDraftIds = {};
 
   @override
   void initState() {
@@ -127,7 +129,7 @@ class _SmartScanScreenState extends ConsumerState<SmartScanScreen> with WidgetsB
         PrecisionDialogAction(
           label: l10n.loginOrSignUp,
           onTap: () async {
-            Navigator.pop(context);
+            Navigator.of(context).popUntil((route) => route.isFirst);
             await ref.read(authControllerProvider.notifier).exitGuestMode();
           },
           isPrimary: true,
@@ -457,13 +459,6 @@ class _SmartScanScreenState extends ConsumerState<SmartScanScreen> with WidgetsB
     final currencySymbol = ref.watch(settingsProvider).currencySymbol;
     final topPadding = MediaQuery.of(context).padding.top;
 
-    final listPadding = EdgeInsets.fromLTRB(
-      16,
-      topPadding + 140.0,
-      16,
-      32,
-    );
-
     return Stack(
       children: [
         const Positioned.fill(
@@ -475,12 +470,22 @@ class _SmartScanScreenState extends ConsumerState<SmartScanScreen> with WidgetsB
           body: Stack(
             children: [
               // 1. ANA İÇERİK BÖLGESİ
-              Positioned.fill(
+              Positioned(
+                top: topPadding + 132.0,
+                left: 0,
+                right: 0,
+                bottom: 0,
                 child: SafeArea(
+                  top: false,
                   bottom: false,
                   child: drafts.isEmpty
                       ? const SmartInboxEmptyState()
-                      : _buildDraftsList(drafts, vaults, currencySymbol, listPadding),
+                      : _buildDraftsList(
+                          drafts,
+                          vaults,
+                          currencySymbol,
+                          const EdgeInsets.fromLTRB(16, 8, 16, 32),
+                        ),
                 ),
               ),
 
@@ -497,16 +502,16 @@ class _SmartScanScreenState extends ConsumerState<SmartScanScreen> with WidgetsB
                 ),
               ),
 
-              // 3. ÖZEL BAŞLIK ALANI (Kasalar sayfasıyla birebir uyumlu)
               Positioned(
                 left: 20,
                 top: topPadding + 10,
                 child: Text(
                   AppLocalizations.of(context)!.smartScanTitle,
-                  style: const TextStyle(
-                    fontSize: 32,
-                    fontWeight: FontWeight.w900,
-                    letterSpacing: -1.5,
+                  style: TextStyle(
+                    fontSize: 28,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: -0.8,
+                    color: AppColors.getTextPrimary(context),
                   ),
                 ),
               ),
@@ -572,6 +577,7 @@ class _SmartScanScreenState extends ConsumerState<SmartScanScreen> with WidgetsB
                     setState(() {
                       _selectedVaultIdForDraft.clear();
                       _selectedTargetVaultIdForDraft.clear();
+                      _animatedDraftIds.clear();
                     });
                   },
                   child: Text(
@@ -586,7 +592,9 @@ class _SmartScanScreenState extends ConsumerState<SmartScanScreen> with WidgetsB
               ],
             ),
           ),
-          ...drafts.map((draft) {
+          ...drafts.asMap().entries.map((entry) {
+            final index = entry.key;
+            final draft = entry.value;
             final defaultVaultId = vaults.isNotEmpty ? vaults.first.id : -1;
             final selectedVaultId = _selectedVaultIdForDraft[draft.id] ?? defaultVaultId;
             int? matchedTargetId;
@@ -595,11 +603,15 @@ class _SmartScanScreenState extends ConsumerState<SmartScanScreen> with WidgetsB
               matchedTargetId = otherVault.id;
             }
             final selectedTargetVaultId = _selectedTargetVaultIdForDraft[draft.id] ?? matchedTargetId;
-            final index = drafts.indexOf(draft);
+            final draftId = draft.id;
+            final shouldAnimate = !_animatedDraftIds.contains(draftId);
+            if (shouldAnimate) {
+              _animatedDraftIds.add(draftId);
+            }
             return StaggeredEntryAnim(
-              key: ValueKey(draft.id),
+              key: ValueKey(draftId),
               index: index,
-              animate: true,
+              animate: shouldAnimate,
               child: DismissibleDraftCard(
                 draft: draft,
                 vaults: vaults,

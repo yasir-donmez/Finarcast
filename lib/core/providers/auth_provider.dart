@@ -5,6 +5,8 @@ import '../services/subscription_service.dart';
 import '../database/database_service.dart';
 import 'db_providers.dart';
 import 'settings_provider.dart';
+import '../../features/home/providers/home_widget_layout_provider.dart';
+import '../../features/vaults/widgets/in_app_notifications_sheet.dart';
 
 class AuthController extends StateNotifier<AsyncValue<void>> {
   final Ref _ref;
@@ -29,6 +31,8 @@ class AuthController extends StateNotifier<AsyncValue<void>> {
       _ref.invalidate(vaultsStreamProvider);
       _ref.invalidate(settingsProvider);
       _ref.invalidate(subscriptionServiceProvider);
+      _ref.invalidate(widgetLayoutProvider);
+      _ref.invalidate(dismissedNotificationsProvider);
 
       // 4. En son oturumu kapat (bu işlem UI'ı değiştirecektir)
       await _ref.read(authServiceProvider).signOut();
@@ -57,6 +61,8 @@ class AuthController extends StateNotifier<AsyncValue<void>> {
       _ref.invalidate(vaultsStreamProvider);
       _ref.invalidate(settingsProvider);
       _ref.invalidate(subscriptionServiceProvider);
+      _ref.invalidate(widgetLayoutProvider);
+      _ref.invalidate(dismissedNotificationsProvider);
 
       // 4. Hesabı ve oturumu sil (bu işlem UI'ı değiştirecektir)
       await _ref.read(authServiceProvider).deleteAccount();

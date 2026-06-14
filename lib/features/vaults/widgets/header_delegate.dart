@@ -108,10 +108,11 @@ class TrueMorphDeckHeaderDelegate extends SliverPersistentHeaderDelegate {
                         alignment: Alignment.centerLeft,
                         child: Text(
                           l10n.vaults,
-                          style: const TextStyle(
-                            fontSize: 32,
-                            fontWeight: FontWeight.w900,
-                            letterSpacing: -1.5,
+                          style: TextStyle(
+                            fontSize: 28,
+                            fontWeight: FontWeight.w800,
+                            letterSpacing: -0.8,
+                            color: AppColors.getTextPrimary(context),
                           ),
                         ),
                       ),

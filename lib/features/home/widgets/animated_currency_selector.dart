@@ -135,7 +135,7 @@ class AnimatedCurrencySelector extends ConsumerWidget {
         Icon(icon, size: 14, color: color.withValues(alpha: 0.8)),
         const SizedBox(width: 4),
         Text(
-          CurrencyUtils.formatAmount(amount, currencySymbol: ''),
+          CurrencyUtils.formatAmount(amount, currencySymbol: currencySymbol),
           style: TextStyle(
             color: color.withValues(alpha: isDark ? 0.9 : 1.0), // Aydınlıkta tam opak
             fontSize: 14,

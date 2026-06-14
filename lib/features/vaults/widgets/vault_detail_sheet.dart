@@ -32,7 +32,7 @@ class VaultDetailSheet extends ConsumerStatefulWidget {
   ConsumerState<VaultDetailSheet> createState() => _VaultDetailSheetState();
 }
 
-class _VaultDetailSheetState extends ConsumerState<VaultDetailSheet> with SingleTickerProviderStateMixin {
+class _VaultDetailSheetState extends ConsumerState<VaultDetailSheet> {
   late TextEditingController _nameController;
   late TextEditingController _balanceController;
   VaultDetailTab _activeTab = VaultDetailTab.transactions;
@@ -304,7 +304,6 @@ class _VaultDetailSheetState extends ConsumerState<VaultDetailSheet> with Single
     List<ExchangeRate> rates,
     AppLocalizations l10n,
   ) {
-    final isTr = Localizations.localeOf(context).languageCode == 'tr';
     // === FİNANSAL HESAPLAMALAR ===
     final incomeLoad = vaultTemplates.where((t) => t.isIncome).fold<double>(0, (sum, t) => sum + t.getConvertedMonthlyEquivalent(currency, rates));
     final expenseLoad = vaultTemplates.where((t) => !t.isIncome).fold<double>(0, (sum, t) => sum + t.getConvertedMonthlyEquivalent(currency, rates));
@@ -322,18 +321,6 @@ class _VaultDetailSheetState extends ConsumerState<VaultDetailSheet> with Single
     final incomeCount = vaultTransactions.where((t) => t.isIncome).length;
     final expenseCount = vaultTransactions.where((t) => !t.isIncome).length;
 
-    // Senaryo analizi (esnek işlemlerin min/max değerlerine göre)
-    final hasFlexible = vaultTemplates.any((t) => t.minAmount != null || t.maxAmount != null);
-    double monthlyBest = 0, monthlyWorst = 0;
-    for (final tx in vaultTemplates) {
-      if (tx.isIncome) {
-        monthlyBest += tx.maxMonthlyEquivalent > 0 ? CurrencyUtils.convert(tx.maxMonthlyEquivalent, tx.currency ?? '₺', currency, rates) : tx.getConvertedMonthlyEquivalent(currency, rates);
-        monthlyWorst += tx.minMonthlyEquivalent > 0 ? CurrencyUtils.convert(tx.minMonthlyEquivalent, tx.currency ?? '₺', currency, rates) : tx.getConvertedMonthlyEquivalent(currency, rates);
-      } else {
-        monthlyBest -= tx.minMonthlyEquivalent > 0 ? CurrencyUtils.convert(tx.minMonthlyEquivalent, tx.currency ?? '₺', currency, rates) : tx.getConvertedMonthlyEquivalent(currency, rates);
-        monthlyWorst -= tx.maxMonthlyEquivalent > 0 ? CurrencyUtils.convert(tx.maxMonthlyEquivalent, tx.currency ?? '₺', currency, rates) : tx.getConvertedMonthlyEquivalent(currency, rates);
-      }
-    }
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -347,45 +334,55 @@ class _VaultDetailSheetState extends ConsumerState<VaultDetailSheet> with Single
             scalingFactor: sf,
             backgroundColor: activeColor.withValues(alpha: 0.06),
             borderColor: activeColor.withValues(alpha: 0.12),
-            padding: EdgeInsets.all(16 * sf),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Container(
-                      padding: EdgeInsets.all(8 * sf),
-                      decoration: BoxDecoration(
-                        color: activeColor.withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(10 * sf),
-                      ),
-                      child: Icon(Icons.account_balance_wallet_rounded, color: activeColor, size: 18 * sf),
+            padding: EdgeInsets.zero,
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(16 * sf),
+              child: Stack(
+                children: [
+                  Positioned(
+                    right: -10 * sf,
+                    bottom: -15 * sf,
+                    child: Icon(
+                      Icons.account_balance_wallet_rounded,
+                      size: 95 * sf,
+                      color: activeColor.withValues(alpha: isDark ? 0.06 : 0.08),
                     ),
-                    SizedBox(width: 10 * sf),
-                    Text(l10n.monthlyNetBalance, style: TextStyle(fontSize: 9 * sf, fontWeight: FontWeight.w900, color: activeColor.withValues(alpha: isDark ? 0.7 : 0.95), letterSpacing: 1.2)),
-                    const Spacer(),
-                    Text(l10n.perMonth, style: TextStyle(fontSize: 10 * sf, fontWeight: FontWeight.w700, color: AppColors.getTextSecondary(context).withValues(alpha: isDark ? 0.4 : 0.7))),
-                  ],
-                ),
-                SizedBox(height: 12 * sf),
-                FittedBox(
-                  fit: BoxFit.scaleDown,
-                  alignment: Alignment.centerLeft,
-                  child: Text(
-                    CurrencyUtils.formatFullAmount(netLoad, symbol: currency),
-                    style: TextStyle(fontSize: 28 * sf, fontWeight: FontWeight.w900, color: netLoad >= 0 ? AppColors.getIncome(context) : AppColors.getExpense(context), letterSpacing: -1),
                   ),
-                ),
-                SizedBox(height: 12 * sf),
-                // Gelir & Gider satırı
-                Row(
-                  children: [
-                    _buildMiniMetric(context, l10n.income, CurrencyUtils.formatFullAmount(incomeLoad, symbol: currency), AppColors.getIncome(context), sf),
-                    SizedBox(width: 16 * sf),
-                    _buildMiniMetric(context, l10n.expense, CurrencyUtils.formatFullAmount(expenseLoad, symbol: currency), AppColors.getExpense(context), sf),
-                  ],
-                ),
-              ],
+                  Padding(
+                    padding: EdgeInsets.all(16 * sf),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Text(l10n.monthlyNetBalance, style: TextStyle(fontSize: 9 * sf, fontWeight: FontWeight.w900, color: activeColor.withValues(alpha: isDark ? 0.7 : 0.95), letterSpacing: 1.2)),
+                            const Spacer(),
+                            Text(l10n.perMonth, style: TextStyle(fontSize: 10 * sf, fontWeight: FontWeight.w700, color: AppColors.getTextSecondary(context).withValues(alpha: isDark ? 0.4 : 0.7))),
+                          ],
+                        ),
+                        SizedBox(height: 12 * sf),
+                        FittedBox(
+                          fit: BoxFit.scaleDown,
+                          alignment: Alignment.centerLeft,
+                          child: Text(
+                            CurrencyUtils.formatFullAmount(netLoad.abs(), symbol: currency),
+                            style: TextStyle(fontSize: 28 * sf, fontWeight: FontWeight.w900, color: netLoad >= 0 ? AppColors.getIncome(context) : AppColors.getExpense(context), letterSpacing: -1),
+                          ),
+                        ),
+                        SizedBox(height: 12 * sf),
+                        // Gelir & Gider satırı
+                        Row(
+                          children: [
+                            _buildMiniMetric(context, l10n.income, CurrencyUtils.formatFullAmount(incomeLoad, symbol: currency), AppColors.getIncome(context), sf),
+                            SizedBox(width: 16 * sf),
+                            _buildMiniMetric(context, l10n.expense, CurrencyUtils.formatFullAmount(expenseLoad, symbol: currency), AppColors.getExpense(context), sf),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
 
@@ -399,30 +396,43 @@ class _VaultDetailSheetState extends ConsumerState<VaultDetailSheet> with Single
                 Expanded(
                   child: CustomCard(
                     scalingFactor: sf,
-                    padding: EdgeInsets.all(14 * sf),
-                    child: ConstrainedBox(
-                      constraints: BoxConstraints(minHeight: 56 * sf),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                    padding: EdgeInsets.zero,
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(16 * sf),
+                      child: Stack(
                         children: [
-                          Row(
-                            children: [
-                              Icon(Icons.savings_rounded, color: savingsRate >= 0 ? Colors.teal : AppColors.getExpense(context), size: 14 * sf),
-                              SizedBox(width: 6 * sf),
-                              Flexible(child: Text(l10n.savingsRate, style: TextStyle(fontSize: 8 * sf, fontWeight: FontWeight.w900, color: AppColors.getTextSecondary(context).withValues(alpha: isDark ? 0.5 : 0.8), letterSpacing: 0.8))),
-                            ],
+                          Positioned(
+                            right: -15 * sf,
+                            bottom: -15 * sf,
+                            child: Icon(
+                              Icons.savings_rounded,
+                              size: 70 * sf,
+                              color: (savingsRate >= 0 ? Colors.teal : AppColors.getExpense(context)).withValues(alpha: isDark ? 0.05 : 0.08),
+                            ),
                           ),
-                          SizedBox(height: 8 * sf),
-                          FittedBox(
-                            fit: BoxFit.scaleDown,
-                            alignment: Alignment.centerLeft,
-                            child: Text(
-                              incomeLoad > 0 
-                                  ? (isTr 
-                                      ? (savingsRate >= 0 ? '%${savingsRate.toStringAsFixed(1)}' : '-%${savingsRate.abs().toStringAsFixed(1)}')
-                                      : '${savingsRate.toStringAsFixed(1)}%')
-                                  : '—',
-                              style: TextStyle(fontSize: 22 * sf, fontWeight: FontWeight.w900, color: savingsRate >= 20 ? Colors.teal : savingsRate >= 0 ? Colors.orange : AppColors.getExpense(context)),
+                          Padding(
+                            padding: EdgeInsets.symmetric(horizontal: 12 * sf, vertical: 10 * sf),
+                            child: ConstrainedBox(
+                              constraints: BoxConstraints(minHeight: 52 * sf),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Text(l10n.savingsRate, style: TextStyle(fontSize: 8 * sf, fontWeight: FontWeight.w900, color: AppColors.getTextSecondary(context).withValues(alpha: isDark ? 0.5 : 0.8), letterSpacing: 0.8)),
+                                  SizedBox(height: 4 * sf),
+                                  if (incomeLoad > 0)
+                                    FittedBox(
+                                      fit: BoxFit.scaleDown,
+                                      alignment: Alignment.centerLeft,
+                                      child: Text(
+                                        l10n.percentFormat(savingsRate.abs().toStringAsFixed(1)),
+                                        style: TextStyle(fontSize: 22 * sf, fontWeight: FontWeight.w900, color: savingsRate >= 20 ? Colors.teal : savingsRate >= 0 ? Colors.orange : AppColors.getExpense(context)),
+                                      ),
+                                    )
+                                  else
+                                    Text('—', style: TextStyle(fontSize: 16 * sf, fontWeight: FontWeight.w700, color: AppColors.getTextSecondary(context).withValues(alpha: 0.3))),
+                                ],
+                              ),
                             ),
                           ),
                         ],
@@ -434,26 +444,40 @@ class _VaultDetailSheetState extends ConsumerState<VaultDetailSheet> with Single
                 Expanded(
                   child: CustomCard(
                     scalingFactor: sf,
-                    padding: EdgeInsets.all(14 * sf),
-                    child: ConstrainedBox(
-                      constraints: BoxConstraints(minHeight: 56 * sf),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                    padding: EdgeInsets.zero,
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(16 * sf),
+                      child: Stack(
                         children: [
-                          Row(
-                            children: [
-                              Icon(Icons.trending_up_rounded, color: yearlyProjection >= 0 ? AppColors.getIncome(context) : AppColors.getExpense(context), size: 14 * sf),
-                              SizedBox(width: 6 * sf),
-                              Flexible(child: Text(l10n.yearlyProjection, style: TextStyle(fontSize: 8 * sf, fontWeight: FontWeight.w900, color: AppColors.getTextSecondary(context).withValues(alpha: isDark ? 0.5 : 0.8), letterSpacing: 0.8))),
-                            ],
+                          Positioned(
+                            right: -15 * sf,
+                            bottom: -15 * sf,
+                            child: Icon(
+                              Icons.trending_up_rounded,
+                              size: 70 * sf,
+                              color: (yearlyProjection >= 0 ? AppColors.getIncome(context) : AppColors.getExpense(context)).withValues(alpha: isDark ? 0.05 : 0.08),
+                            ),
                           ),
-                          SizedBox(height: 8 * sf),
-                          FittedBox(
-                            fit: BoxFit.scaleDown,
-                            alignment: Alignment.centerLeft,
-                            child: Text(
-                              CurrencyUtils.formatFullAmount(yearlyProjection, symbol: currency),
-                              style: TextStyle(fontSize: 20 * sf, fontWeight: FontWeight.w900, color: yearlyProjection >= 0 ? AppColors.getIncome(context) : AppColors.getExpense(context)),
+                          Padding(
+                            padding: EdgeInsets.symmetric(horizontal: 12 * sf, vertical: 10 * sf),
+                            child: ConstrainedBox(
+                              constraints: BoxConstraints(minHeight: 52 * sf),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Text(l10n.yearlyProjection, style: TextStyle(fontSize: 8 * sf, fontWeight: FontWeight.w900, color: AppColors.getTextSecondary(context).withValues(alpha: isDark ? 0.5 : 0.8), letterSpacing: 0.8)),
+                                  SizedBox(height: 4 * sf),
+                                  FittedBox(
+                                    fit: BoxFit.scaleDown,
+                                    alignment: Alignment.centerLeft,
+                                    child: Text(
+                                      CurrencyUtils.formatFullAmount(yearlyProjection.abs(), symbol: currency),
+                                      style: TextStyle(fontSize: 20 * sf, fontWeight: FontWeight.w900, color: yearlyProjection >= 0 ? AppColors.getIncome(context) : AppColors.getExpense(context)),
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ),
                           ),
                         ],
@@ -475,30 +499,52 @@ class _VaultDetailSheetState extends ConsumerState<VaultDetailSheet> with Single
                 Expanded(
                   child: CustomCard(
                     scalingFactor: sf,
-                    padding: EdgeInsets.all(14 * sf),
-                    child: ConstrainedBox(
-                      constraints: BoxConstraints(minHeight: 68 * sf),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                    padding: EdgeInsets.zero,
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(16 * sf),
+                      child: Stack(
                         children: [
-                          Text(l10n.topIncome, style: TextStyle(fontSize: 8 * sf, fontWeight: FontWeight.w900, color: AppColors.getIncome(context).withValues(alpha: isDark ? 0.6 : 0.85), letterSpacing: 0.8)),
-                          SizedBox(height: 6 * sf),
-                          if (topIncome != null) ...[
-                            Row(
-                              children: [
-                                Icon(topIncome.icon, color: topIncome.color, size: 16 * sf),
-                                SizedBox(width: 6 * sf),
-                                Flexible(child: Text(topIncome.title, style: TextStyle(fontSize: 12 * sf, fontWeight: FontWeight.w800), maxLines: 1, overflow: TextOverflow.ellipsis)),
-                              ],
+                          Positioned(
+                            right: -15 * sf,
+                            bottom: -15 * sf,
+                            child: Icon(
+                              topIncome?.icon ?? Icons.arrow_upward_rounded,
+                              size: 70 * sf,
+                              color: (topIncome?.color ?? AppColors.getIncome(context)).withValues(alpha: isDark ? 0.05 : 0.08),
                             ),
-                            SizedBox(height: 4 * sf),
-                            FittedBox(
-                              fit: BoxFit.scaleDown,
-                              alignment: Alignment.centerLeft,
-                              child: Text(CurrencyUtils.formatFullAmount(topIncome.getConvertedMonthlyEquivalent(currency, rates), symbol: currency), style: TextStyle(fontSize: 14 * sf, fontWeight: FontWeight.w900, color: AppColors.getIncome(context))),
+                          ),
+                          Padding(
+                            padding: EdgeInsets.symmetric(horizontal: 12 * sf, vertical: 10 * sf),
+                            child: ConstrainedBox(
+                              constraints: BoxConstraints(minHeight: 52 * sf),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Text(l10n.topIncome, style: TextStyle(fontSize: 8 * sf, fontWeight: FontWeight.w900, color: AppColors.getIncome(context).withValues(alpha: isDark ? 0.6 : 0.85), letterSpacing: 0.8)),
+                                  SizedBox(height: 4 * sf),
+                                  if (topIncome != null) ...[
+                                    Text(
+                                      topIncome.title, 
+                                      style: TextStyle(fontSize: 11 * sf, fontWeight: FontWeight.w800, color: AppColors.getTextPrimary(context).withValues(alpha: 0.85)), 
+                                      maxLines: 1, 
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                    SizedBox(height: 2 * sf),
+                                    FittedBox(
+                                      fit: BoxFit.scaleDown,
+                                      alignment: Alignment.centerLeft,
+                                      child: Text(
+                                        CurrencyUtils.formatFullAmount(topIncome.getConvertedMonthlyEquivalent(currency, rates), symbol: currency), 
+                                        style: TextStyle(fontSize: 15 * sf, fontWeight: FontWeight.w900, color: AppColors.getIncome(context)),
+                                      ),
+                                    ),
+                                  ] else
+                                    Text('—', style: TextStyle(fontSize: 16 * sf, fontWeight: FontWeight.w700, color: AppColors.getTextSecondary(context).withValues(alpha: 0.3))),
+                                ],
+                              ),
                             ),
-                          ] else
-                            Text('—', style: TextStyle(fontSize: 14 * sf, fontWeight: FontWeight.w700, color: AppColors.getTextSecondary(context).withValues(alpha: 0.3))),
+                          ),
                         ],
                       ),
                     ),
@@ -508,30 +554,52 @@ class _VaultDetailSheetState extends ConsumerState<VaultDetailSheet> with Single
                 Expanded(
                   child: CustomCard(
                     scalingFactor: sf,
-                    padding: EdgeInsets.all(14 * sf),
-                    child: ConstrainedBox(
-                      constraints: BoxConstraints(minHeight: 68 * sf),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                    padding: EdgeInsets.zero,
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(16 * sf),
+                      child: Stack(
                         children: [
-                          Text(l10n.topExpense, style: TextStyle(fontSize: 8 * sf, fontWeight: FontWeight.w900, color: AppColors.getExpense(context).withValues(alpha: isDark ? 0.6 : 0.85), letterSpacing: 0.8)),
-                          SizedBox(height: 6 * sf),
-                          if (topExpense != null) ...[
-                            Row(
-                              children: [
-                                Icon(topExpense.icon, color: topExpense.color, size: 16 * sf),
-                                SizedBox(width: 6 * sf),
-                                Flexible(child: Text(topExpense.title, style: TextStyle(fontSize: 12 * sf, fontWeight: FontWeight.w800), maxLines: 1, overflow: TextOverflow.ellipsis)),
-                              ],
+                          Positioned(
+                            right: -15 * sf,
+                            bottom: -15 * sf,
+                            child: Icon(
+                              topExpense?.icon ?? Icons.arrow_downward_rounded,
+                              size: 70 * sf,
+                              color: (topExpense?.color ?? AppColors.getExpense(context)).withValues(alpha: isDark ? 0.05 : 0.08),
                             ),
-                            SizedBox(height: 4 * sf),
-                            FittedBox(
-                              fit: BoxFit.scaleDown,
-                              alignment: Alignment.centerLeft,
-                              child: Text(CurrencyUtils.formatFullAmount(topExpense.getConvertedMonthlyEquivalent(currency, rates), symbol: currency), style: TextStyle(fontSize: 14 * sf, fontWeight: FontWeight.w900, color: AppColors.getExpense(context))),
+                          ),
+                          Padding(
+                            padding: EdgeInsets.symmetric(horizontal: 12 * sf, vertical: 10 * sf),
+                            child: ConstrainedBox(
+                              constraints: BoxConstraints(minHeight: 52 * sf),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Text(l10n.topExpense, style: TextStyle(fontSize: 8 * sf, fontWeight: FontWeight.w900, color: AppColors.getExpense(context).withValues(alpha: isDark ? 0.6 : 0.85), letterSpacing: 0.8)),
+                                  SizedBox(height: 4 * sf),
+                                  if (topExpense != null) ...[
+                                    Text(
+                                      topExpense.title, 
+                                      style: TextStyle(fontSize: 11 * sf, fontWeight: FontWeight.w800, color: AppColors.getTextPrimary(context).withValues(alpha: 0.85)), 
+                                      maxLines: 1, 
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                    SizedBox(height: 2 * sf),
+                                    FittedBox(
+                                      fit: BoxFit.scaleDown,
+                                      alignment: Alignment.centerLeft,
+                                      child: Text(
+                                        CurrencyUtils.formatFullAmount(topExpense.getConvertedMonthlyEquivalent(currency, rates), symbol: currency), 
+                                        style: TextStyle(fontSize: 15 * sf, fontWeight: FontWeight.w900, color: AppColors.getExpense(context)),
+                                      ),
+                                    ),
+                                  ] else
+                                    Text('—', style: TextStyle(fontSize: 16 * sf, fontWeight: FontWeight.w700, color: AppColors.getTextSecondary(context).withValues(alpha: 0.3))),
+                                ],
+                              ),
                             ),
-                          ] else
-                            Text('—', style: TextStyle(fontSize: 14 * sf, fontWeight: FontWeight.w700, color: AppColors.getTextSecondary(context).withValues(alpha: 0.3))),
+                          ),
                         ],
                       ),
                     ),
@@ -589,46 +657,7 @@ class _VaultDetailSheetState extends ConsumerState<VaultDetailSheet> with Single
             ),
           ),
 
-          // === 5. SENARYO ANALİZİ (sadece esnek işlem varsa) ===
-          if (hasFlexible) ...[
-            SizedBox(height: 10 * sf),
-            CustomCard(
-              scalingFactor: sf,
-              backgroundColor: Colors.deepPurple.withValues(alpha: isDark ? 0.08 : 0.04),
-              borderColor: Colors.deepPurple.withValues(alpha: 0.12),
-              padding: EdgeInsets.all(14 * sf),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Icon(Icons.analytics_rounded, color: Colors.deepPurple, size: 16 * sf),
-                      SizedBox(width: 8 * sf),
-                      Text(l10n.scenarioAnalysis, style: TextStyle(fontSize: 9 * sf, fontWeight: FontWeight.w900, color: Colors.deepPurple.withValues(alpha: isDark ? 0.7 : 0.95), letterSpacing: 1)),
-                    ],
-                  ),
-                  SizedBox(height: 12 * sf),
-                  // Aylık senaryolar
-                  Row(
-                    children: [
-                      Expanded(child: _buildScenarioCell(context, l10n.monthlyBest, monthlyBest, currency, AppColors.getIncome(context), sf)),
-                      SizedBox(width: 10 * sf),
-                      Expanded(child: _buildScenarioCell(context, l10n.monthlyWorst, monthlyWorst, currency, AppColors.getExpense(context), sf)),
-                    ],
-                  ),
-                  SizedBox(height: 8 * sf),
-                  // Yıllık senaryolar
-                  Row(
-                    children: [
-                      Expanded(child: _buildScenarioCell(context, l10n.yearlyBest, monthlyBest * 12, currency, AppColors.getIncome(context), sf)),
-                      SizedBox(width: 10 * sf),
-                      Expanded(child: _buildScenarioCell(context, l10n.yearlyWorst, monthlyWorst * 12, currency, AppColors.getExpense(context), sf)),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-          ],
+
 
           SizedBox(height: 16 * sf),
         ],
@@ -678,35 +707,6 @@ class _VaultDetailSheetState extends ConsumerState<VaultDetailSheet> with Single
     );
   }
 
-  Widget _buildScenarioCell(BuildContext context, String label, double value, String currency, Color accentColor, double sf) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final isPositive = value >= 0;
-    return Container(
-      padding: EdgeInsets.symmetric(horizontal: 12 * sf, vertical: 8 * sf),
-      decoration: BoxDecoration(
-        color: (isPositive ? AppColors.getIncome(context) : AppColors.getExpense(context)).withValues(alpha: 0.06),
-        borderRadius: BorderRadius.circular(10 * sf),
-      ),
-      child: ConstrainedBox(
-        constraints: BoxConstraints(minHeight: 36 * sf),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(label, style: TextStyle(fontSize: 8 * sf, fontWeight: FontWeight.w900, color: AppColors.getTextSecondary(context).withValues(alpha: isDark ? 0.5 : 0.8), letterSpacing: 0.5)),
-            SizedBox(height: 4 * sf),
-            FittedBox(
-              fit: BoxFit.scaleDown,
-              alignment: Alignment.centerLeft,
-              child: Text(
-                CurrencyUtils.formatFullAmount(value, symbol: currency),
-                style: TextStyle(fontSize: 14 * sf, fontWeight: FontWeight.w900, color: isPositive ? AppColors.getIncome(context) : AppColors.getExpense(context)),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
 
   Widget _buildManageView(BuildContext context, Vault vault, Color activeColor, bool isDark, double sf, AppLocalizations l10n) {
     final currencies = _getCurrencies(l10n);

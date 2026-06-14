@@ -102,15 +102,18 @@ class CustomBottomSheet extends ConsumerWidget {
     // ═══════════════════════════════════════════════════════════════════
 
     final route = ModalRoute.of(context);
-    final bool isEntering = route?.animation?.status == AnimationStatus.forward;
+    final animation = route?.animation;
+    final bool isEntering = animation?.status == AnimationStatus.forward;
 
     // Sheet'in alt kenarı klavyenin tam üstünde oturmalı (native davranış).
     final double keyboardOffset;
-    if (hasInput && isEntering && viewInsetsBottom == 0) {
-      // Klavye henüz açılmadı ama açılacak — önceden konumla
+    if (hasInput && isEntering) {
+      // Giriş animasyonu sırasında klavyenin son bilinen yüksekliğini sabit tutuyoruz.
+      // viewInsetsBottom sıfırdan yukarı doğru değişirken ani boyut değişikliklerini 
+      // ve sıçramaları (stutter) önler.
       keyboardOffset = _lastKnownKeyboardHeight;
     } else {
-      // Normal durum: OS'un kare-kare verdiği değeri direkt kullan
+      // Normal durum veya giriş bittikten sonra OS'un kare-kare verdiği değeri kullan.
       keyboardOffset = viewInsetsBottom;
     }
 
@@ -165,7 +168,7 @@ class CustomBottomSheet extends ConsumerWidget {
               ),
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(28.0),
-                child: _buildSheetContent(context),
+                child: _buildSheetContent(context, animation),
               ),
             ),
           ),
@@ -174,7 +177,7 @@ class CustomBottomSheet extends ConsumerWidget {
     );
   }
 
-  Widget _buildSheetContent(BuildContext context) {
+  Widget _buildSheetContent(BuildContext context, Animation<double>? animation) {
     return LayoutBuilder(
       builder: (context, constraints) {
         final double maxContentHeight = constraints.maxHeight;
@@ -235,30 +238,43 @@ class CustomBottomSheet extends ConsumerWidget {
               ),
               child: SingleChildScrollView(
                 physics: const BouncingScrollPhysics(),
-                child: TweenAnimationBuilder<double>(
-                  tween: Tween(begin: 0.98, end: 1.0),
-                  duration: const Duration(milliseconds: 280),
-                  curve: Curves.easeOutCubic,
-                  builder: (context, value, child) {
-                    return Transform.scale(
-                      scale: value,
-                      child: Opacity(
-                        opacity: ((value - 0.95) / 0.05).clamp(0.0, 1.0),
-                        child: child,
+                child: animation != null
+                    ? AnimatedBuilder(
+                        animation: animation,
+                        builder: (context, child) {
+                          // Giriş/çıkış animasyonunu easeOutCubic ile yumuşatıyoruz
+                          final double value = Curves.easeOutCubic.transform(animation.value);
+                          final double scale = 0.98 + (0.02 * value);
+                          final double opacity = value;
+                          return Transform.scale(
+                            scale: scale,
+                            child: Opacity(
+                              opacity: opacity.clamp(0.0, 1.0),
+                              child: child,
+                            ),
+                          );
+                        },
+                        child: RepaintBoundary(
+                          child: Padding(
+                            padding: const EdgeInsets.only(
+                              left: AppSizes.paddingLarge,
+                              right: AppSizes.paddingLarge,
+                              bottom: 0.0,
+                            ),
+                            child: child,
+                          ),
+                        ),
+                      )
+                    : RepaintBoundary(
+                        child: Padding(
+                          padding: const EdgeInsets.only(
+                            left: AppSizes.paddingLarge,
+                            right: AppSizes.paddingLarge,
+                            bottom: 0.0,
+                          ),
+                          child: child,
+                        ),
                       ),
-                    );
-                  },
-                  child: RepaintBoundary(
-                    child: Padding(
-                      padding: const EdgeInsets.only(
-                        left: AppSizes.paddingLarge,
-                        right: AppSizes.paddingLarge,
-                        bottom: 0.0,
-                      ),
-                      child: child,
-                    ),
-                  ),
-                ),
               ),
             ),
             

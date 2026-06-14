@@ -5,6 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:purchases_flutter/purchases_flutter.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'sync_coordinator.dart';
 
 enum SubscriptionTier { free, pro }
 
@@ -65,12 +66,12 @@ class SubscriptionService extends ChangeNotifier {
         // Eğer kullanıcı giriş yapmışsa RevenueCat üzerinde de oturum açalım
         if (userId != null) {
           final logInResult = await Purchases.logIn(userId);
-          _updateProStatus(logInResult.customerInfo);
+          await _updateProStatus(logInResult.customerInfo);
           debugPrint('✅ [SubscriptionService] Startup: RevenueCat identified user: $userId');
         } else {
           // Mevcut abonelik durumunu kontrol et
           CustomerInfo customerInfo = await Purchases.getCustomerInfo();
-          _updateProStatus(customerInfo);
+          await _updateProStatus(customerInfo);
         }
         
         // Ürünleri (Offerings) çek
@@ -89,14 +90,17 @@ class SubscriptionService extends ChangeNotifier {
   }
 
   /// CustomerInfo'ya göre PRO durumunu güncelle
-  void _updateProStatus(CustomerInfo customerInfo) {
+  Future<void> _updateProStatus(CustomerInfo customerInfo) async {
     debugPrint('ℹ️ [SubscriptionService] Active Entitlements in RevenueCat: ${customerInfo.entitlements.all.keys.toList()}');
     final entitlement = customerInfo.entitlements.all['premium'];
     debugPrint('ℹ️ [SubscriptionService] "premium" Entitlement details: ${entitlement != null ? "Active: ${entitlement.isActive}" : "NOT FOUND IN DASHBOARD"}');
 
     // 'premium' burada RevenueCat dashboard'unda tanımladığınız "Entitlement ID" olmalıdır.
     _isPro = entitlement?.isActive ?? false;
-    _prefs.setBool(_isProKey, _isPro);
+    await _prefs.setBool(_isProKey, _isPro);
+    // SyncCoordinator'a canlı durumu bildir — SharedPreferences yazımı gecikmeli
+    // olsa bile syncNow doğru isPro değerini görsün.
+    SyncCoordinator.updateProStatus(_isPro);
     notifyListeners();
   }
 
@@ -104,7 +108,7 @@ class SubscriptionService extends ChangeNotifier {
   Future<bool> purchasePackage(Package package) async {
     try {
       final result = await Purchases.purchase(PurchaseParams.package(package));
-      _updateProStatus(result.customerInfo);
+      await _updateProStatus(result.customerInfo);
       return _isPro;
     } catch (e) {
       debugPrint('❌ [SubscriptionService] Satın alma hatası: $e');
@@ -116,7 +120,7 @@ class SubscriptionService extends ChangeNotifier {
   Future<void> restorePurchases() async {
     try {
       final customerInfo = await Purchases.restorePurchases();
-      _updateProStatus(customerInfo);
+      await _updateProStatus(customerInfo);
     } catch (e) {
       debugPrint('❌ [SubscriptionService] Restore hatası: $e');
     }
@@ -128,7 +132,7 @@ class SubscriptionService extends ChangeNotifier {
     notifyListeners();
     try {
       final logInResult = await Purchases.logIn(appUserId);
-      _updateProStatus(logInResult.customerInfo);
+      await _updateProStatus(logInResult.customerInfo);
       debugPrint('✅ [SubscriptionService] RevenueCat identified user: $appUserId');
     } catch (e) {
       debugPrint('❌ [SubscriptionService] RevenueCat logIn error: $e');
@@ -144,10 +148,11 @@ class SubscriptionService extends ChangeNotifier {
       // Clear pro status locally first to prevent race conditions during logout/re-initialization
       _isPro = false;
       await _prefs.setBool(_isProKey, false);
+      SyncCoordinator.updateProStatus(false);
       notifyListeners();
       
       final customerInfo = await Purchases.logOut();
-      _updateProStatus(customerInfo);
+      await _updateProStatus(customerInfo);
       debugPrint('✅ [SubscriptionService] RevenueCat logged out');
     } catch (e) {
       debugPrint('❌ [SubscriptionService] RevenueCat logOut error: $e');
@@ -158,6 +163,7 @@ class SubscriptionService extends ChangeNotifier {
   Future<void> setProStatus(bool isPro) async {
     _isPro = isPro;
     await _prefs.setBool(_isProKey, isPro);
+    SyncCoordinator.updateProStatus(isPro);
     notifyListeners();
   }
 

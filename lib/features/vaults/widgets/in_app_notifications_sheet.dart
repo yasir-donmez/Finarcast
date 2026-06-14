@@ -2,7 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'dart:async';
+import 'dart:math' as math;
+import 'dart:ui' as ui;
 import 'package:intl/intl.dart';
+import '../../../shared/widgets/custom_dismissible.dart';
 import '../../../core/theme/app_constants.dart';
 import '../../../core/services/notification_service.dart';
 import '../../../l10n/app_localizations.dart';
@@ -21,6 +24,31 @@ import '../../../shared/widgets/custom_bottom_sheet.dart';
 import '../../../shared/widgets/custom_dialog.dart';
 import '../../../core/database/database_service.dart';
 import '../../../core/domain/recurrence_engine.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+final dismissedNotificationsProvider = StateNotifierProvider<DismissedNotificationsNotifier, Set<String>>((ref) {
+  final notifier = DismissedNotificationsNotifier();
+  notifier.init();
+  return notifier;
+});
+
+class DismissedNotificationsNotifier extends StateNotifier<Set<String>> {
+  static const _key = 'dismissed_in_app_notifications';
+  
+  DismissedNotificationsNotifier() : super({});
+  
+  Future<void> init() async {
+    final prefs = await SharedPreferences.getInstance();
+    final list = prefs.getStringList(_key) ?? [];
+    state = list.toSet();
+  }
+  
+  Future<void> dismiss(String id) async {
+    state = {...state, id};
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setStringList(_key, state.toList());
+  }
+}
 
 class InAppNotificationsSheet extends ConsumerStatefulWidget {
   const InAppNotificationsSheet({super.key});
@@ -62,6 +90,7 @@ class _InAppNotificationsSheetState extends ConsumerState<InAppNotificationsShee
 
     final now = DateTime.now();
     final triggeredNotifications = <Map<String, dynamic>>[];
+    final dismissedIds = ref.watch(dismissedNotificationsProvider);
 
     for (final template in templates) {
       if (!template.isNotificationEnabled || template.isPaused || template.isArchived) continue;
@@ -82,9 +111,17 @@ class _InAppNotificationsSheetState extends ConsumerState<InAppNotificationsShee
           template.notificationMinute,
         );
 
-        if (reminderTime.isBefore(now)) {
+        // 1. ZAMAN KISITLAMASI (Auto-Disappear): Yalnızca son 7 güne ait olanları göster (Sürekli kalıp birikmesinler)
+        final isRecent = reminderTime.isAfter(now.subtract(const Duration(days: 7)));
+
+        if (reminderTime.isBefore(now) && isRecent) {
+          final notifId = 'template_notif_${template.id}_${date.year}${date.month}${date.day}';
+          
+          // 2. KULLANICI DİSMİSS DURUMU: Eğer kullanıcı kaydırarak sildiyse gösterme
+          if (dismissedIds.contains(notifId)) continue;
+
           final txUi = TransactionUI(
-            id: 'template_notif_${template.id}_${date.year}${date.month}${date.day}',
+            id: notifId,
             name: template.title,
             icon: CategoryUtils.getCategoryIcon(
               categoryId: template.categoryId,
@@ -176,10 +213,96 @@ class _InAppNotificationsSheetState extends ConsumerState<InAppNotificationsShee
             children: displayedNotifications.map((item) {
               final tx = item['tx'] as TransactionUI;
               final reminderTime = item['time'] as DateTime;
-              return _buildNotificationCard(tx, reminderTime, activeColor, l10n, context);
+              return CustomDismissible(
+                key: Key(tx.id),
+                enableLeftToRight: true,
+                enableRightToLeft: true,
+                onDismissed: (direction) {
+                  ref.read(dismissedNotificationsProvider.notifier).dismiss(tx.id);
+                },
+                leftToRightBackgroundBuilder: (context, progress, isThresholdReached) =>
+                    _buildSwipeBackground(isLeftToRight: true, progress: progress, isThresholdReached: isThresholdReached),
+                rightToLeftBackgroundBuilder: (context, progress, isThresholdReached) =>
+                    _buildSwipeBackground(isLeftToRight: false, progress: progress, isThresholdReached: isThresholdReached),
+                child: _buildNotificationCard(tx, reminderTime, activeColor, l10n, context),
+              );
             }).toList(),
           ),
       ],
+    );
+  }
+
+  Widget _buildSwipeBackground({
+    required bool isLeftToRight,
+    required double progress,
+    required bool isThresholdReached,
+  }) {
+    final color = AppColors.error;
+    final alignment = isLeftToRight ? Alignment.centerLeft : Alignment.centerRight;
+    
+    // Y-eksenindeki 3D kapı açılma yönünü kenarlara göre simetrik yapalım:
+    // Soldayken (+), Sağdayken (-) yönde dönerek ekrana doğru açılır.
+    final rotationSign = isLeftToRight ? 1.0 : -1.0;
+
+    final rotationProgress = (progress / 0.25).clamp(0.0, 1.0);
+    final angle = (1.0 - rotationProgress) * (math.pi / 2) * rotationSign;
+
+    final slideSign = isLeftToRight ? -1.0 : 1.0;
+    final slideProgress = (progress / 0.25).clamp(0.0, 1.0);
+    final xOffset = 30.0 * (1.0 - slideProgress) * slideSign;
+
+    final double bgAlpha = isThresholdReached
+        ? 0.22
+        : (progress / 0.20).clamp(0.0, 1.0) * 0.08;
+
+    final double borderAlpha = isThresholdReached
+        ? 0.45
+        : (progress / 0.20).clamp(0.0, 1.0) * 0.12;
+
+    final Color bgColor = color.withValues(alpha: bgAlpha);
+    final Color borderColor = color.withValues(alpha: borderAlpha);
+
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 80),
+      curve: Curves.easeOutQuad,
+      margin: const EdgeInsets.only(bottom: 8),
+      decoration: BoxDecoration(
+        color: bgColor,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: borderColor,
+          width: 1.0,
+        ),
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: BackdropFilter(
+        filter: ui.ImageFilter.blur(sigmaX: 5, sigmaY: 5),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20),
+          child: Align(
+            alignment: alignment,
+            child: Transform(
+              transform: Matrix4.translationValues(xOffset, 0.0, 0.0)
+                ..setEntry(3, 2, 0.004)
+                ..rotateY(angle),
+              alignment: Alignment.center,
+              child: AnimatedScale(
+                scale: isThresholdReached ? 0.95 : 0.8,
+                duration: const Duration(milliseconds: 120),
+                curve: Curves.easeOutCubic,
+                child: Opacity(
+                  opacity: rotationProgress,
+                  child: Transform(
+                    alignment: Alignment.center,
+                    transform: Matrix4.diagonal3Values(isLeftToRight ? 1.0 : -1.0, 1.0, 1.0),
+                    child: AnimatedTrashIcon(progress: progress, color: color),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
     );
   }
 
@@ -310,7 +433,7 @@ class _InAppNotificationsSheetState extends ConsumerState<InAppNotificationsShee
         ? AppColors.getIncome(context)
         : AppColors.getExpense(context);
     final String amountText = tx.minAmount != null && tx.maxAmount != null
-        ? "${CurrencyUtils.formatAmount(tx.minAmount!, currencySymbol: tx.currency ?? "₺")} - ${CurrencyUtils.formatAmount(tx.maxAmount!, currencySymbol: tx.currency ?? "₺")}"
+        ? "${CurrencyUtils.formatAmount(tx.minAmount!, currencySymbol: tx.currency ?? "₺")} ~ ${CurrencyUtils.formatAmount(tx.maxAmount!, currencySymbol: tx.currency ?? "₺")}"
         : CurrencyUtils.formatAmount(tx.effectiveAmount, currencySymbol: tx.currency ?? "₺");
 
     // Kasaları ve notu yükle

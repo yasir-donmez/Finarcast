@@ -16,7 +16,6 @@ import '../transactions/transaction_builder_screen.dart';
 import '../../core/utils/route_transitions.dart';
 import '../../core/utils/category_utils.dart';
 import '../../core/providers/db_providers.dart';
-import '../../core/providers/settings_provider.dart';
 import '../../core/services/subscription_service.dart';
 import '../subscription/widgets/pro_upgrade_sheet.dart';
 
@@ -172,9 +171,6 @@ class _VaultsScreenState extends ConsumerState<VaultsScreen> {
     AppLocalizations l10n, 
     BuildContext context
   ) {
-    final settings = ref.watch(settingsProvider);
-    final langCode = settings.languageCode.split('_')[0].toLowerCase();
-
     return SliverToBoxAdapter(
       child: Padding(
         padding: const EdgeInsets.fromLTRB(
@@ -196,7 +192,7 @@ class _VaultsScreenState extends ConsumerState<VaultsScreen> {
               child: Row(
                 children: [
                   VaultFilterChip(
-                    label: _getPlansLabel(langCode),
+                    label: l10n.plans,
                     isActive: viewMode == VaultViewMode.templates,
                     onTap: () {
                       ref.read(vaultViewModeProvider.notifier).state = VaultViewMode.templates;
@@ -206,7 +202,7 @@ class _VaultsScreenState extends ConsumerState<VaultsScreen> {
                   ),
                   const SizedBox(width: 8),
                   VaultFilterChip(
-                    label: _getHistoryLabel(langCode),
+                    label: l10n.transactions,
                     isActive: viewMode == VaultViewMode.history,
                     onTap: () {
                       ref.read(vaultViewModeProvider.notifier).state = VaultViewMode.history;
@@ -255,36 +251,6 @@ class _VaultsScreenState extends ConsumerState<VaultsScreen> {
     );
   }
 
-
-  String _getPlansLabel(String langCode) {
-    switch (langCode) {
-      case 'tr': return 'Planlar';
-      case 'de': return 'Pläne';
-      case 'fr': return 'Plans';
-      case 'es': return 'Planes';
-      case 'it': return 'Piani';
-      case 'pt': return 'Planos';
-      case 'zh': return '计划';
-      case 'ja': return 'プラン';
-      case 'ko': return '계획';
-      default: return 'Plans';
-    }
-  }
-
-  String _getHistoryLabel(String langCode) {
-    switch (langCode) {
-      case 'tr': return 'İşlemler';
-      case 'de': return 'Transaktionen';
-      case 'fr': return 'Transactions';
-      case 'es': return 'Transacciones';
-      case 'it': return 'Transazioni';
-      case 'pt': return 'Transações';
-      case 'zh': return '交易';
-      case 'ja': return '取引';
-      case 'ko': return '거래';
-      default: return 'Transactions';
-    }
-  }
 
   Widget _buildEmptyState(Color activeColor, bool isDark, AppLocalizations l10n) {
     return SliverFillRemaining(
@@ -392,6 +358,14 @@ class _VaultsScreenState extends ConsumerState<VaultsScreen> {
     }
     final sortedDates = grouped.keys.toList()..sort((a, b) => b.compareTo(a));
 
+    // Precalculate start indices for each day's transactions
+    final List<int> dayStartIndices = [];
+    int currentGlobalIndex = 0;
+    for (final date in sortedDates) {
+      dayStartIndices.add(currentGlobalIndex);
+      currentGlobalIndex += grouped[date]!.length;
+    }
+
     return SliverPadding(
       padding: EdgeInsets.fromLTRB(
         AppSizes.paddingMedium,
@@ -404,11 +378,14 @@ class _VaultsScreenState extends ConsumerState<VaultsScreen> {
           (context, index) {
             final date = sortedDates[index];
             final txs = grouped[date]!;
+            final startIndex = dayStartIndices[index];
             
             return HistoryDayGroup(
               date: date,
               transactions: txs,
               selectedVaultId: selectedVaultId,
+              startIndex: startIndex,
+              animatedTxIds: _animatedTxIds,
               onReviewed: (tx) async {
                 if (tx.dbId != null) {
                   final record = await DatabaseService.getTransaction(tx.dbId!);

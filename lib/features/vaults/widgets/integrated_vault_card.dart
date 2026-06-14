@@ -316,8 +316,8 @@ class IntegratedVaultCard extends StatelessWidget {
                 child: Center(
                   child: Icon(
                     Icons.swap_horiz_rounded,
-                    size: 20,
-                    color: AppColors.getTextSecondary(context),
+                    size: 14,
+                    color: AppColors.getTextSecondary(context).withValues(alpha: 0.35),
                   ),
                 ),
               ),
@@ -392,18 +392,30 @@ class IntegratedVaultCard extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceAround,
       children: [
-        _buildRangeStat(context, l10n.worstCase, minNet, Colors.orange),
-        _buildRangeStat(context, l10n.bestCase, maxNet, Colors.blue),
+        _buildRangeStat(
+          context, 
+          l10n.worstCase, 
+          minNet, 
+          AppColors.getExpense(context), 
+          Icons.south_east_rounded,
+        ),
+        _buildRangeStat(
+          context, 
+          l10n.bestCase, 
+          maxNet, 
+          AppColors.getIncome(context), 
+          Icons.north_east_rounded,
+        ),
       ],
     );
   }
 
-  Widget _buildRangeStat(BuildContext context, String label, double amount, Color color) {
+  Widget _buildRangeStat(BuildContext context, String label, double amount, Color color, IconData icon) {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Container(width: 5, height: 5, decoration: BoxDecoration(color: color, shape: BoxShape.circle)),
-        const SizedBox(width: 8),
+        Icon(icon, size: 14, color: color.withValues(alpha: 0.8)),
+        const SizedBox(width: 6),
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
