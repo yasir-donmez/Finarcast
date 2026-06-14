@@ -456,226 +456,38 @@ class _TransactionBuilderScreenState
     );
     if (parentCat.isEmpty) return;
 
-    final controller = TextEditingController();
-
     final parentColor = parentCat['color'] as Color;
     final parentIcon = parentCat['icon'] as IconData;
     final parentName = parentCat['name'] as String;
     final bool showIconPicker =
         parentCategoryId == 'exp_other' || parentCategoryId == 'inc_other';
 
-    IconData selectedIcon = parentIcon;
-
     final result = await CustomBottomSheet.show<Map<String, dynamic>>(
       context: context,
       title: l10n.addCustomCategory,
       hasInput: true,
-      child: StatefulBuilder(
-        builder: (context, setDialogState) {
-          final isDark = Theme.of(context).brightness == Brightness.dark;
-          final List<IconData> iconOptions = [
-            parentIcon,
-            Icons.star_rounded,
-            Icons.favorite_rounded,
-            Icons.shopping_bag_rounded,
-            Icons.restaurant_rounded,
-            Icons.local_cafe_rounded,
-            Icons.directions_car_rounded,
-            Icons.home_rounded,
-            Icons.medical_services_rounded,
-            Icons.school_rounded,
-            Icons.fitness_center_rounded,
-            Icons.sports_esports_rounded,
-            Icons.camera_alt_rounded,
-            Icons.brush_rounded,
-            Icons.construction_rounded,
-            Icons.pets_rounded,
-            Icons.savings_rounded,
-            Icons.receipt_long_rounded,
-            Icons.card_giftcard_rounded,
-            Icons.build_rounded,
-            Icons.memory_rounded,
-            Icons.landscape_rounded,
-          ];
-
-          return Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 8,
-                ),
-                decoration: BoxDecoration(
-                  color: parentColor.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(selectedIcon, color: parentColor, size: 16),
-                    const SizedBox(width: 8),
-                    Text(
-                      parentName.toSafeUpperCase(context),
-                      style: TextStyle(
-                        fontSize: 10,
-                        fontWeight: FontWeight.w900,
-                        color: parentColor,
-                        letterSpacing: 1.0,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 20),
-
-              TextField(
-                controller: controller,
-                autofocus: true,
-                textCapitalization: TextCapitalization.sentences,
-                maxLength: 30,
-                style: const TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w700,
-                ),
-                decoration: InputDecoration(
-                  hintText: l10n.customCategoryHint,
-                  hintStyle: TextStyle(
-                    color: AppColors.getTextFaint(context),
-                    fontWeight: FontWeight.w600,
-                  ),
-                  counterText: '',
-                  filled: true,
-                  fillColor: (isDark ? Colors.white : Colors.black).withValues(
-                    alpha: 0.03,
-                  ),
-                  contentPadding: const EdgeInsets.symmetric(
-                    horizontal: 20,
-                    vertical: 18,
-                  ),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(20),
-                    borderSide: BorderSide.none,
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(20),
-                    borderSide: BorderSide(
-                      color: parentColor.withValues(alpha: 0.3),
-                      width: 2,
-                    ),
-                  ),
-                ),
-              ),
-
-              if (showIconPicker) ...[
-                const SizedBox(height: 32),
-                Row(
-                  children: [
-                    Text(
-                      l10n.selectIcon,
-                      style: TextStyle(
-                        fontSize: 11,
-                        fontWeight: FontWeight.w900,
-                        color: AppColors.getTextFaint(context),
-                        letterSpacing: 1.2,
-                      ),
-                    ),
-                    const Spacer(),
-                    Text(
-                      l10n.optionsCount(iconOptions.length),
-                      style: TextStyle(
-                        fontSize: 10,
-                        fontWeight: FontWeight.w900,
-                        color: parentColor.withValues(alpha: 0.5),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 16),
-                SizedBox(
-                  height: 160,
-                  child: GridView.builder(
-                    padding: EdgeInsets.zero,
-                    physics: const BouncingScrollPhysics(),
-                    gridDelegate:
-                        const SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: 6,
-                          mainAxisSpacing: 12,
-                          crossAxisSpacing: 12,
-                        ),
-                    itemCount: iconOptions.length,
-                    itemBuilder: (context, index) {
-                      final icon = iconOptions[index];
-                      final isSelected = selectedIcon == icon;
-                      return GestureDetector(
-                        onTap: () {
-                          HapticFeedback.selectionClick();
-                          setDialogState(() => selectedIcon = icon);
-                        },
-                        child: AnimatedContainer(
-                          duration: const Duration(milliseconds: 200),
-                          decoration: BoxDecoration(
-                            color: isSelected
-                                ? parentColor.withValues(alpha: 0.2)
-                                : (isDark ? Colors.white : Colors.black)
-                                      .withValues(alpha: 0.04),
-                            borderRadius: BorderRadius.circular(16),
-                            border: Border.all(
-                              color: isSelected
-                                  ? parentColor
-                                  : Colors.transparent,
-                              width: 2,
-                            ),
-                          ),
-                          child: Icon(
-                            icon,
-                            color: isSelected
-                                ? parentColor
-                                : parentColor.withValues(alpha: 0.25),
-                            size: 22,
-                          ),
-                        ),
-                      );
-                    },
-                  ),
-                ),
-              ],
-
-              const SizedBox(height: 32),
-
-              CustomButton(
-                label: l10n.ok,
-                onTap: () {
-                  if (controller.text.trim().isNotEmpty) {
-                    Navigator.pop(context, {
-                      'name': controller.text.trim(),
-                      'iconCode': selectedIcon.codePoint.toString(),
-                    });
-                  }
-                },
-                isPrimary: true,
-                activeColor: parentColor,
-                height: 56,
-              ),
-              const SizedBox(height: 12),
-            ],
-          );
-        },
+      child: _AddCustomCategorySheetContent(
+        parentColor: parentColor,
+        parentIcon: parentIcon,
+        parentName: parentName,
+        showIconPicker: showIconPicker,
       ),
     );
 
-    if (result != null && result['name'] != null) {
-      final int? code = int.tryParse(result['iconCode'] as String);
-      if (code != null) {
-        await CustomCategoryService.addCustomSubcategory(
-          parentCategoryId,
-          result['name'] as String,
-          code,
-        );
-        await _loadCustomCategories();
-      }
+    if (result == null || result['name'] == null) {
+      return;
     }
+
+    final int? code = int.tryParse(result['iconCode'] as String);
+    if (code == null) return;
+
+    await CustomCategoryService.addCustomSubcategory(
+      parentCategoryId,
+      result['name'] as String,
+      code,
+    );
+    await _loadCustomCategories();
+
     final merged = _getMergedCategories();
     final parentIndex = merged.indexWhere((c) => c['id'] == parentCategoryId);
     if (parentIndex != -1) {
@@ -687,7 +499,6 @@ class _TransactionBuilderScreenState
       });
     }
     HapticFeedback.mediumImpact();
-    controller.dispose();
   }
 
   Future<void> _handleRemoveCustomCategory(String subcategoryId) async {
@@ -1772,6 +1583,269 @@ class _HeaderBackButton extends StatelessWidget {
           ),
         );
       },
+    );
+  }
+}
+
+class _AddCustomCategorySheetContent extends StatefulWidget {
+  final Color parentColor;
+  final IconData parentIcon;
+  final String parentName;
+  final bool showIconPicker;
+
+  const _AddCustomCategorySheetContent({
+    required this.parentColor,
+    required this.parentIcon,
+    required this.parentName,
+    required this.showIconPicker,
+  });
+
+  @override
+  State<_AddCustomCategorySheetContent> createState() =>
+      _AddCustomCategorySheetContentState();
+}
+
+class _AddCustomCategorySheetContentState
+    extends State<_AddCustomCategorySheetContent> {
+  late final TextEditingController _controller;
+  late final FocusNode _focusNode;
+  late IconData _selectedIcon;
+  Animation<double>? _routeAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = TextEditingController();
+    _focusNode = FocusNode();
+    _selectedIcon = widget.parentIcon;
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_routeAnimation == null) {
+      _routeAnimation = ModalRoute.of(context)?.animation;
+      if (_routeAnimation != null) {
+        if (_routeAnimation!.isCompleted) {
+          _focusNode.requestFocus();
+        } else {
+          _routeAnimation!.addStatusListener(_handleAnimationStatus);
+        }
+      } else {
+        _focusNode.requestFocus();
+      }
+    }
+  }
+
+  void _handleAnimationStatus(AnimationStatus status) {
+    if (status == AnimationStatus.completed) {
+      if (mounted) {
+        _focusNode.requestFocus();
+      }
+      _routeAnimation?.removeStatusListener(_handleAnimationStatus);
+    }
+  }
+
+  @override
+  void dispose() {
+    _routeAnimation?.removeStatusListener(_handleAnimationStatus);
+    _controller.dispose();
+    _focusNode.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final l10n = AppLocalizations.of(context)!;
+    final List<IconData> iconOptions = [
+      widget.parentIcon,
+      Icons.star_rounded,
+      Icons.favorite_rounded,
+      Icons.shopping_bag_rounded,
+      Icons.restaurant_rounded,
+      Icons.local_cafe_rounded,
+      Icons.directions_car_rounded,
+      Icons.home_rounded,
+      Icons.medical_services_rounded,
+      Icons.school_rounded,
+      Icons.fitness_center_rounded,
+      Icons.sports_esports_rounded,
+      Icons.camera_alt_rounded,
+      Icons.brush_rounded,
+      Icons.construction_rounded,
+      Icons.pets_rounded,
+      Icons.savings_rounded,
+      Icons.receipt_long_rounded,
+      Icons.card_giftcard_rounded,
+      Icons.build_rounded,
+      Icons.memory_rounded,
+      Icons.landscape_rounded,
+    ];
+
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          padding: const EdgeInsets.symmetric(
+            horizontal: 12,
+            vertical: 8,
+          ),
+          decoration: BoxDecoration(
+            color: widget.parentColor.withValues(alpha: 0.1),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(_selectedIcon, color: widget.parentColor, size: 16),
+              const SizedBox(width: 8),
+              Text(
+                widget.parentName.toSafeUpperCase(context),
+                style: TextStyle(
+                  fontSize: 10,
+                  fontWeight: FontWeight.w900,
+                  color: widget.parentColor,
+                  letterSpacing: 1.0,
+                ),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 20),
+
+        TextField(
+          controller: _controller,
+          focusNode: _focusNode,
+          autofocus: false,
+          textCapitalization: TextCapitalization.sentences,
+          maxLength: 30,
+          style: const TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.w700,
+          ),
+          decoration: InputDecoration(
+            hintText: l10n.customCategoryHint,
+            hintStyle: TextStyle(
+              color: AppColors.getTextFaint(context),
+              fontWeight: FontWeight.w600,
+            ),
+            counterText: '',
+            filled: true,
+            fillColor: (isDark ? Colors.white : Colors.black).withValues(
+              alpha: 0.03,
+            ),
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 20,
+              vertical: 18,
+            ),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(20),
+              borderSide: BorderSide.none,
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(20),
+              borderSide: BorderSide(
+                color: widget.parentColor.withValues(alpha: 0.3),
+                width: 2,
+              ),
+            ),
+          ),
+        ),
+
+        if (widget.showIconPicker) ...[
+          const SizedBox(height: 32),
+          Row(
+            children: [
+              Text(
+                l10n.selectIcon,
+                style: TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w900,
+                  color: AppColors.getTextFaint(context),
+                  letterSpacing: 1.2,
+                ),
+              ),
+              const Spacer(),
+              Text(
+                l10n.optionsCount(iconOptions.length),
+                style: TextStyle(
+                  fontSize: 10,
+                  fontWeight: FontWeight.w900,
+                  color: widget.parentColor.withValues(alpha: 0.5),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          SizedBox(
+            height: 160,
+            child: GridView.builder(
+              padding: EdgeInsets.zero,
+              physics: const BouncingScrollPhysics(),
+              gridDelegate:
+                  const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 6,
+                    mainAxisSpacing: 12,
+                    crossAxisSpacing: 12,
+                  ),
+              itemCount: iconOptions.length,
+              itemBuilder: (context, index) {
+                final icon = iconOptions[index];
+                final isSelected = _selectedIcon == icon;
+                return GestureDetector(
+                  onTap: () {
+                    HapticFeedback.selectionClick();
+                    setState(() => _selectedIcon = icon);
+                  },
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 200),
+                    decoration: BoxDecoration(
+                      color: isSelected
+                          ? widget.parentColor.withValues(alpha: 0.2)
+                          : (isDark ? Colors.white : Colors.black)
+                                .withValues(alpha: 0.04),
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(
+                        color: isSelected
+                            ? widget.parentColor
+                            : Colors.transparent,
+                        width: 2,
+                      ),
+                    ),
+                    child: Icon(
+                      icon,
+                      color: isSelected
+                          ? widget.parentColor
+                          : widget.parentColor.withValues(alpha: 0.25),
+                      size: 22,
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+        ],
+
+        const SizedBox(height: 32),
+
+        CustomButton(
+          label: l10n.ok,
+          onTap: () {
+            if (_controller.text.trim().isNotEmpty) {
+              Navigator.pop(context, {
+                'name': _controller.text.trim(),
+                'iconCode': _selectedIcon.codePoint.toString(),
+              });
+            }
+          },
+          isPrimary: true,
+          activeColor: widget.parentColor,
+          height: 56,
+        ),
+        const SizedBox(height: 12),
+      ],
     );
   }
 }

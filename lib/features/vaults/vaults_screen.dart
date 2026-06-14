@@ -40,6 +40,12 @@ class VaultsScreen extends ConsumerStatefulWidget {
 class _VaultsScreenState extends ConsumerState<VaultsScreen> {
   final Set<String> _animatedTxIds = {};
 
+  // Caching fields for transaction history memoization
+  List<TransactionUI>? _lastTransactions;
+  Map<DateTime, List<TransactionUI>>? _cachedGrouped;
+  List<DateTime>? _cachedSortedDates;
+  List<int>? _cachedDayStartIndices;
+
   @override
   void initState() {
     super.initState();
@@ -350,21 +356,31 @@ class _VaultsScreenState extends ConsumerState<VaultsScreen> {
     final bottomPadding = MediaQuery.of(context).padding.bottom;
     final selectedVaultId = ref.read(selectedVaultProvider);
     
-    // Group transactions by day
-    final Map<DateTime, List<TransactionUI>> grouped = {};
-    for (final tx in transactions) {
-      final dateOnly = DateTime(tx.date.year, tx.date.month, tx.date.day);
-      grouped.putIfAbsent(dateOnly, () => []).add(tx);
-    }
-    final sortedDates = grouped.keys.toList()..sort((a, b) => b.compareTo(a));
+    if (_cachedGrouped == null || _lastTransactions != transactions) {
+      _lastTransactions = transactions;
+      final Map<DateTime, List<TransactionUI>> grouped = {};
+      for (final tx in transactions) {
+        final dateOnly = DateTime(tx.date.year, tx.date.month, tx.date.day);
+        grouped.putIfAbsent(dateOnly, () => []).add(tx);
+      }
+      final sortedDates = grouped.keys.toList()..sort((a, b) => b.compareTo(a));
 
-    // Precalculate start indices for each day's transactions
-    final List<int> dayStartIndices = [];
-    int currentGlobalIndex = 0;
-    for (final date in sortedDates) {
-      dayStartIndices.add(currentGlobalIndex);
-      currentGlobalIndex += grouped[date]!.length;
+      // Precalculate start indices for each day's transactions
+      final List<int> dayStartIndices = [];
+      int currentGlobalIndex = 0;
+      for (final date in sortedDates) {
+        dayStartIndices.add(currentGlobalIndex);
+        currentGlobalIndex += grouped[date]!.length;
+      }
+
+      _cachedGrouped = grouped;
+      _cachedSortedDates = sortedDates;
+      _cachedDayStartIndices = dayStartIndices;
     }
+
+    final grouped = _cachedGrouped!;
+    final sortedDates = _cachedSortedDates!;
+    final dayStartIndices = _cachedDayStartIndices!;
 
     return SliverPadding(
       padding: EdgeInsets.fromLTRB(

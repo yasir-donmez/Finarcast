@@ -13,63 +13,96 @@ import '../../../core/theme/app_constants.dart';
 import '../../../core/utils/category_utils.dart';
 import '../../../l10n/app_localizations.dart';
 
-class TimelineActivityWidget extends ConsumerWidget {
+class TimelineActivityWidget extends ConsumerStatefulWidget {
   final HomeWidgetSize size;
   final String? selectedVaultId;
   const TimelineActivityWidget({super.key, this.size = HomeWidgetSize.large, this.selectedVaultId});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final transactions = ref.watch(allTransactionsProvider)
-        .where((tx) => tx.status != TransactionStatus.skipped)
-        .toList();
+  ConsumerState<TimelineActivityWidget> createState() => _TimelineActivityWidgetState();
+}
+
+class _TimelineActivityWidgetState extends ConsumerState<TimelineActivityWidget> {
+  // Caching variables for memoization
+  List<TransactionRecord>? _lastTransactions;
+  List<CustomCategory>? _lastCustomCategories;
+  List<ExchangeRate>? _lastRates;
+  int? _lastRetentionDays;
+  String? _lastSelectedVaultId;
+
+  List<TransactionRecord>? _cachedIncomeTxs;
+  List<TransactionRecord>? _cachedExpenseTxs;
+  bool _cachedIsEmpty = true;
+
+  @override
+  Widget build(BuildContext context) {
+    final rawTransactions = ref.watch(allTransactionsProvider);
     final customCategories = ref.watch(customCategoriesProvider);
     final rates = ref.watch(exchangeRatesProvider).value ?? [];
     final settings = ref.watch(settingsProvider);
     final symbol = settings.currencySymbol;
-    
-    // EKLEME SIRASINA GÖRE SIRALA (En son eklenen en üstte)
-    final sortedTxs = transactions..sort((a, b) => b.id.compareTo(a.id));
-
-    // Kasa / Vault bazında filtrele
-    List<TransactionRecord> vaultFilteredTxs = sortedTxs;
-    if (selectedVaultId != null && selectedVaultId!.startsWith('v_')) {
-      final filterVaultId = int.tryParse(selectedVaultId!.replaceFirst('v_', ''));
-      if (filterVaultId != null) {
-        vaultFilteredTxs = sortedTxs.where((tx) => tx.vaultId == filterVaultId || tx.targetVaultId == filterVaultId).toList();
-      }
-    }
-    
-    // Veri Saklama Süresine Göre Filtrele
-    final now = DateTime.now();
     final retentionDays = settings.dataRetentionDays;
-    final filteredTxs = vaultFilteredTxs.where((tx) {
-      if (retentionDays <= 0 || retentionDays > 3650) return true; // 0 veya çok büyükse (Sonsuz) filtreleme yapma
-      final cutoffDate = now.subtract(Duration(days: retentionDays));
-      return tx.updatedAt.isAfter(cutoffDate);
-    }).toList();
-    
-    // Gelir ve Giderleri ayır (Kesinlikle max 7şer adet)
-    // Transfer işlemlerini kasa seçiliyse doğru tarafa at, seçili değilse gider tarafında göster
-    final filterVaultId = selectedVaultId != null && selectedVaultId!.startsWith('v_') 
-        ? int.tryParse(selectedVaultId!.replaceFirst('v_', '')) 
-        : null;
 
-    final incomeTxs = filteredTxs.where((tx) {
-      if (tx.targetVaultId != null && filterVaultId != null) {
-        return tx.targetVaultId == filterVaultId;
+    if (_cachedIncomeTxs == null ||
+        _lastTransactions != rawTransactions ||
+        _lastCustomCategories != customCategories ||
+        _lastRates != rates ||
+        _lastRetentionDays != retentionDays ||
+        _lastSelectedVaultId != widget.selectedVaultId) {
+      _lastTransactions = rawTransactions;
+      _lastCustomCategories = customCategories;
+      _lastRates = rates;
+      _lastRetentionDays = retentionDays;
+      _lastSelectedVaultId = widget.selectedVaultId;
+
+      final transactions = rawTransactions
+          .where((tx) => tx.status != TransactionStatus.skipped)
+          .toList();
+      
+      // EKLEME SIRASINA GÖRE SIRALA (En son eklenen en üstte)
+      final sortedTxs = transactions..sort((a, b) => b.id.compareTo(a.id));
+
+      // Kasa / Vault bazında filtrele
+      List<TransactionRecord> vaultFilteredTxs = sortedTxs;
+      if (widget.selectedVaultId != null && widget.selectedVaultId!.startsWith('v_')) {
+        final filterVaultId = int.tryParse(widget.selectedVaultId!.replaceFirst('v_', ''));
+        if (filterVaultId != null) {
+          vaultFilteredTxs = sortedTxs.where((tx) => tx.vaultId == filterVaultId || tx.targetVaultId == filterVaultId).toList();
+        }
       }
-      return tx.isIncome;
-    }).take(7).toList();
+      
+      // Veri Saklama Süresine Göre Filtrele
+      final now = DateTime.now();
+      final filteredTxs = vaultFilteredTxs.where((tx) {
+        if (retentionDays <= 0 || retentionDays > 3650) return true; // 0 veya çok büyükse (Sonsuz) filtreleme yapma
+        final cutoffDate = now.subtract(Duration(days: retentionDays));
+        return tx.updatedAt.isAfter(cutoffDate);
+      }).toList();
+      
+      // Gelir ve Giderleri ayır (Kesinlikle max 7şer adet)
+      // Transfer işlemlerini kasa seçiliyse doğru tarafa at, seçili değilse gider tarafında göster
+      final filterVaultId = widget.selectedVaultId != null && widget.selectedVaultId!.startsWith('v_') 
+          ? int.tryParse(widget.selectedVaultId!.replaceFirst('v_', '')) 
+          : null;
 
-    final expenseTxs = filteredTxs.where((tx) {
-      if (tx.targetVaultId != null && filterVaultId != null) {
-        return tx.vaultId == filterVaultId;
-      }
-      return !tx.isIncome;
-    }).take(7).toList();
+      _cachedIncomeTxs = filteredTxs.where((tx) {
+        if (tx.targetVaultId != null && filterVaultId != null) {
+          return tx.targetVaultId == filterVaultId;
+        }
+        return tx.isIncome;
+      }).take(7).toList();
 
-    if (filteredTxs.isEmpty) {
+      _cachedExpenseTxs = filteredTxs.where((tx) {
+        if (tx.targetVaultId != null && filterVaultId != null) {
+          return tx.vaultId == filterVaultId;
+        }
+        return !tx.isIncome;
+      }).take(7).toList();
+
+      _cachedIsEmpty = filteredTxs.isEmpty;
+    }
+
+    if (_cachedIsEmpty) {
       return _buildEmptyState(context);
     }
 
@@ -78,14 +111,14 @@ class TimelineActivityWidget extends ConsumerWidget {
       children: [
         // SOL: Gelirler
         Expanded(
-          child: _buildColumn(context, incomeTxs, symbol, rates, true, customCategories),
+          child: _buildColumn(context, _cachedIncomeTxs!, symbol, rates, true, customCategories),
         ),
         
         const SizedBox(width: 8),
         
         // SAĞ: Giderler
         Expanded(
-          child: _buildColumn(context, expenseTxs, symbol, rates, false, customCategories),
+          child: _buildColumn(context, _cachedExpenseTxs!, symbol, rates, false, customCategories),
         ),
       ],
     );
@@ -251,7 +284,6 @@ class TimelineActivityWidget extends ConsumerWidget {
       child: Icon(icon, size: 9, color: accentColor),
     );
   }
-
 
   String _formatSmartDate(DateTime date, AppLocalizations l10n) {
     final now = DateTime.now();

@@ -26,6 +26,14 @@ class _SpendingGiantsWidgetState extends ConsumerState<SpendingGiantsWidget> wit
   int _selectedFilterIndex = 1;
   late AnimationController _chartController;
 
+  // Caching fields for memoization
+  List<TransactionRecord>? _lastTransactions;
+  List<ExchangeRate>? _lastRates;
+  String? _lastSymbol;
+  int? _lastFilterIndex;
+  String? _lastVaultId;
+  List<_AnalyticGiant>? _cachedGiants;
+
   @override
   void initState() {
     super.initState();
@@ -56,20 +64,35 @@ class _SpendingGiantsWidgetState extends ConsumerState<SpendingGiantsWidget> wit
     final transactions = ref.watch(expenseTransactionsProvider);
     final customCategories = ref.watch(customCategoriesProvider);
     
-    // Kasa / Vault bazında filtrele
-    List<TransactionRecord> vaultFilteredTxs = transactions;
-    if (widget.selectedVaultId != null && widget.selectedVaultId!.startsWith('v_')) {
-      final filterVaultId = int.tryParse(widget.selectedVaultId!.replaceFirst('v_', ''));
-      if (filterVaultId != null) {
-        vaultFilteredTxs = transactions.where((tx) => tx.vaultId == filterVaultId).toList();
-      }
-    }
-    
-    final periods = _getAnalysisPeriods();
-    final currentTxs = vaultFilteredTxs.where((tx) => tx.date.isAfter(periods['currentStart']!) && tx.date.isBefore(periods['currentEnd']!)).toList();
-    final previousTxs = vaultFilteredTxs.where((tx) => tx.date.isAfter(periods['prevStart']!) && tx.date.isBefore(periods['prevEnd']!)).toList();
+    if (_cachedGiants == null ||
+        _lastTransactions != transactions ||
+        _lastRates != rates ||
+        _lastSymbol != symbol ||
+        _lastFilterIndex != _selectedFilterIndex ||
+        _lastVaultId != widget.selectedVaultId) {
+      _lastTransactions = transactions;
+      _lastRates = rates;
+      _lastSymbol = symbol;
+      _lastFilterIndex = _selectedFilterIndex;
+      _lastVaultId = widget.selectedVaultId;
 
-    final giants = _getAnalyticGiants(currentTxs, previousTxs, symbol, rates);
+      // Kasa / Vault bazında filtrele
+      List<TransactionRecord> vaultFilteredTxs = transactions;
+      if (widget.selectedVaultId != null && widget.selectedVaultId!.startsWith('v_')) {
+        final filterVaultId = int.tryParse(widget.selectedVaultId!.replaceFirst('v_', ''));
+        if (filterVaultId != null) {
+          vaultFilteredTxs = transactions.where((tx) => tx.vaultId == filterVaultId).toList();
+        }
+      }
+      
+      final periods = _getAnalysisPeriods();
+      final currentTxs = vaultFilteredTxs.where((tx) => tx.date.isAfter(periods['currentStart']!) && tx.date.isBefore(periods['currentEnd']!)).toList();
+      final previousTxs = vaultFilteredTxs.where((tx) => tx.date.isAfter(periods['prevStart']!) && tx.date.isBefore(periods['prevEnd']!)).toList();
+
+      _cachedGiants = _getAnalyticGiants(currentTxs, previousTxs, symbol, rates);
+    }
+
+    final giants = _cachedGiants!;
 
     return Column(
       children: [

@@ -60,8 +60,6 @@ class CustomBottomSheet extends ConsumerWidget {
     );
   }
 
-  static double _lastKnownKeyboardHeight = 290.0; // Makul bir varsayılan klavye yüksekliği
-
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
@@ -72,11 +70,6 @@ class CustomBottomSheet extends ConsumerWidget {
     final safePadding = MediaQuery.paddingOf(context);
     final safeBottom = safePadding.bottom;
     final safeTop = safePadding.top;
-    
-    // Klavye yüksekliğini kaydet (sadece gerçek klavye yüksekliği geldiğinde güncelle)
-    if (viewInsetsBottom > 0) {
-      _lastKnownKeyboardHeight = viewInsetsBottom;
-    }
 
     final bgColorStyle = ref.watch(settingsProvider.select((s) => s.bgColorStyle));
 
@@ -103,30 +96,23 @@ class CustomBottomSheet extends ConsumerWidget {
 
     final route = ModalRoute.of(context);
     final animation = route?.animation;
-    final bool isEntering = animation?.status == AnimationStatus.forward;
 
     // Sheet'in alt kenarı klavyenin tam üstünde oturmalı (native davranış).
-    final double keyboardOffset;
-    if (hasInput && isEntering) {
-      // Giriş animasyonu sırasında klavyenin son bilinen yüksekliğini sabit tutuyoruz.
-      // viewInsetsBottom sıfırdan yukarı doğru değişirken ani boyut değişikliklerini 
-      // ve sıçramaları (stutter) önler.
-      keyboardOffset = _lastKnownKeyboardHeight;
-    } else {
-      // Normal durum veya giriş bittikten sonra OS'un kare-kare verdiği değeri kullan.
-      keyboardOffset = viewInsetsBottom;
-    }
+    // isEntering sırasında yapay sabitleme yapmak yerine, odağı geciktirdiğimiz için
+    // doğrudan viewInsetsBottom kullanmak zıplamaları ve kasılmaları önler.
+    final double keyboardOffset = viewInsetsBottom;
 
     final double bottomMargin = keyboardOffset > 0
         ? keyboardOffset + 16.0
         : safeBottom + 16.0;
 
     // ═══ Kullanılabilir alan: ekran - alt boşluk - üst güvenli alan - nefes payı ═══
-    // Sheet hiçbir zaman status bar / notch / Dynamic Island'ın arkasına girmemeli.
-    final double availableHeight = screenHeight - bottomMargin - safeTop - 8.0;
+    // Üst güvenli alanı (safeTop) 24.0 piksel nefes payı ile genişleterek 
+    // sayfanın telefonun durum çubuğunun (header/status bar) arkasına girmesini önlüyoruz.
+    final double availableHeight = screenHeight - bottomMargin - safeTop - 24.0;
     final double desiredHeight = height ?? (isFullScreen
         ? availableHeight
-        : screenHeight * 0.85);
+        : screenHeight * 0.85); // Varsayılan yüksekliği kullanıcı isteği üzerine %85 seviyesinde tutuyoruz.
     final double maxSheetHeight = desiredHeight.clamp(0.0, availableHeight);
 
     return PrecisionSheetScope(
@@ -295,7 +281,7 @@ class PrecisionSheetScope extends InheritedWidget {
   });
 
   static PrecisionSheetScope? of(BuildContext context) {
-    return context.dependOnInheritedWidgetOfExactType<PrecisionSheetScope>();
+    return context.findAncestorWidgetOfExactType<PrecisionSheetScope>();
   }
 
   @override

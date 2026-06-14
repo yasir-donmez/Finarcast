@@ -10,23 +10,11 @@ import 'widgets/home_widget_manager_sheet.dart';
 import '../../shared/widgets/custom_bottom_sheet.dart';
 import '../../l10n/app_localizations.dart';
 
-class DashboardScreen extends ConsumerStatefulWidget {
+class DashboardScreen extends StatelessWidget {
   const DashboardScreen({super.key});
 
   @override
-  ConsumerState<DashboardScreen> createState() => _DashboardScreenState();
-}
-
-class _DashboardScreenState extends ConsumerState<DashboardScreen> {
-  @override
   Widget build(BuildContext context) {
-    final totalBalance = ref.watch(displayBalanceProvider);
-    final bonus = ref.watch(simulationBonusProvider);
-    final minBalance = ref.watch(homeMinBalanceProvider) + bonus;
-    final maxBalance = ref.watch(homeMaxBalanceProvider) + bonus;
-
-    final bool hasFlexibleRange = minBalance != totalBalance || maxBalance != totalBalance;
-
     return Stack(
       children: [
         Positioned.fill(
@@ -38,9 +26,6 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
               children: [
                 const SizedBox(height: AppSizes.paddingSmall),
             
-           
-                
-                
                 // 1. Widget Board
                 const HomeWidgetBoard(),
                 
@@ -49,37 +34,47 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                 // 2. Bakiye Alanı (Uzun basınca Widget Manager açılır)
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: AppSizes.paddingLarge),
-                  child: GestureDetector(
-                    onLongPress: () {
-                      HapticFeedback.heavyImpact();
-                      final l10n = AppLocalizations.of(context)!;
-                      CustomBottomSheet.show(
-                        context: context,
-                        title: l10n.home,
-                        child: const HomeWidgetManagerSheet(),
+                  child: Consumer(
+                    builder: (context, ref, child) {
+                      final totalBalance = ref.watch(displayBalanceProvider);
+                      final bonus = ref.watch(simulationBonusProvider);
+                      final minBalance = ref.watch(homeMinBalanceProvider) + bonus;
+                      final maxBalance = ref.watch(homeMaxBalanceProvider) + bonus;
+                      final bool hasFlexibleRange = minBalance != totalBalance || maxBalance != totalBalance;
+
+                      return GestureDetector(
+                        onLongPress: () {
+                          HapticFeedback.heavyImpact();
+                          final l10n = AppLocalizations.of(context)!;
+                          CustomBottomSheet.show(
+                            context: context,
+                            title: l10n.home,
+                            child: const HomeWidgetManagerSheet(),
+                          );
+                        },
+                        child: AnimatedCurrencySelector(
+                          fontSize: 28,
+                          totalBalance: totalBalance,
+                          minBalance: hasFlexibleRange ? minBalance : null,
+                          maxBalance: hasFlexibleRange ? maxBalance : null,
+                        ),
                       );
                     },
-                    child: AnimatedCurrencySelector(
-                      fontSize: 28,
-                      totalBalance: totalBalance,
-                      minBalance: hasFlexibleRange ? minBalance : null,
-                      maxBalance: hasFlexibleRange ? maxBalance : null,
-                    ),
                   ),
                 ),
                 
                 const Spacer(flex: 2),
 
                 // 3. Zaman Kadranı
-                Expanded(
+                const Expanded(
                   flex: 48,
                   child: Align(
                     alignment: Alignment.topCenter,
                     child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 24),
+                      padding: EdgeInsets.symmetric(horizontal: 24),
                       child: FittedBox(
                         fit: BoxFit.contain,
-                        child: const RotaryTimeDial(),
+                        child: RotaryTimeDial(),
                       ),
                     ),
                   ),

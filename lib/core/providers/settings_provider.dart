@@ -8,6 +8,7 @@ import '../database/models/app_settings.dart';
 import '../services/notification_service.dart';
 import '../services/sync_coordinator.dart';
 import '../services/subscription_service.dart';
+import '../services/data_retention_service.dart';
 
 extension AppSettingsCopy on AppSettings {
   AppSettings copyWith({
@@ -189,11 +190,15 @@ class SettingsNotifier extends StateNotifier<AppSettings> {
   Future<void> setDataRetention(int days) async {
     if (state.dataRetentionDays == days) return;
     await _save(state.copyWith(dataRetentionDays: days));
+    // Yeni ayara göre arşivlemeyi anında tetikle
+    DataRetentionService.archiveExpiredTransactions();
   }
 
   Future<void> setPermanentDeletion(int days) async {
     if (state.permanentDeletionDays == days) return;
     await _save(state.copyWith(permanentDeletionDays: days));
+    // Yeni ayara göre kalıcı silmeyi anında tetikle
+    DataRetentionService.archiveExpiredTransactions();
   }
 
   Future<void> toggleNotifications(bool value) async {
