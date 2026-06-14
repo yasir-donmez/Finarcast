@@ -116,7 +116,7 @@ class _VaultsScreenState extends ConsumerState<VaultsScreen> {
               _buildFilters(viewMode, filter, activeColor, scalingFactor, gapCardToFilters, l10n, context),
               
               TweenAnimationBuilder<double>(
-                key: ValueKey('$selectedVaultId-$viewMode-$filter'),
+                key: ValueKey('$viewMode-$filter'),
                 tween: Tween(begin: 0.0, end: 1.0),
                 duration: const Duration(milliseconds: 240),
                 curve: Curves.easeOut,

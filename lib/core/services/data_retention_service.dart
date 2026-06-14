@@ -11,39 +11,28 @@ class DataRetentionService {
     final retentionDays = settings.dataRetentionDays;
     final permanentDeletionDays = settings.permanentDeletionDays;
 
-    // Her iki ayar da devre dışı ise işlem yapma
-    if (retentionDays == -1 && permanentDeletionDays == -1) return;
-
     final allTx = await DatabaseService.getAllTransactions();
     final allTemplates = await DatabaseService.getAllTemplates();
     final now = DateTime.now();
 
-    // 1. Arşivleme İşlemi (dataRetentionDays != -1 ise)
-    if (retentionDays != -1) {
-      // 1.1. İşlem Arşivleme
-      final toArchiveTx = getTransactionsToArchive(
-        allTransactions: allTx,
-        dataRetentionDays: retentionDays,
-        now: now,
-      );
-      if (toArchiveTx.isNotEmpty) {
-        for (final tx in toArchiveTx) {
-          tx.isArchived = true;
-        }
-        await DatabaseService.updateAllTransactions(toArchiveTx);
-      }
+    // 1. Arşiv Durumu Güncellemeleri (Arşivleme ve Geri Çıkartma)
+    final toUpdateTx = getTransactionsToUpdateArchiveStatus(
+      allTransactions: allTx,
+      dataRetentionDays: retentionDays,
+      now: now,
+    );
+    if (toUpdateTx.isNotEmpty) {
+      await DatabaseService.updateAllTransactions(toUpdateTx);
+    }
 
-      // 1.2. Şablon (Plan) Arşivleme
-      final toArchiveTemplates = getTemplatesToArchive(
-        allTemplates: allTemplates,
-        dataRetentionDays: retentionDays,
-        now: now,
-      );
-      if (toArchiveTemplates.isNotEmpty) {
-        for (final t in toArchiveTemplates) {
-          t.isArchived = true;
-          await DatabaseService.updateTemplate(t);
-        }
+    final toUpdateTemplates = getTemplatesToUpdateArchiveStatus(
+      allTemplates: allTemplates,
+      dataRetentionDays: retentionDays,
+      now: now,
+    );
+    if (toUpdateTemplates.isNotEmpty) {
+      for (final t in toUpdateTemplates) {
+        await DatabaseService.updateTemplate(t);
       }
     }
 
@@ -82,18 +71,33 @@ class DataRetentionService {
     }
   }
 
-  /// Arşivlenmesi gereken işlemleri döner (Test edilebilirlik için pure fonksiyon)
-  static List<TransactionRecord> getTransactionsToArchive({
+  /// Hangi işlemlerin arşiv durumunun güncellenmesi gerektiğini hesaplar (arşivleme + geri çıkartma)
+  static List<TransactionRecord> getTransactionsToUpdateArchiveStatus({
     required List<TransactionRecord> allTransactions,
     required int dataRetentionDays,
     required DateTime now,
   }) {
-    if (dataRetentionDays == -1) return [];
-    final cutoff = now.subtract(Duration(days: dataRetentionDays));
-    return allTransactions.where((tx) {
-      if (tx.isArchived) return false; // Zaten arşivlenmiş
-      return tx.date.isBefore(cutoff);
-    }).toList();
+    final toUpdate = <TransactionRecord>[];
+    
+    if (dataRetentionDays == -1) {
+      // Eğer sonsuz ise, arşivlenmiş olan tüm işlemleri aktif hale getir
+      for (final tx in allTransactions) {
+        if (tx.isArchived) {
+          tx.isArchived = false;
+          toUpdate.add(tx);
+        }
+      }
+    } else {
+      final cutoff = now.subtract(Duration(days: dataRetentionDays));
+      for (final tx in allTransactions) {
+        final shouldBeArchived = tx.date.isBefore(cutoff);
+        if (tx.isArchived != shouldBeArchived) {
+          tx.isArchived = shouldBeArchived;
+          toUpdate.add(tx);
+        }
+      }
+    }
+    return toUpdate;
   }
 
   /// Kalıcı olarak silinmesi gereken işlemleri döner (Test edilebilirlik için pure fonksiyon)
@@ -113,26 +117,44 @@ class DataRetentionService {
     }).toList();
   }
 
-  /// Arşivlenmesi gereken şablonları (planları) döner (Test edilebilirlik için pure fonksiyon)
-  static List<RecurringTemplate> getTemplatesToArchive({
+  /// Hangi şablonların (planların) arşiv durumunun güncellenmesi gerektiğini hesaplar (arşivleme + geri çıkartma)
+  static List<RecurringTemplate> getTemplatesToUpdateArchiveStatus({
     required List<RecurringTemplate> allTemplates,
     required int dataRetentionDays,
     required DateTime now,
   }) {
-    if (dataRetentionDays == -1) return [];
-    final cutoff = now.subtract(Duration(days: dataRetentionDays));
+    final toUpdate = <RecurringTemplate>[];
     final farFuture = DateTime(2100, 12, 31);
-    
-    return allTemplates.where((t) {
-      if (t.isArchived) return false; // Zaten arşivlenmiş
-      if (t.totalInstallments == null) return false; // Sonsuz planlar otomatik arşivlenmez
 
-      final dates = RecurrenceEngine.occurrenceDates(t.recurrenceRule, farFuture);
-      if (dates.isEmpty) return false;
+    if (dataRetentionDays == -1) {
+      // Eğer sonsuz ise, arşivlenmiş olan tüm planları aktif hale getir
+      for (final t in allTemplates) {
+        if (t.isArchived) {
+          t.isArchived = false;
+          toUpdate.add(t);
+        }
+      }
+    } else {
+      final cutoff = now.subtract(Duration(days: dataRetentionDays));
+      for (final t in allTemplates) {
+        if (t.totalInstallments == null) {
+          // Sonsuz planlar asla otomatik arşivlenmez veya unarchive edilmez
+          continue;
+        }
 
-      final completionDate = dates.last;
-      return completionDate.isBefore(cutoff);
-    }).toList();
+        final dates = RecurrenceEngine.occurrenceDates(t.recurrenceRule, farFuture);
+        if (dates.isEmpty) continue;
+
+        final completionDate = dates.last;
+        final shouldBeArchived = completionDate.isBefore(cutoff);
+
+        if (t.isArchived != shouldBeArchived) {
+          t.isArchived = shouldBeArchived;
+          toUpdate.add(t);
+        }
+      }
+    }
+    return toUpdate;
   }
 
   /// Kalıcı silinmesi gereken şablonları (planları) döner (Test edilebilirlik için pure fonksiyon)

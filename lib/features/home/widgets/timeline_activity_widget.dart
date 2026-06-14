@@ -56,7 +56,7 @@ class _TimelineActivityWidgetState extends ConsumerState<TimelineActivityWidget>
       _lastSelectedVaultId = widget.selectedVaultId;
 
       final transactions = rawTransactions
-          .where((tx) => tx.status != TransactionStatus.skipped)
+          .where((tx) => tx.status != TransactionStatus.skipped && !tx.isArchived)
           .toList();
       
       // EKLEME SIRASINA GÖRE SIRALA (En son eklenen en üstte)
@@ -76,7 +76,7 @@ class _TimelineActivityWidgetState extends ConsumerState<TimelineActivityWidget>
       final filteredTxs = vaultFilteredTxs.where((tx) {
         if (retentionDays <= 0 || retentionDays > 3650) return true; // 0 veya çok büyükse (Sonsuz) filtreleme yapma
         final cutoffDate = now.subtract(Duration(days: retentionDays));
-        return tx.updatedAt.isAfter(cutoffDate);
+        return tx.date.isAfter(cutoffDate);
       }).toList();
       
       // Gelir ve Giderleri ayır (Kesinlikle max 7şer adet)

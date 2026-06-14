@@ -4,50 +4,65 @@ import 'package:finarcast/core/database/models/transaction_record.dart';
 import 'package:finarcast/core/database/models/recurring_template.dart';
 
 void main() {
-  group('DataRetentionService - getTransactionsToArchive', () {
+  group('DataRetentionService - getTransactionsToUpdateArchiveStatus', () {
     final now = DateTime(2026, 6, 14);
 
-    test('Should return empty list when dataRetentionDays is -1', () {
-      final txs = [
-        TransactionRecord()..date = now.subtract(const Duration(days: 100)),
-        TransactionRecord()..date = now.subtract(const Duration(days: 10)),
-      ];
+    test('Should unarchive all archived transactions when dataRetentionDays is -1', () {
+      final tx1 = TransactionRecord()
+        ..id = 1
+        ..date = now.subtract(const Duration(days: 100))
+        ..isArchived = true;
 
-      final result = DataRetentionService.getTransactionsToArchive(
+      final tx2 = TransactionRecord()
+        ..id = 2
+        ..date = now.subtract(const Duration(days: 10))
+        ..isArchived = false;
+
+      final txs = [tx1, tx2];
+
+      final result = DataRetentionService.getTransactionsToUpdateArchiveStatus(
         allTransactions: txs,
         dataRetentionDays: -1,
         now: now,
       );
 
-      expect(result, isEmpty);
+      expect(result.length, 1);
+      expect(result.first.id, 1);
+      expect(result.first.isArchived, isFalse);
     });
 
-    test('Should only return records older than dataRetentionDays and not already archived', () {
+    test('Should correctly archive expired and unarchive active transactions based on cutoff', () {
       final tx1 = TransactionRecord()
         ..id = 1
-        ..date = now.subtract(const Duration(days: 91))
-        ..isArchived = false;
+        ..date = now.subtract(const Duration(days: 95))
+        ..isArchived = false; // Expired, active -> should archive
 
       final tx2 = TransactionRecord()
         ..id = 2
-        ..date = now.subtract(const Duration(days: 89))
-        ..isArchived = false;
+        ..date = now.subtract(const Duration(days: 95))
+        ..isArchived = true; // Expired, archived -> keep archived (no update)
 
       final tx3 = TransactionRecord()
         ..id = 3
-        ..date = now.subtract(const Duration(days: 95))
-        ..isArchived = true; // Already archived
+        ..date = now.subtract(const Duration(days: 45))
+        ..isArchived = true; // Active, archived -> should unarchive
 
-      final txs = [tx1, tx2, tx3];
+      final tx4 = TransactionRecord()
+        ..id = 4
+        ..date = now.subtract(const Duration(days: 45))
+        ..isArchived = false; // Active, active -> keep active (no update)
 
-      final result = DataRetentionService.getTransactionsToArchive(
+      final txs = [tx1, tx2, tx3, tx4];
+
+      final result = DataRetentionService.getTransactionsToUpdateArchiveStatus(
         allTransactions: txs,
         dataRetentionDays: 90,
         now: now,
       );
 
-      expect(result.length, 1);
-      expect(result.first.id, 1);
+      expect(result.length, 2);
+      expect(result.any((tx) => tx.id == 1 && tx.isArchived == true), isTrue);
+      expect(result.any((tx) => tx.id == 3 && tx.isArchived == false), isTrue);
     });
   });
 
@@ -97,65 +112,84 @@ void main() {
     });
   });
 
-  group('DataRetentionService - getTemplatesToArchive', () {
+  group('DataRetentionService - getTemplatesToUpdateArchiveStatus', () {
     final now = DateTime(2026, 6, 14);
 
-    test('Should return empty list when dataRetentionDays is -1', () {
-      final templates = [
-        RecurringTemplate()
-          ..startDate = now.subtract(const Duration(days: 100))
-          ..totalInstallments = 1
-          ..periodType = 301,
-      ];
+    test('Should unarchive all archived templates when dataRetentionDays is -1', () {
+      final t1 = RecurringTemplate()
+        ..id = 1
+        ..startDate = now.subtract(const Duration(days: 100))
+        ..totalInstallments = 1
+        ..periodType = 301
+        ..isArchived = true; // Archived -> should unarchive
 
-      final result = DataRetentionService.getTemplatesToArchive(
+      final t2 = RecurringTemplate()
+        ..id = 2
+        ..startDate = now.subtract(const Duration(days: 10))
+        ..totalInstallments = 1
+        ..periodType = 301
+        ..isArchived = false;
+
+      final templates = [t1, t2];
+
+      final result = DataRetentionService.getTemplatesToUpdateArchiveStatus(
         allTemplates: templates,
         dataRetentionDays: -1,
         now: now,
       );
 
-      expect(result, isEmpty);
+      expect(result.length, 1);
+      expect(result.first.id, 1);
+      expect(result.first.isArchived, isFalse);
     });
 
-    test('Should only archive completed templates that passed dataRetentionDays', () {
+    test('Should correctly archive expired and unarchive active templates based on cutoff', () {
       final t1 = RecurringTemplate()
         ..id = 1
         ..startDate = now.subtract(const Duration(days: 95))
         ..totalInstallments = 1
-        ..periodType = 301 // Monthly
-        ..isArchived = false; // Completed 95 days ago -> archive
+        ..periodType = 301 // Completed 95 days ago
+        ..isArchived = false; // Expired, active -> archive
 
       final t2 = RecurringTemplate()
         ..id = 2
-        ..startDate = now.subtract(const Duration(days: 5))
-        ..totalInstallments = 1
-        ..periodType = 301
-        ..isArchived = false; // Completed 5 days ago -> keep active
-
-      final t3 = RecurringTemplate()
-        ..id = 3
         ..startDate = now.subtract(const Duration(days: 95))
         ..totalInstallments = 1
         ..periodType = 301
-        ..isArchived = true; // Already archived -> skip
+        ..isArchived = true; // Expired, archived -> keep archived (no update)
+
+      final t3 = RecurringTemplate()
+        ..id = 3
+        ..startDate = now.subtract(const Duration(days: 45))
+        ..totalInstallments = 1
+        ..periodType = 301 // Completed 45 days ago
+        ..isArchived = true; // Active, archived -> unarchive
 
       final t4 = RecurringTemplate()
         ..id = 4
+        ..startDate = now.subtract(const Duration(days: 45))
+        ..totalInstallments = 1
+        ..periodType = 301
+        ..isArchived = false; // Active, active -> keep active (no update)
+
+      final t5 = RecurringTemplate()
+        ..id = 5
         ..startDate = now.subtract(const Duration(days: 95))
         ..totalInstallments = null // Infinite template -> skip
         ..periodType = 301
         ..isArchived = false;
 
-      final templates = [t1, t2, t3, t4];
+      final templates = [t1, t2, t3, t4, t5];
 
-      final result = DataRetentionService.getTemplatesToArchive(
+      final result = DataRetentionService.getTemplatesToUpdateArchiveStatus(
         allTemplates: templates,
         dataRetentionDays: 90,
         now: now,
       );
 
-      expect(result.length, 1);
-      expect(result.first.id, 1);
+      expect(result.length, 2);
+      expect(result.any((t) => t.id == 1 && t.isArchived == true), isTrue);
+      expect(result.any((t) => t.id == 3 && t.isArchived == false), isTrue);
     });
   });
 

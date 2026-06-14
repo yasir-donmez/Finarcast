@@ -171,9 +171,6 @@ class BackgroundPreviewCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final primaryColor = Theme.of(context).colorScheme.primary;
-    final gradient = bgGradient;
-
-    // Yeni stil isimleri ve açıklamaları
     final l10n = AppLocalizations.of(context)!;
     final String label;
     final String description;
@@ -189,6 +186,11 @@ class BackgroundPreviewCard extends StatelessWidget {
         ? primaryColor
         : Color(accentColorValue);
 
+    final mockColorScheme = ColorScheme.fromSeed(
+      seedColor: activeColor,
+      brightness: isDark ? Brightness.dark : Brightness.light,
+    );
+
     Decoration previewDecoration;
     Color mockCardBg;
     Color mockCardBorder;
@@ -197,14 +199,9 @@ class BackgroundPreviewCard extends StatelessWidget {
 
     if (styleIndex == 2) {
       // ═══ SADE ═══
-      // Düz arka plan, düz kart. Tema rengi sadece içeriklere (bar) yansır.
       final solidBg = isDark ? AppColors.darkBackground : AppColors.lightBackground;
       previewDecoration = BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [solidBg, solidBg],
-        ),
+        color: solidBg,
         borderRadius: BorderRadius.circular(16),
       );
       mockCardBg = isDark ? const Color(0xFF161720) : Colors.white;
@@ -217,45 +214,15 @@ class BackgroundPreviewCard extends StatelessWidget {
         )
       ] : null;
     } else {
-      // ═══ RENKLİ ═══
-      // Arka plan ve kartlar tema rengiyle uyumlu katı renkler.
-      final Color tintColor = gradient != null ? gradient.first : activeColor;
-      
-      final bgTinted = isDark
-          ? Color.lerp(AppColors.darkBackground, tintColor, 0.20)!
-          : Color.lerp(AppColors.lightBackground, tintColor, 0.10)!;
-      
-      if (gradient != null) {
-        previewDecoration = BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: gradient
-                .map((c) => isDark
-                    ? Color.lerp(AppColors.darkBackground, c, 0.22)!
-                    : Color.lerp(AppColors.lightBackground, c, 0.12)!)
-                .toList(),
-          ),
-          borderRadius: BorderRadius.circular(16),
-        );
-      } else {
-        previewDecoration = BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [bgTinted, bgTinted],
-          ),
-          borderRadius: BorderRadius.circular(16),
-        );
-      }
- 
-      // Kart rengi: arka plandan biraz daha açık/koyu tonda, ama yine uyumlu
-      mockCardBg = isDark
-          ? Color.lerp(const Color(0xFF161720), tintColor, 0.12)!
-          : Color.lerp(Colors.white, tintColor, 0.06)!;
-      mockCardBorder = isDark
-          ? Color.lerp(const Color(0xFF2A2B36), tintColor, 0.15)!
-          : Color.lerp(const Color(0xFFE4E7EB), tintColor, 0.12)!;
+      // ═══ RENKLİ ═══ (M3 Uyumlu)
+      final bgTinted = isDark ? mockColorScheme.surfaceContainerLowest : mockColorScheme.surfaceDim;
+      previewDecoration = BoxDecoration(
+        color: bgTinted,
+        borderRadius: BorderRadius.circular(16),
+      );
+
+      mockCardBg = isDark ? mockColorScheme.surfaceContainer : mockColorScheme.surfaceContainerLow;
+      mockCardBorder = mockColorScheme.outlineVariant;
       mockCardShadow = null;
     }
 

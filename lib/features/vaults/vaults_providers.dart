@@ -355,8 +355,47 @@ final transactionGroupsProvider = Provider<List<TransactionGroup>>((ref) {
   }).toList();
 });
 
+class SelectedVaultNotifier extends StateNotifier<String?> {
+  SelectedVaultNotifier() : super(null) {
+    _load();
+  }
+
+  Future<void> _load() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final savedId = prefs.getString('last_selected_vault_id');
+      if (savedId != null) {
+        state = savedId;
+      }
+    } catch (e) {
+      debugPrint('❌ selectedVaultProvider yükleme hatası: $e');
+    }
+  }
+
+  @override
+  set state(String? value) {
+    super.state = value;
+    _save(value);
+  }
+
+  Future<void> _save(String? value) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      if (value == null) {
+        await prefs.remove('last_selected_vault_id');
+      } else {
+        await prefs.setString('last_selected_vault_id', value);
+      }
+    } catch (e) {
+      debugPrint('❌ selectedVaultProvider kaydetme hatası: $e');
+    }
+  }
+}
+
 /// Seçili kasa (null = Ana Kasa / Tümü)
-final selectedVaultProvider = StateProvider<String?>((ref) => null);
+final selectedVaultProvider = StateNotifierProvider<SelectedVaultNotifier, String?>((ref) {
+  return SelectedVaultNotifier();
+});
 
 /// Seçili filtrelere göre şablonları listeler
 final filteredVaultTemplatesProvider = Provider<List<TemplateUI>>((ref) {
@@ -396,7 +435,7 @@ final filteredVaultTemplatesProvider = Provider<List<TemplateUI>>((ref) {
 
 /// Seçili filtrelere göre işlemleri listeler (sadece bugün ve öncesi — geçmiş)
 final filteredVaultTransactionsProvider = Provider<List<TransactionUI>>((ref) {
-  final allTransactions = ref.watch(vaultTransactionsProvider);
+  final allTransactions = ref.watch(vaultTransactionsProvider).where((t) => !t.isArchived).toList();
   final filter = ref.watch(transactionFilterProvider);
   final selectedVaultId = ref.watch(selectedVaultProvider);
   final groups = ref.watch(transactionGroupsProvider);

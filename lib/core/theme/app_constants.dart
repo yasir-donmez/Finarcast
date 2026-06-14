@@ -98,64 +98,54 @@ class AppColors {
 
   /// Arayüz stiline göre dinamik zemin rengini döner
   static Color getThemeBackground(BuildContext context, int bgColorStyle) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final accentColor = getPrimary(context);
-    final gradient = getGradientColors(accentColor);
-    final tint = gradient != null ? gradient.first : accentColor;
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final isDark = theme.brightness == Brightness.dark;
 
     if (bgColorStyle == 2) {
       // ═══ SADE ═══
       return isDark ? darkBackground : lightBackground;
     } else {
-      // ═══ RENKLİ ═══ (Varsayılan)
-      return isDark
-          ? Color.lerp(const Color(0xFF07080A), tint, 0.08)!
-          : Color.lerp(const Color(0xFFE9ECF0), tint, 0.12)!;
+      // ═══ RENKLİ ═══ (Varsayılan - M3 Uyumlu)
+      return isDark ? colorScheme.surfaceContainerLowest : colorScheme.surfaceDim;
     }
   }
 
   /// Arayüz stiline göre dinamik kart/yüzey rengini döner
   static Color getThemeSurface(BuildContext context, int bgColorStyle, {bool isInsideSheet = false}) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final accentColor = getPrimary(context);
-    final gradient = getGradientColors(accentColor);
-    final tint = gradient != null ? gradient.first : accentColor;
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final isDark = theme.brightness == Brightness.dark;
 
     if (bgColorStyle == 2) {
       // ═══ SADE ═══
       if (isDark) {
-        return isInsideSheet ? darkInnerSurface : const Color(0xFF161720);
+        return isInsideSheet ? const Color(0xFF22252A) : const Color(0xFF161720);
       } else {
-        return isInsideSheet ? lightInnerSurface : Colors.white;
+        return isInsideSheet ? const Color(0xFFEBEEF2) : Colors.white;
       }
     } else {
-      // ═══ RENKLİ ═══ (Varsayılan)
+      // ═══ RENKLİ ═══ (Varsayılan - M3 Uyumlu)
       if (isDark) {
-        final base = isInsideSheet ? darkInnerSurface : const Color(0xFF161722);
-        return Color.lerp(base, tint, isInsideSheet ? 0.20 : 0.16)!;
+        return isInsideSheet ? colorScheme.surfaceContainerHigh : colorScheme.surfaceContainer;
       } else {
-        return isInsideSheet
-            ? Color.lerp(lightInnerSurface, tint, 0.08)!
-            : Colors.white;
+        return isInsideSheet ? colorScheme.surfaceContainer : colorScheme.surfaceContainerLow;
       }
     }
   }
 
   /// Arayüz stiline göre dinamik sınır/kenarlık rengini döner
   static Color getThemeBorder(BuildContext context, int bgColorStyle) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final accentColor = getPrimary(context);
-    final gradient = getGradientColors(accentColor);
-    final tint = gradient != null ? gradient.first : accentColor;
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final isDark = theme.brightness == Brightness.dark;
 
     if (bgColorStyle == 2) {
       // ═══ SADE ═══
       return isDark ? const Color(0xFF2A2B36) : const Color(0xFFE4E7EB);
     } else {
-      // ═══ RENKLİ ═══ (Varsayılan)
-      return isDark
-          ? Color.lerp(const Color(0xFF2E303E), tint, 0.22)!
-          : Color.lerp(const Color(0xFFD8DCE3), tint, 0.15)!;
+      // ═══ RENKLİ ═══ (Varsayılan - M3 Uyumlu)
+      return colorScheme.outlineVariant;
     }
   }
 

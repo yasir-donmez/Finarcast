@@ -4,25 +4,26 @@ import 'app_constants.dart';
 class AppTheme {
   /// Premium Glassmorphism - Karanlık Tema
   static ThemeData buildDarkTheme(Color accentColor) {
+    final colorScheme = ColorScheme.fromSeed(
+      seedColor: accentColor,
+      brightness: Brightness.dark,
+    ).copyWith(
+      primary: accentColor,
+      onPrimary: Colors.white,
+      error: AppColors.error,
+    );
+
     return ThemeData(
       useMaterial3: true,
       brightness: Brightness.dark,
       scaffoldBackgroundColor: Colors.transparent,
-      colorScheme: ColorScheme.dark(
-        primary: accentColor,
-        onPrimary: Colors.white,
-        secondary: AppColors.getThemeSecondary(accentColor),
-        onSecondary: Colors.white,
-        surface: AppColors.darkSurface,
-        onSurface: AppColors.darkTextPrimary,
-        error: AppColors.error,
-      ),
+      colorScheme: colorScheme,
       textTheme: _buildTextTheme(
         Typography.material2021(platform: TargetPlatform.android).white,
-        AppColors.darkTextPrimary,
-        AppColors.darkTextSecondary,
+        colorScheme.onSurface,
+        colorScheme.onSurfaceVariant,
       ),
-      iconTheme: const IconThemeData(color: AppColors.darkTextSecondary, size: 24),
+      iconTheme: IconThemeData(color: colorScheme.onSurfaceVariant, size: 24),
     );
   }
 
@@ -34,24 +35,26 @@ class AppTheme {
     final lerpAmount = luma > 0.6 ? 0.65 : 0.45;
     final readableAccent = Color.lerp(accentColor, Colors.black, lerpAmount) ?? accentColor;
 
+    final colorScheme = ColorScheme.fromSeed(
+      seedColor: readableAccent,
+      brightness: Brightness.light,
+    ).copyWith(
+      primary: readableAccent,
+      error: AppColors.error,
+    );
+
     return ThemeData(
       useMaterial3: true,
       brightness: Brightness.light,
       primaryColor: readableAccent,
       scaffoldBackgroundColor: AppColors.lightBackground,
-      colorScheme: ColorScheme.light(
-        primary: readableAccent,
-        secondary: AppColors.getThemeSecondary(readableAccent),
-        surface: AppColors.lightSurface,
-        onSurface: AppColors.lightTextPrimary,
-        error: AppColors.error,
-      ),
+      colorScheme: colorScheme,
       textTheme: _buildTextTheme(
         Typography.material2021(platform: TargetPlatform.android).black,
-        AppColors.lightTextPrimary,
-        AppColors.lightTextSecondary,
+        colorScheme.onSurface,
+        colorScheme.onSurfaceVariant,
       ),
-      iconTheme: const IconThemeData(color: AppColors.lightTextSecondary, size: 24),
+      iconTheme: IconThemeData(color: colorScheme.onSurfaceVariant, size: 24),
     );
   }
 

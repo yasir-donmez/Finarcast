@@ -35,12 +35,14 @@ class VaultCardStack extends ConsumerStatefulWidget {
 class _VaultCardStackState extends ConsumerState<VaultCardStack> {
   late PageController _pageController;
   int? _lastTargetIndex;
+  late int _currentPageIndex;
 
   @override
   void initState() {
     super.initState();
     _pageController = PageController(initialPage: widget.currentIndex, viewportFraction: 0.70);
     _lastTargetIndex = widget.currentIndex;
+    _currentPageIndex = widget.currentIndex;
   }
   
   @override
@@ -61,6 +63,8 @@ class _VaultCardStackState extends ConsumerState<VaultCardStack> {
               curve: Curves.easeOutQuart
             );
             if (targetPage >= 0 && targetPage < widget.deckItems.length) {
+              _currentPageIndex = targetPage;
+              _lastTargetIndex = targetPage;
               Future.microtask(() => widget.onVaultSelect(widget.deckItems[targetPage]));
             }
           }
@@ -71,6 +75,7 @@ class _VaultCardStackState extends ConsumerState<VaultCardStack> {
     if (oldWidget.currentIndex != widget.currentIndex && _pageController.hasClients) {
       if (_lastTargetIndex != widget.currentIndex) {
         _lastTargetIndex = widget.currentIndex;
+        _currentPageIndex = widget.currentIndex;
         _pageController.animateToPage(widget.currentIndex, duration: const Duration(milliseconds: 400), curve: Curves.easeOutCubic);
       }
     }
@@ -87,95 +92,106 @@ class _VaultCardStackState extends ConsumerState<VaultCardStack> {
     // Kasa kartları %1 bile küçülmeye başlasa etkileşimi (kaydırmayı) kapatıyoruz.
     final bool isInteractingDisabled = widget.morphProgress > 0.01;
 
-    return PageView.builder(
-      controller: _pageController,
-      physics: isInteractingDisabled ? const NeverScrollableScrollPhysics() : const PageScrollPhysics(),
-      clipBehavior: Clip.hardEdge,
-      itemCount: widget.deckItems.length,
-      onPageChanged: (page) {
-        _lastTargetIndex = page;
-        HapticFeedback.selectionClick();
-        if (page >= 0 && page < widget.deckItems.length) {
-          widget.onVaultSelect(widget.deckItems[page]);
+    return NotificationListener<ScrollNotification>(
+      onNotification: (notification) {
+        if (notification is ScrollEndNotification) {
+          if (_currentPageIndex >= 0 && _currentPageIndex < widget.deckItems.length) {
+            widget.onVaultSelect(widget.deckItems[_currentPageIndex]);
+          }
         }
+        return false;
       },
-      itemBuilder: (context, index) {
-        final vaultId = widget.deckItems[index];
-        final globalCurrency = ref.watch(settingsProvider).currencySymbol;
-        final cardDataMap = ref.watch(vaultCardDataProvider);
-        
-        final cardData = cardDataMap[vaultId] ?? VaultCardData(
-          vaultId: vaultId,
-          income: 0,
-          expense: 0,
-          balance: 0,
-          currencySymbol: globalCurrency,
-          targetCurrency: globalCurrency,
-          hasFlexibleTx: false,
-          minNet: 0,
-          maxNet: 0,
-        );
-
-        final isCurrent = index == widget.currentIndex;
-        final cardOpacity = isCurrent ? 1.0 : (1 - widget.morphProgress * 2.0).clamp(0.0, 1.0);
-        
-        if (cardOpacity <= 0.001) {
-          return const SizedBox.shrink();
-        }
-
-        final vaultCard = IntegratedVaultCard(
-          vaultId: vaultId,
-          income: cardData.income,
-          expense: cardData.expense,
-          balance: cardData.balance,
-          activeColor: widget.activeColor,
-          l10n: widget.l10n,
-          vaultName: widget.groups[index].name,
-          currencySymbol: cardData.currencySymbol,
-          convertedBalance: cardData.convertedBalance,
-          convertedSymbol: globalCurrency,
-          hasFlexibleTx: cardData.hasFlexibleTx,
-          minNet: cardData.minNet,
-          maxNet: cardData.maxNet,
-          morphProgress: widget.morphProgress,
-          isCurrent: isCurrent,
-        );
-
-        return AnimatedBuilder(
-          animation: _pageController,
-          child: RepaintBoundary(
-            child: GestureDetector(
-              onTap: isCurrent ? () => widget.onVaultTap(vaultId) : null,
-              child: vaultCard,
+      child: PageView.builder(
+        controller: _pageController,
+        physics: isInteractingDisabled ? const NeverScrollableScrollPhysics() : const PageScrollPhysics(),
+        clipBehavior: Clip.hardEdge,
+        itemCount: widget.deckItems.length,
+        onPageChanged: (page) {
+          _lastTargetIndex = page;
+          _currentPageIndex = page;
+          HapticFeedback.selectionClick();
+        },
+        itemBuilder: (context, index) {
+          final vaultId = widget.deckItems[index];
+          final globalCurrency = ref.watch(settingsProvider).currencySymbol;
+          final cardDataMap = ref.watch(vaultCardDataProvider);
+          
+          final cardData = cardDataMap[vaultId] ?? VaultCardData(
+            vaultId: vaultId,
+            income: 0,
+            expense: 0,
+            balance: 0,
+            currencySymbol: globalCurrency,
+            targetCurrency: globalCurrency,
+            hasFlexibleTx: false,
+            minNet: 0,
+            maxNet: 0,
+          );
+  
+          final isCurrent = index == widget.currentIndex;
+          final cardOpacity = isCurrent ? 1.0 : (1 - widget.morphProgress * 2.0).clamp(0.0, 1.0);
+          
+          if (cardOpacity <= 0.001) {
+            return const SizedBox.shrink();
+          }
+  
+          final vaultCard = IntegratedVaultCard(
+            vaultId: vaultId,
+            income: cardData.income,
+            expense: cardData.expense,
+            balance: cardData.balance,
+            activeColor: widget.activeColor,
+            l10n: widget.l10n,
+            vaultName: widget.groups[index].name,
+            currencySymbol: cardData.currencySymbol,
+            convertedBalance: cardData.convertedBalance,
+            convertedSymbol: globalCurrency,
+            hasFlexibleTx: cardData.hasFlexibleTx,
+            minNet: cardData.minNet,
+            maxNet: cardData.maxNet,
+            morphProgress: widget.morphProgress,
+            isCurrent: isCurrent,
+          );
+  
+          return AnimatedBuilder(
+            animation: _pageController,
+            child: RepaintBoundary(
+              child: GestureDetector(
+                onTap: isCurrent ? () => widget.onVaultTap(vaultId) : null,
+                child: vaultCard,
+              ),
             ),
-          ),
-          builder: (context, child) {
-            double value = 1.0;
-            if (_pageController.position.haveDimensions) {
-              double diff = (_pageController.page! - index).abs();
-              value = (1 - (diff * 0.15)).clamp(0.85, 1.0);
-            } else {
-              value = index == widget.currentIndex ? 1.0 : 0.85;
-            }
-            
-            // Seçili olmayan kartlar daha hızlı yanlara doğru kaysın (Depth Effect)
-            final double slideOutOffset = (index - widget.currentIndex) * (widget.morphProgress * 450);
-
-            return Center(
-              child: Opacity(
-                opacity: cardOpacity * (isCurrent ? 1.0 : (value * 2 - 1).clamp(0.0, 1.0)),
-                child: Transform.translate(
-                  offset: Offset(slideOutOffset, 0),
-                  child: Transform.scale(
-                    scale: isCurrent ? value : value * (1 - widget.morphProgress * 0.15), // Yumuşak küçülme
-                    child: child,
+            builder: (context, child) {
+              double value = 1.0;
+              double cardHighlight = 1.0;
+              if (_pageController.position.haveDimensions) {
+                double diff = (_pageController.page! - index).abs();
+                value = (1 - (diff * 0.15)).clamp(0.85, 1.0);
+                cardHighlight = (value * 2 - 1).clamp(0.0, 1.0);
+              } else {
+                value = index == widget.currentIndex ? 1.0 : 0.85;
+                cardHighlight = index == widget.currentIndex ? 1.0 : 0.70;
+              }
+              
+              // Seçili olmayan kartlar daha hızlı yanlara doğru kaysın (Depth Effect)
+              final double slideOutOffset = (index - widget.currentIndex) * (widget.morphProgress * 450);
+  
+              return Center(
+                child: Opacity(
+                  opacity: cardOpacity * cardHighlight,
+                  child: Transform.translate(
+                    offset: Offset(slideOutOffset, 0),
+                    child: Transform.scale(
+                      scale: isCurrent ? value : value * (1 - widget.morphProgress * 0.15), // Yumuşak küçülme
+                      child: child,
+                    ),
                   ),
                 ),
-              ),
-            );
-          },
-        );
-      },
+              );
+            },
+          );
+        },
+      ),
     );
   }
 }
