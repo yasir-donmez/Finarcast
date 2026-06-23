@@ -4,6 +4,7 @@ import '../database/models/recurring_template.dart';
 import '../database/models/transaction_record.dart';
 import '../database/models/transaction_status.dart';
 import '../domain/recurrence_engine.dart';
+import '../utils/currency_utils.dart';
 
 class MaterializationService {
   /// Ufuk Politikası: startDate → bugün (gelecekteki işlemler veritabanına yazılmaz, engine ile hesaplanır)
@@ -41,12 +42,23 @@ class MaterializationService {
       dates = dates.where((d) => d.isAfter(normalizedLatest)).toList();
     }
 
+    double? snapshotRate;
+    final currencySymbol = template.currency ?? '₺';
+    final currencyCode = CurrencyUtils.symbolToCode(currencySymbol);
+    if (currencyCode != 'TRY' && currencyCode != '₺') {
+      final rates = await DatabaseService.getAllExchangeRates();
+      final rateRecord = rates.where((r) => r.currencyCode == currencyCode).firstOrNull;
+      if (rateRecord != null && rateRecord.rate > 0) {
+        snapshotRate = rateRecord.rate;
+      }
+    }
+
     final newRecords = <TransactionRecord>[];
     for (final date in dates) {
       final key = _buildOccurrenceKey(template, date);
       if (existingKeys.contains(key)) continue;
 
-      newRecords.add(_createRecordFromTemplate(template, date, key));
+      newRecords.add(_createRecordFromTemplate(template, date, key, snapshotRate));
     }
 
     if (newRecords.isNotEmpty) {
@@ -56,7 +68,7 @@ class MaterializationService {
   }
 
   static TransactionRecord _createRecordFromTemplate(
-    RecurringTemplate template, DateTime date, String occurrenceKey,
+    RecurringTemplate template, DateTime date, String occurrenceKey, double? snapshotRate,
   ) {
     final installment = RecurrenceEngine.installmentNumber(
       template.recurrenceRule,
@@ -76,6 +88,7 @@ class MaterializationService {
       ..vaultId = template.vaultId
       ..note = template.note
       ..currency = template.currency
+      ..snapshotRate = snapshotRate
       ..templateId = template.id
       ..occurrenceKey = occurrenceKey
       ..installmentNumber = installment

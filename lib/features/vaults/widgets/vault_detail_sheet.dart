@@ -168,6 +168,16 @@ class _VaultDetailSheetState extends ConsumerState<VaultDetailSheet> {
         final String oldBalanceStr = CurrencyUtils.formatFullAmount(currentBalanceVal, symbol: tempCurrency);
         final String newBalanceStr = CurrencyUtils.formatFullAmount(editedBalance, symbol: tempCurrency);
         
+        double? snapshotRate;
+        final currencyCode = CurrencyUtils.symbolToCode(tempCurrency);
+        if (currencyCode != 'TRY' && currencyCode != '₺') {
+          final rates = await DatabaseService.getAllExchangeRates();
+          final rateRecord = rates.where((r) => r.currencyCode == currencyCode).firstOrNull;
+          if (rateRecord != null && rateRecord.rate > 0) {
+            snapshotRate = rateRecord.rate;
+          }
+        }
+
         final tx = TransactionRecord()
           ..title = l10n.balanceAdjustment
           ..amount = difference.abs()
@@ -176,6 +186,7 @@ class _VaultDetailSheetState extends ConsumerState<VaultDetailSheet> {
           ..occurrenceDate = DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day)
           ..vaultId = vault.id
           ..currency = tempCurrency
+          ..snapshotRate = snapshotRate
           ..categoryId = difference > 0 ? 'inc_other_general' : 'exp_other_general'
           ..iconCode = 'account_balance_wallet_rounded'
           ..note = l10n.balanceAdjustmentNote(newBalanceStr, oldBalanceStr)

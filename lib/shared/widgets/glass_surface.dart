@@ -22,7 +22,7 @@ class GlassSurface extends StatelessWidget {
   /// Köşe yuvarlaklığı. Varsayılan: 28.
   final double borderRadius;
 
-  /// Bulanıklık (blur) şiddeti. Varsayılan: 28 (navbar ile aynı).
+  /// Bulanıklık (blur) şiddeti. Varsayılan: 18 (performans optimize).
   final double blurSigma;
 
   /// İç padding.
@@ -72,7 +72,7 @@ class GlassSurface extends StatelessWidget {
     super.key,
     required this.child,
     this.borderRadius = 28,
-    this.blurSigma = 28,
+    this.blurSigma = 18,
     this.padding,
     this.margin,
     this.width,
@@ -149,7 +149,7 @@ class GlassSurface extends StatelessWidget {
     // Widget Hiyerarşisi
     // ═══════════════════════════════════════════
     final glassContent = BackdropFilter(
-      filter: ImageFilter.blur(sigmaX: activeBlurSigma, sigmaY: activeBlurSigma),
+      filter: ImageFilter.blur(sigmaX: activeBlurSigma, sigmaY: activeBlurSigma, tileMode: TileMode.clamp),
       child: Container(
         padding: padding,
         decoration: BoxDecoration(

@@ -49,6 +49,17 @@ class CurrencyUtils {
 
   /// Tutarı kurlara göre baz birime (TRY) veya başka bir birime çevirir
   static double convert(double amount, String from, String to, List<ExchangeRate> rates) {
+    return convertWithSnapshot(amount, from, to, rates);
+  }
+
+  /// Tutarı kurlara veya sabitlenmiş snapshot kuruna göre baz birime (TRY) veya başka bir birime çevirir
+  static double convertWithSnapshot(
+    double amount,
+    String from,
+    String to,
+    List<ExchangeRate> rates, {
+    double? snapshotRate,
+  }) {
     if (from == to) return amount;
 
     final fromCode = symbolToCode(from);
@@ -71,9 +82,16 @@ class CurrencyUtils {
     // 1. Tutar'ı TRY'ye (Baz birim) getir
     double tryAmount = amount;
     if (fromCode != 'TRY') {
-      final fromRate = rates.where((r) => r.currencyCode == fromCode).firstOrNull;
-      if (fromRate != null && fromRate.rate > 0) {
-        double multiplier = fromRate.rate;
+      double? rawRate = snapshotRate;
+      if (rawRate == null) {
+        final fromRate = rates.where((r) => r.currencyCode == fromCode).firstOrNull;
+        if (fromRate != null && fromRate.rate > 0) {
+          rawRate = fromRate.rate;
+        }
+      }
+
+      if (rawRate != null && rawRate > 0) {
+        double multiplier = rawRate;
         // Küresel kullanıcılar için altın/gümüşü ons biriminden grama (TRY tabanına) çevir
         if (isGlobal && (fromCode == 'GOLD' || fromCode == 'SILVER')) {
           multiplier *= 31.1034768;

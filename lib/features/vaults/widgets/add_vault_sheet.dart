@@ -228,6 +228,18 @@ class _AddVaultSheetState extends ConsumerState<AddVaultSheet> with SingleTicker
                     // Başlangıç bakiyesi varsa otomatik bir "Başlangıç Bakiyesi" işlemi oluştur (Pure Ledger)
                     if (initialBalance != null && initialBalance != 0) {
                       final now = DateTime.now();
+                      final txCurrency = _selectedCurrency == 'AUTO' ? baseCurrency : _selectedCurrency;
+                      
+                      double? snapshotRate;
+                      final currencyCode = CurrencyUtils.symbolToCode(txCurrency);
+                      if (currencyCode != 'TRY' && currencyCode != '₺') {
+                        final rates = await DatabaseService.getAllExchangeRates();
+                        final rateRecord = rates.where((r) => r.currencyCode == currencyCode).firstOrNull;
+                        if (rateRecord != null && rateRecord.rate > 0) {
+                          snapshotRate = rateRecord.rate;
+                        }
+                      }
+
                       final tx = TransactionRecord()
                         ..title = l10n.initialBalance
                         ..amount = initialBalance.abs()
@@ -235,7 +247,8 @@ class _AddVaultSheetState extends ConsumerState<AddVaultSheet> with SingleTicker
                         ..date = now
                         ..occurrenceDate = DateTime(now.year, now.month, now.day)
                         ..vaultId = vaultId
-                        ..currency = _selectedCurrency == 'AUTO' ? baseCurrency : _selectedCurrency
+                        ..currency = txCurrency
+                        ..snapshotRate = snapshotRate
                         ..categoryId = initialBalance > 0 ? 'inc_other_general' : 'exp_other_general'
                         ..iconCode = 'account_balance_wallet_rounded'
                         ..status = 0

@@ -10,6 +10,7 @@ import 'models/exchange_rate.dart';
 import 'models/custom_category.dart';
 import '../services/notification_service.dart';
 import '../services/sync_coordinator.dart';
+import '../utils/currency_utils.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:uuid/uuid.dart';
 
@@ -47,6 +48,9 @@ class DatabaseService {
       debugPrint('🌱 [DatabaseService] Varsayılan veriler kontrol ediliyor...');
       await _seedDefaultVaults();
       debugPrint('✅ [DatabaseService] Veri tohumlama tamamlandı.');
+
+      // Eski işlemler için snapshotRate migrasyonunu çalıştır
+      await _migrateSnapshotRates();
 
 
     } catch (e, stack) {
@@ -190,6 +194,7 @@ class DatabaseService {
     tx.occurrenceDate = DateTime(tx.date.year, tx.date.month, tx.date.day);
     tx.updatedAt = DateTime.now();
     tx.syncStatus = 1; // Pending
+    tx.snapshotRate ??= await _getExchangeRateFor(tx.currency);
     final id = await isar.writeTxn(() async {
       return await isar.transactionRecords.put(tx);
     });
@@ -302,6 +307,7 @@ class DatabaseService {
       r.occurrenceDate = DateTime(r.date.year, r.date.month, r.date.day);
       r.updatedAt = now;
       r.syncStatus = 1; // Pending
+      r.snapshotRate ??= await _getExchangeRateFor(r.currency);
     }
     await isar.writeTxn(() async {
       await isar.transactionRecords.putAll(records);
@@ -707,6 +713,49 @@ class DatabaseService {
     } catch (e) {
       debugPrint('❌ [DatabaseService] Dosyalar silinirken hata: $e');
       rethrow;
+    }
+  }
+
+  static Future<double?> _getExchangeRateFor(String? currency) async {
+    if (currency == null) return null;
+    final code = CurrencyUtils.symbolToCode(currency);
+    if (code == 'TRY' || code == '₺') return null;
+    final rateRecord = await isar.exchangeRates.filter().currencyCodeEqualTo(code).findFirst();
+    return rateRecord?.rate;
+  }
+
+  /// snapshotRate alanı null olan eski dövizli işlemlerin kurunu doldur
+  static Future<void> _migrateSnapshotRates() async {
+    try {
+      final records = await isar.transactionRecords.filter().snapshotRateIsNull().findAll();
+      if (records.isEmpty) return;
+
+      debugPrint('🔧 [DatabaseService] ${records.length} eski işlem için snapshotRate güncellemesi başlatılıyor...');
+      
+      final rates = await getAllExchangeRates();
+      final List<TransactionRecord> recordsToUpdate = [];
+
+      for (final r in records) {
+        if (r.currency != null) {
+          final code = CurrencyUtils.symbolToCode(r.currency!);
+          if (code != 'TRY' && code != '₺') {
+            final rateRecord = rates.where((rate) => rate.currencyCode == code).firstOrNull;
+            if (rateRecord != null && rateRecord.rate > 0) {
+              r.snapshotRate = rateRecord.rate;
+              recordsToUpdate.add(r);
+            }
+          }
+        }
+      }
+
+      if (recordsToUpdate.isNotEmpty) {
+        await isar.writeTxn(() async {
+          await isar.transactionRecords.putAll(recordsToUpdate);
+        });
+        debugPrint('✅ [DatabaseService] ${recordsToUpdate.length} eski işlem snapshotRate ile güncellendi.');
+      }
+    } catch (e) {
+      debugPrint('❌ [DatabaseService ERROR] _migrateSnapshotRates hatası: $e');
     }
   }
 }

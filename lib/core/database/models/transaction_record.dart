@@ -71,6 +71,10 @@ class TransactionRecord {
   /// İşlemin yapıldığı para birimi (USD, TRY vb.)
   String? currency;
 
+  /// İşlem oluşturulduğu andaki döviz kuru (1 birim kaynak para birimi = X TRY).
+  /// Null ise güncel kur kullanılır (geriye dönük uyumluluk).
+  double? snapshotRate;
+
   /// --- Senkronizasyon Alanları ---
   @Index()
   String? remoteId;
@@ -94,7 +98,13 @@ class TransactionRecord {
 
   /// Belirli bir hedef birime göre tutarı döndürür
   double getConvertedAmount(String targetCurrency, List<ExchangeRate> rates) {
-    return CurrencyUtils.convert(effectiveAmount, currency ?? '₺', targetCurrency, rates);
+    return CurrencyUtils.convertWithSnapshot(
+      effectiveAmount,
+      currency ?? '₺',
+      targetCurrency,
+      rates,
+      snapshotRate: snapshotRate,
+    );
   }
 
   /// Tek seferlik kayıt için occurrenceKey üretir

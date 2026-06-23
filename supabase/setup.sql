@@ -61,6 +61,7 @@ create table if not exists public.transaction_records (
   target_vault_id uuid references public.vaults(id) on delete set null,
   note text,
   currency text,
+  snapshot_rate double precision,
   updated_at timestamptz not null default now(),
   unique (user_id, occurrence_key)
 );

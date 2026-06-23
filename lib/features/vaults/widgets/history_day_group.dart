@@ -6,11 +6,13 @@ import '../../../../core/utils/currency_utils.dart';
 import '../../../../core/utils/string_utils.dart';
 import '../../../../core/providers/db_providers.dart';
 import '../../../../core/providers/settings_provider.dart';
+import '../../../../core/services/balance_service.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../vaults_providers.dart';
 import 'staggered_entry_anim.dart';
 import 'history_record_tile.dart';
 import '../../../../core/database/models/transaction_status.dart';
+
 
 class HistoryDayGroup extends ConsumerWidget {
   final DateTime date;
@@ -86,6 +88,75 @@ class HistoryDayGroup extends ConsumerWidget {
       dateTitle = DateFormat('d MMMM yyyy, EEEE', locale).format(date);
     }
 
+    // Calculate cumulative balance up to this date
+    final allVaults = ref.watch(allVaultsProvider);
+    final dbRecords = ref.watch(allTransactionsProvider);
+    double dayBalance = 0.0;
+    String balanceCurrency = settings.currencySymbol;
+
+    if (selectedVaultId == null) {
+      dayBalance = BalanceService.calculateNetBalance(
+        vaults: allVaults,
+        records: dbRecords,
+        targetCurrency: settings.currencySymbol,
+        rates: rates,
+        untilDate: date,
+      );
+      balanceCurrency = settings.currencySymbol;
+    } else {
+      final vault = allVaults.where((v) => 'v_${v.id}' == selectedVaultId).firstOrNull;
+      if (vault != null) {
+        final vaultCurrency = vault.currency;
+        final targetCurrency = vaultCurrency == 'AUTO' ? settings.currencySymbol : vaultCurrency;
+        dayBalance = BalanceService.calculateVaultBalance(
+          vault: vault,
+          records: dbRecords,
+          targetCurrency: targetCurrency,
+          rates: rates,
+          untilDate: date,
+        );
+        balanceCurrency = targetCurrency;
+      }
+    }
+
+    final String dayBalanceText = CurrencyUtils.formatAmount(
+      dayBalance,
+      currencySymbol: balanceCurrency,
+    );
+
+    final String balanceLabel;
+    switch (locale) {
+      case 'tr':
+        balanceLabel = 'Bakiye';
+        break;
+      case 'de':
+        balanceLabel = 'Saldo';
+        break;
+      case 'es':
+        balanceLabel = 'Saldo';
+        break;
+      case 'fr':
+        balanceLabel = 'Solde';
+        break;
+      case 'it':
+        balanceLabel = 'Saldo';
+        break;
+      case 'pt':
+        balanceLabel = 'Saldo';
+        break;
+      case 'ja':
+        balanceLabel = '残高';
+        break;
+      case 'ko':
+        balanceLabel = '잔액';
+        break;
+      case 'zh':
+        balanceLabel = '余额';
+        break;
+      default:
+        balanceLabel = 'Balance';
+    }
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -95,13 +166,31 @@ class HistoryDayGroup extends ConsumerWidget {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                dateTitle.toSafeUpperCase(context),
-                style: TextStyle(
-                  fontSize: 11,
-                  fontWeight: FontWeight.w900,
-                  color: AppColors.getTextSecondary(context).withValues(alpha: 0.6),
-                  letterSpacing: 1.0,
+              Expanded(
+                child: Row(
+                  children: [
+                    Text(
+                      dateTitle.toSafeUpperCase(context),
+                      style: TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w900,
+                        color: AppColors.getTextSecondary(context).withValues(alpha: 0.6),
+                        letterSpacing: 1.0,
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Flexible(
+                      child: Text(
+                        '($balanceLabel: $dayBalanceText)',
+                        style: TextStyle(
+                          fontSize: 9.5,
+                          fontWeight: FontWeight.w500,
+                          color: AppColors.getTextSecondary(context).withValues(alpha: 0.4),
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ],
                 ),
               ),
               if (transactions.any((tx) => tx.status != TransactionStatus.skipped))

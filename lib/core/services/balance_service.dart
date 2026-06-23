@@ -11,9 +11,12 @@ class BalanceService {
     required List<TransactionRecord> records,
     required String targetCurrency,
     required List<ExchangeRate> rates,
+    DateTime? untilDate,
   }) {
     final now = DateTime.now();
-    final today = DateTime(now.year, now.month, now.day);
+    final limitDate = untilDate != null
+        ? DateTime(untilDate.year, untilDate.month, untilDate.day)
+        : DateTime(now.year, now.month, now.day);
 
     double balance = 0.0;
 
@@ -27,9 +30,9 @@ class BalanceService {
       // Transfer işlemleri toplam bakiyeyi etkilemez (para yer değiştirmiştir)
       if (r.targetVaultId != null) continue;
 
-      // Sadece bugüne kadar veya bugün gerçekleşmiş olanları dahil et (hybrid model)
+      // Sadece limit tarihine kadar gerçekleşmiş olanları dahil et
       final paymentDate = DateTime(r.date.year, r.date.month, r.date.day);
-      if (paymentDate.isAfter(today)) continue;
+      if (paymentDate.isAfter(limitDate)) continue;
 
       final amt = r.getConvertedAmount(targetCurrency, rates);
       balance += r.isIncome ? amt : -amt;
@@ -97,10 +100,10 @@ class BalanceService {
 
       if (r.isIncome) {
         final val = r.minAmount ?? r.amount;
-        balance += CurrencyUtils.convert(val, r.currency ?? '₺', targetCurrency, rates);
+        balance += CurrencyUtils.convertWithSnapshot(val, r.currency ?? '₺', targetCurrency, rates, snapshotRate: r.snapshotRate);
       } else {
         final val = r.maxAmount ?? r.amount;
-        balance -= CurrencyUtils.convert(val, r.currency ?? '₺', targetCurrency, rates);
+        balance -= CurrencyUtils.convertWithSnapshot(val, r.currency ?? '₺', targetCurrency, rates, snapshotRate: r.snapshotRate);
       }
     }
     return balance;
@@ -132,10 +135,10 @@ class BalanceService {
 
       if (r.isIncome) {
         final val = r.maxAmount ?? r.amount;
-        balance += CurrencyUtils.convert(val, r.currency ?? '₺', targetCurrency, rates);
+        balance += CurrencyUtils.convertWithSnapshot(val, r.currency ?? '₺', targetCurrency, rates, snapshotRate: r.snapshotRate);
       } else {
         final val = r.minAmount ?? r.amount;
-        balance -= CurrencyUtils.convert(val, r.currency ?? '₺', targetCurrency, rates);
+        balance -= CurrencyUtils.convertWithSnapshot(val, r.currency ?? '₺', targetCurrency, rates, snapshotRate: r.snapshotRate);
       }
     }
     return balance;
@@ -164,16 +167,16 @@ class BalanceService {
 
       if (r.targetVaultId != null) {
         final val = r.maxAmount ?? r.amount;
-        final amt = CurrencyUtils.convert(val, r.currency ?? '₺', targetCurrency, rates);
+        final amt = CurrencyUtils.convertWithSnapshot(val, r.currency ?? '₺', targetCurrency, rates, snapshotRate: r.snapshotRate);
         if (r.vaultId == vault.id) balance -= amt;
         if (r.targetVaultId == vault.id) balance += amt;
       } else {
         if (r.isIncome) {
           final val = r.minAmount ?? r.amount;
-          balance += CurrencyUtils.convert(val, r.currency ?? '₺', targetCurrency, rates);
+          balance += CurrencyUtils.convertWithSnapshot(val, r.currency ?? '₺', targetCurrency, rates, snapshotRate: r.snapshotRate);
         } else {
           final val = r.maxAmount ?? r.amount;
-          balance -= CurrencyUtils.convert(val, r.currency ?? '₺', targetCurrency, rates);
+          balance -= CurrencyUtils.convertWithSnapshot(val, r.currency ?? '₺', targetCurrency, rates, snapshotRate: r.snapshotRate);
         }
       }
     }
@@ -203,16 +206,16 @@ class BalanceService {
 
       if (r.targetVaultId != null) {
         final val = r.minAmount ?? r.amount;
-        final amt = CurrencyUtils.convert(val, r.currency ?? '₺', targetCurrency, rates);
+        final amt = CurrencyUtils.convertWithSnapshot(val, r.currency ?? '₺', targetCurrency, rates, snapshotRate: r.snapshotRate);
         if (r.vaultId == vault.id) balance -= amt;
         if (r.targetVaultId == vault.id) balance += amt;
       } else {
         if (r.isIncome) {
           final val = r.maxAmount ?? r.amount;
-          balance += CurrencyUtils.convert(val, r.currency ?? '₺', targetCurrency, rates);
+          balance += CurrencyUtils.convertWithSnapshot(val, r.currency ?? '₺', targetCurrency, rates, snapshotRate: r.snapshotRate);
         } else {
           final val = r.minAmount ?? r.amount;
-          balance -= CurrencyUtils.convert(val, r.currency ?? '₺', targetCurrency, rates);
+          balance -= CurrencyUtils.convertWithSnapshot(val, r.currency ?? '₺', targetCurrency, rates, snapshotRate: r.snapshotRate);
         }
       }
     }

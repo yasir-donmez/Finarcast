@@ -76,34 +76,39 @@ const TransactionRecordSchema = CollectionSchema(
       name: r'remoteId',
       type: IsarType.string,
     ),
-    r'status': PropertySchema(id: 15, name: r'status', type: IsarType.long),
+    r'snapshotRate': PropertySchema(
+      id: 15,
+      name: r'snapshotRate',
+      type: IsarType.double,
+    ),
+    r'status': PropertySchema(id: 16, name: r'status', type: IsarType.long),
     r'syncStatus': PropertySchema(
-      id: 16,
+      id: 17,
       name: r'syncStatus',
       type: IsarType.long,
     ),
     r'targetVaultId': PropertySchema(
-      id: 17,
+      id: 18,
       name: r'targetVaultId',
       type: IsarType.long,
     ),
     r'templateId': PropertySchema(
-      id: 18,
+      id: 19,
       name: r'templateId',
       type: IsarType.long,
     ),
-    r'title': PropertySchema(id: 19, name: r'title', type: IsarType.string),
+    r'title': PropertySchema(id: 20, name: r'title', type: IsarType.string),
     r'totalInstallments': PropertySchema(
-      id: 20,
+      id: 21,
       name: r'totalInstallments',
       type: IsarType.long,
     ),
     r'updatedAt': PropertySchema(
-      id: 21,
+      id: 22,
       name: r'updatedAt',
       type: IsarType.dateTime,
     ),
-    r'vaultId': PropertySchema(id: 22, name: r'vaultId', type: IsarType.long),
+    r'vaultId': PropertySchema(id: 23, name: r'vaultId', type: IsarType.long),
   },
 
   estimateSize: _transactionRecordEstimateSize,
@@ -314,14 +319,15 @@ void _transactionRecordSerialize(
   writer.writeDateTime(offsets[12], object.occurrenceDate);
   writer.writeString(offsets[13], object.occurrenceKey);
   writer.writeString(offsets[14], object.remoteId);
-  writer.writeLong(offsets[15], object.status);
-  writer.writeLong(offsets[16], object.syncStatus);
-  writer.writeLong(offsets[17], object.targetVaultId);
-  writer.writeLong(offsets[18], object.templateId);
-  writer.writeString(offsets[19], object.title);
-  writer.writeLong(offsets[20], object.totalInstallments);
-  writer.writeDateTime(offsets[21], object.updatedAt);
-  writer.writeLong(offsets[22], object.vaultId);
+  writer.writeDouble(offsets[15], object.snapshotRate);
+  writer.writeLong(offsets[16], object.status);
+  writer.writeLong(offsets[17], object.syncStatus);
+  writer.writeLong(offsets[18], object.targetVaultId);
+  writer.writeLong(offsets[19], object.templateId);
+  writer.writeString(offsets[20], object.title);
+  writer.writeLong(offsets[21], object.totalInstallments);
+  writer.writeDateTime(offsets[22], object.updatedAt);
+  writer.writeLong(offsets[23], object.vaultId);
 }
 
 TransactionRecord _transactionRecordDeserialize(
@@ -347,14 +353,15 @@ TransactionRecord _transactionRecordDeserialize(
   object.occurrenceDate = reader.readDateTime(offsets[12]);
   object.occurrenceKey = reader.readString(offsets[13]);
   object.remoteId = reader.readStringOrNull(offsets[14]);
-  object.status = reader.readLong(offsets[15]);
-  object.syncStatus = reader.readLong(offsets[16]);
-  object.targetVaultId = reader.readLongOrNull(offsets[17]);
-  object.templateId = reader.readLongOrNull(offsets[18]);
-  object.title = reader.readString(offsets[19]);
-  object.totalInstallments = reader.readLongOrNull(offsets[20]);
-  object.updatedAt = reader.readDateTime(offsets[21]);
-  object.vaultId = reader.readLongOrNull(offsets[22]);
+  object.snapshotRate = reader.readDoubleOrNull(offsets[15]);
+  object.status = reader.readLong(offsets[16]);
+  object.syncStatus = reader.readLong(offsets[17]);
+  object.targetVaultId = reader.readLongOrNull(offsets[18]);
+  object.templateId = reader.readLongOrNull(offsets[19]);
+  object.title = reader.readString(offsets[20]);
+  object.totalInstallments = reader.readLongOrNull(offsets[21]);
+  object.updatedAt = reader.readDateTime(offsets[22]);
+  object.vaultId = reader.readLongOrNull(offsets[23]);
   return object;
 }
 
@@ -396,20 +403,22 @@ P _transactionRecordDeserializeProp<P>(
     case 14:
       return (reader.readStringOrNull(offset)) as P;
     case 15:
-      return (reader.readLong(offset)) as P;
+      return (reader.readDoubleOrNull(offset)) as P;
     case 16:
       return (reader.readLong(offset)) as P;
     case 17:
-      return (reader.readLongOrNull(offset)) as P;
+      return (reader.readLong(offset)) as P;
     case 18:
       return (reader.readLongOrNull(offset)) as P;
     case 19:
-      return (reader.readString(offset)) as P;
-    case 20:
       return (reader.readLongOrNull(offset)) as P;
+    case 20:
+      return (reader.readString(offset)) as P;
     case 21:
-      return (reader.readDateTime(offset)) as P;
+      return (reader.readLongOrNull(offset)) as P;
     case 22:
+      return (reader.readDateTime(offset)) as P;
+    case 23:
       return (reader.readLongOrNull(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -3066,6 +3075,99 @@ extension TransactionRecordQueryFilter
   }
 
   QueryBuilder<TransactionRecord, TransactionRecord, QAfterFilterCondition>
+  snapshotRateIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        const FilterCondition.isNull(property: r'snapshotRate'),
+      );
+    });
+  }
+
+  QueryBuilder<TransactionRecord, TransactionRecord, QAfterFilterCondition>
+  snapshotRateIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        const FilterCondition.isNotNull(property: r'snapshotRate'),
+      );
+    });
+  }
+
+  QueryBuilder<TransactionRecord, TransactionRecord, QAfterFilterCondition>
+  snapshotRateEqualTo(double? value, {double epsilon = Query.epsilon}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.equalTo(
+          property: r'snapshotRate',
+          value: value,
+
+          epsilon: epsilon,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<TransactionRecord, TransactionRecord, QAfterFilterCondition>
+  snapshotRateGreaterThan(
+    double? value, {
+    bool include = false,
+    double epsilon = Query.epsilon,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(
+          include: include,
+          property: r'snapshotRate',
+          value: value,
+
+          epsilon: epsilon,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<TransactionRecord, TransactionRecord, QAfterFilterCondition>
+  snapshotRateLessThan(
+    double? value, {
+    bool include = false,
+    double epsilon = Query.epsilon,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.lessThan(
+          include: include,
+          property: r'snapshotRate',
+          value: value,
+
+          epsilon: epsilon,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<TransactionRecord, TransactionRecord, QAfterFilterCondition>
+  snapshotRateBetween(
+    double? lower,
+    double? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    double epsilon = Query.epsilon,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.between(
+          property: r'snapshotRate',
+          lower: lower,
+          includeLower: includeLower,
+          upper: upper,
+          includeUpper: includeUpper,
+
+          epsilon: epsilon,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<TransactionRecord, TransactionRecord, QAfterFilterCondition>
   statusEqualTo(int value) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
@@ -3883,6 +3985,20 @@ extension TransactionRecordQuerySortBy
   }
 
   QueryBuilder<TransactionRecord, TransactionRecord, QAfterSortBy>
+  sortBySnapshotRate() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'snapshotRate', Sort.asc);
+    });
+  }
+
+  QueryBuilder<TransactionRecord, TransactionRecord, QAfterSortBy>
+  sortBySnapshotRateDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'snapshotRate', Sort.desc);
+    });
+  }
+
+  QueryBuilder<TransactionRecord, TransactionRecord, QAfterSortBy>
   sortByStatus() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'status', Sort.asc);
@@ -4221,6 +4337,20 @@ extension TransactionRecordQuerySortThenBy
   }
 
   QueryBuilder<TransactionRecord, TransactionRecord, QAfterSortBy>
+  thenBySnapshotRate() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'snapshotRate', Sort.asc);
+    });
+  }
+
+  QueryBuilder<TransactionRecord, TransactionRecord, QAfterSortBy>
+  thenBySnapshotRateDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'snapshotRate', Sort.desc);
+    });
+  }
+
+  QueryBuilder<TransactionRecord, TransactionRecord, QAfterSortBy>
   thenByStatus() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'status', Sort.asc);
@@ -4445,6 +4575,13 @@ extension TransactionRecordQueryWhereDistinct
   }
 
   QueryBuilder<TransactionRecord, TransactionRecord, QDistinct>
+  distinctBySnapshotRate() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'snapshotRate');
+    });
+  }
+
+  QueryBuilder<TransactionRecord, TransactionRecord, QDistinct>
   distinctByStatus() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'status');
@@ -4605,6 +4742,13 @@ extension TransactionRecordQueryProperty
   remoteIdProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'remoteId');
+    });
+  }
+
+  QueryBuilder<TransactionRecord, double?, QQueryOperations>
+  snapshotRateProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'snapshotRate');
     });
   }
 

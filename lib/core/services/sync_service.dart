@@ -1097,6 +1097,7 @@ class SyncService {
       'target_vault_id': targetVaultRemoteId,
       'note': tx.note,
       'currency': tx.currency,
+      'snapshot_rate': tx.snapshotRate,
       'updated_at': tx.updatedAt.toUtc().toIso8601String(),
     };
   }
@@ -1120,6 +1121,7 @@ class SyncService {
     tx.isArchived = raw['is_archived'] ?? tx.isArchived;
     tx.note = raw['note'];
     tx.currency = raw['currency'];
+    tx.snapshotRate = (raw['snapshot_rate'] as num?)?.toDouble();
 
     final dateStr = raw['date']?.toString();
     if (dateStr != null) {

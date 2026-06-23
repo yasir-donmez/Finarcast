@@ -33,18 +33,19 @@ class MainScaffold extends ConsumerStatefulWidget {
 class _MainScaffoldState extends ConsumerState<MainScaffold> with TickerProviderStateMixin {
   int _currentIndex = 0;
   bool _isFloatingActionsVisible = true;
-  late final PageController _pageController = PageController(initialPage: _currentIndex);
   ScrollController? _scrollController; 
   late final ShareHandlerService _shareHandlerService;
 
   late final AnimationController _pillController;
   late final AnimationController _sheenController;
+  late final AnimationController _pageSlideController;
   late final Animation<double> _sheenAnimation;
   double _sourceIndex = 0.0;
   double _targetIndex = 0.0;
   bool _isSlidingTransition = true;
+  int _previousIndex = 0;
 
-  // GlobalKey listesi: Sayfaların durumunu (state) reparenting esnasında korumak için
+  // Sayfaların durumunu (state) korumak için GlobalKey kullanımı
   late final List<GlobalKey> _pageKeys = List.generate(4, (_) => GlobalKey());
 
   late final List<Widget> _pages = [
@@ -54,24 +55,6 @@ class _MainScaffoldState extends ConsumerState<MainScaffold> with TickerProvider
     SettingsScreen(key: _pageKeys[3]),
   ];
 
-  bool _isTransitioning = false;
-  List<Widget>? _transitioningPages;
-
-  List<Widget> _getTransitionPages(int from, int to) {
-    if ((to - from).abs() <= 1) return _pages;
-    
-    // Diğer sayfaları boş kutularla (SizedBox) doldurarak hem performansı artırır
-    // hem de aynı GlobalKey'e sahip widget'ların ağaçta aynı anda iki kez bulunmasını engeller.
-    final list = List<Widget>.generate(4, (_) => const SizedBox());
-    list[from] = _pages[from];
-    if (to > from) {
-      list[from + 1] = _pages[to];
-    } else {
-      list[from - 1] = _pages[to];
-    }
-    return list;
-  }
-
   @override
   void initState() {
     super.initState();
@@ -79,10 +62,21 @@ class _MainScaffoldState extends ConsumerState<MainScaffold> with TickerProvider
       vsync: this,
       duration: const Duration(milliseconds: 350),
     );
+    _pageSlideController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 300),
+    );
+    _pageSlideController.addStatusListener((status) {
+      if (status == AnimationStatus.completed && mounted) {
+        setState(() {}); // Eski sayfayı gizle
+      }
+    });
     _sheenController = AnimationController(
       vsync: this,
       duration: const Duration(seconds: 3),
-    )..repeat();
+    );
+    // Sheen animasyonunu yalnızca Pro butonu görünürken çalıştır (başlangıçta index 0)
+    _sheenController.repeat();
     _sheenAnimation = CurvedAnimation(
       parent: _sheenController,
       curve: const Interval(0.0, 0.6, curve: Curves.easeInOut),
@@ -105,11 +99,7 @@ class _MainScaffoldState extends ConsumerState<MainScaffold> with TickerProvider
       onProcessingStarted: (message) {
         if (mounted) {
           // Switch to Cart screen (index 2) immediately
-          setState(() {
-            _currentIndex = 2;
-            _isFloatingActionsVisible = false;
-          });
-          _pageController.jumpToPage(2);
+          _switchToPage(2);
           
           // Set global loading message
           ref.read(smartInboxLoadingProvider.notifier).state = message;
@@ -184,14 +174,51 @@ class _MainScaffoldState extends ConsumerState<MainScaffold> with TickerProvider
     )..init();
   }
 
+  /// Hedef sayfaya geçiş yap — orb görünürlüğünü ve sheen lifecycle'ını yönetir.
+  void _switchToPage(int toIndex) {
+    final fromIndex = _currentIndex;
+    _previousIndex = fromIndex;
+    
+    setState(() {
+      _currentIndex = toIndex;
+      // Sekme değişimlerinde orb görünürlük durumunu akıllıca güncelle
+      if (toIndex == 0) {
+        _isFloatingActionsVisible = true;
+      } else if (toIndex == 1) {
+        if (_scrollController != null && _scrollController!.hasClients) {
+          _isFloatingActionsVisible = _scrollController!.offset < 10;
+        } else {
+          _isFloatingActionsVisible = true;
+        }
+      } else {
+        _isFloatingActionsVisible = false;
+      }
+    });
+    
+    // Slide animasyonu başlat
+    _pageSlideController.forward(from: 0.0);
+    
+    // Sheen animasyonunu yönet: yalnızca Dashboard (index 0) sekmesinde çalıştır
+    _manageSheenLifecycle(toIndex);
+  }
+
+  /// Sheen animasyonunu sadece görünür olduğunda çalıştır (Dashboard sekmesi).
+  void _manageSheenLifecycle(int activeIndex) {
+    if (activeIndex == 0) {
+      if (!_sheenController.isAnimating) _sheenController.repeat();
+    } else {
+      if (_sheenController.isAnimating) _sheenController.stop();
+    }
+  }
+
   @override
   void dispose() {
     _pillController.dispose();
     _sheenController.dispose();
+    _pageSlideController.dispose();
     _shareHandlerService.dispose();
     // ref kullanmadan güvenli temizlik
     _scrollController?.removeListener(_onScroll);
-    _pageController.dispose();
     super.dispose();
   }
 
@@ -251,6 +278,14 @@ class _MainScaffoldState extends ConsumerState<MainScaffold> with TickerProvider
       setState(() {
         _isFloatingActionsVisible = isAtTop;
       });
+    }
+
+    // Sheen animasyonunu Pro butonu görünürlüğüne bağla
+    final shouldAnimateSheen = _currentIndex == 0 && isAtTop;
+    if (shouldAnimateSheen && !_sheenController.isAnimating) {
+      _sheenController.repeat();
+    } else if (!shouldAnimateSheen && _sheenController.isAnimating) {
+      _sheenController.stop();
     }
   }
 
@@ -313,28 +348,50 @@ class _MainScaffoldState extends ConsumerState<MainScaffold> with TickerProvider
           extendBody: true,
           backgroundColor: Colors.transparent,
           resizeToAvoidBottomInset: false,
-          body: PageView(
-            controller: _pageController,
-            physics: const NeverScrollableScrollPhysics(),
-            onPageChanged: (index) {
-              if (_isTransitioning) return;
-              setState(() {
-                _currentIndex = index;
-                // Sekme değişimlerinde orb görünürlük durumunu akıllıca güncelle
-                if (index == 0) {
-                  _isFloatingActionsVisible = true;
-                } else if (index == 1) {
-                  if (_scrollController != null && _scrollController!.hasClients) {
-                    _isFloatingActionsVisible = _scrollController!.offset < 10;
-                  } else {
-                    _isFloatingActionsVisible = true;
+          // Offstage + TickerMode + SlideTransition mimarisi:
+          // - Sayfa state'i korunur (Offstage widget'ı ağaçta tutar)
+          // - Görünmeyen sayfanın TÜM animasyonları otomatik durur (TickerMode)
+          // - Smooth slide geçişi (SlideTransition, GPU-native transform)
+          body: AnimatedBuilder(
+            animation: _pageSlideController,
+            builder: (context, _) {
+              final bool isAnimating = _pageSlideController.isAnimating;
+              final double t = Curves.easeOutCubic.transform(_pageSlideController.value);
+              final bool goingRight = _currentIndex > _previousIndex;
+              
+              return Stack(
+                children: List.generate(4, (i) {
+                  final isActive = i == _currentIndex;
+                  final isPrevious = i == _previousIndex && isAnimating;
+                  final isVisible = isActive || isPrevious;
+                  
+                  // Geçiş sırasında slide offset hesapla
+                  Offset slideOffset = Offset.zero;
+                  if (isAnimating) {
+                    if (isActive) {
+                      // Yeni sayfa: yönden içeri kayar
+                      final direction = goingRight ? 1.0 : -1.0;
+                      slideOffset = Offset(direction * (1.0 - t), 0);
+                    } else if (isPrevious) {
+                      // Eski sayfa: ters yöne dışarı kayar
+                      final direction = goingRight ? -1.0 : 1.0;
+                      slideOffset = Offset(direction * t, 0);
+                    }
                   }
-                } else {
-                  _isFloatingActionsVisible = false;
-                }
-              });
+                  
+                  return TickerMode(
+                    enabled: isActive,
+                    child: Offstage(
+                      offstage: !isVisible,
+                      child: FractionalTranslation(
+                        translation: slideOffset,
+                        child: _pages[i],
+                      ),
+                    ),
+                  );
+                }),
+              );
             },
-            children: _isTransitioning && _transitioningPages != null ? _transitioningPages! : _pages,
           ),
         ),
 
@@ -445,7 +502,7 @@ class _MainScaffoldState extends ConsumerState<MainScaffold> with TickerProvider
         ),
         child: GlassSurface(
           borderRadius: 29,
-          blurSigma: 28,
+          blurSigma: 18,
           showShadow: false,
           child: Stack(
             children: [
@@ -654,9 +711,8 @@ class _MainScaffoldState extends ConsumerState<MainScaffold> with TickerProvider
 
     return Expanded(
       child: GestureDetector(
-        onTap: () async {
+        onTap: () {
           if (_currentIndex == index) return;
-          if (_isTransitioning) return;
           
           HapticFeedback.selectionClick();
           
@@ -664,74 +720,25 @@ class _MainScaffoldState extends ConsumerState<MainScaffold> with TickerProvider
           final int toIndex = index;
           final distance = (toIndex - fromIndex).abs();
           
-          setState(() {
-            _sourceIndex = _pillController.isAnimating ? _getCurrentIndexPosition() : fromIndex.toDouble();
-            _targetIndex = toIndex.toDouble();
-            _currentIndex = toIndex;
-            _isSlidingTransition = distance <= 1;
-            
-            // Sekme değişimlerinde orb görünürlük durumunu akıllıca güncelle
-            if (toIndex == 0) {
-              _isFloatingActionsVisible = true;
-            } else if (toIndex == 1) {
-              if (_scrollController != null && _scrollController!.hasClients) {
-                _isFloatingActionsVisible = _scrollController!.offset < 10;
-              } else {
-                _isFloatingActionsVisible = true;
-              }
-            } else {
-              _isFloatingActionsVisible = false;
-            }
-          });
-          
+          // Pill animasyonunu başlat
+          _sourceIndex = _pillController.isAnimating ? _getCurrentIndexPosition() : fromIndex.toDouble();
+          _targetIndex = toIndex.toDouble();
+          _isSlidingTransition = distance <= 1;
           _pillController.forward(from: 0.0);
           
-          if (distance <= 1) {
-            await _pageController.animateToPage(
-              toIndex,
-              duration: const Duration(milliseconds: 350),
-              curve: Curves.easeOutQuart,
-            );
-          } else {
-            final tempPages = _getTransitionPages(fromIndex, toIndex);
-            
-            setState(() {
-              _isTransitioning = true;
-              _transitioningPages = tempPages;
-            });
-            
-            final int animateTo = toIndex > fromIndex ? fromIndex + 1 : fromIndex - 1;
-            
-            await _pageController.animateToPage(
-              animateTo,
-              duration: const Duration(milliseconds: 350),
-              curve: Curves.easeOutQuart,
-            );
-            
-            if (mounted) {
-              _pageController.jumpToPage(toIndex);
-              setState(() {
-                _isTransitioning = false;
-                _transitioningPages = null;
-              });
-            }
-          }
+          // Sayfa geçişi — tek setState, jumpToPage yok
+          _switchToPage(toIndex);
         },
         behavior: HitTestBehavior.opaque,
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            AnimatedSwitcher(
-              duration: const Duration(milliseconds: 400),
-              transitionBuilder: (Widget child, Animation<double> animation) {
-                return FadeTransition(
-                  opacity: animation,
-                  child: ScaleTransition(scale: animation, child: child),
-                );
-              },
+            AnimatedScale(
+              scale: isSelected ? 1.0 : 0.85,
+              duration: const Duration(milliseconds: 250),
+              curve: Curves.easeOutCubic,
               child: Icon(
                 isSelected ? activeIcon : inactiveIcon,
-                key: ValueKey('icon_${index}_$isSelected'),
                 color: contentColor,
                 size: 22,
               ),

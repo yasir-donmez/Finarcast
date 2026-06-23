@@ -28,35 +28,70 @@ class MembershipOrb extends StatefulWidget {
 }
 
 class _PrecisionMembershipOrbState extends State<MembershipOrb> with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
+  AnimationController? _controller;
 
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(
-      vsync: this,
-      duration: const Duration(seconds: 4),
-    )..repeat();
+    // Dışarıdan wobbleValue verilmiyorsa kendi animasyonunu yönet.
+    // Dışarıdan veriliyorsa gereksiz sonsuz döngü oluşturma.
+    if (widget.wobbleValue < 0) {
+      _controller = AnimationController(
+        vsync: this,
+        duration: const Duration(seconds: 4),
+      )..repeat();
+    }
+  }
+
+  @override
+  void didUpdateWidget(covariant MembershipOrb oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // wobbleValue dışarıdan verilmeye başlandıysa iç controller'ı durdur
+    if (widget.wobbleValue >= 0 && _controller != null) {
+      _controller!.dispose();
+      _controller = null;
+    }
+    // wobbleValue kaldırıldıysa iç controller'ı başlat
+    if (widget.wobbleValue < 0 && _controller == null) {
+      _controller = AnimationController(
+        vsync: this,
+        duration: const Duration(seconds: 4),
+      )..repeat();
+    }
   }
 
   @override
   void dispose() {
-    _controller.dispose();
+    _controller?.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    // Dışarıdan wobbleValue geliyorsa iç controller gereksiz — direkt çiz
+    if (_controller == null) {
+      return CustomPaint(
+        size: Size(widget.size, widget.size),
+        painter: _WaterDropPainter(
+          color: widget.color,
+          morphFactor: widget.morphFactor,
+          wobbleValue: widget.wobbleValue,
+          showParticles: widget.showParticles,
+          sheenVal: widget.sheenVal,
+          particleColor: widget.particleColor,
+        ),
+      );
+    }
+
     return AnimatedBuilder(
-      animation: _controller,
+      animation: _controller!,
       builder: (context, child) {
-        final currentWobble = widget.wobbleValue >= 0 ? widget.wobbleValue : _controller.value;
         return CustomPaint(
           size: Size(widget.size, widget.size),
           painter: _WaterDropPainter(
             color: widget.color,
             morphFactor: widget.morphFactor,
-            wobbleValue: currentWobble,
+            wobbleValue: _controller!.value,
             showParticles: widget.showParticles,
             sheenVal: widget.sheenVal,
             particleColor: widget.particleColor,

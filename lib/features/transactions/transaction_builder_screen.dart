@@ -687,6 +687,16 @@ class _TransactionBuilderScreenState
                 ? subModel['name'] as String
                 : cat!['name'] as String);
 
+      double? snapshotRate;
+      final currencyCode = CurrencyUtils.symbolToCode(_selectedCurrency);
+      if (currencyCode != 'TRY' && currencyCode != '₺') {
+        final rates = await DatabaseService.getAllExchangeRates();
+        final rateRecord = rates.where((r) => r.currencyCode == currencyCode).firstOrNull;
+        if (rateRecord != null && rateRecord.rate > 0) {
+          snapshotRate = rateRecord.rate;
+        }
+      }
+
       if (_builderType == TransactionBuilderType.recurring) {
         if (widget.initialId != null && widget.isTemplateEdit == true) {
           final old = await DatabaseService.getTemplate(widget.initialId!);
@@ -764,6 +774,7 @@ class _TransactionBuilderScreenState
                 ? _noteController.text
                 : null;
             old.currency = _selectedCurrency;
+            old.snapshotRate = snapshotRate;
             old.date = _periodData.selectedDateForRecurrence;
             old.occurrenceDate = DateTime(
               _periodData.selectedDateForRecurrence.year,
@@ -794,6 +805,7 @@ class _TransactionBuilderScreenState
                 ? _noteController.text
                 : null
             ..currency = _selectedCurrency
+            ..snapshotRate = snapshotRate
             ..occurrenceKey = TransactionRecord.generateManualKey()
             ..isReviewed = true;
 

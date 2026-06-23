@@ -34,6 +34,7 @@ class TransactionUI {
 
   final String? note;
   final String? currency;
+  final double? snapshotRate;
 
   final int status;
   final bool isReviewed;
@@ -62,6 +63,7 @@ class TransactionUI {
     this.targetVaultId,
     this.note,
     this.currency,
+    this.snapshotRate,
     required this.status,
     required this.isReviewed,
     this.templateId,
@@ -83,7 +85,13 @@ class TransactionUI {
 
   /// Belirli bir hedef birime göre tutarı döndürür
   double getConvertedAmount(String targetCurrency, List<ExchangeRate> rates) {
-    return CurrencyUtils.convert(effectiveAmount, currency ?? '₺', targetCurrency, rates);
+    return CurrencyUtils.convertWithSnapshot(
+      effectiveAmount,
+      currency ?? '₺',
+      targetCurrency,
+      rates,
+      snapshotRate: snapshotRate,
+    );
   }
 
   /// TransactionRecord'dan TransactionUI'a dönüştür
@@ -112,6 +120,7 @@ class TransactionUI {
       targetVaultId: record.targetVaultId,
       note: record.note,
       currency: record.currency,
+      snapshotRate: record.snapshotRate,
       status: record.status,
       isReviewed: record.isReviewed,
       templateId: record.templateId,
