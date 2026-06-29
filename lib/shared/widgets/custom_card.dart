@@ -45,9 +45,7 @@ class CustomCard extends ConsumerWidget {
 
     return GestureDetector(
       onTap: onTap,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 300),
-        curve: Curves.easeInOut,
+      child: Container(
         padding: padding ?? EdgeInsets.all(12 * scalingFactor),
         decoration: BoxDecoration(
           color: activeBgColor,

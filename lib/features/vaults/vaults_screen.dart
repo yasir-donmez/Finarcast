@@ -16,6 +16,8 @@ import '../transactions/transaction_builder_screen.dart';
 import '../../core/utils/route_transitions.dart';
 import '../../core/utils/category_utils.dart';
 import '../../core/providers/db_providers.dart';
+import '../../core/providers/settings_provider.dart';
+import '../../core/database/models/custom_category.dart';
 import '../../core/services/subscription_service.dart';
 import '../subscription/widgets/pro_upgrade_sheet.dart';
 
@@ -29,6 +31,7 @@ import 'widgets/header_delegate.dart';
 import 'widgets/filter_chip.dart';
 import 'widgets/vault_snap_scroll_physics.dart';
 import 'widgets/staggered_entry_anim.dart';
+import 'widgets/history_record_tile.dart';
 
 class VaultsScreen extends ConsumerStatefulWidget {
   const VaultsScreen({super.key});
@@ -42,9 +45,14 @@ class _VaultsScreenState extends ConsumerState<VaultsScreen> {
 
   // Caching fields for transaction history memoization
   List<TransactionUI>? _lastTransactions;
+  List<CustomCategory>? _lastCustomCategories;
   Map<DateTime, List<TransactionUI>>? _cachedGrouped;
   List<DateTime>? _cachedSortedDates;
-  List<int>? _cachedDayStartIndices;
+  List<int>? _cachedFlatOffsets;
+  int _cachedFlatCount = 0;
+  Map<String, String>? _cachedCategoryNames;
+  Map<String, String?>? _cachedParentNames;
+  Map<String, int>? _cachedGlobalIndices;
 
   @override
   void initState() {
@@ -76,10 +84,10 @@ class _VaultsScreenState extends ConsumerState<VaultsScreen> {
 
     final screenHeight = MediaQuery.of(context).size.height;
     final scalingFactor = (screenHeight / 812.0).clamp(0.85, 1.0);
-    final topPadding = MediaQuery.of(context).padding.top;
+    final topPadding = MediaQuery.of(context).viewPadding.top;
 
     final scrollController = ref.watch(homeScrollProvider);
-    final bottomPadding = MediaQuery.of(context).padding.bottom;
+    final bottomPadding = MediaQuery.of(context).viewPadding.bottom;
     final screenWidth = MediaQuery.of(context).size.width;
 
     // Sabit boşluklar
@@ -160,7 +168,7 @@ class _VaultsScreenState extends ConsumerState<VaultsScreen> {
         onAddVault: () => _showAddVaultSheet(context),
         l10n: l10n,
         onVaultTap: (id) => _showVaultDetail(context, id),
-        topPadding: MediaQuery.of(context).padding.top,
+        topPadding: MediaQuery.of(context).viewPadding.top,
         onShowNotifications: () => _showNotificationsSheet(context),
         unseenNotificationsCount: unseenNotificationsCount,
         dynamicGap: dynamicGap,
@@ -309,7 +317,7 @@ class _VaultsScreenState extends ConsumerState<VaultsScreen> {
   }
 
   Widget _buildTemplateGrid(List<TemplateUI> templates, double childAspectRatio, BuildContext context) {
-    final bottomPadding = MediaQuery.of(context).padding.bottom;
+    final bottomPadding = MediaQuery.of(context).viewPadding.bottom;
     return SliverPadding(
       padding: EdgeInsets.fromLTRB(
         AppSizes.paddingMedium,
@@ -353,11 +361,17 @@ class _VaultsScreenState extends ConsumerState<VaultsScreen> {
   }
 
   Widget _buildTransactionHistoryList(List<TransactionUI> transactions, BuildContext context) {
-    final bottomPadding = MediaQuery.of(context).padding.bottom;
+    final bottomPadding = MediaQuery.of(context).viewPadding.bottom;
     final selectedVaultId = ref.read(selectedVaultProvider);
+    final dayBalanceCache = ref.watch(dayBalanceCacheProvider);
+    final dayBalanceCurrency = ref.watch(dayBalanceCurrencyProvider);
+    final customCategories = ref.read(customCategoriesProvider);
+    final settings = ref.read(settingsProvider);
     
-    if (_cachedGrouped == null || _lastTransactions != transactions) {
+    // Gruplandırma ve flat list offset hesaplama (memoized)
+    if (_cachedGrouped == null || _lastTransactions != transactions || _lastCustomCategories != customCategories) {
       _lastTransactions = transactions;
+      _lastCustomCategories = customCategories;
       final Map<DateTime, List<TransactionUI>> grouped = {};
       for (final tx in transactions) {
         final dateOnly = DateTime(tx.date.year, tx.date.month, tx.date.day);
@@ -365,22 +379,59 @@ class _VaultsScreenState extends ConsumerState<VaultsScreen> {
       }
       final sortedDates = grouped.keys.toList()..sort((a, b) => b.compareTo(a));
 
-      // Precalculate start indices for each day's transactions
-      final List<int> dayStartIndices = [];
-      int currentGlobalIndex = 0;
+      // Flat list offset hesapla: her gün = 1 header + N transaction
+      final List<int> flatOffsets = [];
+      int total = 0;
       for (final date in sortedDates) {
-        dayStartIndices.add(currentGlobalIndex);
-        currentGlobalIndex += grouped[date]!.length;
+        flatOffsets.add(total);
+        total += 1 + grouped[date]!.length; // 1 header + N tiles
       }
 
       _cachedGrouped = grouped;
       _cachedSortedDates = sortedDates;
-      _cachedDayStartIndices = dayStartIndices;
+      _cachedFlatOffsets = flatOffsets;
+      _cachedFlatCount = total;
+
+      // Kategori adlarını, parent adlarını ve global index'leri önceden hesapla
+      final catNames = <String, String>{};
+      final parentNames = <String, String?>{};
+      final globalIndices = <String, int>{};
+
+      int globalTxIndex = 0;
+      for (final date in sortedDates) {
+        final txs = grouped[date]!;
+        for (final tx in txs) {
+          globalIndices[tx.id] = globalTxIndex++;
+
+          final categoryName = CategoryUtils.getCategoryName(
+            categoryId: tx.categoryId,
+            context: context,
+            customCategories: customCategories,
+            fallbackTitle: tx.name,
+          );
+          catNames[tx.id] = categoryName;
+
+          final parentId = tx.categoryId?.split('_').take(2).join('_');
+          final parentName = parentId != null
+              ? CategoryUtils.getCategoryName(
+                  categoryId: parentId,
+                  context: context,
+                  customCategories: customCategories,
+                )
+              : null;
+          parentNames[tx.id] = parentName;
+        }
+      }
+
+      _cachedCategoryNames = catNames;
+      _cachedParentNames = parentNames;
+      _cachedGlobalIndices = globalIndices;
     }
 
     final grouped = _cachedGrouped!;
     final sortedDates = _cachedSortedDates!;
-    final dayStartIndices = _cachedDayStartIndices!;
+    final flatOffsets = _cachedFlatOffsets!;
+    final totalFlatCount = _cachedFlatCount;
 
     return SliverPadding(
       padding: EdgeInsets.fromLTRB(
@@ -391,48 +442,97 @@ class _VaultsScreenState extends ConsumerState<VaultsScreen> {
       ),
       sliver: SliverList(
         delegate: SliverChildBuilderDelegate(
-          (context, index) {
-            final date = sortedDates[index];
+          (context, flatIndex) {
+            // Binary search ile hangi gün grubuna ait olduğunu bul
+            int dayIdx = _findDayIndex(flatIndex, flatOffsets);
+            int posInDay = flatIndex - flatOffsets[dayIdx];
+            final date = sortedDates[dayIdx];
             final txs = grouped[date]!;
-            final startIndex = dayStartIndices[index];
-            
-            return HistoryDayGroup(
-              date: date,
-              transactions: txs,
-              selectedVaultId: selectedVaultId,
-              startIndex: startIndex,
-              animatedTxIds: _animatedTxIds,
-              onReviewed: (tx) async {
-                if (tx.dbId != null) {
-                  final record = await DatabaseService.getTransaction(tx.dbId!);
-                  if (record != null) {
-                    record.status = TransactionStatus.confirmed;
-                    record.isReviewed = true;
-                    await DatabaseService.updateTransaction(record);
-                  }
-                }
-              },
-              onSkipped: (tx) async {
-                if (tx.dbId != null) {
-                  final record = await DatabaseService.getTransaction(tx.dbId!);
-                  if (record != null) {
-                    record.status = TransactionStatus.skipped;
-                    record.isReviewed = true;
-                    await DatabaseService.updateTransaction(record);
-                  }
-                }
-              },
-              onTap: (tx) => _showTransactionActions(context, tx),
-              onLongPress: (tx) {
-                HapticFeedback.heavyImpact();
-                _showTransactionActions(context, tx);
-              },
-            );
+
+            if (posInDay == 0) {
+              // Gün başlığı
+              final dayBalance = dayBalanceCache[date] ?? 0.0;
+              return DayHeaderTile(
+                date: date,
+                transactions: txs,
+                dayBalance: dayBalance,
+                balanceCurrency: dayBalanceCurrency,
+                settingsCurrency: settings.currencySymbol,
+              );
+            } else {
+              // İşlem kartı (posInDay - 1 = tx index)
+              final txIndex = posInDay - 1;
+              final tx = txs[txIndex];
+              
+              // Staggered animation
+              final txId = 'tx_${tx.id}';
+              final shouldAnimate = !_animatedTxIds.contains(txId);
+              if (shouldAnimate) {
+                _animatedTxIds.add(txId);
+              }
+              
+              // O(1) cache lookups
+              final globalTxIndex = _cachedGlobalIndices?[tx.id] ?? 0;
+              final categoryName = _cachedCategoryNames?[tx.id] ?? '';
+              final parentName = _cachedParentNames?[tx.id];
+              
+              return StaggeredEntryAnim(
+                key: ValueKey(txId),
+                index: globalTxIndex,
+                animate: shouldAnimate,
+                child: HistoryRecordTile(
+                  key: ValueKey(tx.id),
+                  transaction: tx,
+                  categoryName: categoryName,
+                  parentName: parentName,
+                  selectedVaultId: selectedVaultId,
+                  onReviewed: () async {
+                    if (tx.dbId != null) {
+                      final record = await DatabaseService.getTransaction(tx.dbId!);
+                      if (record != null) {
+                        record.status = TransactionStatus.confirmed;
+                        record.isReviewed = true;
+                        await DatabaseService.updateTransaction(record);
+                      }
+                    }
+                  },
+                  onSkipped: () async {
+                    if (tx.dbId != null) {
+                      final record = await DatabaseService.getTransaction(tx.dbId!);
+                      if (record != null) {
+                        record.status = TransactionStatus.skipped;
+                        record.isReviewed = true;
+                        await DatabaseService.updateTransaction(record);
+                      }
+                    }
+                  },
+                  onTap: () => _showTransactionActions(context, tx),
+                  onLongPress: () {
+                    HapticFeedback.heavyImpact();
+                    _showTransactionActions(context, tx);
+                  },
+                ),
+              );
+            }
           },
-          childCount: sortedDates.length,
+          childCount: totalFlatCount,
         ),
       ),
     );
+  }
+
+  /// Binary search ile flat index'in hangi gün grubuna ait olduğunu bulur
+  int _findDayIndex(int flatIndex, List<int> flatOffsets) {
+    int lo = 0, hi = flatOffsets.length - 1;
+    while (lo < hi) {
+      final mid = (lo + hi + 1) >> 1;
+      if (flatOffsets[mid] <= flatIndex) {
+        lo = mid;
+      } else {
+        hi = mid - 1;
+      }
+    }
+    return lo;
   }
 
   Widget _buildSmartSpacing(double maxHeaderHeight, double minHeaderHeight) {

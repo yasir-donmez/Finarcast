@@ -26,7 +26,7 @@ class _StaggeredEntryAnimState extends State<StaggeredEntryAnim> with SingleTick
   void initState() {
     super.initState();
     
-    final bool isAnimationEnabled = widget.animate && widget.index < 10;
+    final bool isAnimationEnabled = widget.animate && widget.index < 4;
     
     if (isAnimationEnabled) {
       _controller = AnimationController(vsync: this, duration: const Duration(milliseconds: 550));

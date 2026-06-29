@@ -36,13 +36,9 @@ class _MainScaffoldState extends ConsumerState<MainScaffold> with TickerProvider
   ScrollController? _scrollController; 
   late final ShareHandlerService _shareHandlerService;
 
-  late final AnimationController _pillController;
   late final AnimationController _sheenController;
   late final AnimationController _pageSlideController;
   late final Animation<double> _sheenAnimation;
-  double _sourceIndex = 0.0;
-  double _targetIndex = 0.0;
-  bool _isSlidingTransition = true;
   int _previousIndex = 0;
 
   // Sayfaların durumunu (state) korumak için GlobalKey kullanımı
@@ -58,10 +54,6 @@ class _MainScaffoldState extends ConsumerState<MainScaffold> with TickerProvider
   @override
   void initState() {
     super.initState();
-    _pillController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 350),
-    );
     _pageSlideController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 300),
@@ -81,9 +73,7 @@ class _MainScaffoldState extends ConsumerState<MainScaffold> with TickerProvider
       parent: _sheenController,
       curve: const Interval(0.0, 0.6, curve: Curves.easeInOut),
     );
-    _sourceIndex = _currentIndex.toDouble();
-    _targetIndex = _currentIndex.toDouble();
-    _pillController.value = 1.0;
+
 
     // Build sonrası güvenli başlatma (LateInitializationError çözümüdür)
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -213,30 +203,12 @@ class _MainScaffoldState extends ConsumerState<MainScaffold> with TickerProvider
 
   @override
   void dispose() {
-    _pillController.dispose();
     _sheenController.dispose();
     _pageSlideController.dispose();
     _shareHandlerService.dispose();
     // ref kullanmadan güvenli temizlik
     _scrollController?.removeListener(_onScroll);
     super.dispose();
-  }
-
-  double _getCurrentIndexPosition() {
-    final t = _pillController.value;
-    final isMovingRight = _targetIndex > _sourceIndex;
-    final valLeading = Curves.easeOutQuart.transform(t);
-    final valTrailing = Curves.easeInQuart.transform(t);
-    
-    if (isMovingRight) {
-      final leftPos = _sourceIndex + (_targetIndex - _sourceIndex) * valTrailing;
-      final rightPos = _sourceIndex + (_targetIndex - _sourceIndex) * valLeading;
-      return (leftPos + rightPos) / 2.0;
-    } else {
-      final leftPos = _sourceIndex + (_targetIndex - _sourceIndex) * valLeading;
-      final rightPos = _sourceIndex + (_targetIndex - _sourceIndex) * valTrailing;
-      return (leftPos + rightPos) / 2.0;
-    }
   }
 
   Widget _buildPillWidget(Color activeColor, bool isDark) {
@@ -324,7 +296,7 @@ class _MainScaffoldState extends ConsumerState<MainScaffold> with TickerProvider
     final subscription = ref.watch(subscriptionServiceProvider);
     
     final isKeyboardVisible = MediaQuery.of(context).viewInsets.bottom > 0;
-    final bottomPadding = MediaQuery.of(context).padding.bottom;
+    final bottomPadding = MediaQuery.of(context).viewPadding.bottom;
     const navbarHeight = 58.0;
     const navbarBottomMargin = 12.0;
     const gapAboveNavbar = 18.0;
@@ -460,6 +432,7 @@ class _MainScaffoldState extends ConsumerState<MainScaffold> with TickerProvider
           child: Material(
             type: MaterialType.transparency,
             child: SafeArea(
+              maintainBottomViewPadding: true,
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
                 child: _buildModernNavbar(),
@@ -506,105 +479,14 @@ class _MainScaffoldState extends ConsumerState<MainScaffold> with TickerProvider
           showShadow: false,
           child: Stack(
             children: [
-              AnimatedBuilder(
-                animation: _pillController,
-                builder: (context, child) {
-                  final t = _pillController.value;
-                  
-                  if (_isSlidingTransition) {
-                    final isMovingRight = _targetIndex > _sourceIndex;
-                    
-                    // ZİRVE HİSSİYAT: Öncü kenar Curves.easeOutBack ile hafif taşma yaparken,
-                    // artçı kenar Curves.easeInOutCubic ile geriden gelip yakalıyor.
-                    final valLeading = Curves.easeOutBack.transform(t);
-                    final valTrailing = Curves.easeInOutCubic.transform(t);
-                    
-                    final double leftIndex;
-                    final double rightIndex;
-                    
-                    if (isMovingRight) {
-                      leftIndex = _sourceIndex + (_targetIndex - _sourceIndex) * valTrailing;
-                      rightIndex = _sourceIndex + (_targetIndex - _sourceIndex) * valLeading;
-                    } else {
-                      leftIndex = _sourceIndex + (_targetIndex - _sourceIndex) * valLeading;
-                      rightIndex = _sourceIndex + (_targetIndex - _sourceIndex) * valTrailing;
-                    }
-                    
-                    final double left = 6 + (leftIndex * itemWidth) + pillHorizontalMargin;
-                    final double width = (rightIndex - leftIndex) * itemWidth + (itemWidth - (2 * pillHorizontalMargin));
-                    
-                    return Stack(
-                      children: [
-                        Positioned(
-                          left: left,
-                          top: 6,
-                          bottom: 6,
-                          width: width,
-                          child: _buildPillWidget(activeColor, isDark),
-                        ),
-                      ],
-                    );
-                  } else {
-                    // FADE/SCALE HYBRID ANIMATION (for distance > 1)
-                    if (!_pillController.isAnimating) {
-                      final double left = 6 + (_targetIndex * itemWidth) + pillHorizontalMargin;
-                      final double width = itemWidth - (2 * pillHorizontalMargin);
-                      return Stack(
-                        children: [
-                          Positioned(
-                            left: left,
-                            top: 6,
-                            bottom: 6,
-                            width: width,
-                            child: _buildPillWidget(activeColor, isDark),
-                          ),
-                        ],
-                      );
-                    }
-                    
-                    final sourceLeft = 6 + (_sourceIndex * itemWidth) + pillHorizontalMargin;
-                    final targetLeft = 6 + (_targetIndex * itemWidth) + pillHorizontalMargin;
-                    final width = itemWidth - (2 * pillHorizontalMargin);
-                    
-                    // ZİRVE HİSSİYAT: Eski hap ilk %40'lık dilimde hızlıca sönüyor.
-                    final sourceOpacity = (1.0 - t / 0.4).clamp(0.0, 1.0);
-                    
-                    // Yeni hap %10'luk bir gecikmeyle başlayıp Curves.easeOutBack ile büyüyerek pop-in yapıyor.
-                    final targetT = ((t - 0.1) / 0.9).clamp(0.0, 1.0);
-                    final targetOpacity = Curves.easeIn.transform(targetT);
-                    final targetScale = 0.8 + (0.2 * Curves.easeOutBack.transform(targetT));
-                    
-                    return Stack(
-                      children: [
-                        // Old pill fading out
-                        Positioned(
-                          left: sourceLeft,
-                          top: 6,
-                          bottom: 6,
-                          width: width,
-                          child: Opacity(
-                            opacity: sourceOpacity,
-                            child: _buildPillWidget(activeColor, isDark),
-                          ),
-                        ),
-                        // New pill fading & scaling in
-                        Positioned(
-                          left: targetLeft,
-                          top: 6,
-                          bottom: 6,
-                          width: width,
-                          child: Opacity(
-                            opacity: targetOpacity,
-                            child: Transform.scale(
-                              scale: targetScale,
-                              child: _buildPillWidget(activeColor, isDark),
-                            ),
-                          ),
-                        ),
-                      ],
-                    );
-                  }
-                },
+              AnimatedPositioned(
+                duration: const Duration(milliseconds: 250),
+                curve: Curves.easeOutCubic,
+                left: 6 + (_currentIndex * itemWidth) + pillHorizontalMargin,
+                top: 6,
+                bottom: 6,
+                width: itemWidth - (2 * pillHorizontalMargin),
+                child: _buildPillWidget(activeColor, isDark),
               ),
               
               Padding(
@@ -716,15 +598,7 @@ class _MainScaffoldState extends ConsumerState<MainScaffold> with TickerProvider
           
           HapticFeedback.selectionClick();
           
-          final int fromIndex = _currentIndex;
           final int toIndex = index;
-          final distance = (toIndex - fromIndex).abs();
-          
-          // Pill animasyonunu başlat
-          _sourceIndex = _pillController.isAnimating ? _getCurrentIndexPosition() : fromIndex.toDouble();
-          _targetIndex = toIndex.toDouble();
-          _isSlidingTransition = distance <= 1;
-          _pillController.forward(from: 0.0);
           
           // Sayfa geçişi — tek setState, jumpToPage yok
           _switchToPage(toIndex);

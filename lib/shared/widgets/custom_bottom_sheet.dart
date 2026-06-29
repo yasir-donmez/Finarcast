@@ -36,6 +36,9 @@ class CustomBottomSheet extends ConsumerWidget {
     bool isFullScreen = false,
     bool hasInput = false,
   }) {
+    // Unfocus any active text field in the parent screen first
+    FocusManager.instance.primaryFocus?.unfocus();
+
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return showModalBottomSheet<T>(
       context: context,
@@ -67,7 +70,7 @@ class CustomBottomSheet extends ConsumerWidget {
     // ═══ Granüler MediaQuery — sadece ilgili alan değişince rebuild ═══
     final viewInsetsBottom = MediaQuery.viewInsetsOf(context).bottom;
     final screenHeight = MediaQuery.sizeOf(context).height;
-    final safePadding = MediaQuery.paddingOf(context);
+    final safePadding = MediaQuery.viewPaddingOf(context);
     final safeBottom = safePadding.bottom;
     final safeTop = safePadding.top;
 
@@ -102,9 +105,7 @@ class CustomBottomSheet extends ConsumerWidget {
     // doğrudan viewInsetsBottom kullanmak zıplamaları ve kasılmaları önler.
     final double keyboardOffset = viewInsetsBottom;
 
-    final double bottomMargin = keyboardOffset > 0
-        ? keyboardOffset + 16.0
-        : safeBottom + 16.0;
+    final double bottomMargin = (keyboardOffset > safeBottom ? keyboardOffset : safeBottom) + 16.0;
 
     // ═══ Kullanılabilir alan: ekran - alt boşluk - üst güvenli alan - nefes payı ═══
     // Üst güvenli alanı (safeTop) 24.0 piksel nefes payı ile genişleterek 
@@ -115,50 +116,60 @@ class CustomBottomSheet extends ConsumerWidget {
         : screenHeight * 0.85); // Varsayılan yüksekliği kullanıcı isteği üzerine %85 seviyesinde tutuyoruz.
     final double maxSheetHeight = desiredHeight.clamp(0.0, availableHeight);
 
-    return PrecisionSheetScope(
-      child: Stack(
-        alignment: Alignment.bottomCenter,
-        children: [
-          // Sayfa kapandığında tetiklenecek alan (Tüm ekranı kaplar)
-          Positioned.fill(
-            child: GestureDetector(
-              onTap: () => Navigator.pop(context),
-              child: Container(color: Colors.transparent),
+    return PopScope(
+      onPopInvokedWithResult: (didPop, result) {
+        if (didPop) {
+          FocusManager.instance.primaryFocus?.unfocus();
+        }
+      },
+      child: PrecisionSheetScope(
+        child: Stack(
+          alignment: Alignment.bottomCenter,
+          children: [
+            // Sayfa kapandığında tetiklenecek alan (Tüm ekranı kaplar)
+            Positioned.fill(
+              child: GestureDetector(
+                onTap: () {
+                  FocusManager.instance.primaryFocus?.unfocus();
+                  Navigator.pop(context);
+                },
+                child: Container(color: Colors.transparent),
+              ),
             ),
-          ),
-          
-          // Yüzen Gövde — Padding ile kare-kare klavye takibi
-          Padding(
-            padding: EdgeInsets.only(
-              left: 16.0,
-              right: 16.0,
-              bottom: bottomMargin,
-            ),
-            child: Container(
-              constraints: BoxConstraints(maxHeight: maxSheetHeight),
-              width: double.infinity,
-              decoration: BoxDecoration(
-                color: activeBgColor,
-                borderRadius: BorderRadius.circular(28.0),
-                border: Border.all(
-                  color: activeBorderColor,
-                  width: 1.0,
-                ),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: isDark ? 0.3 : 0.08),
-                    blurRadius: 32,
-                    offset: const Offset(0, 8),
+            
+            // Yüzen Gövde — Padding ile kare-kare klavye takibi
+            Padding(
+              padding: EdgeInsets.only(
+                left: 16.0,
+                right: 16.0,
+                bottom: bottomMargin,
+              ),
+              child: Container(
+                constraints: BoxConstraints(maxHeight: maxSheetHeight),
+                width: double.infinity,
+                decoration: BoxDecoration(
+                  color: activeBgColor,
+                  borderRadius: BorderRadius.circular(28.0),
+                  border: Border.all(
+                    color: activeBorderColor,
+                    width: 1.0,
                   ),
-                ],
-              ),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(28.0),
-                child: _buildSheetContent(context, animation),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: isDark ? 0.3 : 0.08),
+                      blurRadius: 32,
+                      offset: const Offset(0, 8),
+                    ),
+                  ],
+                ),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(28.0),
+                  child: _buildSheetContent(context, animation),
+                ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

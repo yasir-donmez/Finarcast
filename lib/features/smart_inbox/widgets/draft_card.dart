@@ -341,35 +341,20 @@ class _DismissibleDraftCardState extends State<DismissibleDraftCard> {
             ),
             child: Stack(
               children: [
-                // 1. Arka Plan Watermark (Filigran) İkonu
-                Positioned(
+                           Positioned(
                   right: -15 * sf,
                   bottom: -10 * sf,
                   child: IgnorePointer(
                     child: Transform.rotate(
                       angle: -math.pi / 7, // ~25 derece eğim
-                      child: ShaderMask(
-                        shaderCallback: (bounds) {
-                          return LinearGradient(
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
-                            colors: [
-                              catColor.withValues(alpha: isDark ? 0.16 : 0.09),
-                              catColor.withValues(alpha: 0.0),
-                            ],
-                            stops: const [0.35, 1.0],
-                          ).createShader(bounds);
-                        },
-                        blendMode: BlendMode.srcIn,
-                        child: Icon(
-                          catIcon,
-                          size: 105 * sf,
-                          color: Colors.white,
-                        ),
-                      ),
+                      child: Icon(
+                        catIcon,
+                        size: 105 * sf,
+                        color: catColor.withValues(alpha: isDark ? 0.05 : 0.035),
                     ),
                   ),
                 ),
+              ),
                 // 2. Kart İçeriği
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),

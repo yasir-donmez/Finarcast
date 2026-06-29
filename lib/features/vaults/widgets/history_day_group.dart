@@ -4,53 +4,43 @@ import 'package:intl/intl.dart';
 import '../../../../core/theme/app_constants.dart';
 import '../../../../core/utils/currency_utils.dart';
 import '../../../../core/utils/string_utils.dart';
+import '../../../../core/database/models/transaction_status.dart';
 import '../../../../core/providers/db_providers.dart';
-import '../../../../core/providers/settings_provider.dart';
-import '../../../../core/services/balance_service.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../vaults_providers.dart';
-import 'staggered_entry_anim.dart';
-import 'history_record_tile.dart';
-import '../../../../core/database/models/transaction_status.dart';
 
 
-class HistoryDayGroup extends ConsumerWidget {
+/// Gün başlığı widget'ı — flat SliverList'te her gün grubunun başında gösterilir.
+/// 
+/// Artık BalanceService çağrısı yapmaz; bakiye değeri dışarıdan geçirilir.
+class DayHeaderTile extends ConsumerWidget {
   final DateTime date;
   final List<TransactionUI> transactions;
-  final Future<void> Function(TransactionUI) onReviewed;
-  final Future<void> Function(TransactionUI) onSkipped;
-  final void Function(TransactionUI) onTap;
-  final void Function(TransactionUI) onLongPress;
-  final String? selectedVaultId;
-  final int startIndex;
-  final Set<String> animatedTxIds;
+  final double dayBalance;
+  final String balanceCurrency;
+  final String settingsCurrency;
 
-  const HistoryDayGroup({
+  const DayHeaderTile({
     super.key,
     required this.date,
     required this.transactions,
-    required this.onReviewed,
-    required this.onSkipped,
-    required this.onTap,
-    required this.onLongPress,
-    required this.startIndex,
-    required this.animatedTxIds,
-    this.selectedVaultId,
+    required this.dayBalance,
+    required this.balanceCurrency,
+    required this.settingsCurrency,
   });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context)!;
     final locale = Localizations.localeOf(context).languageCode;
-    final settings = ref.watch(settingsProvider);
     final rates = ref.watch(exchangeRatesProvider).value ?? [];
 
-    // Calculate net amount for this day in target settings currency
+    // Calculate net amount for this day
     double dailyNet = 0.0;
     for (final tx in transactions) {
       if (tx.status == TransactionStatus.skipped) continue;
 
-      final double convAmount = tx.getConvertedAmount(settings.currencySymbol, rates);
+      final double convAmount = tx.getConvertedAmount(settingsCurrency, rates);
       if (tx.isIncome) {
         dailyNet += convAmount;
       } else {
@@ -60,7 +50,7 @@ class HistoryDayGroup extends ConsumerWidget {
 
     final String netText = CurrencyUtils.formatAmount(
       dailyNet.abs(),
-      currencySymbol: settings.currencySymbol,
+      currencySymbol: settingsCurrency,
     );
 
     final String netLabel = dailyNet > 0
@@ -86,37 +76,6 @@ class HistoryDayGroup extends ConsumerWidget {
       dateTitle = l10n.tomorrow;
     } else {
       dateTitle = DateFormat('d MMMM yyyy, EEEE', locale).format(date);
-    }
-
-    // Calculate cumulative balance up to this date
-    final allVaults = ref.watch(allVaultsProvider);
-    final dbRecords = ref.watch(allTransactionsProvider);
-    double dayBalance = 0.0;
-    String balanceCurrency = settings.currencySymbol;
-
-    if (selectedVaultId == null) {
-      dayBalance = BalanceService.calculateNetBalance(
-        vaults: allVaults,
-        records: dbRecords,
-        targetCurrency: settings.currencySymbol,
-        rates: rates,
-        untilDate: date,
-      );
-      balanceCurrency = settings.currencySymbol;
-    } else {
-      final vault = allVaults.where((v) => 'v_${v.id}' == selectedVaultId).firstOrNull;
-      if (vault != null) {
-        final vaultCurrency = vault.currency;
-        final targetCurrency = vaultCurrency == 'AUTO' ? settings.currencySymbol : vaultCurrency;
-        dayBalance = BalanceService.calculateVaultBalance(
-          vault: vault,
-          records: dbRecords,
-          targetCurrency: targetCurrency,
-          rates: rates,
-          untilDate: date,
-        );
-        balanceCurrency = targetCurrency;
-      }
     }
 
     final String dayBalanceText = CurrencyUtils.formatAmount(
@@ -157,85 +116,50 @@ class HistoryDayGroup extends ConsumerWidget {
         balanceLabel = 'Balance';
     }
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        // Day Header Row
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 12),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Expanded(
-                child: Row(
-                  children: [
-                    Text(
-                      dateTitle.toSafeUpperCase(context),
-                      style: TextStyle(
-                        fontSize: 11,
-                        fontWeight: FontWeight.w900,
-                        color: AppColors.getTextSecondary(context).withValues(alpha: 0.6),
-                        letterSpacing: 1.0,
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    Flexible(
-                      child: Text(
-                        '($balanceLabel: $dayBalanceText)',
-                        style: TextStyle(
-                          fontSize: 9.5,
-                          fontWeight: FontWeight.w500,
-                          color: AppColors.getTextSecondary(context).withValues(alpha: 0.4),
-                        ),
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              if (transactions.any((tx) => tx.status != TransactionStatus.skipped))
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 12),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Expanded(
+            child: Row(
+              children: [
                 Text(
-                  netLabel,
+                  dateTitle.toSafeUpperCase(context),
                   style: TextStyle(
                     fontSize: 11,
                     fontWeight: FontWeight.w900,
-                    color: netColor,
-                    letterSpacing: 0.5,
+                    color: AppColors.getTextSecondary(context).withValues(alpha: 0.6),
+                    letterSpacing: 1.0,
                   ),
                 ),
-            ],
-          ),
-        ),
-
-        // Record Tiles List
-        ...transactions.asMap().entries.map((entry) {
-          final txIndex = entry.key;
-          final tx = entry.value;
-          final globalIndex = startIndex + txIndex;
-          
-          final txId = 'tx_${tx.id}';
-          final shouldAnimate = !animatedTxIds.contains(txId);
-          if (shouldAnimate) {
-            animatedTxIds.add(txId);
-          }
-
-          return StaggeredEntryAnim(
-            key: ValueKey(txId),
-            index: globalIndex,
-            animate: shouldAnimate,
-            child: HistoryRecordTile(
-              key: ValueKey(tx.id),
-              transaction: tx,
-              selectedVaultId: selectedVaultId,
-              onReviewed: () => onReviewed(tx),
-              onSkipped: () => onSkipped(tx),
-              onTap: () => onTap(tx),
-              onLongPress: () => onLongPress(tx),
+                const SizedBox(width: 8),
+                Flexible(
+                  child: Text(
+                    '($balanceLabel: $dayBalanceText)',
+                    style: TextStyle(
+                      fontSize: 9.5,
+                      fontWeight: FontWeight.w500,
+                      color: AppColors.getTextSecondary(context).withValues(alpha: 0.4),
+                    ),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ],
             ),
-          );
-        }),
-        const SizedBox(height: 12),
-      ],
+          ),
+          if (transactions.any((tx) => tx.status != TransactionStatus.skipped))
+            Text(
+              netLabel,
+              style: TextStyle(
+                fontSize: 11,
+                fontWeight: FontWeight.w900,
+                color: netColor,
+                letterSpacing: 0.5,
+              ),
+            ),
+        ],
+      ),
     );
   }
 }

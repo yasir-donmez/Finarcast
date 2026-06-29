@@ -107,24 +107,10 @@ class TemplateCard extends ConsumerWidget {
               child: IgnorePointer(
                 child: Transform.rotate(
                   angle: -0.22,
-                  child: ShaderMask(
-                    shaderCallback: (bounds) {
-                      return LinearGradient(
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                        colors: [
-                          tx.color.withValues(alpha: isDark ? 0.16 : 0.09),
-                          tx.color.withValues(alpha: 0.0),
-                        ],
-                        stops: const [0.35, 1.0],
-                      ).createShader(bounds);
-                    },
-                    blendMode: BlendMode.srcIn,
-                    child: Icon(
-                      tx.icon,
-                      size: 105 * sf,
-                      color: Colors.white,
-                    ),
+                  child: Icon(
+                    tx.icon,
+                    size: 105 * sf,
+                    color: tx.color.withValues(alpha: isDark ? 0.05 : 0.035),
                   ),
                 ),
               ),

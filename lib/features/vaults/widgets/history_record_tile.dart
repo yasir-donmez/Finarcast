@@ -1,9 +1,7 @@
-import 'dart:ui';
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../shared/widgets/custom_dismissible.dart';
 import '../../../../core/theme/app_constants.dart';
 import '../../../../core/utils/currency_utils.dart';
@@ -11,17 +9,17 @@ import '../../../../shared/widgets/custom_card.dart';
 import '../vaults_providers.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../../core/database/models/transaction_status.dart';
-import '../../../../core/providers/db_providers.dart';
-import '../../../../core/utils/category_utils.dart';
 
 
-class HistoryRecordTile extends ConsumerStatefulWidget {
+class HistoryRecordTile extends StatefulWidget {
   final TransactionUI transaction;
   final Future<void> Function() onReviewed;
   final Future<void> Function() onSkipped;
   final VoidCallback onTap;
   final VoidCallback onLongPress;
   final String? selectedVaultId;
+  final String categoryName;
+  final String? parentName;
 
   const HistoryRecordTile({
     super.key,
@@ -30,14 +28,16 @@ class HistoryRecordTile extends ConsumerStatefulWidget {
     required this.onSkipped,
     required this.onTap,
     required this.onLongPress,
+    required this.categoryName,
+    this.parentName,
     this.selectedVaultId,
   });
 
   @override
-  ConsumerState<HistoryRecordTile> createState() => _HistoryRecordTileState();
+  State<HistoryRecordTile> createState() => _HistoryRecordTileState();
 }
 
-class _HistoryRecordTileState extends ConsumerState<HistoryRecordTile> {
+class _HistoryRecordTileState extends State<HistoryRecordTile> {
   double _scale = 1.0;
 
   @override
@@ -129,9 +129,7 @@ class _HistoryRecordTileState extends ConsumerState<HistoryRecordTile> {
     final Color bgColor = color.withValues(alpha: bgAlpha);
     final Color borderColor = color.withValues(alpha: borderAlpha);
 
-    return AnimatedContainer(
-      duration: const Duration(milliseconds: 80),
-      curve: Curves.easeOutQuad,
+    return Container(
       margin: const EdgeInsets.only(bottom: 8),
       decoration: BoxDecoration(
         color: bgColor,
@@ -141,28 +139,24 @@ class _HistoryRecordTileState extends ConsumerState<HistoryRecordTile> {
           width: 1.0,
         ),
       ),
-      clipBehavior: Clip.antiAlias,
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24),
-          child: Align(
-            alignment: alignment,
-            child: Transform(
-              transform: Matrix4.translationValues(xOffset, 0.0, 0.0)
-                ..setEntry(3, 2, 0.004)
-                ..rotateY(angle),
-              alignment: Alignment.center,
-              child: AnimatedScale(
-                scale: isThresholdReached ? 1.15 : 1.0,
-                duration: const Duration(milliseconds: 120),
-                curve: Curves.easeOutCubic,
-                child: Opacity(
-                  opacity: rotationProgress,
-                  child: isLeftToRight
-                      ? AnimatedCheckIcon(progress: progress, color: color)
-                      : AnimatedSkipIcon(progress: progress, color: color),
-                ),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 24),
+        child: Align(
+          alignment: alignment,
+          child: Transform(
+            transform: Matrix4.translationValues(xOffset, 0.0, 0.0)
+              ..setEntry(3, 2, 0.004)
+              ..rotateY(angle),
+            alignment: Alignment.center,
+            child: AnimatedScale(
+              scale: isThresholdReached ? 1.15 : 1.0,
+              duration: const Duration(milliseconds: 120),
+              curve: Curves.easeOutCubic,
+              child: Opacity(
+                opacity: rotationProgress,
+                child: isLeftToRight
+                    ? AnimatedCheckIcon(progress: progress, color: color)
+                    : AnimatedSkipIcon(progress: progress, color: color),
               ),
             ),
           ),
@@ -172,22 +166,9 @@ class _HistoryRecordTileState extends ConsumerState<HistoryRecordTile> {
   }
 
   Widget _buildCardContent(BuildContext context) {
-    final customCategories = ref.watch(customCategoriesProvider);
     final tx = widget.transaction;
-    final categoryName = CategoryUtils.getCategoryName(
-      categoryId: tx.categoryId,
-      context: context,
-      customCategories: customCategories,
-      fallbackTitle: tx.name,
-    );
-    final parentId = tx.categoryId?.split('_').take(2).join('_');
-    final parentName = parentId != null
-        ? CategoryUtils.getCategoryName(
-            categoryId: parentId,
-            context: context,
-            customCategories: customCategories,
-          )
-        : null;
+    final categoryName = widget.categoryName;
+    final parentName = widget.parentName;
     final bool hasSubCategory = parentName != null && parentName != categoryName;
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final l10n = AppLocalizations.of(context)!;
@@ -248,24 +229,10 @@ class _HistoryRecordTileState extends ConsumerState<HistoryRecordTile> {
                 child: IgnorePointer(
                   child: Transform.rotate(
                     angle: -math.pi / 7,
-                    child: ShaderMask(
-                      shaderCallback: (bounds) {
-                        return LinearGradient(
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                          colors: [
-                            tx.color.withValues(alpha: isDark ? 0.16 : 0.09),
-                            tx.color.withValues(alpha: 0.0),
-                          ],
-                          stops: const [0.35, 1.0],
-                        ).createShader(bounds);
-                      },
-                      blendMode: BlendMode.srcIn,
-                      child: Icon(
-                        tx.icon,
-                        size: 105 * sf,
-                        color: Colors.white,
-                      ),
+                    child: Icon(
+                      tx.icon,
+                      size: 105 * sf,
+                      color: tx.color.withValues(alpha: isDark ? 0.05 : 0.035),
                     ),
                   ),
                 ),

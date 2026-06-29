@@ -18,14 +18,14 @@ class BalanceService {
         ? DateTime(untilDate.year, untilDate.month, untilDate.day)
         : DateTime(now.year, now.month, now.day);
 
+    final vaultIds = vaults.map((v) => v.id).toSet();
     double balance = 0.0;
 
     for (final r in records) {
       if (r.status == TransactionStatus.skipped) continue;
 
       // Ensure transaction belongs to one of the vaults being summed
-      final vaultExists = vaults.any((v) => v.id == r.vaultId);
-      if (!vaultExists) continue;
+      if (!vaultIds.contains(r.vaultId)) continue;
 
       // Transfer işlemleri toplam bakiyeyi etkilemez (para yer değiştirmiştir)
       if (r.targetVaultId != null) continue;
@@ -84,13 +84,13 @@ class BalanceService {
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
 
+    final vaultIds = vaults.map((v) => v.id).toSet();
     double balance = 0.0;
 
     for (final r in records) {
       if (r.status == TransactionStatus.skipped) continue;
       
-      final vaultExists = vaults.any((v) => v.id == r.vaultId);
-      if (!vaultExists) continue;
+      if (!vaultIds.contains(r.vaultId)) continue;
 
       // Transfer işlemleri toplam bakiyeyi etkilemez
       if (r.targetVaultId != null) continue;
@@ -119,13 +119,13 @@ class BalanceService {
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
 
+    final vaultIds = vaults.map((v) => v.id).toSet();
     double balance = 0.0;
 
     for (final r in records) {
       if (r.status == TransactionStatus.skipped) continue;
 
-      final vaultExists = vaults.any((v) => v.id == r.vaultId);
-      if (!vaultExists) continue;
+      if (!vaultIds.contains(r.vaultId)) continue;
 
       // Transfer işlemleri toplam bakiyeyi etkilemez
       if (r.targetVaultId != null) continue;

@@ -154,7 +154,13 @@ class TrueMorphDeckHeaderDelegate extends SliverPersistentHeaderDelegate {
   @override
   double get minExtent => topPadding + kCompactCardHeight + kHeaderBottomBuffer;
   @override
-  bool shouldRebuild(covariant TrueMorphDeckHeaderDelegate oldDelegate) => true;
+  bool shouldRebuild(covariant TrueMorphDeckHeaderDelegate oldDelegate) =>
+      groups.length != oldDelegate.groups.length ||
+      selectedVaultId != oldDelegate.selectedVaultId ||
+      activeColor != oldDelegate.activeColor ||
+      unseenNotificationsCount != oldDelegate.unseenNotificationsCount ||
+      dynamicGap != oldDelegate.dynamicGap ||
+      topPadding != oldDelegate.topPadding;
 }
 
 class HeaderIconButton extends StatelessWidget {

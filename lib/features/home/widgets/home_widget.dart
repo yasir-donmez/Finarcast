@@ -86,44 +86,46 @@ class _HomeWidgetState extends State<HomeWidget> with SingleTickerProviderStateM
           HapticFeedback.heavyImpact();
           widget.onLongPress?.call();
         },
-        child: SolidSurface(
-          padding: const EdgeInsets.all(AppSizes.paddingSmall),
-          borderRadius: 24, // Daha yumuşak köşeler
-          child: Stack(
-            clipBehavior: Clip.none,
-            children: [
-              widget.child,
-              if (widget.isEditing)
-                Positioned(
-                  top: -12,
-                  left: -12,
-                  child: TweenAnimationBuilder<double>(
-                    duration: const Duration(milliseconds: 200),
-                    tween: Tween(begin: 0.0, end: 1.0),
-                    builder: (context, value, child) {
-                      return Transform.scale(
-                        scale: value,
-                        child: child,
-                      );
-                    },
-                    child: Container(
-                      padding: const EdgeInsets.all(6),
-                      decoration: BoxDecoration(
-                        color: Theme.of(context).colorScheme.error,
-                        shape: BoxShape.circle,
-                        boxShadow: [
-                          BoxShadow(
-                            color: Theme.of(context).colorScheme.error.withValues(alpha: 0.3),
-                            blurRadius: 8,
-                            offset: const Offset(0, 2),
-                          )
-                        ],
+        child: RepaintBoundary(
+          child: SolidSurface(
+            padding: const EdgeInsets.all(AppSizes.paddingSmall),
+            borderRadius: 24, // Daha yumuşak köşeler
+            child: Stack(
+              clipBehavior: Clip.none,
+              children: [
+                widget.child,
+                if (widget.isEditing)
+                  Positioned(
+                    top: -12,
+                    left: -12,
+                    child: TweenAnimationBuilder<double>(
+                      duration: const Duration(milliseconds: 200),
+                      tween: Tween(begin: 0.0, end: 1.0),
+                      builder: (context, value, child) {
+                        return Transform.scale(
+                          scale: value,
+                          child: child,
+                        );
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.all(6),
+                        decoration: BoxDecoration(
+                          color: Theme.of(context).colorScheme.error,
+                          shape: BoxShape.circle,
+                          boxShadow: [
+                            BoxShadow(
+                              color: Theme.of(context).colorScheme.error.withValues(alpha: 0.3),
+                              blurRadius: 8,
+                              offset: const Offset(0, 2),
+                            )
+                          ],
+                        ),
+                        child: const Icon(Icons.close_rounded, size: 14, color: Colors.white),
                       ),
-                      child: const Icon(Icons.close_rounded, size: 14, color: Colors.white),
                     ),
                   ),
-                ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

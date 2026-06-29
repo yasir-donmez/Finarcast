@@ -475,6 +475,81 @@ final filteredVaultTransactionsProvider = Provider<List<TransactionUI>>((ref) {
   return filtered;
 });
 
+/// Her gün grubu için kümülatif bakiye değerlerini önbellekleyen provider.
+/// Bu sayede HistoryDayGroup build sırasında BalanceService çağrılmaz.
+final dayBalanceCacheProvider = Provider<Map<DateTime, double>>((ref) {
+  final selectedVaultId = ref.watch(selectedVaultProvider);
+  final groups = ref.watch(transactionGroupsProvider);
+  final isIdValid = selectedVaultId == null || groups.any((g) => g.id == selectedVaultId);
+  final effectiveVaultId = (isIdValid ? selectedVaultId : null) ?? (groups.isNotEmpty ? groups.first.id : null);
+
+  final allVaults = ref.watch(allVaultsProvider);
+  final dbRecords = ref.watch(allTransactionsProvider);
+  final settings = ref.watch(settingsProvider);
+  final rates = ref.watch(exchangeRatesProvider).value ?? [];
+
+  final filteredTransactions = ref.watch(filteredVaultTransactionsProvider);
+
+  // Benzersiz tarihleri topla
+  final Set<DateTime> uniqueDates = {};
+  for (final tx in filteredTransactions) {
+    uniqueDates.add(DateTime(tx.date.year, tx.date.month, tx.date.day));
+  }
+
+  final Map<DateTime, double> cache = {};
+
+  if (effectiveVaultId == null) {
+    // Genel bakiye modu
+    for (final date in uniqueDates) {
+      cache[date] = BalanceService.calculateNetBalance(
+        vaults: allVaults,
+        records: dbRecords,
+        targetCurrency: settings.currencySymbol,
+        rates: rates,
+        untilDate: date,
+      );
+    }
+  } else {
+    // Kasa bazlı bakiye modu
+    final vault = allVaults.where((v) => 'v_${v.id}' == effectiveVaultId).firstOrNull;
+    if (vault != null) {
+      final vaultCurrency = vault.currency;
+      final targetCurrency = vaultCurrency == 'AUTO' ? settings.currencySymbol : vaultCurrency;
+      for (final date in uniqueDates) {
+        cache[date] = BalanceService.calculateVaultBalance(
+          vault: vault,
+          records: dbRecords,
+          targetCurrency: targetCurrency,
+          rates: rates,
+          untilDate: date,
+        );
+      }
+    }
+  }
+
+  return cache;
+});
+
+/// Günlük bakiye hesabında kullanılan para birimi
+final dayBalanceCurrencyProvider = Provider<String>((ref) {
+  final selectedVaultId = ref.watch(selectedVaultProvider);
+  final groups = ref.watch(transactionGroupsProvider);
+  final isIdValid = selectedVaultId == null || groups.any((g) => g.id == selectedVaultId);
+  final effectiveVaultId = (isIdValid ? selectedVaultId : null) ?? (groups.isNotEmpty ? groups.first.id : null);
+  final settings = ref.watch(settingsProvider);
+  final allVaults = ref.watch(allVaultsProvider);
+
+  if (effectiveVaultId == null) {
+    return settings.currencySymbol;
+  }
+  final vault = allVaults.where((v) => 'v_${v.id}' == effectiveVaultId).firstOrNull;
+  if (vault != null) {
+    final vaultCurrency = vault.currency;
+    return vaultCurrency == 'AUTO' ? settings.currencySymbol : vaultCurrency;
+  }
+  return settings.currencySymbol;
+});
+
 /// Gelecek tarihli tek seferlik işlemler — plan sekmesinde gösterilir
 final futureOneTimeTransactionsProvider = Provider<List<TransactionUI>>((ref) {
   final allTransactions = ref.watch(vaultTransactionsProvider);

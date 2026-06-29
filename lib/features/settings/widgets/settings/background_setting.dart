@@ -231,8 +231,8 @@ class BackgroundPreviewCard extends StatelessWidget {
       border: Border.all(
         color: isSelected
             ? primaryColor
-            : AppColors.getTextSecondary(context).withValues(alpha: 0.1),
-        width: isSelected ? 2.5 : 1,
+            : AppColors.getTextSecondary(context).withValues(alpha: 0.15),
+        width: 2.0,
       ),
       boxShadow: [],
     );

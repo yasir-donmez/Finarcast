@@ -27,103 +27,105 @@ class AnimatedCurrencySelector extends ConsumerWidget {
     final activeColor = isDark ? rotaryColor : AppColors.getAccentDeep(context, rotaryColor);
     final currencySymbol = ref.watch(settingsProvider.select((s) => s.currencySymbol));
 
-    return Container(
-      height: 106,
-      padding: const EdgeInsets.symmetric(horizontal: AppSizes.paddingMedium),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          // Sol: Para Birimi Simgesi (Sabit Boyut)
-          KnobSurface(
-            size: 54,
-            child: Center(
-              child: Text(
-                currencySymbol,
-                style: TextStyle(
-                  color: activeColor,
-                  fontSize: 26,
-                  fontWeight: FontWeight.w900,
+    return RepaintBoundary(
+      child: Container(
+        height: 106,
+        padding: const EdgeInsets.symmetric(horizontal: AppSizes.paddingMedium),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            // Sol: Para Birimi Simgesi (Sabit Boyut)
+            KnobSurface(
+              size: 54,
+              child: Center(
+                child: Text(
+                  currencySymbol,
+                  style: TextStyle(
+                    color: activeColor,
+                    fontSize: 26,
+                    fontWeight: FontWeight.w900,
+                  ),
                 ),
               ),
             ),
-          ),
-          const SizedBox(width: 16),
-          // Sağ: Tutar + Min/Max
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              mainAxisAlignment: MainAxisAlignment.end,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                FittedBox(
-                  fit: BoxFit.scaleDown,
-                  alignment: Alignment.center,
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.baseline,
-                    textBaseline: TextBaseline.alphabetic,
-                    children: [
-                      Text(
-                        CurrencyUtils.formatFullAmount(totalBalance, symbol: ''),
-                        style: TextStyle(
-                          color: activeColor,
-                          fontSize: 56,
-                          fontWeight: FontWeight.w900,
-                          letterSpacing: -2.5,
+            const SizedBox(width: 16),
+            // Sağ: Tutar + Min/Max
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.end,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  FittedBox(
+                    fit: BoxFit.scaleDown,
+                    alignment: Alignment.center,
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.baseline,
+                      textBaseline: TextBaseline.alphabetic,
+                      children: [
+                        Text(
+                          CurrencyUtils.formatFullAmount(totalBalance, symbol: ''),
+                          style: TextStyle(
+                            color: activeColor,
+                            fontSize: 56,
+                            fontWeight: FontWeight.w900,
+                            letterSpacing: -2.5,
+                          ),
                         ),
-                      ),
-                      const SizedBox(width: 8),
-                      Text(
-                        AppCurrency.getCode(currencySymbol),
-                        style: TextStyle(
-                          color: activeColor.withValues(alpha: isDark ? 0.35 : 0.55),
-                          fontSize: 24,
-                          fontWeight: FontWeight.w900,
-                          letterSpacing: -0.5,
+                        const SizedBox(width: 8),
+                        Text(
+                          AppCurrency.getCode(currencySymbol),
+                          style: TextStyle(
+                            color: activeColor.withValues(alpha: isDark ? 0.35 : 0.55),
+                            fontSize: 24,
+                            fontWeight: FontWeight.w900,
+                            letterSpacing: -0.5,
+                          ),
                         ),
-                      ),
-                    ],
-                  ),
-                ),
-                if (minBalance != null && maxBalance != null)
-                  Padding(
-                    padding: const EdgeInsets.only(top: 2),
-                    child: FittedBox(
-                      fit: BoxFit.scaleDown,
-                      alignment: Alignment.center,
-                      child: Row(
-                        children: [
-                          _buildRangeIndicator(
-                            context: context,
-                            icon: Icons.south_east_rounded,
-                            amount: minBalance!,
-                            color: AppColors.getExpense(context),
-                            currencySymbol: currencySymbol,
-                          ),
-                          const SizedBox(width: 12),
-                          Container(
-                            width: 3,
-                            height: 3,
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              color: activeColor.withValues(alpha: 0.3),
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          _buildRangeIndicator(
-                            context: context,
-                            icon: Icons.north_east_rounded,
-                            amount: maxBalance!,
-                            color: AppColors.getIncome(context),
-                            currencySymbol: currencySymbol,
-                          ),
-                        ],
-                      ),
+                      ],
                     ),
                   ),
-              ],
+                  if (minBalance != null && maxBalance != null)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 2),
+                      child: FittedBox(
+                        fit: BoxFit.scaleDown,
+                        alignment: Alignment.center,
+                        child: Row(
+                          children: [
+                            _buildRangeIndicator(
+                              context: context,
+                              icon: Icons.south_east_rounded,
+                              amount: minBalance!,
+                              color: AppColors.getExpense(context),
+                              currencySymbol: currencySymbol,
+                            ),
+                            const SizedBox(width: 12),
+                            Container(
+                              width: 3,
+                              height: 3,
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: activeColor.withValues(alpha: 0.3),
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            _buildRangeIndicator(
+                              context: context,
+                              icon: Icons.north_east_rounded,
+                              amount: maxBalance!,
+                              color: AppColors.getIncome(context),
+                              currencySymbol: currencySymbol,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

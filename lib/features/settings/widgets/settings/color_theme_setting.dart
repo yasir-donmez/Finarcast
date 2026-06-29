@@ -335,9 +335,9 @@ class _LiquidColorDropState extends State<LiquidColorDrop> {
                         gradient: gradient,
                         border: Border.all(
                           color: AppColors.getTextPrimary(context).withValues(
-                            alpha: widget.isSelected ? 0.8 : 0.12,
+                            alpha: widget.isSelected ? 0.8 : 0.15,
                           ),
-                          width: widget.isSelected ? 2.5 : 1,
+                          width: 2.0,
                         ),
                         boxShadow: shadows,
                       ),

@@ -21,3 +21,7 @@
 -keepclassmembers,allowobfuscation class * {
   @com.google.gson.annotations.SerializedName <fields>;
 }
+
+# Ignore missing Play Core classes (deferred components/splits not used)
+-dontwarn com.google.android.play.core.**
+
