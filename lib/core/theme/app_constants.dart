@@ -233,8 +233,8 @@ class AppCurrency {
   static bool isCommodity(String symbol) => commoditySymbols.contains(symbol);
 }
 class AppAssets {
-  static const String logoNormal = 'assets/images/app_logo_normal.png';
-  static const String logoPremium = 'assets/images/app_logo_premium.png';
+  static const String logoNormal = 'assets/images/ikontrans.png';
+  static const String logoPremium = 'assets/images/ikon.png';
   static const String bgPattern = 'assets/images/bg_pattern.png';
 
   static String getLogo(BuildContext context) {

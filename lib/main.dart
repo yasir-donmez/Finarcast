@@ -10,7 +10,7 @@ import 'core/theme/app_theme.dart';
 import 'core/theme/app_constants.dart';
 import 'core/services/data_retention_service.dart';
 import 'core/services/auth_service.dart';
-import 'core/services/currency_service.dart';
+import 'core/services/currency_service.dart';  
 import 'core/providers/settings_provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
