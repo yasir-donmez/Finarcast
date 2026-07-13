@@ -15,6 +15,8 @@ import '../../core/providers/settings_provider.dart';
 import '../home/home_providers.dart';
 import '../../core/services/notification_service.dart';
 import '../../core/utils/currency_utils.dart';
+import '../../core/utils/category_utils.dart';
+import '../../core/providers/db_providers.dart';
 import '../../core/services/currency_service.dart';
 import '../auth/widgets/auth_background.dart';
 import '../../core/services/subscription_service.dart';
@@ -34,6 +36,7 @@ import '../../shared/widgets/custom_card.dart';
 import '../../shared/widgets/custom_text_field.dart';
 import '../../shared/widgets/custom_button.dart';
 import '../../shared/widgets/custom_bottom_sheet.dart';
+import '../vaults/widgets/template_update_warning_sheet.dart';
 import '../../shared/widgets/glass_surface.dart';
 import '../../shared/widgets/custom_notification.dart';
 import '../../shared/widgets/custom_dialog.dart';
@@ -701,33 +704,61 @@ class _TransactionBuilderScreenState
         if (widget.initialId != null && widget.isTemplateEdit == true) {
           final old = await DatabaseService.getTemplate(widget.initialId!);
           if (old != null) {
-            old.title = catName;
-            old.amount = finalAmount;
-            old.minAmount = finalMin;
-            old.maxAmount = finalMax;
-            old.isIncome = _tabIndex == 1;
-            old.vaultId = _selectedVaultIds.firstOrNull;
-            old.categoryId = categoryId;
-            old.iconCode = iconCodeStr;
-            old.periodType = _periodData.periodType;
-            old.recurrenceDay = _periodData.selectedDay;
-            old.recurrenceDate = _periodData.selectedDateForRecurrence;
-            old.totalInstallments = _periodData.totalInstallments;
-            old.note = _noteController.text.isNotEmpty
-                ? _noteController.text
-                : null;
-            old.currency = _selectedCurrency;
-            old.startDate = _periodData.selectedDateForRecurrence;
+            final unreviewedCount = await DatabaseService.getUnreviewedRecordsCountForTemplate(old.id);
+            bool shouldUpdate = true;
+            
+            if (unreviewedCount > 0 && mounted) {
+              final option = await CustomBottomSheet.show<TemplateUpdateOption>(
+                context: context,
+                title: "İncelenmemiş İşlemler",
+                child: TemplateUpdateWarningSheet(
+                  unreviewedCount: unreviewedCount,
+                  templateTitle: old.title,
+                  templateColor: CategoryUtils.getCategoryColor(
+                    categoryId: old.categoryId,
+                    customCategories: ref.read(customCategoriesProvider),
+                  ),
+                ),
+              );
+              
+              if (option == TemplateUpdateOption.cancel || option == null) {
+                shouldUpdate = false;
+              } else if (option == TemplateUpdateOption.approveAndKeepHistory && mounted) {
+                await DatabaseService.approveAllUnreviewedRecordsForTemplate(old.id);
+              }
+            }
+            
+            if (shouldUpdate) {
+              old.title = catName;
+              old.amount = finalAmount;
+              old.minAmount = finalMin;
+              old.maxAmount = finalMax;
+              old.isIncome = _tabIndex == 1;
+              old.vaultId = _selectedVaultIds.firstOrNull;
+              old.categoryId = categoryId;
+              old.iconCode = iconCodeStr;
+              old.periodType = _periodData.periodType;
+              old.recurrenceDay = _periodData.selectedDay;
+              old.recurrenceDate = _periodData.selectedDateForRecurrence;
+              old.totalInstallments = _periodData.totalInstallments;
+              old.note = _noteController.text.isNotEmpty
+                  ? _noteController.text
+                  : null;
+              old.currency = _selectedCurrency;
+              old.startDate = _periodData.selectedDateForRecurrence;
 
-            old.isNotificationEnabled = _isNotificationEnabled;
-            old.hasNotification =
-                _isNotificationEnabled || old.hasNotification;
-            old.notificationReminderDays = _notificationReminderDays;
-            old.notificationHour = _notificationTime.hour;
-            old.notificationMinute = _notificationTime.minute;
+              old.isNotificationEnabled = _isNotificationEnabled;
+              old.hasNotification =
+                  _isNotificationEnabled || old.hasNotification;
+              old.notificationReminderDays = _notificationReminderDays;
+              old.notificationHour = _notificationTime.hour;
+              old.notificationMinute = _notificationTime.minute;
 
-            await DatabaseService.updateTemplate(old);
-            await MaterializationService.onTemplateChanged(old);
+              await DatabaseService.updateTemplate(old);
+              await MaterializationService.onTemplateChanged(old);
+            } else {
+              return; // Do not pop screen, return early so user stays in editor
+            }
           }
         } else {
           final template = RecurringTemplate()

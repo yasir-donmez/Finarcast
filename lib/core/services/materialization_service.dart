@@ -17,7 +17,7 @@ class MaterializationService {
       debugPrint('⚙️ [MaterializationService] materializeAll başlatılıyor... Bugün: $today');
 
       for (final template in templates) {
-        if (template.isPaused || template.isArchived) continue;
+        if (template.isArchived) continue;
         await _materializeTemplate(template, until: today);
       }
       debugPrint('✅ [MaterializationService] materializeAll tamamlandı.');
@@ -105,7 +105,7 @@ class MaterializationService {
       await DatabaseService.deleteUnreviewedRecordsForTemplate(template.id);
       
       // 2. startDate'den bugüne kadar tekrar materialize et
-      if (!template.isPaused && !template.isArchived) {
+      if (!template.isArchived) {
         final now = DateTime.now();
         final today = DateTime(now.year, now.month, now.day);
         await _materializeTemplate(template, until: today);

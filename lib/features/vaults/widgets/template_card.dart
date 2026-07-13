@@ -272,15 +272,7 @@ class TemplateCard extends ConsumerWidget {
                                           : AppColors.getTextSecondary(context).withValues(alpha: 0.35),
                                       size: 13 * sf,
                                     ),
-                                  if (tx.isPaused) ...[
-                                    if (tx.hasNotification)
-                                      SizedBox(width: 4 * sf),
-                                    Icon(
-                                      Icons.pause_circle_filled_rounded,
-                                      size: 13 * sf,
-                                      color: Colors.orangeAccent,
-                                    ),
-                                  ],
+                                  
                                 ],
                               ),
                               const SizedBox(width: 4),

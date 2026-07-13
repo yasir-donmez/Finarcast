@@ -409,7 +409,7 @@ List<TransactionRecord> _getUpcomingItems({
 
   // 2. Aktif şablonlardan geleceğe yönelik projeksiyon yap
   for (var template in templates) {
-    if (template.isPaused || template.isArchived) continue;
+    if (template.isArchived) continue;
     if (template.periodType == 0) continue;
 
     final dates = RecurrenceEngine.occurrenceDates(

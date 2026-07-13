@@ -93,7 +93,7 @@ class _InAppNotificationsSheetState extends ConsumerState<InAppNotificationsShee
     final dismissedIds = ref.watch(dismissedNotificationsProvider);
 
     for (final template in templates) {
-      if (!template.isNotificationEnabled || template.isPaused || template.isArchived) continue;
+      if (!template.isNotificationEnabled || template.isArchived) continue;
 
       // Generate occurrences from template.startDate to now + 1 day
       final dates = RecurrenceEngine.occurrenceDates(

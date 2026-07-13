@@ -116,7 +116,7 @@ final dailyVelocityProvider = Provider<double>((ref) {
   double dailyNet = 0;
 
   for (final t in templates) {
-    if (t.isPaused || t.isArchived) continue;
+    if (t.isArchived) continue;
 
     // monthlyEquivalent'i günlüğe çeviriyoruz (30.44 gün ortalama)
     double monthlyConv = t.getConvertedMonthlyEquivalent(globalCurrency, rates);

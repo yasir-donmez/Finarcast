@@ -10,6 +10,7 @@ import 'models/exchange_rate.dart';
 import 'models/custom_category.dart';
 import '../services/notification_service.dart';
 import '../services/sync_coordinator.dart';
+import '../services/materialization_service.dart';
 import '../utils/currency_utils.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:uuid/uuid.dart';
@@ -161,6 +162,7 @@ class DatabaseService {
       });
     }
     await NotificationService().cancelNotification(id);
+    await MaterializationService.onTemplateDeleted(id);
     SyncCoordinator.scheduleSync();
   }
 
@@ -324,6 +326,38 @@ class DatabaseService {
         .sortByDateDesc()
         .findFirst();
     return lastRecord?.date;
+  }
+
+  static Future<int> getUnreviewedRecordsCountForTemplate(int templateId) async {
+    return await isar.transactionRecords
+        .filter()
+        .templateIdEqualTo(templateId)
+        .isReviewedEqualTo(false)
+        .syncStatusLessThan(2)
+        .count();
+  }
+
+  static Future<void> approveAllUnreviewedRecordsForTemplate(int templateId) async {
+    final unreviewed = await isar.transactionRecords
+        .filter()
+        .templateIdEqualTo(templateId)
+        .isReviewedEqualTo(false)
+        .syncStatusLessThan(2)
+        .findAll();
+
+    if (unreviewed.isEmpty) return;
+
+    await isar.writeTxn(() async {
+      for (final r in unreviewed) {
+        r.isReviewed = true;
+        r.updatedAt = DateTime.now();
+        if (r.syncStatus != 2) {
+          r.syncStatus = 1; // Pending update for sync
+        }
+        await isar.transactionRecords.put(r);
+      }
+    });
+    SyncCoordinator.scheduleSync();
   }
 
   static Future<void> deleteUnreviewedRecordsForTemplate(int templateId) async {

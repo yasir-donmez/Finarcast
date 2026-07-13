@@ -27,7 +27,6 @@ create table if not exists public.recurring_templates (
   start_date timestamptz not null default now(),
   note text,
   currency text,
-  is_paused boolean not null default false,
   is_archived boolean not null default false,
   is_notification_enabled boolean not null default false,
   has_notification boolean not null default false,

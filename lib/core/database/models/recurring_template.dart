@@ -41,7 +41,6 @@ class RecurringTemplate {
   int notificationMinute = 0;
 
   // — Durum —
-  bool isPaused = false;
   bool isArchived = false;
 
   // — Senkronizasyon —

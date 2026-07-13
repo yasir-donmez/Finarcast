@@ -1198,7 +1198,6 @@ class SyncService {
       'start_date': t.startDate.toUtc().toIso8601String(),
       'note': t.note,
       'currency': t.currency,
-      'is_paused': t.isPaused,
       'is_archived': t.isArchived,
       'is_notification_enabled': t.isNotificationEnabled,
       'has_notification': t.hasNotification,
@@ -1235,7 +1234,6 @@ class SyncService {
     
     t.note = raw['note'];
     t.currency = raw['currency'];
-    t.isPaused = raw['is_paused'] ?? t.isPaused;
     t.isArchived = raw['is_archived'] ?? t.isArchived;
     t.isNotificationEnabled = raw['is_notification_enabled'] ?? t.isNotificationEnabled;
     t.hasNotification = raw['has_notification'] ?? t.hasNotification;

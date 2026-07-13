@@ -13,6 +13,10 @@ class AuthErrorHelper {
         errorString.contains('failed host lookup') || 
         errorString.contains('network_error') ||
         errorString.contains('connection failed')) {
+      if (errorString.contains('supabase.co') && 
+          (errorString.contains('failed host lookup') || errorString.contains('host lookup failed'))) {
+        return l10n.syncErrorProjectPaused;
+      }
       return l10n.syncErrorNoInternet;
     }
 

@@ -143,22 +143,34 @@ class SyncCoordinator {
         _retryTimer?.cancel();
         return true;
       } else {
-        // Hatalar arasında internet/bağlantı problemi olup olmadığını kontrol et
-        final hasConnectionError = result.errors.any((err) {
+        final hasProjectPausedError = result.errors.any((err) {
           final errStr = err.toLowerCase();
-          return errStr.contains('socketexception') ||
-              errStr.contains('network') ||
-              errStr.contains('connection failed') ||
-              errStr.contains('httpclientexception') ||
-              errStr.contains('host lookup failed');
+          return errStr.contains('supabase.co') &&
+              (errStr.contains('host lookup failed') || errStr.contains('failed host lookup'));
         });
 
-        if (hasConnectionError) {
+        if (hasProjectPausedError) {
           lastError = l10n != null
-              ? l10n.syncErrorNoInternet
-              : "İnternet bağlantısı kurulamadı. Lütfen internet bağlantınızı kontrol edin.";
+              ? l10n.syncErrorProjectPaused
+              : "Bulut veritabanı projesi duraklatılmış (Project Paused). Lütfen Supabase panelinizden projeyi tekrar aktifleştirin.";
         } else {
-          lastError = l10n != null ? result.getLocalizedSummary(l10n) : result.summary;
+          // Hatalar arasında internet/bağlantı problemi olup olmadığını kontrol et
+          final hasConnectionError = result.errors.any((err) {
+            final errStr = err.toLowerCase();
+            return errStr.contains('socketexception') ||
+                errStr.contains('network') ||
+                errStr.contains('connection failed') ||
+                errStr.contains('httpclientexception') ||
+                errStr.contains('host lookup failed');
+          });
+
+          if (hasConnectionError) {
+            lastError = l10n != null
+                ? l10n.syncErrorNoInternet
+                : "İnternet bağlantısı kurulamadı. Lütfen internet bağlantınızı kontrol edin.";
+          } else {
+            lastError = l10n != null ? result.getLocalizedSummary(l10n) : result.summary;
+          }
         }
 
         _scheduleRetry(l10n);
@@ -230,6 +242,11 @@ class SyncCoordinator {
       return l10n != null
           ? l10n.syncErrorSessionExpired
           : "Oturum süreniz dolmuş olabilir. Lütfen Ayarlar > Oturumu Kapat seçeneğiyle çıkış yapıp tekrar giriş yapın.";
+    }
+    if (errStr.contains('supabase.co') && (errStr.contains('host lookup failed') || errStr.contains('failed host lookup'))) {
+      return l10n != null
+          ? l10n.syncErrorProjectPaused
+          : "Bulut veritabanı projesi duraklatılmış (Project Paused). Lütfen Supabase panelinizden projeyi tekrar aktifleştirin.";
     }
     if (errStr.contains('socketexception') || errStr.contains('network') || errStr.contains('connection failed') || errStr.contains('httpclientexception') || errStr.contains('host lookup failed')) {
       return l10n != null

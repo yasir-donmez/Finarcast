@@ -18,6 +18,11 @@ import 'widgets/due_date_radar_widget.dart';
 import 'widgets/spending_giants_widget.dart';
 import 'widgets/timeline_activity_widget.dart';
 
+import 'package:supabase_flutter/supabase_flutter.dart';
+import 'models/announcement.dart';
+import 'providers/announcement_provider.dart';
+import '../../core/services/subscription_service.dart';
+
 class DashboardScreen extends ConsumerWidget {
   const DashboardScreen({super.key});
 
@@ -25,14 +30,26 @@ class DashboardScreen extends ConsumerWidget {
     final hour = DateTime.now().hour;
     final locale = Localizations.localeOf(context).languageCode;
     final isTr = locale == 'tr';
+    
+    final user = Supabase.instance.client.auth.currentUser;
+    String name = "";
+    if (user != null) {
+      final username = user.userMetadata?['username'] as String?;
+      if (username != null && username.isNotEmpty) {
+        name = ", ${username[0].toUpperCase() + username.substring(1)}";
+      } else if (user.email != null && user.email!.isNotEmpty) {
+        name = ", ${user.email!.split('@').first}";
+      }
+    }
+
     if (hour >= 5 && hour < 12) {
-      return isTr ? 'Günaydın ☀️' : 'Good morning ☀️';
+      return isTr ? 'Günaydın$name ☀️' : 'Good morning$name ☀️';
     } else if (hour >= 12 && hour < 17) {
-      return isTr ? 'Tünaydın 🌤️' : 'Good afternoon 🌤️';
+      return isTr ? 'Tünaydın$name 🌤️' : 'Good afternoon$name 🌤️';
     } else if (hour >= 17 && hour < 22) {
-      return isTr ? 'İyi Akşamlar 🌙' : 'Good evening 🌙';
+      return isTr ? 'İyi Akşamlar$name 🌙' : 'Good evening$name 🌙';
     } else {
-      return isTr ? 'İyi Geceler 🌌' : 'Good night 🌌';
+      return isTr ? 'İyi Geceler$name 🌌' : 'Good night$name 🌌';
     }
   }
 
@@ -43,6 +60,15 @@ class DashboardScreen extends ConsumerWidget {
     final l10n = AppLocalizations.of(context)!;
     final vaults = ref.watch(allVaultsProvider);
     final isTr = Localizations.localeOf(context).languageCode == 'tr';
+    final announcements = ref.watch(announcementsProvider).value ?? [];
+    final isPro = ref.watch(subscriptionServiceProvider).isPro;
+
+    final visibleAnnouncements = announcements.where((a) {
+      if (a.isPremiumPromotion && isPro) {
+        return false;
+      }
+      return true;
+    }).toList();
 
     // Kasa Listesi ve Seçim İndeksi
     final List<String> vaultItems = [l10n.allVaults];
@@ -170,9 +196,12 @@ class DashboardScreen extends ConsumerWidget {
                   // 3. Genel İstatistikler
                   _buildGeneralStatsCard(context, dailyIncome, dailyExpense, dailyNet, targetCurrency),
 
-                  // 5. Duyurular
-                  _buildAnnouncementsCard(context),
-                  const SizedBox(height: 8),
+                  // 5. Duyurular (Sadece görüntülenecek aktif duyuru varsa gösterilir)
+                  if (visibleAnnouncements.isNotEmpty) ...[
+                    _buildAnnouncementsCard(context, visibleAnnouncements),
+                  ],
+
+                  const SizedBox(height: 16), // Bölümler arası tutarlı boşluk (Stat/Duyuru -> Detaylar)
 
                   // 6. 3 Temel Widget (Dikey Akış - Kartsız)
                   Padding(
@@ -355,75 +384,57 @@ class DashboardScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildAnnouncementsCard(BuildContext context) {
+  Widget _buildAnnouncementsCard(BuildContext context, List<Announcement> announcements) {
+    if (announcements.isEmpty) return const SizedBox.shrink();
+
     final activeColor = AppColors.getPrimary(context);
     final locale = Localizations.localeOf(context).languageCode;
-    final isTr = locale == 'tr';
+    final List<String> items = announcements.map((a) => a.getLocalizedContent(locale)).toList();
 
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: AppSizes.paddingMedium, vertical: 6),
       child: GlassSurface(
         borderRadius: 20,
         padding: const EdgeInsets.all(16),
-        child: Column(
+        child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Row(
-              children: [
-                Icon(
-                  Icons.campaign_rounded,
-                  color: activeColor,
-                  size: 20,
-                ),
-                const SizedBox(width: 8),
-                Text(
-                  isTr ? 'Duyurular & Bütçe İpuçları' : 'Notices & Budget Tips',
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w900,
-                    color: AppColors.getTextPrimary(context),
-                    letterSpacing: -0.3,
-                  ),
-                ),
-              ],
+            Icon(
+              Icons.campaign_rounded,
+              color: activeColor,
+              size: 22,
             ),
-            const SizedBox(height: 10),
-            Padding(
-              padding: const EdgeInsets.only(left: 4.0),
+            const SizedBox(width: 12),
+            Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    isTr
-                        ? '• Bu ayki tekrarlayan ödemeleriniz toplam harcamalarınızın %32\'sini oluşturuyor. Finansal sağlığınız mükemmel durumda! 🚀'
-                        : '• Your recurring payments make up 32% of your total spending this month. Your financial health is in excellent shape! 🚀',
-                    style: TextStyle(
-                      fontSize: 12.5,
-                      fontWeight: FontWeight.w500,
-                      color: AppColors.getTextSecondary(context).withValues(alpha: 0.8),
-                      height: 1.45,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  isTr
-                      ? '• Yaklaşan ödemeleriniz için bildirim ayarlarını "Hesap Ayarları" sayfasından kişiselleştirebilirsiniz.'
-                      : '• You can personalize your notification settings for upcoming payments in the "Account Settings" page.',
-                  style: TextStyle(
-                    fontSize: 12.5,
-                    fontWeight: FontWeight.w500,
-                    color: AppColors.getTextSecondary(context).withValues(alpha: 0.8),
-                    height: 1.45,
-                  ),
-                ),
-              ],
+                mainAxisSize: MainAxisSize.min,
+                children: items.asMap().entries.map((entry) {
+                  final idx = entry.key;
+                  final text = entry.value;
+                  return Padding(
+                    padding: EdgeInsets.only(
+                      top: idx == 0 ? 2.0 : 6.0,
+                      bottom: idx == items.length - 1 ? 0.0 : 6.0,
+                    ),
+                    child: Text(
+                      text,
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.getTextPrimary(context),
+                        height: 1.45,
+                      ),
+                    ),
+                  );
+                }).toList(),
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
-    ),
-  );
-}
+    );
+  }
 
   Widget _buildSectionHeader(BuildContext context, String title) {
     return Padding(

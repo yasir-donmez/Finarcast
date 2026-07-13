@@ -49,75 +49,74 @@ const RecurringTemplateSchema = CollectionSchema(
       name: r'isNotificationEnabled',
       type: IsarType.bool,
     ),
-    r'isPaused': PropertySchema(id: 8, name: r'isPaused', type: IsarType.bool),
     r'maxAmount': PropertySchema(
-      id: 9,
+      id: 8,
       name: r'maxAmount',
       type: IsarType.double,
     ),
     r'minAmount': PropertySchema(
-      id: 10,
+      id: 9,
       name: r'minAmount',
       type: IsarType.double,
     ),
-    r'note': PropertySchema(id: 11, name: r'note', type: IsarType.string),
+    r'note': PropertySchema(id: 10, name: r'note', type: IsarType.string),
     r'notificationHour': PropertySchema(
-      id: 12,
+      id: 11,
       name: r'notificationHour',
       type: IsarType.long,
     ),
     r'notificationMinute': PropertySchema(
-      id: 13,
+      id: 12,
       name: r'notificationMinute',
       type: IsarType.long,
     ),
     r'notificationReminderDays': PropertySchema(
-      id: 14,
+      id: 13,
       name: r'notificationReminderDays',
       type: IsarType.long,
     ),
     r'periodType': PropertySchema(
-      id: 15,
+      id: 14,
       name: r'periodType',
       type: IsarType.long,
     ),
     r'recurrenceDate': PropertySchema(
-      id: 16,
+      id: 15,
       name: r'recurrenceDate',
       type: IsarType.dateTime,
     ),
     r'recurrenceDay': PropertySchema(
-      id: 17,
+      id: 16,
       name: r'recurrenceDay',
       type: IsarType.long,
     ),
     r'remoteId': PropertySchema(
-      id: 18,
+      id: 17,
       name: r'remoteId',
       type: IsarType.string,
     ),
     r'startDate': PropertySchema(
-      id: 19,
+      id: 18,
       name: r'startDate',
       type: IsarType.dateTime,
     ),
     r'syncStatus': PropertySchema(
-      id: 20,
+      id: 19,
       name: r'syncStatus',
       type: IsarType.long,
     ),
-    r'title': PropertySchema(id: 21, name: r'title', type: IsarType.string),
+    r'title': PropertySchema(id: 20, name: r'title', type: IsarType.string),
     r'totalInstallments': PropertySchema(
-      id: 22,
+      id: 21,
       name: r'totalInstallments',
       type: IsarType.long,
     ),
     r'updatedAt': PropertySchema(
-      id: 23,
+      id: 22,
       name: r'updatedAt',
       type: IsarType.dateTime,
     ),
-    r'vaultId': PropertySchema(id: 24, name: r'vaultId', type: IsarType.long),
+    r'vaultId': PropertySchema(id: 23, name: r'vaultId', type: IsarType.long),
   },
 
   estimateSize: _recurringTemplateEstimateSize,
@@ -242,23 +241,22 @@ void _recurringTemplateSerialize(
   writer.writeBool(offsets[5], object.isArchived);
   writer.writeBool(offsets[6], object.isIncome);
   writer.writeBool(offsets[7], object.isNotificationEnabled);
-  writer.writeBool(offsets[8], object.isPaused);
-  writer.writeDouble(offsets[9], object.maxAmount);
-  writer.writeDouble(offsets[10], object.minAmount);
-  writer.writeString(offsets[11], object.note);
-  writer.writeLong(offsets[12], object.notificationHour);
-  writer.writeLong(offsets[13], object.notificationMinute);
-  writer.writeLong(offsets[14], object.notificationReminderDays);
-  writer.writeLong(offsets[15], object.periodType);
-  writer.writeDateTime(offsets[16], object.recurrenceDate);
-  writer.writeLong(offsets[17], object.recurrenceDay);
-  writer.writeString(offsets[18], object.remoteId);
-  writer.writeDateTime(offsets[19], object.startDate);
-  writer.writeLong(offsets[20], object.syncStatus);
-  writer.writeString(offsets[21], object.title);
-  writer.writeLong(offsets[22], object.totalInstallments);
-  writer.writeDateTime(offsets[23], object.updatedAt);
-  writer.writeLong(offsets[24], object.vaultId);
+  writer.writeDouble(offsets[8], object.maxAmount);
+  writer.writeDouble(offsets[9], object.minAmount);
+  writer.writeString(offsets[10], object.note);
+  writer.writeLong(offsets[11], object.notificationHour);
+  writer.writeLong(offsets[12], object.notificationMinute);
+  writer.writeLong(offsets[13], object.notificationReminderDays);
+  writer.writeLong(offsets[14], object.periodType);
+  writer.writeDateTime(offsets[15], object.recurrenceDate);
+  writer.writeLong(offsets[16], object.recurrenceDay);
+  writer.writeString(offsets[17], object.remoteId);
+  writer.writeDateTime(offsets[18], object.startDate);
+  writer.writeLong(offsets[19], object.syncStatus);
+  writer.writeString(offsets[20], object.title);
+  writer.writeLong(offsets[21], object.totalInstallments);
+  writer.writeDateTime(offsets[22], object.updatedAt);
+  writer.writeLong(offsets[23], object.vaultId);
 }
 
 RecurringTemplate _recurringTemplateDeserialize(
@@ -277,23 +275,22 @@ RecurringTemplate _recurringTemplateDeserialize(
   object.isArchived = reader.readBool(offsets[5]);
   object.isIncome = reader.readBool(offsets[6]);
   object.isNotificationEnabled = reader.readBool(offsets[7]);
-  object.isPaused = reader.readBool(offsets[8]);
-  object.maxAmount = reader.readDoubleOrNull(offsets[9]);
-  object.minAmount = reader.readDoubleOrNull(offsets[10]);
-  object.note = reader.readStringOrNull(offsets[11]);
-  object.notificationHour = reader.readLong(offsets[12]);
-  object.notificationMinute = reader.readLong(offsets[13]);
-  object.notificationReminderDays = reader.readLong(offsets[14]);
-  object.periodType = reader.readLong(offsets[15]);
-  object.recurrenceDate = reader.readDateTimeOrNull(offsets[16]);
-  object.recurrenceDay = reader.readLongOrNull(offsets[17]);
-  object.remoteId = reader.readStringOrNull(offsets[18]);
-  object.startDate = reader.readDateTime(offsets[19]);
-  object.syncStatus = reader.readLong(offsets[20]);
-  object.title = reader.readString(offsets[21]);
-  object.totalInstallments = reader.readLongOrNull(offsets[22]);
-  object.updatedAt = reader.readDateTime(offsets[23]);
-  object.vaultId = reader.readLongOrNull(offsets[24]);
+  object.maxAmount = reader.readDoubleOrNull(offsets[8]);
+  object.minAmount = reader.readDoubleOrNull(offsets[9]);
+  object.note = reader.readStringOrNull(offsets[10]);
+  object.notificationHour = reader.readLong(offsets[11]);
+  object.notificationMinute = reader.readLong(offsets[12]);
+  object.notificationReminderDays = reader.readLong(offsets[13]);
+  object.periodType = reader.readLong(offsets[14]);
+  object.recurrenceDate = reader.readDateTimeOrNull(offsets[15]);
+  object.recurrenceDay = reader.readLongOrNull(offsets[16]);
+  object.remoteId = reader.readStringOrNull(offsets[17]);
+  object.startDate = reader.readDateTime(offsets[18]);
+  object.syncStatus = reader.readLong(offsets[19]);
+  object.title = reader.readString(offsets[20]);
+  object.totalInstallments = reader.readLongOrNull(offsets[21]);
+  object.updatedAt = reader.readDateTime(offsets[22]);
+  object.vaultId = reader.readLongOrNull(offsets[23]);
   return object;
 }
 
@@ -321,13 +318,13 @@ P _recurringTemplateDeserializeProp<P>(
     case 7:
       return (reader.readBool(offset)) as P;
     case 8:
-      return (reader.readBool(offset)) as P;
+      return (reader.readDoubleOrNull(offset)) as P;
     case 9:
       return (reader.readDoubleOrNull(offset)) as P;
     case 10:
-      return (reader.readDoubleOrNull(offset)) as P;
-    case 11:
       return (reader.readStringOrNull(offset)) as P;
+    case 11:
+      return (reader.readLong(offset)) as P;
     case 12:
       return (reader.readLong(offset)) as P;
     case 13:
@@ -335,24 +332,22 @@ P _recurringTemplateDeserializeProp<P>(
     case 14:
       return (reader.readLong(offset)) as P;
     case 15:
-      return (reader.readLong(offset)) as P;
-    case 16:
       return (reader.readDateTimeOrNull(offset)) as P;
+    case 16:
+      return (reader.readLongOrNull(offset)) as P;
     case 17:
-      return (reader.readLongOrNull(offset)) as P;
-    case 18:
       return (reader.readStringOrNull(offset)) as P;
+    case 18:
+      return (reader.readDateTime(offset)) as P;
     case 19:
-      return (reader.readDateTime(offset)) as P;
-    case 20:
       return (reader.readLong(offset)) as P;
-    case 21:
+    case 20:
       return (reader.readString(offset)) as P;
-    case 22:
+    case 21:
       return (reader.readLongOrNull(offset)) as P;
-    case 23:
+    case 22:
       return (reader.readDateTime(offset)) as P;
-    case 24:
+    case 23:
       return (reader.readLongOrNull(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -1524,15 +1519,6 @@ extension RecurringTemplateQueryFilter
           property: r'isNotificationEnabled',
           value: value,
         ),
-      );
-    });
-  }
-
-  QueryBuilder<RecurringTemplate, RecurringTemplate, QAfterFilterCondition>
-  isPausedEqualTo(bool value) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.equalTo(property: r'isPaused', value: value),
       );
     });
   }
@@ -2984,20 +2970,6 @@ extension RecurringTemplateQuerySortBy
   }
 
   QueryBuilder<RecurringTemplate, RecurringTemplate, QAfterSortBy>
-  sortByIsPaused() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'isPaused', Sort.asc);
-    });
-  }
-
-  QueryBuilder<RecurringTemplate, RecurringTemplate, QAfterSortBy>
-  sortByIsPausedDesc() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'isPaused', Sort.desc);
-    });
-  }
-
-  QueryBuilder<RecurringTemplate, RecurringTemplate, QAfterSortBy>
   sortByMaxAmount() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'maxAmount', Sort.asc);
@@ -3350,20 +3322,6 @@ extension RecurringTemplateQuerySortThenBy
   }
 
   QueryBuilder<RecurringTemplate, RecurringTemplate, QAfterSortBy>
-  thenByIsPaused() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'isPaused', Sort.asc);
-    });
-  }
-
-  QueryBuilder<RecurringTemplate, RecurringTemplate, QAfterSortBy>
-  thenByIsPausedDesc() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'isPaused', Sort.desc);
-    });
-  }
-
-  QueryBuilder<RecurringTemplate, RecurringTemplate, QAfterSortBy>
   thenByMaxAmount() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'maxAmount', Sort.asc);
@@ -3647,13 +3605,6 @@ extension RecurringTemplateQueryWhereDistinct
   }
 
   QueryBuilder<RecurringTemplate, RecurringTemplate, QDistinct>
-  distinctByIsPaused() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addDistinctBy(r'isPaused');
-    });
-  }
-
-  QueryBuilder<RecurringTemplate, RecurringTemplate, QDistinct>
   distinctByMaxAmount() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'maxAmount');
@@ -3825,12 +3776,6 @@ extension RecurringTemplateQueryProperty
   isNotificationEnabledProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'isNotificationEnabled');
-    });
-  }
-
-  QueryBuilder<RecurringTemplate, bool, QQueryOperations> isPausedProperty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r'isPaused');
     });
   }
 

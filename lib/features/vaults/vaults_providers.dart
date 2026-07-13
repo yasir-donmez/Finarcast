@@ -155,7 +155,6 @@ class TemplateUI {
   final int? vaultId;
   final String? note;
   final String? currency;
-  final bool isPaused;
   final bool isArchived;
   final bool isNotificationEnabled;
   final bool hasNotification;
@@ -183,7 +182,6 @@ class TemplateUI {
     required this.vaultId,
     this.note,
     this.currency,
-    required this.isPaused,
     required this.isArchived,
     required this.isNotificationEnabled,
     required this.hasNotification,
@@ -220,7 +218,6 @@ class TemplateUI {
       vaultId: t.vaultId,
       note: t.note,
       currency: t.currency,
-      isPaused: t.isPaused,
       isArchived: t.isArchived,
       isNotificationEnabled: t.isNotificationEnabled,
       hasNotification: t.hasNotification,
@@ -697,8 +694,8 @@ final vaultCardDataProvider = Provider<Map<String?, VaultCardData>>((ref) {
 
     // A. Tekrarlı şablonların bu aydaki katkısı (tahmini)
     final activeTemplates = vaultId == null
-        ? allTemplates.where((t) => !t.isArchived && !t.isPaused)
-        : allTemplates.where((t) => !t.isArchived && !t.isPaused && t.vaultId == int.parse(vaultId.replaceFirst('v_', '')));
+        ? allTemplates.where((t) => !t.isArchived)
+        : allTemplates.where((t) => !t.isArchived && t.vaultId == int.parse(vaultId.replaceFirst('v_', '')));
 
     for (final t in activeTemplates) {
       final occurrences = RecurrenceEngine.occurrencesInMonth(t.recurrenceRule, now.year, now.month);

@@ -24,6 +24,7 @@ import '../subscription/widgets/pro_upgrade_sheet.dart';
 import 'widgets/add_vault_sheet.dart';
 import 'widgets/vault_detail_sheet.dart';
 import 'widgets/detail_sheet.dart';
+import 'widgets/template_delete_warning_sheet.dart';
 import 'widgets/in_app_notifications_sheet.dart';
 import '../home/home_providers.dart';
 import '../home/home_scroll_provider.dart';
@@ -668,27 +669,50 @@ class _VaultsScreenState extends ConsumerState<VaultsScreen> {
         ),
       );
     } else if (action == DetailSheetAction.delete) {
-      final confirm = await showCustomDialog<bool>(
-        context: context,
-        accentColor: AppColors.error,
-        title: AppLocalizations.of(context)!.permanentDelete,
-        content: AppLocalizations.of(context)!.permanentDeleteDesc,
-        actions: [
-          PrecisionDialogAction(
-            label: AppLocalizations.of(context)!.cancel,
-            onTap: () => Navigator.pop(context, false),
-            isPrimary: false,
+      final unreviewedCount = await DatabaseService.getUnreviewedRecordsCountForTemplate(template.id);
+      
+      if (unreviewedCount > 0 && context.mounted) {
+        final option = await CustomBottomSheet.show<TemplateDeleteOption>(
+          context: context,
+          title: "İncelenmemiş İşlemler",
+          child: TemplateDeleteWarningSheet(
+            unreviewedCount: unreviewedCount,
+            templateTitle: template.title,
+            templateColor: template.color,
           ),
-          PrecisionDialogAction(
-            label: AppLocalizations.of(context)!.ok,
-            onTap: () => Navigator.pop(context, true),
-            isPrimary: true,
-          ),
-        ],
-      );
-      if (confirm == true && context.mounted) {
-        await DatabaseService.deleteTemplate(template.id);
-        HapticFeedback.mediumImpact();
+        );
+        
+        if (option == TemplateDeleteOption.approveAndKeepHistory && context.mounted) {
+          await DatabaseService.approveAllUnreviewedRecordsForTemplate(template.id);
+          await DatabaseService.deleteTemplate(template.id);
+          HapticFeedback.mediumImpact();
+        } else if (option == TemplateDeleteOption.deleteWithTransactions && context.mounted) {
+          await DatabaseService.deleteTemplate(template.id);
+          HapticFeedback.mediumImpact();
+        }
+      } else if (context.mounted) {
+        final confirm = await showCustomDialog<bool>(
+          context: context,
+          accentColor: AppColors.error,
+          title: AppLocalizations.of(context)!.permanentDelete,
+          content: AppLocalizations.of(context)!.permanentDeleteDesc,
+          actions: [
+            PrecisionDialogAction(
+              label: AppLocalizations.of(context)!.cancel,
+              onTap: () => Navigator.pop(context, false),
+              isPrimary: false,
+            ),
+            PrecisionDialogAction(
+              label: AppLocalizations.of(context)!.ok,
+              onTap: () => Navigator.pop(context, true),
+              isPrimary: true,
+            ),
+          ],
+        );
+        if (confirm == true && context.mounted) {
+          await DatabaseService.deleteTemplate(template.id);
+          HapticFeedback.mediumImpact();
+        }
       }
     }
   }
