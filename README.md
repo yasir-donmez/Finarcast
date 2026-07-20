@@ -1,10 +1,10 @@
 <div align="center">
-  <img src="https://via.placeholder.com/800x200/1A1A1A/FFFFFF?text=FinCast+Banner" alt="FinCast Banner" width="100%">
+  <img src="https://via.placeholder.com/800x200/1A1A1A/FFFFFF?text=Finarcast+Banner" alt="Finarcast Banner" width="100%">
 
   <br />
   <br />
 
-  <h1>FinCast 💸</h1>
+  <h1>Finarcast 💸</h1>
   <p><strong>Flutter tabanlı, Yapay Zeka destekli yeni nesil finans ve abonelik yönetim uygulaması.</strong></p>
 
   <a href="#indir">
@@ -25,20 +25,24 @@
 
 <br />
 
-> **Not:** FinCast, standart bütçe takibinin ötesine geçerek; harcamalarınızı özel **Kasalar (Vaults)** içinde izole etmenizi, **Gemini AI** destekli "Smart Inbox" (Akıllı Gelen Kutusu) üzerinden finansal optimizasyon yapmanızı sağlayan premium bir mobil uygulamadır.
+> **Not:** Finarcast, standart bütçe takibinin ötesine geçerek; varlıklarınızı özel **Kasalar (Vaults)** içinde yönetmenizi ve **Gemini AI** destekli **Smart Scan (Akıllı Tarama)** özelliğiyle doğal dil girdileriyle hızlıca işlem veya şablon taslakları oluşturmanızı sağlayan premium bir mobil uygulamadır.
 
 ---
 
 ## 📱 Ekran Görüntüleri
 
-*Geliştirme aşaması tamamlandıkça, uygulamanın özel cam efektli (GlassSurface) ve neumorphic (InsetContainer) tasarımlarına sahip ekran görüntüleri buraya eklenecektir.*
+<p align="center">
+  <img src="assets/screenshots/dashboard.png" width="30%" alt="Dashboard">
+  &nbsp;&nbsp;&nbsp;&nbsp;
+  <img src="assets/screenshots/kasalar.png" width="30%" alt="Kasalar">
+  &nbsp;&nbsp;&nbsp;&nbsp;
+  <img src="assets/screenshots/smart_scan.png" width="30%" alt="Smart Scan">
+</p>
 
 <p align="center">
-  <img src="https://via.placeholder.com/250x500/1e1e1e/ffffff?text=Dashboard+Mockup" width="30%">
+  <img src="assets/screenshots/yeni_plan.png" width="30%" alt="Yeni Plan">
   &nbsp;&nbsp;&nbsp;&nbsp;
-  <img src="https://via.placeholder.com/250x500/1e1e1e/ffffff?text=Vaults+Mockup" width="30%">
-  &nbsp;&nbsp;&nbsp;&nbsp;
-  <img src="https://via.placeholder.com/250x500/1e1e1e/ffffff?text=AI+Optimization+Mockup" width="30%">
+  <img src="assets/screenshots/ayarlar.png" width="30%" alt="Ayarlar (Görünüm ve Stil)">
 </p>
 
 ---
@@ -48,22 +52,22 @@
 <table>
   <tr>
     <td align="center" width="50%">
-      <h3>🛡️ Kasa (Vault) Mimarisi</h3>
-      <p>Nakit, Kredi Kartı gibi varlıklarınızı ayrı kasalara bölün. <code>VaultGrid</code> ve <code>IntegratedVaultCard</code> bileşenleriyle tüm bakiyelerinizi tek panelden yönetin.</p>
+      <h3>🛡️ Kasa (Vault) ve Cüzdan Yönetimi</h3>
+      <p>Nakit, banka kartı ve kredi kartı varlıklarınızı ayrı kasalara bölerek reaktif takip edin. <code>VaultGrid</code> ve <code>IntegratedVaultCard</code> ile gelir/gider akışını tek cüzdan altında izleyin.</p>
     </td>
     <td align="center" width="50%">
-      <h3>🤖 Gemini AI Optimizasyonu</h3>
-      <p><code>google_generative_ai</code> entegrasyonu ile harcama geçmişiniz analiz edilir. "Smart Inbox" (Akıllı Kutu) üzerinden size özel bütçe optimizasyon tavsiyeleri sunulur.</p>
+      <h3>🤖 AI Hızlı Giriş (Smart Scan)</h3>
+      <p><code>google_generative_ai</code> (Gemini API) entegrasyonu sayesinde serbest metin veya fatura girdilerini analiz ederek saniyeler içinde taslak işlemler oluşturur. Analiz veya optimizasyon yapmaz; hızlı giriş odaklıdır.</p>
     </td>
   </tr>
   <tr>
     <td align="center" width="50%">
-      <h3>💎 Premium Cam Tasarım</h3>
-      <p>Özel <code>GlassSurface</code>, <code>SolidSurface</code> ve sıvı animasyonlara sahip <code>DynamicSegmentedControl</code> bileşenleri ile üst düzey, akıcı bir arayüz deneyimi.</p>
+      <h3>🎨 Kişiselleştirilebilir Renkli Tasarım</h3>
+      <p>Klasik cam efektleri yerine "Kutup", "Nane", "Rose" gibi renk paletleri ve "Sade/Renkli" kart stili seçenekleri sunar. <code>CustomCard</code>, <code>SolidSurface</code> ve Neumorphic yapılarla canlı bir arayüz sağlar.</p>
     </td>
     <td align="center" width="50%">
-      <h3>🔁 Akıllı İşlem ve Abonelikler</h3>
-      <p>Tekrarlayan gelir ve giderlerinizi takip edin, uygulama içi özel hatırlatıcılar ile yaklaşan ödemelerinizi asla kaçırmayın.</p>
+      <h3>🔁 Gelişmiş Tekrarlayan İşlemler</h3>
+      <p>Günlük, haftalık, aylık veya yıllık periyotlu gelir/gider planları (RecurringTemplate) oluşturun. 'Esnek Tutar' özelliğiyle min-max aralığında bütçe senaryoları simüle edebilirsiniz.</p>
     </td>
   </tr>
 </table>
@@ -72,7 +76,7 @@
 
 ## 🛠 Kullanılan Teknolojiler (Tech Stack)
 
-FinCast, en güncel Flutter paketleri ve modern mobil mimari standartlarıyla inşa edilmiştir:
+Finarcast, en güncel Flutter paketleri ve modern mobil mimari standartlarıyla inşa edilmiştir:
 
 *   **SDK & UI:** <img src="https://img.shields.io/badge/Flutter-02569B?style=flat-square&logo=flutter&logoColor=white" alt="Flutter" /> (Material & Özel Bileşenler)
 *   **State Management:** `flutter_riverpod` (Reaktif durum yönetimi)
@@ -95,7 +99,7 @@ lib/
 ├── features/     # İş modülleri
 │   ├── auth/         # Giriş / Kayıt / Supabase Auth
 │   ├── home/         # Dashboard, Özet Kartlar ve Ana Navigasyon
-│   ├── smart_inbox/  # AI Asistan ve Akıllı Tarama (Gemini API)
+│   ├── smart_inbox/  # Doğal Dil ile Hızlı İşlem Girişi (Smart Scan)
 │   ├── settings/     # Uygulama Tercihleri ve Profil
 │   ├── subscription/ # Premium Abonelik Yönetimi (RevenueCat)
 │   ├── transactions/ # İşlem Kayıtları, Şablonlar ve Periyotlar
@@ -106,7 +110,7 @@ lib/
 
 ## 💾 Veritabanı ve Senkronizasyon Yapısı (Database & Sync)
 
-FinCast, **çevrimdışı öncelikli (offline-first)** veri mimarisi üzerine kurulmuştur. Veriler önce yerel veritabanında (**Isar**) saklanır ve internet bağlantısı sağlandığında arka planda bulut veritabanı (**Supabase**) ile çift yönlü olarak senkronize edilir.
+Finarcast, **çevrimdışı öncelikli (offline-first)** veri mimarisi üzerine kurulmuştur. Veriler önce yerel veritabanında (**Isar**) saklanır ve internet bağlantısı sağlandığında arka planda bulut veritabanı (**Supabase**) ile çift yönlü olarak senkronize edilir.
 
 ### 1. Veritabanı Mimarisi
 
@@ -254,7 +258,7 @@ Sorgu performansı ve veritabanı tasarrufu için kullanılan formül: `(Birim *
 
 ### 4. Tekrarlayan İşlem Mimarisi (Hybrid Materialization)
 
-FinCast, tekrarlayan harcamaları ve abonelikleri takip etmek için **Hybrid Materialization (Hibrit Somutlaştırma)** mimarisini kullanır. Bu mimari, performansı optimize ederken geçmiş verilerin doğruluğunu korumayı hedefler.
+Finarcast, tekrarlayan harcamaları ve abonelikleri takip etmek için **Hybrid Materialization (Hibrit Somutlaştırma)** mimarisini kullanır. Bu mimari, performansı optimize ederken geçmiş verilerin doğruluğunu korumayı hedefler.
 
 *   **Geçmiş & Bugün (Somut Kayıt):** `occurrenceDate <= bugün` olan tüm periyot kayıtları veritabanında gerçek birer `TransactionRecord` olarak saklanır. Bu sayede geçmiş bakiye, grafik ve raporlar statik ve tutarlı kalır.
 *   **Gelecek (Hesaplanmış Tahmin):** `occurrenceDate > bugün` olan gelecek işlemler veritabanında yer kaplamaz, `RecurrenceEngine` aracılığıyla çalışma zamanında dinamik olarak hesaplanır. Gelecek bütçe projeksiyonları ve takvim ekranı bu tahminleri kullanır.
@@ -293,7 +297,7 @@ Projeyi lokal ortamınızda derlemek için aşağıdaki adımları izleyin.
 2. **Repoyu indirin:**
    ```bash
    git clone <repository-url>
-   cd FinCast
+   cd Finarcast
    ```
 3. **Bağımlılıkları yükleyin:**
    ```bash
