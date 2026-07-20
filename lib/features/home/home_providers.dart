@@ -31,7 +31,7 @@ final homeRealBalanceProvider = Provider<double>((ref) {
   return BalanceService.calculateVaultBalance(
     vault: vault,
     records: ref.watch(allTransactionsProvider),
-    targetCurrency: ref.watch(settingsProvider).currencySymbol,
+    targetCurrency: ref.watch(settingsProvider.select((s) => s.currencySymbol)),
     rates: ref.watch(exchangeRatesProvider).value ?? [],
   );
 });
@@ -57,7 +57,7 @@ final homeMinBalanceProvider = Provider<double>((ref) {
   return BalanceService.calculateVaultMinBalance(
     vault: vault,
     records: ref.watch(allTransactionsProvider),
-    targetCurrency: ref.watch(settingsProvider).currencySymbol,
+    targetCurrency: ref.watch(settingsProvider.select((s) => s.currencySymbol)),
     rates: ref.watch(exchangeRatesProvider).value ?? [],
   );
 });
@@ -83,7 +83,7 @@ final homeMaxBalanceProvider = Provider<double>((ref) {
   return BalanceService.calculateVaultMaxBalance(
     vault: vault,
     records: ref.watch(allTransactionsProvider),
-    targetCurrency: ref.watch(settingsProvider).currencySymbol,
+    targetCurrency: ref.watch(settingsProvider.select((s) => s.currencySymbol)),
     rates: ref.watch(exchangeRatesProvider).value ?? [],
   );
 });
@@ -111,7 +111,7 @@ final timeOffsetProvider = StateProvider<int>((ref) => 0);
 final dailyVelocityProvider = Provider<double>((ref) {
   final templates = ref.watch(allTemplatesProvider);
   final rates = ref.watch(exchangeRatesProvider).value ?? [];
-  final globalCurrency = ref.watch(settingsProvider).currencySymbol;
+  final globalCurrency = ref.watch(settingsProvider.select((s) => s.currencySymbol));
   
   double dailyNet = 0;
 

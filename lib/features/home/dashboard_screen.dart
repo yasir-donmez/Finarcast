@@ -56,7 +56,7 @@ class DashboardScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final activeVaultId = ref.watch(homeMainBalanceVaultIdProvider);
-    final globalCurrency = ref.watch(settingsProvider).currencySymbol;
+    final globalCurrency = ref.watch(settingsProvider.select((s) => s.currencySymbol));
     final l10n = AppLocalizations.of(context)!;
     final vaults = ref.watch(allVaultsProvider);
     final isTr = Localizations.localeOf(context).languageCode == 'tr';

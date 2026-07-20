@@ -29,6 +29,20 @@ class _RotaryTimeDialState extends ConsumerState<RotaryTimeDial> with SingleTick
       vsync: this,
       duration: const Duration(milliseconds: 600),
     );
+    // Listener'ı bir kez ekle — her double-tap'te yeniden eklenmez
+    _resetController.addListener(_onResetTick);
+  }
+
+  void _onResetTick() {
+    if (_resetAnimation == null) return;
+    setState(() {
+      _currentAngle = _resetAnimation!.value.clamp(0.0, double.infinity);
+      _lastAngle = 0.0;
+      _lastHapticLevel = 0;
+      final double simulatedDays = _calculateSimulatedDays(_currentAngle);
+      final double dailyVelocity = ref.read(dailyVelocityProvider);
+      ref.read(simulationBonusProvider.notifier).state = simulatedDays * dailyVelocity;
+    });
   }
 
   @override
@@ -196,19 +210,8 @@ class _RotaryTimeDialState extends ConsumerState<RotaryTimeDial> with SingleTick
                   ).animate(CurvedAnimation(
                     parent: _resetController,
                     curve: Curves.easeOutExpo,
-                  ))
-                    ..addListener(() {
-                      setState(() {
-                        _currentAngle = _resetAnimation!.value.clamp(0.0, double.infinity);
-                        _lastAngle = 0.0;
-                        _lastHapticLevel = 0;
-                        
-                        final double simulatedDays = _calculateSimulatedDays(_currentAngle);
-                        final double dailyVelocity = ref.read(dailyVelocityProvider);
-                        ref.read(simulationBonusProvider.notifier).state = simulatedDays * dailyVelocity;
-                      });
-                    });
-                  
+                  ));
+                  // Listener artık initState'de bir kez ekleniyor (_onResetTick)
                   _resetController.forward(from: 0.0);
                 },
                 child: SizedBox(

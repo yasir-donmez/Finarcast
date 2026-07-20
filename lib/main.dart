@@ -125,11 +125,15 @@ class FinarcastApp extends ConsumerWidget {
       }
     });
 
-    final settings = ref.watch(settingsProvider);
-    final themeMode = _getThemeMode(settings.themeModeIndex);
+    // PERFORMANS: Sadece MaterialApp'in ihtiyaç duyduğu alanları dinle.
+    // Böylece bildirim/senkronizasyon/saklama gibi ilgisiz ayar değişikliklerinde
+    // tüm uygulama yeniden oluşturulmaz.
+    final themeModeIndex = ref.watch(settingsProvider.select((s) => s.themeModeIndex));
+    final accentColorValue = ref.watch(settingsProvider.select((s) => s.accentColorValue));
+    final themeMode = _getThemeMode(themeModeIndex);
 
     // Dil kodunu temizle (tr_TR -> tr)
-    final langCode = settings.languageCode.split('_')[0].toLowerCase();
+    final langCode = ref.watch(settingsProvider.select((s) => s.languageCode)).split('_')[0].toLowerCase();
     
     // Geçerli bir locale nesnesi oluştur, hata durumunda varsayılan 'tr'
     Locale? appLocale;
@@ -143,8 +147,8 @@ class FinarcastApp extends ConsumerWidget {
     return DynamicColorBuilder(
       builder: (lightDynamic, darkDynamic) {
         Color? accentColor;
-        if (settings.accentColorValue != 0) {
-          accentColor = Color(settings.accentColorValue);
+        if (accentColorValue != 0) {
+          accentColor = Color(accentColorValue);
         }
 
         final theme = AppTheme.buildLightTheme(accentColor ?? lightDynamic?.primary ?? const Color(0xFF00BCD4));

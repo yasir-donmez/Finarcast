@@ -67,8 +67,8 @@ class _MainScaffoldState extends ConsumerState<MainScaffold> with TickerProvider
       vsync: this,
       duration: const Duration(seconds: 3),
     );
-    // Sheen animasyonunu yalnızca Pro butonu görünürken çalıştır (başlangıçta index 0)
-    _sheenController.repeat();
+    // Sheen animasyonunu koşulsuz başlatma — _onScroll ve sayfa geçişleri
+    // Pro butonu görünür olduğunda çalıştıracak
     _sheenAnimation = CurvedAnimation(
       parent: _sheenController,
       curve: const Interval(0.0, 0.6, curve: Curves.easeInOut),

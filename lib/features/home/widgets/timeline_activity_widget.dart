@@ -39,9 +39,8 @@ class _TimelineActivityWidgetState extends ConsumerState<TimelineActivityWidget>
     final rawTransactions = ref.watch(allTransactionsProvider);
     final customCategories = ref.watch(customCategoriesProvider);
     final rates = ref.watch(exchangeRatesProvider).value ?? [];
-    final settings = ref.watch(settingsProvider);
-    final symbol = settings.currencySymbol;
-    final retentionDays = settings.dataRetentionDays;
+    final symbol = ref.watch(settingsProvider.select((s) => s.currencySymbol));
+    final retentionDays = ref.watch(settingsProvider.select((s) => s.dataRetentionDays));
 
     if (_cachedIncomeTxs == null ||
         _lastTransactions != rawTransactions ||

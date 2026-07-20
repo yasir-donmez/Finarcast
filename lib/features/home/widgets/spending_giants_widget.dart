@@ -58,8 +58,7 @@ class _SpendingGiantsWidgetState extends ConsumerState<SpendingGiantsWidget> wit
 
   @override
   Widget build(BuildContext context) {
-    final settings = ref.watch(settingsProvider);
-    final symbol = settings.currencySymbol;
+    final symbol = ref.watch(settingsProvider.select((s) => s.currencySymbol));
     final rates = ref.watch(exchangeRatesProvider).value ?? [];
     final transactions = ref.watch(expenseTransactionsProvider);
     final customCategories = ref.watch(customCategoriesProvider);
@@ -418,5 +417,7 @@ class _TripleOverlapPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(covariant _TripleOverlapPainter oldDelegate) => true;
+  bool shouldRepaint(covariant _TripleOverlapPainter oldDelegate) =>
+      oldDelegate.animationValue != animationValue ||
+      oldDelegate.giants != giants;
 }

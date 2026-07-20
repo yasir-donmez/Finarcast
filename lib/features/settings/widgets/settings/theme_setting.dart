@@ -56,12 +56,18 @@ class ThemeSetting extends ConsumerWidget {
               ],
             ),
           ),
-          CelestialSwitcher(
+          RepaintBoundary(
+            child: CelestialSwitcher(
             currentIndex: themeIndex,
             onChanged: (index) {
               HapticFeedback.mediumImpact();
-              ref.read(settingsProvider.notifier).setThemeMode(index);
+              // PERFORMANS: Tema seçim geçiş animasyonunun (500ms) kasmasını engellemek için
+              // MaterialApp'i rebuild edecek ayar güncellemesini 250ms geciktiriyoruz.
+              Future.delayed(const Duration(milliseconds: 250), () {
+                ref.read(settingsProvider.notifier).setThemeMode(index);
+              });
             },
+            ),
           ),
         ],
       ),
@@ -96,22 +102,14 @@ class CelestialSwitcher extends ConsumerStatefulWidget {
   ConsumerState<CelestialSwitcher> createState() => _CelestialSwitcherState();
 }
 
-class _CelestialSwitcherState extends ConsumerState<CelestialSwitcher>
-    with TickerProviderStateMixin {
-  late AnimationController _loopCtrl;
-
+class _CelestialSwitcherState extends ConsumerState<CelestialSwitcher> {
   @override
   void initState() {
     super.initState();
-    _loopCtrl = AnimationController(
-      vsync: this,
-      duration: const Duration(seconds: 20),
-    )..repeat();
   }
 
   @override
   void dispose() {
-    _loopCtrl.dispose();
     super.dispose();
   }
 
@@ -194,15 +192,12 @@ class _CelestialSwitcherState extends ConsumerState<CelestialSwitcher>
                 child: Stack(
                   children: [
                     // Gökyüzü
-                    AnimatedBuilder(
-                      animation: _loopCtrl,
-                      builder: (_, __) => CustomPaint(
-                        size: const Size(W, H),
-                        painter: _SkyPainter(
-                          t: tVal,
-                          anim: _loopCtrl.value,
-                          sysColor: sysColor,
-                        ),
+                    CustomPaint(
+                      size: const Size(W, H),
+                      painter: _SkyPainter(
+                        t: tVal,
+                        anim: 0.0, // Sabitlendi — performansı korumak için sürekli loop kaldırıldı
+                        sysColor: sysColor,
                       ),
                     ),
                     // Güneş / Ay
@@ -216,7 +211,7 @@ class _CelestialSwitcherState extends ConsumerState<CelestialSwitcher>
                           size: const Size(orbSize, orbSize),
                           painter: _OrbPainter(
                             t: tVal,
-                            anim: _loopCtrl.value,
+                            anim: 0.0, // Sabitlendi
                             sysColor: sysColor,
                           ),
                         ),
@@ -681,7 +676,8 @@ class _SkyPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(covariant _SkyPainter old) => true;
+  bool shouldRepaint(covariant _SkyPainter old) =>
+      old.t != t || old.anim != anim || old.sysColor != sysColor;
 }
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -795,5 +791,6 @@ class _OrbPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(covariant CustomPainter old) => true;
+  bool shouldRepaint(covariant _OrbPainter old) =>
+      old.t != t || old.anim != anim || old.sysColor != sysColor;
 }
