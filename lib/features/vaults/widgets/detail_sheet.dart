@@ -701,10 +701,13 @@ class _PrecisionDetailSheetState extends ConsumerState<DetailSheet> {
       List<String> details = [base];
       final unit = pType ~/ 100;
       
-      if (t.recurrenceDay != null && (unit == 2 || pType == 250 || pType == 251)) {
+      if (unit == 2 || pType == 250 || pType == 251) {
         final List<String> weekDays = [l10n.monday, l10n.tuesday, l10n.wednesday, l10n.thursday, l10n.friday, l10n.saturday, l10n.sunday];
-        if (t.recurrenceDay! > 0 && t.recurrenceDay! <= 7) {
-          details.add(weekDays[t.recurrenceDay! - 1]);
+        int dayIdx = (t.recurrenceDay != null && t.recurrenceDay! >= 1 && t.recurrenceDay! <= 7)
+            ? t.recurrenceDay!
+            : (t.recurrenceDate ?? t.startDate).weekday;
+        if (dayIdx >= 1 && dayIdx <= 7) {
+          details.add(weekDays[dayIdx - 1]);
         }
       } else if (t.recurrenceDate != null && (unit == 3 || unit == 4)) {
         if (unit == 4) {

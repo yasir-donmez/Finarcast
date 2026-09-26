@@ -220,9 +220,9 @@ class ColorThemeSetting extends ConsumerWidget {
         }
         if (isSelected) return;
         HapticFeedback.heavyImpact();
-        // PERFORMANS: Renk butonunun büyüme animasyonunun (300ms) kasmasını önlemek için
-        // renk güncellemesini ve MaterialApp rebuild'ini 200ms geciktiriyoruz.
-        Future.delayed(const Duration(milliseconds: 200), () {
+        // PERFORMANS: Mevcut kare (frame) bittikten sonra renk güncellemesi
+        // tetiklenir. ThemeCache ile rebuild sırasında hesaplama yükü sıfırdır.
+        WidgetsBinding.instance.addPostFrameCallback((_) {
           ref.read(settingsProvider.notifier).setAccentColor(0);
         });
       },
@@ -253,8 +253,8 @@ class ColorThemeSetting extends ConsumerWidget {
         }
         if (isSelected) return;
         HapticFeedback.heavyImpact();
-        // PERFORMANS: 200ms gecikmeli güncelleme
-        Future.delayed(const Duration(milliseconds: 200), () {
+        // PERFORMANS: Mevcut kare bittikten sonra renk güncellemesi tetiklenir.
+        WidgetsBinding.instance.addPostFrameCallback((_) {
           ref
               .read(settingsProvider.notifier)
               .setAccentColor(option.primaryColor.toARGB32());

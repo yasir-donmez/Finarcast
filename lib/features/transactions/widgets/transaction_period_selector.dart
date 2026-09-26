@@ -312,28 +312,28 @@ class _TransactionPeriodSelectorState extends State<TransactionPeriodSelector> {
               Icons.calendar_today_rounded,
               widget.readOnlyPeriod ? null : () => _showFullDatePicker(l10n),
             ),
-          if ((widget.hidePeriodSelection || widget.readOnlyPeriod) && _periodType != 0) ...[
+          if (_periodType != 0) ...[
             SizedBox(height: 8 * scalingFactor),
             if (_periodType ~/ 100 == 3) // Monthly
               _buildStandardRow(
                 l10n.recurrenceDay,
                 l10n.dayOfMonthFormatted(_selectedDay),
                 Icons.calendar_month_rounded,
-                () => _showRecurrenceDayPicker(l10n),
+                widget.readOnlyPeriod ? null : () => _showRecurrenceDayPicker(l10n),
               ),
             if (_periodType ~/ 100 == 4) // Yearly
               _buildStandardRow(
                 l10n.recurrenceDate,
                 "${_selectedDateForRecurrence.day} ${_getMonths(l10n)[_selectedDateForRecurrence.month - 1]}",
                 Icons.calendar_month_rounded,
-                () => _showRecurrenceMonthDayPicker(l10n),
+                widget.readOnlyPeriod ? null : () => _showRecurrenceMonthDayPicker(l10n),
               ),
             if (_periodType ~/ 100 == 2 && ![250, 251].contains(_periodType)) // Weekly
               _buildStandardRow(
                 l10n.dayOfWeek,
-                _getWeekdays(l10n)[_selectedDateForRecurrence.weekday - 1],
+                _getWeekdays(l10n)[((_selectedDay >= 1 && _selectedDay <= 7 ? _selectedDay : _selectedDateForRecurrence.weekday) - 1)],
                 Icons.calendar_view_week_rounded,
-                () => _showRecurrenceWeekdayPicker(l10n),
+                widget.readOnlyPeriod ? null : () => _showRecurrenceWeekdayPicker(l10n),
               ),
           ],
         
@@ -868,7 +868,11 @@ class _TransactionPeriodSelectorState extends State<TransactionPeriodSelector> {
                   final selected = DateTime(tempYear, tempMonth, tempDay);
                   setState(() {
                     _selectedDateForRecurrence = selected;
-                    _selectedDay = selected.day;
+                    if (_periodType ~/ 100 == 2 && ![250, 251].contains(_periodType)) {
+                      _selectedDay = selected.weekday;
+                    } else {
+                      _selectedDay = selected.day;
+                    }
                   });
                   _notifyChanges();
                   Navigator.pop(context);
@@ -1037,7 +1041,7 @@ class _TransactionPeriodSelectorState extends State<TransactionPeriodSelector> {
                 final int currentWeekday = _selectedDateForRecurrence.weekday;
                 final int difference = tempWeekday - currentWeekday;
                 _selectedDateForRecurrence = _selectedDateForRecurrence.add(Duration(days: difference));
-                _selectedDay = _selectedDateForRecurrence.day;
+                _selectedDay = tempWeekday;
               });
               _notifyChanges();
               Navigator.pop(context);

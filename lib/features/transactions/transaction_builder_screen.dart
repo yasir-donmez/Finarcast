@@ -167,7 +167,7 @@ class _TransactionBuilderScreenState
 
     _periodData = TransactionPeriodData(
       periodType: initialPeriod,
-      selectedDay: widget.initialRecurrenceDay ?? 1,
+      selectedDay: _resolveInitialRecurrenceDay(initialPeriod, widget.initialRecurrenceDay, initialDate),
       selectedDateForRecurrence: initialDate,
       duration: widget.initialRecurrenceDuration ?? 0,
       totalInstallments: widget.initialTotalInstallments,
@@ -237,6 +237,22 @@ class _TransactionBuilderScreenState
         .text;
   }
 
+  int _resolveInitialRecurrenceDay(int periodType, int? recurrenceDay, DateTime date) {
+    final unit = periodType ~/ 100;
+    if (unit == 2 && ![250, 251].contains(periodType)) {
+      if (recurrenceDay == null || recurrenceDay < 1 || recurrenceDay > 7) {
+        return date.weekday;
+      }
+      return recurrenceDay;
+    } else if (unit == 3) {
+      if (recurrenceDay == null || recurrenceDay < 1 || recurrenceDay > 31) {
+        return date.day;
+      }
+      return recurrenceDay;
+    }
+    return recurrenceDay ?? 1;
+  }
+
   void _prefillIfEditing() {
     if (widget.initialId != null) {
       if (widget.initialTargetVaultId != null) {
@@ -276,11 +292,15 @@ class _TransactionBuilderScreenState
       }
 
       if (widget.initialPeriodType != null && widget.initialPeriodType != 0) {
+        final initDate = widget.initialRecurrenceDate ?? DateTime.now();
         _periodData = TransactionPeriodData(
           periodType: widget.initialPeriodType!,
-          selectedDay: widget.initialRecurrenceDay ?? 1,
-          selectedDateForRecurrence:
-              widget.initialRecurrenceDate ?? DateTime.now(),
+          selectedDay: _resolveInitialRecurrenceDay(
+            widget.initialPeriodType!,
+            widget.initialRecurrenceDay,
+            initDate,
+          ),
+          selectedDateForRecurrence: initDate,
           duration: widget.initialRecurrenceDuration ?? 0,
           totalInstallments: widget.initialTotalInstallments,
         );
@@ -364,11 +384,15 @@ class _TransactionBuilderScreenState
         );
       }
       if (widget.initialPeriodType != null && widget.initialPeriodType != 0) {
+        final initDate = widget.initialRecurrenceDate ?? DateTime.now();
         _periodData = TransactionPeriodData(
           periodType: widget.initialPeriodType!,
-          selectedDay: widget.initialRecurrenceDay ?? 1,
-          selectedDateForRecurrence:
-              widget.initialRecurrenceDate ?? DateTime.now(),
+          selectedDay: _resolveInitialRecurrenceDay(
+            widget.initialPeriodType!,
+            widget.initialRecurrenceDay,
+            initDate,
+          ),
+          selectedDateForRecurrence: initDate,
           duration: widget.initialRecurrenceDuration ?? 0,
           totalInstallments: widget.initialTotalInstallments,
         );

@@ -61,9 +61,10 @@ class ThemeSetting extends ConsumerWidget {
             currentIndex: themeIndex,
             onChanged: (index) {
               HapticFeedback.mediumImpact();
-              // PERFORMANS: Tema seçim geçiş animasyonunun (500ms) kasmasını engellemek için
-              // MaterialApp'i rebuild edecek ayar güncellemesini 250ms geciktiriyoruz.
-              Future.delayed(const Duration(milliseconds: 250), () {
+              // PERFORMANS: Mevcut kareyi (frame) tamamlattıktan sonra tema
+              // güncellemesini tetikler. ThemeCache sayesinde rebuild sırasında
+              // ColorScheme.fromSeed() hesaplaması atlanır → kasma yok.
+              WidgetsBinding.instance.addPostFrameCallback((_) {
                 ref.read(settingsProvider.notifier).setThemeMode(index);
               });
             },

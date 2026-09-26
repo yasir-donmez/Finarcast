@@ -41,7 +41,6 @@ class DueDateRadarWidget extends ConsumerStatefulWidget {
 
 class _DueDateRadarWidgetState extends ConsumerState<DueDateRadarWidget> {
   final Set<String> _expandedGroups = {};
-  bool _initialized = false;
 
   @override
   Widget build(BuildContext context) {
@@ -76,20 +75,15 @@ class _DueDateRadarWidgetState extends ConsumerState<DueDateRadarWidget> {
         groupDateRef[groupKey] = tx.date;
       }
 
-      // İLK SEFERDE: Yakın tarihli grupları otomatik genişlet
-      if (!_initialized) {
-        if (diff <= 30) {
-          _expandedGroups.add(groupKey);
-        }
-      }
     }
-    _initialized = true;
 
     final sortedGroupKeys = temporalGroups.keys.toList()..sort((a, b) {
       return groupDateRef[a]!.compareTo(groupDateRef[b]!);
     });
 
     return ListView.builder(
+      shrinkWrap: true,
+      physics: const BouncingScrollPhysics(),
       padding: const EdgeInsets.only(top: 0, bottom: 12), // Üst boşluğu sıfırladım
       itemCount: sortedGroupKeys.length,
       itemBuilder: (context, index) {
@@ -167,7 +161,7 @@ class _DueDateRadarWidgetState extends ConsumerState<DueDateRadarWidget> {
                   duration: const Duration(milliseconds: 400),
                   child: Icon(
                     Icons.keyboard_arrow_right_rounded,
-                    size: 12,
+                    size: 16,
                     color: AppColors.getTextSecondary(context).withValues(alpha: isExpanded ? 0.6 : 0.3),
                   ),
                 ),
@@ -175,7 +169,7 @@ class _DueDateRadarWidgetState extends ConsumerState<DueDateRadarWidget> {
                 Text(
                   railLabel,
                   style: TextStyle(
-                    fontSize: 7, 
+                    fontSize: 12, 
                     fontWeight: FontWeight.w900, 
                     color: AppColors.getTextSecondary(context).withValues(alpha: isExpanded ? 0.7 : 0.4), 
                     letterSpacing: 1.0
@@ -191,7 +185,7 @@ class _DueDateRadarWidgetState extends ConsumerState<DueDateRadarWidget> {
                     ),
                     child: Text(
                       '${groupItems.length}',
-                      style: TextStyle(fontSize: 6, fontWeight: FontWeight.w900, color: AppColors.getTextSecondary(context).withValues(alpha: 0.7)),
+                      style: TextStyle(fontSize: 10, fontWeight: FontWeight.w900, color: AppColors.getTextSecondary(context).withValues(alpha: 0.7)),
                     ),
                   ),
                 ],
@@ -218,13 +212,13 @@ class _DueDateRadarWidgetState extends ConsumerState<DueDateRadarWidget> {
                       children: [
                         Expanded(child: incomeTx != null ? _buildMiniCard(context, incomeTx, isLeft: true, showDetailDate: diff > 7, customCategories: customCategories) : const SizedBox()),
                         SizedBox(
-                          width: 16,
+                          width: 20,
                           child: Stack(
                             alignment: Alignment.center,
                             children: [
                               Container(width: 1, color: AppColors.getTextSecondary(context).withValues(alpha: 0.15)),
                               Container(
-                                width: 4, height: 4,
+                                width: 6, height: 6,
                                 decoration: BoxDecoration(
                                   color: (incomeTx != null || expenseTx != null) 
                                       ? (expenseTx != null ? Colors.orange : Colors.green) 
@@ -262,15 +256,15 @@ class _DueDateRadarWidgetState extends ConsumerState<DueDateRadarWidget> {
     );
     
     return Container(
-      margin: EdgeInsets.only(left: isLeft ? 4 : 0, right: isLeft ? 0 : 4, bottom: 4),
-      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 5),
+      margin: EdgeInsets.only(left: isLeft ? 4 : 0, right: isLeft ? 0 : 4, bottom: 6),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
       decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: isLeft ? Alignment.centerRight : Alignment.centerLeft,
           end: isLeft ? Alignment.centerLeft : Alignment.centerRight,
           colors: [color.withValues(alpha: 0.1), Colors.transparent],
         ),
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(12),
         border: Border.all(color: color.withValues(alpha: 0.04), width: 0.5),
       ),
       child: Row(
@@ -288,14 +282,14 @@ class _DueDateRadarWidgetState extends ConsumerState<DueDateRadarWidget> {
               children: [
                 Text(
                   _getSmartTitle(tx, customCategories),
-                  style: TextStyle(fontSize: 8, fontWeight: FontWeight.w800, color: AppColors.getTextPrimary(context)),
+                  style: TextStyle(fontSize: 13, fontWeight: FontWeight.w800, color: AppColors.getTextPrimary(context)),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
                 Text(
                   CurrencyUtils.formatAmount(tx.effectiveAmount, currencySymbol: tx.currency ?? '₺'),
                   style: TextStyle(
-                    fontSize: 8.5, 
+                    fontSize: 14, 
                     fontWeight: FontWeight.w900, 
                     color: tx.targetVaultId != null
                         ? Colors.blueGrey
@@ -320,7 +314,7 @@ class _DueDateRadarWidgetState extends ConsumerState<DueDateRadarWidget> {
       child: Text(
         DateFormat('d MMM').format(tx.date),
         style: TextStyle(
-          fontSize: 6.5, 
+          fontSize: 11, 
           color: AppColors.getTextSecondary(context).withValues(alpha: 0.6), 
           fontWeight: FontWeight.w700
         ),
@@ -331,10 +325,10 @@ class _DueDateRadarWidgetState extends ConsumerState<DueDateRadarWidget> {
   Widget _buildIcon(BuildContext context, TransactionRecord tx, Color color, List<CustomCategory> customCategories) {
     final accentColor = AppColors.getAccentDeep(context, color);
     return Container(
-      width: 18, height: 18,
+      width: 28, height: 28,
       decoration: BoxDecoration(
         color: accentColor.withValues(alpha: 0.15), 
-        borderRadius: BorderRadius.circular(5),
+        borderRadius: BorderRadius.circular(8),
       ),
       child: Icon(
         CategoryUtils.getCategoryIcon(
@@ -342,7 +336,7 @@ class _DueDateRadarWidgetState extends ConsumerState<DueDateRadarWidget> {
           customCategories: customCategories,
           iconCode: tx.iconCode,
         ),
-        size: 9,
+        size: 14,
         color: accentColor,
       ),
     );
@@ -368,7 +362,7 @@ class _DueDateRadarWidgetState extends ConsumerState<DueDateRadarWidget> {
             AppLocalizations.of(context)!.upcomingPaymentsNotFound,
             style: TextStyle(
               color: AppColors.getTextSecondary(context).withValues(alpha: 0.5),
-              fontSize: 10, 
+              fontSize: 13, 
               fontWeight: FontWeight.w600,
               letterSpacing: 0.5,
             ),
@@ -386,7 +380,7 @@ List<TransactionRecord> _getUpcomingItems({
 }) {
   final now = DateTime.now();
   final today = DateTime(now.year, now.month, now.day);
-  final limit = today.add(const Duration(days: 365));
+  final limit = today.add(const Duration(days: 60));
   
   final List<TransactionRecord> projectedItems = [];
 
@@ -453,5 +447,6 @@ List<TransactionRecord> _getUpcomingItems({
     }
   }
 
-  return projectedItems..sort((a, b) => a.date.compareTo(b.date));
+  projectedItems.sort((a, b) => a.date.compareTo(b.date));
+  return projectedItems.take(50).toList();
 }

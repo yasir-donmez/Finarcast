@@ -10,6 +10,9 @@ import '../home_providers.dart';
 import '../../../core/providers/db_providers.dart';
 import 'home_widget.dart';
 
+/// @deprecated This manager sheet is no longer actively used.
+/// Widget layout is hardcoded in dashboard_screen.dart.
+/// Kept for potential future use.
 class HomeWidgetManagerSheet extends ConsumerWidget {
   const HomeWidgetManagerSheet({super.key});
 

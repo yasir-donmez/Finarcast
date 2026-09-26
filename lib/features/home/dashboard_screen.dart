@@ -16,15 +16,21 @@ import 'widgets/horizontal_vault_selector.dart';
 import 'widgets/home_widget.dart';
 import 'widgets/due_date_radar_widget.dart';
 import 'widgets/spending_giants_widget.dart';
-import 'widgets/timeline_activity_widget.dart';
 
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'models/announcement.dart';
 import 'providers/announcement_provider.dart';
 import '../../core/services/subscription_service.dart';
 
-class DashboardScreen extends ConsumerWidget {
+class DashboardScreen extends ConsumerStatefulWidget {
   const DashboardScreen({super.key});
+
+  @override
+  ConsumerState<DashboardScreen> createState() => _DashboardScreenState();
+}
+
+class _DashboardScreenState extends ConsumerState<DashboardScreen> {
+  int _selectedSectionIndex = 0; // 0: Yaklaşan Ödemeler, 1: Harcama Analitiği
 
   String _getGreeting(BuildContext context) {
     final hour = DateTime.now().hour;
@@ -54,7 +60,7 @@ class DashboardScreen extends ConsumerWidget {
   }
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final activeVaultId = ref.watch(homeMainBalanceVaultIdProvider);
     final globalCurrency = ref.watch(settingsProvider.select((s) => s.currencySymbol));
     final l10n = AppLocalizations.of(context)!;
@@ -91,9 +97,6 @@ class DashboardScreen extends ConsumerWidget {
 
     // Telefon boyutlarına göre ölçeklendirme çarpanları (Zirve responsive tasarımı)
     final scalingFactor = (MediaQuery.of(context).size.height / 812.0).clamp(0.85, 1.0);
-    final screenWidth = MediaQuery.of(context).size.width;
-    final fullWidth = screenWidth - (AppSizes.paddingMedium * 2);
-    final widgetHeight = fullWidth * 0.70;
 
     // Günlük İstatistik Hesaplamaları (Bugünkü Gelir / Gider / Net)
     final allTransactions = ref.watch(vaultTransactionsProvider);
@@ -144,129 +147,192 @@ class DashboardScreen extends ConsumerWidget {
         Positioned.fill(
           child: SafeArea(
             bottom: false,
-            child: SingleChildScrollView(
-              physics: const BouncingScrollPhysics(),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  const SizedBox(height: AppSizes.paddingSmall),
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                return SingleChildScrollView(
+                  physics: const BouncingScrollPhysics(),
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(
+                      minHeight: constraints.maxHeight - 80, // Navbar yüksekliğini düşür
+                    ),
+                    child: IntrinsicHeight(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          const SizedBox(height: AppSizes.paddingSmall),
 
-                  // 1. Karşılama ve Başlık
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: AppSizes.paddingMedium),
-                    child: Text(
-                      _getGreeting(context),
-                      style: TextStyle(
-                        fontSize: 28,
-                        fontWeight: FontWeight.w800,
-                        letterSpacing: -0.8,
-                        color: AppColors.getTextPrimary(context),
+                          // 1. Karşılama ve Başlık
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: AppSizes.paddingMedium),
+                            child: Text(
+                              _getGreeting(context),
+                              style: TextStyle(
+                                fontSize: 26,
+                                fontWeight: FontWeight.w800,
+                                letterSpacing: -0.8,
+                                color: AppColors.getTextPrimary(context),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 6),
+
+                          // 2. Neredeyim (Bakiye Alanı - Kartsız)
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: AppSizes.paddingMedium),
+                            child: AnimatedCurrencySelector(
+                              fontSize: 30,
+                              totalBalance: realBalance,
+                              minBalance: hasFlexibleRange ? minBalance : null,
+                              maxBalance: hasFlexibleRange ? maxBalance : null,
+                            ),
+                          ),
+                          const SizedBox(height: 10),
+
+                          // 3. Kasa Seçici (Kartsız)
+                          HorizontalVaultSelector(
+                            items: vaultItems,
+                            selectedIndex: selectedIdx.clamp(0, vaultItems.length - 1),
+                            scalingFactor: scalingFactor,
+                            onChanged: (newIdx) {
+                              String? newVaultId;
+                              if (newIdx > 0 && newIdx < vaultItems.length) {
+                                newVaultId = 'v_${vaults[newIdx - 1].id}';
+                              }
+                              ref.read(homeMainBalanceVaultIdProvider.notifier).state = newVaultId;
+                            },
+                          ),
+                          const SizedBox(height: 10),
+
+                          // 4. Genel İstatistikler
+                          _buildGeneralStatsCard(context, dailyIncome, dailyExpense, dailyNet, targetCurrency),
+
+                          // 5. Duyurular (Sadece görüntülenecek aktif duyuru varsa gösterilir)
+                          if (visibleAnnouncements.isNotEmpty) ...[
+                            _buildAnnouncementsCard(context, visibleAnnouncements),
+                          ],
+
+                          const SizedBox(height: 12),
+
+                          // 6. Dinamik Analiz Sekme Seçici (Tab Bar)
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: AppSizes.paddingMedium),
+                            child: Row(
+                              children: [
+                                Expanded(
+                                  child: _buildSectionTabButton(
+                                    context: context,
+                                    title: isTr ? 'Yaklaşan Ödemeler' : 'Upcoming Payments',
+                                    icon: Icons.radar_rounded,
+                                    isSelected: _selectedSectionIndex == 0,
+                                    onTap: () => setState(() => _selectedSectionIndex = 0),
+                                  ),
+                                ),
+                                const SizedBox(width: 8),
+                                Expanded(
+                                  child: _buildSectionTabButton(
+                                    context: context,
+                                    title: isTr ? 'Harcama Analitiği' : 'Spending Analytics',
+                                    icon: Icons.pie_chart_outline_rounded,
+                                    isSelected: _selectedSectionIndex == 1,
+                                    onTap: () => setState(() => _selectedSectionIndex = 1),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(height: 10),
+
+                          // 7. Seçili Analiz Widget'ı (Ekranın Kalan Tüm Alanını Doldurur)
+                          Expanded(
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: AppSizes.paddingMedium),
+                              child: AnimatedSwitcher(
+                                duration: const Duration(milliseconds: 300),
+                                child: _selectedSectionIndex == 0
+                                    ? DueDateRadarWidget(
+                                        key: const ValueKey('due_date_radar'),
+                                        size: HomeWidgetSize.large,
+                                        selectedVaultId: activeVaultId,
+                                      )
+                                    : SpendingGiantsWidget(
+                                        key: const ValueKey('spending_giants'),
+                                        size: HomeWidgetSize.large,
+                                        selectedVaultId: activeVaultId,
+                                      ),
+                              ),
+                            ),
+                          ),
+
+                          // Alt Navigasyon Barı üstü tam oturma boşluğu
+                          const SizedBox(height: 85),
+                        ],
                       ),
                     ),
                   ),
-                  const SizedBox(height: 8),
-
-                  // 2. Neredeyim (Bakiye Alanı - Kartsız)
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: AppSizes.paddingMedium),
-                    child: AnimatedCurrencySelector(
-                      fontSize: 32, // Biraz daha büyük, kartsız olduğu için ferah duruyor
-                      totalBalance: realBalance,
-                      minBalance: hasFlexibleRange ? minBalance : null,
-                      maxBalance: hasFlexibleRange ? maxBalance : null,
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-
-                  // 3. Kasa Seçici (Kartsız)
-                  HorizontalVaultSelector(
-                    items: vaultItems,
-                    selectedIndex: selectedIdx.clamp(0, vaultItems.length - 1),
-                    scalingFactor: scalingFactor,
-                    onChanged: (newIdx) {
-                      String? newVaultId;
-                      if (newIdx > 0 && newIdx < vaultItems.length) {
-                        newVaultId = 'v_${vaults[newIdx - 1].id}';
-                      }
-                      ref.read(homeMainBalanceVaultIdProvider.notifier).state = newVaultId;
-                    },
-                  ),
-                  const SizedBox(height: 12),
-
-                  // 3. Genel İstatistikler
-                  _buildGeneralStatsCard(context, dailyIncome, dailyExpense, dailyNet, targetCurrency),
-
-                  // 5. Duyurular (Sadece görüntülenecek aktif duyuru varsa gösterilir)
-                  if (visibleAnnouncements.isNotEmpty) ...[
-                    _buildAnnouncementsCard(context, visibleAnnouncements),
-                  ],
-
-                  const SizedBox(height: 16), // Bölümler arası tutarlı boşluk (Stat/Duyuru -> Detaylar)
-
-                  // 6. 3 Temel Widget (Dikey Akış - Kartsız)
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: AppSizes.paddingMedium),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        // A. Yaklaşan Ödemeler
-                        _buildSectionHeader(
-                          context,
-                          isTr ? 'Yaklaşan Ödemeler' : 'Upcoming Payments',
-                        ),
-                        const SizedBox(height: 8),
-                        SizedBox(
-                          width: fullWidth,
-                          height: widgetHeight,
-                          child: DueDateRadarWidget(
-                            size: HomeWidgetSize.large,
-                            selectedVaultId: activeVaultId,
-                          ),
-                        ),
-                        const SizedBox(height: 24),
-
-                        // B. Harcama Analitiği
-                        _buildSectionHeader(
-                          context,
-                          isTr ? 'Harcama Analitiği' : 'Spending Analytics',
-                        ),
-                        const SizedBox(height: 8),
-                        SizedBox(
-                          width: fullWidth,
-                          height: widgetHeight,
-                          child: SpendingGiantsWidget(
-                            size: HomeWidgetSize.large,
-                            selectedVaultId: activeVaultId,
-                          ),
-                        ),
-                        const SizedBox(height: 24),
-
-                        // C. Son İşlemler
-                        _buildSectionHeader(
-                          context,
-                          isTr ? 'Son İşlemler' : 'Recent Transactions',
-                        ),
-                        const SizedBox(height: 8),
-                        SizedBox(
-                          width: fullWidth,
-                          height: widgetHeight,
-                          child: TimelineActivityWidget(
-                            size: HomeWidgetSize.large,
-                            selectedVaultId: activeVaultId,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-
-                  // Alt boşluk (Bottom navbar altına taşmamak için)
-                  const SizedBox(height: 100),
-                ],
-              ),
+                );
+              },
             ),
           ),
         ),
       ],
+    );
+  }
+
+  Widget _buildSectionTabButton({
+    required BuildContext context,
+    required String title,
+    required IconData icon,
+    required bool isSelected,
+    required VoidCallback onTap,
+  }) {
+    final primaryColor = Theme.of(context).colorScheme.primary;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    return GestureDetector(
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 250),
+        padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 10),
+        decoration: BoxDecoration(
+          color: isSelected
+              ? primaryColor.withValues(alpha: 0.15)
+              : (isDark ? Colors.white.withValues(alpha: 0.05) : Colors.black.withValues(alpha: 0.03)),
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(
+            color: isSelected
+                ? primaryColor.withValues(alpha: 0.4)
+                : Colors.transparent,
+            width: 1,
+          ),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              icon,
+              size: 14,
+              color: isSelected
+                  ? primaryColor
+                  : AppColors.getTextSecondary(context).withValues(alpha: 0.6),
+            ),
+            const SizedBox(width: 6),
+            Flexible(
+              child: Text(
+                title,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  fontSize: 11,
+                  fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
+                  color: isSelected
+                      ? primaryColor
+                      : AppColors.getTextSecondary(context).withValues(alpha: 0.7),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 
@@ -431,21 +497,6 @@ class DashboardScreen extends ConsumerWidget {
               ),
             ),
           ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildSectionHeader(BuildContext context, String title) {
-    return Padding(
-      padding: const EdgeInsets.only(left: 0, bottom: 8),
-      child: Text(
-        title.toSafeUpperCase(context),
-        style: TextStyle(
-          fontSize: 10,
-          fontWeight: FontWeight.w900,
-          color: AppColors.getTextFaint(context),
-          letterSpacing: 2,
         ),
       ),
     );

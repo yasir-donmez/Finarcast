@@ -203,15 +203,15 @@ class _TimelineActivityWidgetState extends ConsumerState<TimelineActivityWidget>
     );
 
     return Container(
-      margin: const EdgeInsets.only(bottom: 3),
-      padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 4),
+      margin: const EdgeInsets.only(bottom: 5),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 7),
       decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: isLeft ? Alignment.centerRight : Alignment.centerLeft,
           end: isLeft ? Alignment.centerLeft : Alignment.centerRight,
           colors: [categoryColor.withValues(alpha: 0.12), Colors.transparent], // Daha canlı gradyan
         ),
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(12),
         border: Border.all(color: categoryColor.withValues(alpha: 0.05), width: 0.5),
       ),
       child: Row(
@@ -230,7 +230,7 @@ class _TimelineActivityWidgetState extends ConsumerState<TimelineActivityWidget>
                 Text(
                   displayTitle,
                   style: TextStyle(
-                    fontSize: 8, 
+                    fontSize: 13, 
                     fontWeight: FontWeight.w800, 
                     letterSpacing: -0.2,
                     color: AppColors.getTextPrimary(context), // Daha net başlık
@@ -241,7 +241,7 @@ class _TimelineActivityWidgetState extends ConsumerState<TimelineActivityWidget>
                 Text(
                   amountText,
                   style: TextStyle(
-                    fontSize: 8, 
+                    fontSize: 13, 
                     fontWeight: FontWeight.w900, 
                     color: semanticColor.withValues(alpha: 0.95) // Tam doygunluğa yakın tutar
                   ),
@@ -264,7 +264,7 @@ class _TimelineActivityWidgetState extends ConsumerState<TimelineActivityWidget>
       child: Text(
         _formatSmartDate(tx.updatedAt, l10n), // EKlenme zamanını (updatedAt) kullan
         style: TextStyle(
-          fontSize: 6, 
+          fontSize: 11, 
           color: AppColors.getTextSecondary(context).withValues(alpha: 0.5), 
           fontWeight: FontWeight.w700
         ),
@@ -275,12 +275,12 @@ class _TimelineActivityWidgetState extends ConsumerState<TimelineActivityWidget>
   Widget _buildIcon(BuildContext context, IconData icon, Color color) {
     final accentColor = AppColors.getAccentDeep(context, color);
     return Container(
-      width: 17, height: 17,
+      width: 28, height: 28,
       decoration: BoxDecoration(
         color: accentColor.withValues(alpha: 0.15), 
-        borderRadius: BorderRadius.circular(5),
+        borderRadius: BorderRadius.circular(8),
       ),
-      child: Icon(icon, size: 9, color: accentColor),
+      child: Icon(icon, size: 14, color: accentColor),
     );
   }
 
@@ -321,7 +321,7 @@ class _TimelineActivityWidgetState extends ConsumerState<TimelineActivityWidget>
             l10n.historyEmpty,
             style: TextStyle(
               color: AppColors.getTextSecondary(context).withValues(alpha: 0.5),
-              fontSize: 10,
+              fontSize: 13,
               fontWeight: FontWeight.w600,
               letterSpacing: 0.5,
             ),

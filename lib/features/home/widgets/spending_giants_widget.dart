@@ -163,8 +163,8 @@ class _SpendingGiantsWidgetState extends ConsumerState<SpendingGiantsWidget> wit
     );
     
     return Container(
-      margin: const EdgeInsets.symmetric(vertical: 2),
-      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
+      margin: const EdgeInsets.symmetric(vertical: 2.5),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
       decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.centerLeft,
@@ -174,18 +174,18 @@ class _SpendingGiantsWidgetState extends ConsumerState<SpendingGiantsWidget> wit
             Colors.transparent,
           ],
         ),
-        borderRadius: BorderRadius.circular(6),
+        borderRadius: BorderRadius.circular(10),
       ),
       child: Row(
         children: [
           // Kategori İkonu (Renkli Kare İçinde)
           Container(
-            width: 24, height: 24,
+            width: 32, height: 32,
             decoration: BoxDecoration(
               color: catColor.withValues(alpha: 0.15),
-              borderRadius: BorderRadius.circular(6),
+              borderRadius: BorderRadius.circular(8),
             ),
-            child: Icon(catIcon, size: 12, color: AppColors.getAccentDeep(context, catColor)),
+            child: Icon(catIcon, size: 16, color: AppColors.getAccentDeep(context, catColor)),
           ),
           const SizedBox(width: 8),
           Expanded(
@@ -195,12 +195,12 @@ class _SpendingGiantsWidgetState extends ConsumerState<SpendingGiantsWidget> wit
               children: [
                 Text(
                   _getLocalizedCategoryName(context, g.categoryId, customCategories),
-                  style: TextStyle(fontSize: 8, fontWeight: FontWeight.w700, color: AppColors.getTextPrimary(context), letterSpacing: -0.2),
+                  style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.getTextPrimary(context), letterSpacing: -0.2),
                   maxLines: 1, overflow: TextOverflow.ellipsis,
                 ),
                 Text(
                   CurrencyUtils.formatAmount(g.amount, currencySymbol: symbol),
-                  style: TextStyle(fontSize: 9, fontWeight: FontWeight.w900, color: catColor.withValues(alpha: 0.9)),
+                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.w900, color: catColor.withValues(alpha: 0.9)),
                 ),
               ],
             ),
@@ -214,7 +214,7 @@ class _SpendingGiantsWidgetState extends ConsumerState<SpendingGiantsWidget> wit
               ),
               child: Text(
                 'NEW',
-                style: TextStyle(fontSize: 5, fontWeight: FontWeight.w900, color: AppColors.getIncome(context)),
+                style: TextStyle(fontSize: 8, fontWeight: FontWeight.w900, color: AppColors.getIncome(context)),
               ),
             ),
         ],
@@ -315,7 +315,7 @@ class _SpendingGiantsWidgetState extends ConsumerState<SpendingGiantsWidget> wit
             l10n.giantsWait,
             style: TextStyle(
               color: AppColors.getTextSecondary(context).withValues(alpha: 0.5),
-              fontSize: 10,
+              fontSize: 13,
               fontWeight: FontWeight.w600,
               letterSpacing: 0.5,
             ),
@@ -349,11 +349,11 @@ class _TripleOverlapPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final center = Offset(size.width / 2, size.height / 2);
-    final maxRadius = (math.min(size.width, size.height) / 2) - 8;
+    final maxRadius = (math.min(size.width, size.height) / 2) - 4;
     
-    const double strokeWidth = 16.0;
-    const double spacing = 2.0;
-    const double coreWidth = 3.5;
+    const double strokeWidth = 10.0;
+    const double spacing = 3.0;
+    const double coreWidth = 2.5;
 
     const double startAngle = -math.pi / 2; // Saat 12 yönünden başla
 

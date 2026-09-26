@@ -180,6 +180,18 @@ class DraftService {
       }
 
       if (draft.periodType > 0) {
+        int? resolvedRecurrenceDay = draft.recurrenceDay;
+        final unit = draft.periodType ~/ 100;
+        if (unit == 2 && ![250, 251].contains(draft.periodType)) {
+          if (resolvedRecurrenceDay == null || resolvedRecurrenceDay < 1 || resolvedRecurrenceDay > 7) {
+            resolvedRecurrenceDay = draft.date.weekday;
+          }
+        } else if (unit == 3) {
+          if (resolvedRecurrenceDay == null || resolvedRecurrenceDay < 1 || resolvedRecurrenceDay > 31) {
+            resolvedRecurrenceDay = draft.date.day;
+          }
+        }
+
         // Tekrarlı işlem şablonu oluştur
         final template = RecurringTemplate()
           ..title = categoryName
@@ -198,7 +210,7 @@ class DraftService {
           ..notificationMinute = draft.notificationMinute
           ..periodType = draft.periodType
           ..totalInstallments = draft.remainingInstallments
-          ..recurrenceDay = draft.recurrenceDay;
+          ..recurrenceDay = resolvedRecurrenceDay;
 
         final templateId = await DatabaseService.addTemplate(template);
         template.id = templateId;

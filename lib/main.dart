@@ -6,8 +6,8 @@ import 'l10n/app_localizations.dart';
 import 'features/home/main_scaffold.dart';
 import 'features/auth/auth_screen.dart';
 import 'core/database/database_service.dart';
-import 'core/theme/app_theme.dart';
 import 'core/theme/app_constants.dart';
+import 'core/theme/theme_cache.dart';
 import 'core/services/data_retention_service.dart';
 import 'core/services/auth_service.dart';
 import 'core/services/currency_service.dart';  
@@ -151,8 +151,8 @@ class FinarcastApp extends ConsumerWidget {
           accentColor = Color(accentColorValue);
         }
 
-        final theme = AppTheme.buildLightTheme(accentColor ?? lightDynamic?.primary ?? const Color(0xFF00BCD4));
-        final darkTheme = AppTheme.buildDarkTheme(accentColor ?? darkDynamic?.primary ?? const Color(0xFF00BCD4));
+        final theme = ThemeCache.getLightTheme(accentColor ?? lightDynamic?.primary ?? const Color(0xFF00BCD4));
+        final darkTheme = ThemeCache.getDarkTheme(accentColor ?? darkDynamic?.primary ?? const Color(0xFF00BCD4));
 
         // Dinamik rengi güncelle (Diğer bileşenlerin erişebilmesi için)
         final dynamicColor = lightDynamic?.primary ?? const Color(0xFF00BCD4);

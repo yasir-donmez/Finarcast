@@ -12,6 +12,9 @@ import 'home_widget_manager_sheet.dart';
 import '../../../shared/widgets/custom_bottom_sheet.dart';
 import '../../../l10n/app_localizations.dart';
 
+/// @deprecated This widget board system is no longer used by DashboardScreen.
+/// The dashboard now uses a simple vertical scroll layout which provides better UX.
+/// Kept for potential future use. See dashboard_screen.dart for the current implementation.
 class HomeWidgetBoard extends ConsumerStatefulWidget {
   const HomeWidgetBoard({super.key});
 

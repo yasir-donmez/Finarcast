@@ -324,6 +324,18 @@ class _SmartScanScreenState extends ConsumerState<SmartScanScreen> with WidgetsB
         ? ''
         : (draft.title == '__RECEIPT_EXPENSE__' ? l10n.receiptExpense : draft.title);
 
+    int? recDay = draft.recurrenceDay;
+    final unit = draft.periodType ~/ 100;
+    if (unit == 2 && ![250, 251].contains(draft.periodType)) {
+      if (recDay == null || recDay < 1 || recDay > 7) {
+        recDay = draft.date.weekday;
+      }
+    } else if (unit == 3) {
+      if (recDay == null || recDay < 1 || recDay > 31) {
+        recDay = draft.date.day;
+      }
+    }
+
     Navigator.push(
       context,
       SlideUpPageRoute(
@@ -342,7 +354,7 @@ class _SmartScanScreenState extends ConsumerState<SmartScanScreen> with WidgetsB
           initialNotificationHour: draft.notificationHour,
           initialNotificationMinute: draft.notificationMinute,
           initialPeriodType: draft.periodType,
-          initialRecurrenceDay: draft.recurrenceDay,
+          initialRecurrenceDay: recDay,
           initialTotalInstallments: draft.remainingInstallments,
           initialBuilderType: draft.periodType > 0
               ? TransactionBuilderType.recurring
